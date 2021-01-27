@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" targetNamespace="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../xsds/commons-type/common-types.xsd"/>
+	<xs:import namespace="http://www.w3.org/XML/1998/namespace" 
+               schemaLocation="https://www.w3.org/2009/01/xml.xsd"/>
+	<xs:element name="RequestTransferEvidence">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="RequestId" type="RequestIdType"/>
+				<xs:element name="SpecificationId" type="SpecificationIdType"/>
+				<xs:element name="TimeStamp" type="TimeStampType"/>
+				<xs:element name="ProcedureId" type="ProcedureIdType" minOccurs="0"/>
+				<xs:element name="DataEvaluator" type="AgentCVType"/>
+				<xs:element name="DataOwner" type="AgentCVType"/>
+				<xs:element name="DataRequestSubject" type="DataRequestSubjectCVType"/>
+				<xs:element name="RequestGrounds" type="RequestGroundsType"/>
+				<xs:element name="CanonicalEvidenceId" type="CanonicalEvidenceIdType"/>
+				<xs:element name="EvidenceServiceData" type="EvidenceServiceDataType"/>
+				<xs:element name="ReturnServiceId" type="ReturnServiceIdType"/>
+			</xs:sequence>
+			<xs:attribute name="Language" type="xs:language" use="optional" default="en"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ResponseTransferEvidence">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:sequence>
+					<xs:element name="RequestId" type="RequestIdType"/>
+					<xs:element name="SpecificationId" type="SpecificationIdType"/>
+					<xs:element name="TimeStamp" type="TimeStampType"/>
+					<xs:element name="ProcedureId" type="ProcedureIdType" minOccurs="0"/>
+					<xs:element name="DataEvaluator" type="AgentCVType"/>
+					<xs:element name="DataOwner" type="AgentCVType"/>
+					<xs:element name="DataRequestSubject" type="DataRequestSubjectCVType"/>
+					<xs:element name="CanonicalEvidenceId" type="CanonicalEvidenceIdType"/>
+				</xs:sequence>
+				<xs:choice>
+					<xs:sequence>
+						<xs:element name="CanonicalEvidence" type="CanonicalEvidenceType"/>
+						<xs:element name="DomesticEvidenceList" type="DomesticsEvidencesType" minOccurs="0"/>
+					</xs:sequence>
+					<xs:element name="Error" type="ErrorType"/>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

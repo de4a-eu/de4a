@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ein="http://eidas.europa.eu/attributes/naturalperson" xmlns:eil="http://eidas.europa.eu/attributes/legalperson" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://eidas.europa.eu/attributes/naturalperson" schemaLocation="../xsd-vocabularies/eidas-NP.xsd"/>
+	<xs:import namespace="http://eidas.europa.eu/attributes/legalperson" schemaLocation="../xsd-vocabularies/eidas-LP.xsd"/>
+	<!-- Start Natural Person CV -->
+	<xs:complexType name="NaturalPersonIdentifierType">
+		<xs:annotation>
+			<xs:documentation source="http://mapping.semic.eu/vdm/description.vsp?namespace=cv&amp;type=eb004434a93bbeaa2ba5968d26af06be&amp;id=&amp;format=">
+				Natural Person eIDAS mandatory dataset and optional dataset</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Identifier" type="ein:PersonIdentifierType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="GivenName" type="ein:CurrentGivenNameType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="FamilyName" type="ein:CurrentFamilyNameType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="DateOfBirth" type="ein:DateOfBirthType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="Gender" type="ein:GenderType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="BirthName" type="ein:BirthNameType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="PlaceOfBirth" type="ein:PlaceOfBirthType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="CurrentAddress" type="ein:CurrentAddressType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- End Natural Person CV -->
+	<!-- Start Legal Person CV-->
+	<xs:complexType name="LegalEntityIdentifierType">
+		<xs:annotation>
+			<xs:documentation>Legal Entity eIDAS mandatory dataset and optional dataset</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="LegalEntityIdentifier" type="eil:LegalPersonIdentifierType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="LegalEntityName" type="eil:LegalNameType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="LegalAddress" type="eil:LegalPersonAddressType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="VATRegistration" type="eil:VATRegistrationNumberType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="TaxReference" type="eil:TaxReferenceType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="D-2012-17-EUIdentifier" type="eil:D-2012-17-EUIdentifierType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="LEI" type="eil:LEIType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="EORI" type="eil:EORIType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="SEED" type="eil:SEEDType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="SIC" type="eil:SICType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- End Legal Person CV -->
+</xs:schema>
