@@ -57,11 +57,11 @@ public class ReturnAction extends AbstractSPServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {  
-		 Collection<Part> parts = request.getParts();
-		 
-	     WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-	     ResponseManager responseManager = (ResponseManager) ctx.getBean("responseManager");
-	     responseManager.manageResponse(parts);
+//		 Collection<Part> parts = request.getParts();
+//		 
+//	     WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+//	     ResponseManager responseManager = (ResponseManager) ctx.getBean("responseManager");
+//	     responseManager.manageResponse(parts);
     }
 	 
 	
