@@ -1,0 +1,89 @@
+package eu.toop.service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.naming.ConfigurationException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import com.helger.commons.mime.CMimeType;
+
+import eu.de4a.conn.api.smp.NodeInfo;
+import eu.de4a.conn.xml.DOMUtils;
+import eu.de4a.exception.MessageException;
+import eu.de4a.util.DE4AConstants;
+import eu.toop.as4.client.regrep.CletusLevelTransformer;
+import eu.toop.as4.owner.MessageOwner;
+import eu.toop.as4.owner.OwnerLocator;
+import eu.toop.connector.api.me.outgoing.MEOutgoingException;
+import eu.toop.connector.api.rest.TCPayload;
+import eu.toop.rest.Client;
+
+@Component 
+public class EvidenceTransferorManager extends EvidenceManager {
+	@Value("${as4.me.id}")
+	private String meId;
+	@Value("${as4.another.id}")
+	private String anotherId;
+	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class); 
+	@Autowired
+	private Client clientSmp;
+	@Autowired
+	private OwnerLocator ownerLocator;
+	  public void yourfather( MessageOwner request) {
+//		  DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//	      DocumentBuilder dBuilder=null;
+//		try {
+//			dBuilder = factory.newDocumentBuilder();
+//		} catch (ParserConfigurationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	      Document  docresponse=null;
+//		try {  
+//			docresponse = dBuilder.parse(this.getClass().getClassLoader()  .getResourceAsStream( "edm/response.xml"));
+//			DOMUtils.changeNodo(docresponse, DE4AConstants.XPATH_ID, id);
+//		} catch (SAXException | IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} 
+		  List<TCPayload> payloads=null;
+		try {
+			payloads = ownerLocator.getOwnerGateway(request.getEvidenceService()).sendEvidenceRequest(request.getMessage(), request.getEvidenceService());
+		} catch (ConfigurationException | MessageException e) {
+			// TODO gestion de errores chachi
+		  
+		} 
+		sendRequestMessage( meId,anotherId,  request.getEvidenceService(),request.getId() ,payloads);
+	  }
+	public boolean sendRequestMessage(String sender,String dataOwnerId,String evidenceServiceUri,String id, List<TCPayload> payloads ) {
+		NodeInfo nodeInfo=clientSmp.getNodeInfo(dataOwnerId,evidenceServiceUri);
+		try {
+			logger.debug("Sending  message to as4 gateway ...");
+			String requestId=id;
+			TCPayload canonicalpay=payloads.stream().filter(p->p.getContentID().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
+			Document tosilly=DOMUtils.byteToDocument(canonicalpay.getValue()); 
+			Element requestSillyWrapper=new CletusLevelTransformer().wrapMessage(tosilly.getDocumentElement(), false);
+			as4Client.sendMessage(sender,nodeInfo, evidenceServiceUri,requestSillyWrapper,payloads,false);
+			return true;
+		}  catch (MEOutgoingException e) {
+			logger.error("Error with as4 gateway comunications",e);
+		} catch (MessageException e) {
+			logger.error("Error building wrapper message",e);
+		}
+		return false;
+	}
+	
+}
