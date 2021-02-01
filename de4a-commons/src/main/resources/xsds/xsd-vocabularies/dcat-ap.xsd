@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- the CAV namespace has not been created yet, hence the same node number for the cccev and the cav, for the time being -->
+<xsd:schema xmlns="http://data.europa.eu/r5r/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:cbc="https://semic.org/sa/cv/common/cbc-2.0.0#" 
+	xmlns:dct="http://purl.org/dc/terms/"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:adms="http://www.w3.org/ns/adms#"
+	xmlns:odrl="http://www.w3.org/ns/odrl/2/"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+	xmlns:spdx="spdx:xsd::1.0"
+	xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#"
+	targetNamespace="http://data.europa.eu/r5r/" elementFormDefault="qualified"
+	attributeFormDefault="unqualified" version="2.0.0">
+
+	<xsd:import namespace="http://purl.org/dc/terms/"
+		schemaLocation="dcterms.xsd"/>
+	<xsd:import namespace="https://semic.org/sa/cv/common/cbc-2.0.0#"
+		schemaLocation="CV-CommonBasicComponents.xsd"/>
+	<xsd:import namespace="http://xmlns.com/foaf/0.1/"
+		schemaLocation="foaf.xsd"/>
+	<xsd:import namespace="http://www.w3.org/ns/adms#"
+		schemaLocation="adms.xsd"/>
+	<xsd:import namespace="http://www.w3.org/ns/odrl/2/"
+		schemaLocation="odrl.xsd"/>
+	<xsd:import namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		schemaLocation="rdf.xsd"/>
+	<xsd:import namespace="http://www.w3.org/2004/02/skos/core#"
+		schemaLocation="skos.xsd"/>
+	<xsd:import namespace="spdx:xsd::1.0"
+		schemaLocation="spdx.xsd"/>
+	<xsd:import namespace="http://www.w3.org/2001/vcard-rdf/3.0#"
+		schemaLocation="vcard.xsd"/>
+
+	<!-- Element declaration -->
+	<!-- data properties -->
+	<!-- rdfs:Resource is mapped (considered equivalent) to xsd:anyURI --> 
+	<xsd:element name="accessURL" type="xsd:anyURI"/>
+	<xsd:element name="byteSize" type="xsd:decimal"/>
+	<xsd:element name="downloadURL" type="xsd:anyURI"/>
+	<xsd:element name="endpointURL" type="xsd:anyURI"/>
+	<xsd:element name="endpointDescription" type="xsd:string"/>
+	<xsd:element name="hadRole" type="RoleType"/>
+	<xsd:element name="spatialResolutionInMeters" type="xsd:decimal"/>
+	<xsd:element name="temporalResolution" type="xsd:duration"/>
+
+	<!-- object properties -->
+	<xsd:element name="accessService" type="DataServiceType"/>
+	<xsd:element name="availability" type="skos:ConceptType"/>
+	<xsd:element name="compressedFormat" type="dct:MediaType"/>
+	<!--VCard is still WIP-->
+	<xsd:element name="contactPoint" type="xsd:anyType"/>
+	<xsd:element name="distribution" type="DistributionType"/>
+	<xsd:element name="keyword" type="rdf:PlainLiteral"/>
+	<xsd:element name="landingPage" type="foaf:DocumentType"/>
+	<xsd:element name="mediaType" type="dct:MediaType"/>	
+	<xsd:element name="packageFormat" type="dct:MediaType"/>	
+	<xsd:element name="qualifiedRelation" type="RelationshipType"/>
+	<xsd:element name="servesDataset" type="DatasetType"/>
+	<xsd:element name="theme" type="skos:ConceptType"/>
+	
+	<!-- Classes -->
+	<xsd:element name="CatalogRecord" type="CatalogRecordType"/>
+	<xsd:element name="Dataset" type="DatasetType"/>
+  <!-- [ph] hack for JAXB -->
+	<xsd:element name="Distribution_" type="DistributionType"/>
+	<xsd:element name="DatasetService" type="DataServiceType"/>
+	<xsd:element name="Relationship" type="RelationshipType"/>
+	<xsd:element name="Role" type="RoleType"/>
+
+	<!-- Element definition -->
+	
+	<xsd:complexType name="CatalogRecordType">
+		<xsd:sequence>
+			<xsd:element name="CatalogRecord" minOccurs="0" maxOccurs="1">
+				<xsd:complexType>
+					<xsd:sequence>
+						<!-- mandatory properties for dcat:CatalogRecord-->
+						<xsd:element ref="foaf:primaryTopic" minOccurs="1" maxOccurs="1"/>
+						<xsd:element ref="dct:modified" minOccurs="1" maxOccurs="1"/>
+						<!-- recommended properties for dcat:CatalogRecord-->
+						<xsd:element ref="dct:conformsTo" minOccurs="0" maxOccurs="1"/>
+						<xsd:element ref="adms:status" minOccurs="0" maxOccurs="1"/>
+						<xsd:element ref="dct:issued" minOccurs="0" maxOccurs="1"/>
+						<!-- optional properties for dcat:CatalogRecord-->
+						<xsd:element ref="dct:description" minOccurs="0"/>
+						<xsd:element ref="dct:language" maxOccurs="unbounded"/>
+						<xsd:element ref="dct:source" maxOccurs="1"/>
+						<xsd:element ref="dct:title" minOccurs="0" maxOccurs="1"/>
+					</xsd:sequence>
+					<xsd:attribute ref="rdf:about"/>
+					<xsd:attribute ref="rdf:nodeID"/>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="DatasetType">
+		<xsd:sequence>
+			<!--Mandatory elements-->
+			<xsd:element ref="dct:description" minOccurs="1" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:title" minOccurs="1" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:spatial" minOccurs="0" maxOccurs="unbounded"/>
+			<!--Recommended elements-->
+			<xsd:element ref="contactPoint" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="distribution" minOccurs="0" maxOccurs="unbounded"/>	
+			<xsd:element ref="keyword" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="theme" minOccurs="0" maxOccurs="unbounded"/>
+			<!--Optional elements-->
+			<xsd:element ref="adms:identifier" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="adms:sample" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="adms:versionNotes" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:accessRights" minOccurs="0"/>
+			<xsd:element ref="dct:accrualPeriodicity" minOccurs="0"/>
+			<xsd:element ref="dct:conformsTo" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:creator" minOccurs="0"/>
+			<xsd:element ref="dct:format" minOccurs="0" maxOccurs="1"/>
+			<xsd:element ref="dct:hasVersion" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:identifier" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:isReferencedBy" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:isVersionOf" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:issued" minOccurs="0"/>
+			<xsd:element ref="dct:language" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:modified" minOccurs="0"/>
+			<xsd:element ref="dct:provenance" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:publisher" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:relation" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:source" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:temporal" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:type" minOccurs="0"/>
+			<xsd:element ref="foaf:page" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="landingPage" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="qualifiedRelation" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="spatialResolutionInMeters" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="temporalResolution" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="DataServiceType">
+		<xsd:sequence>
+			<!--Mandatory elements-->
+			<xsd:element ref="dct:identifier"/>
+			<xsd:element ref="dct:title"/>
+			<xsd:element ref="endpointURL" minOccurs="1" maxOccurs="unbounded"/>
+			<!--Optional elements-->
+			<xsd:element ref="dct:description" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:conformsTo" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:accessRights" minOccurs="0" maxOccurs="1"/>
+			<xsd:element ref="endpointDescription" minOccurs="0" maxOccurs="unbounded"/>
+			<!--Recommended elements-->
+			<xsd:element ref="servesDataset" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="DistributionType">
+		<xsd:sequence>
+			<!--Mandatory elements-->
+			<xsd:element ref="accessURL"/>
+			<!--Optional elements-->
+			<xsd:element ref="adms:status" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="foaf:page" minOccurs="0"/>
+			<xsd:element ref="dct:conformsTo" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:issued" minOccurs="0"/>
+			<xsd:element ref="dct:title" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:description" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="dct:format" minOccurs="0"/>
+			<xsd:element ref="dct:modified" minOccurs="0"/>
+			<xsd:element ref="dct:rights" minOccurs="0"/>
+			<xsd:element ref="odrl:hasPolicy" minOccurs="0"/>
+			<xsd:element ref="spdx:checksum" minOccurs="0"/>
+			<xsd:element ref="accessService" minOccurs="0"/>
+			<xsd:element ref="availability" minOccurs="0"/>
+			<xsd:element ref="byteSize" minOccurs="0"/>
+			<xsd:element ref="compressedFormat" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="downloadURL" minOccurs="0"/>
+			<xsd:element ref="mediaType" minOccurs="0"/>
+			<xsd:element ref="spatialResolutionInMeters" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="temporalResolution" minOccurs="0" maxOccurs="unbounded"/>
+			<!--Recommended elements-->
+			<xsd:element ref="dct:licence" minOccurs="0"/>	
+			<xsd:element ref="packageFormat" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<xsd:complexType name="RelationshipType">
+		<xsd:sequence>
+			<xsd:element ref="dct:relation" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="hadRole" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!--
+		The XML serialisation extends the CCTS CodeTye to take advantage of the attributes listID, 
+		listAgencyID, listeVersionID, etc. therein defined. The RDF serialisation uses skos:Concept 
+	-->
+  <xsd:complexType name="RoleType">
+    <xsd:simpleContent>
+      <xsd:extension base="cbc:CodeType" />
+    </xsd:simpleContent>
+  </xsd:complexType>
+  <!--   
+	<xsd:complexType name="RoleType">
+		<xsd:complexContent>
+			<xsd:extension base="cbc:CodeType">
+				<xsd:sequence/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+   -->
+</xsd:schema>
