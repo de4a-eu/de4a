@@ -6,6 +6,7 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -79,7 +80,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 
 		            // Marshal Object to the Document
 		            Marshaller marshaller = jc.createMarshaller();
-		            marshaller.marshal(request, document);
+		            marshaller.marshal(request, document); 
 		            return document;
 		        } catch (JAXBException | ParserConfigurationException e) {
 		           logger.error("Error building request DOM",e);

@@ -22,7 +22,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          metadata-complete="false">
 
-  <display-name>tc-requestor</display-name>
+  <display-name>de4a-connector</display-name>
 
   
   <servlet>

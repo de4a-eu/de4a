@@ -110,6 +110,7 @@ public class DOMUtils {
 
 		    try {
 		      factory = DocumentBuilderFactory.newInstance();
+		      factory.setNamespaceAware(true);
 		      builder = factory.newDocumentBuilder();
 		    } catch (ParserConfigurationException e) {
 		    	String err="Error parsing DOM.";

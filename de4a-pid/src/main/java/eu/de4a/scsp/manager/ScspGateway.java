@@ -4,12 +4,13 @@ import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,11 +19,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import eu.de4a.conn.api.requestor.RequestTransferEvidence;
 import eu.de4a.conn.owner.OwnerGateway;
 import eu.de4a.conn.xml.DOMUtils;
-import eu.de4a.exception.MessageException; 
+import eu.de4a.exception.MessageException;
 import eu.toop.connector.api.rest.TCPayload;
 @Component
 public class ScspGateway implements OwnerGateway{  
@@ -33,33 +37,35 @@ public class ScspGateway implements OwnerGateway{
 		if(logger.isDebugEnabled()) { 
 			logger.debug("Request: {}",DOMUtils.documentToString(evidenceRequest.getOwnerDocument()));
 		}
-		 
-		RestTemplate plantilla = new RestTemplate();
-		HttpComponentsClientHttpRequestFactory requestFactory =  new HttpComponentsClientHttpRequestFactory();
-		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
-		plantilla.setRequestFactory(requestFactory);
-		MultiValueMap<String, Object> body  = new LinkedMultiValueMap<>();  
-		body.add("request",evidenceRequest); 
- 		HttpHeaders headers = new HttpHeaders();
- 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_XML ); 
- 		HttpEntity<MultiValueMap<String, Object>> requestEntity = new    HttpEntity<MultiValueMap<String, Object>>( 	body, headers); 
- 		return (List<TCPayload>)plantilla.postForObject( endpoint,unmarshallMe(evidenceRequest),List.class);  
-		
+//		 
+//		RestTemplate plantilla = new RestTemplate();
+//		HttpComponentsClientHttpRequestFactory requestFactory =  new HttpComponentsClientHttpRequestFactory();
+//		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
+//		plantilla.setRequestFactory(requestFactory);
+//		MultiValueMap<String, Object> body  = new LinkedMultiValueMap<>();  
+//		body.add("request",unmarshallMe(evidenceRequest)); 
+// 		HttpHeaders headers = new HttpHeaders();
+// 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_XML ); 
+// 		HttpEntity<MultiValueMap<String, Object>> requestEntity = new    HttpEntity<MultiValueMap<String, Object>>( 	body, headers); 
+// 		return (List<TCPayload>)plantilla.postForEntity( endpoint,requestEntity,Object.class);  
+		RestTemplate restTemplate = new RestTemplate(); 
+        return  (List<TCPayload>) restTemplate.postForObject(endpoint, unmarshallMe(evidenceRequest), RequestTransferEvidence.class);
 	} 
 	
 	private  eu.de4a.conn.api.requestor.RequestTransferEvidence  unmarshallMe(Element request)  {  
         try
         {  
-        	DOMUtils.documentToString(request.getOwnerDocument());
-            JAXBContext jaxbContext = JAXBContext.newInstance(eu.de4a.conn.api.requestor.RequestTransferEvidence.class);
+        	DOMUtils.stringToDocument(DOMUtils.documentToString(request.getOwnerDocument())); 
+            JAXBContext jaxbContext = JAXBContext.newInstance(eu.de4a.conn.api.requestor.RequestTransferEvidence.class); 
             javax.xml.bind.Unmarshaller jaxbMarshaller = (Unmarshaller) jaxbContext.createUnmarshaller() ;  
-            return (eu.de4a.conn.api.requestor.RequestTransferEvidence) jaxbMarshaller.unmarshal(request); 
+            return (eu.de4a.conn.api.requestor.RequestTransferEvidence) jaxbMarshaller.unmarshal( request );  
  
         } catch (Exception e) {
         	logger.error("error:",e);
            return null;
         }  
 }
+	 
 	
 }
  
