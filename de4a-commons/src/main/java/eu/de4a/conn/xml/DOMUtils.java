@@ -143,15 +143,19 @@ public class DOMUtils {
 	    return null;
 	 }
 	 public static Document stringToDocument(String xml) {
-		 DocumentBuilder db;
-		try {
-			db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			InputSource is = new InputSource();
-			is.setCharacterStream(new StringReader(xml));
-			return db.parse(is);
-		} catch (ParserConfigurationException | SAXException | IOException e) {
-			logger.error("Error string -> doc",e);
-		}
+		 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
+	        DocumentBuilder builder;  
+	        try 
+	        {  
+	        	factory.setNamespaceAware(true);
+	            builder = factory.newDocumentBuilder();  
+	            Document doc = builder.parse( new InputSource( new StringReader( xml )) ); 
+	            return doc; 
+	        } catch (Exception e) {  
+	        	logger.error("Error string -> doc",e);
+	        } 
+	  
+		  
 		return null; 
 	 }
 }

@@ -11,8 +11,12 @@ public class DE4AConstants {
 
 	public static final String XPATH_EVALUATOR_ID="//*[local-name()='DataEvaluator']/*[local-name()='id']/text()";
 	public static final String XPATH_EVALUATOR_NAME="//*[local-name()='DataEvaluator']/*[local-name()='name']/text()";
+	public static final String XPATH_EVALUATOR_ID_NODE="//*[local-name()='DataEvaluator']/*[local-name()='id']";
+	public static final String XPATH_EVALUATOR_NAME_NODE="//*[local-name()='DataEvaluator']/*[local-name()='name']";
 	public static final String XPATH_OWNER_ID="//*[local-name()='DataOwner']/*[local-name()='id']/text()";
 	public static final String XPATH_OWNER_NAME="//*[local-name()='DataOwner']/*[local-name()='name']/text()";
+	public static final String XPATH_OWNER_ID_NODE="//*[local-name()='DataOwner']/*[local-name()='id']";
+	public static final String XPATH_OWNER_NAME_NODE="//*[local-name()='DataOwner']/*[local-name()='name']";
 	public static final String XPATH_CANONICAL_EVICENCE_ID="//*[local-name()='CanonicalEvidenceId']/text()";
 	
 	public static final String XPATH_EIDAS_DOC="//*[local-name()='Identifier']/text()";  

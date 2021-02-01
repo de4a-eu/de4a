@@ -9,6 +9,7 @@ public class User {
 	private String id;
 	private String response;
 	private String nationalResponse;
+	private String request;
 	public String getEidas() {
 		return eidas;
 	}
@@ -72,6 +73,14 @@ public class User {
 
 	public void setNationalResponse(String nationalResponse) {
 		this.nationalResponse = nationalResponse;
+	}
+
+	public String getRequest() {
+		return request;
+	}
+
+	public void setRequest(String request) {
+		this.request = request;
 	}
 	
 }

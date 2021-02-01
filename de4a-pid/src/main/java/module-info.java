@@ -1,14 +1,11 @@
-open  module de4apid {
-	exports eu.de4a.scsp.translate.birth;
-	exports eu.de4a.scsp.translate;
+open  module de4apid { 
 	exports eu.toop.scsp.spring;
-	exports eu.de4a.scsp.manager; 
-	exports eu.de4a.scsp.ws.client; 
+	exports eu.de4a.scsp.manager;  
 	requires com.helger.commons; 
-	requires de4acommons;
+	requires   transitive de4acommons;
 	requires org.apache.commons.logging;
-	requires java.xml;
-	requires eu.toop.connector.api; 
+	requires   transitive java.xml;
+	requires transitive eu.toop.connector.api; 
 	requires org.apache.httpcomponents.httpclient;
 	requires org.apache.httpcomponents.httpcore;
 	requires org.apache.logging.log4j;
@@ -21,4 +18,6 @@ open  module de4apid {
 	requires spring.ws.core;
 	requires spring.ws.security;
 	requires spring.xml;
+	requires spring.web;
+	requires transitive java.xml.bind;
 }

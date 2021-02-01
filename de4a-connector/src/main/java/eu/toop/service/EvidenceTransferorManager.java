@@ -1,13 +1,8 @@
 package eu.toop.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.naming.ConfigurationException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
-import com.helger.commons.mime.CMimeType;
 
 import eu.de4a.conn.api.smp.NodeInfo;
 import eu.de4a.conn.xml.DOMUtils;
@@ -33,11 +25,18 @@ import eu.toop.rest.Client;
 
 @Component 
 public class EvidenceTransferorManager extends EvidenceManager {
+	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class); 
 	@Value("${as4.me.id}")
 	private String meId;
+	
 	@Value("${as4.another.id}")
 	private String anotherId;
-	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class); 
+	@Value("${as4.another.id.jvm:#{null}}")
+	private String anotherIdjvm;
+	
+	
+	@Value("${as4.me.id.jvm:#{null}}")
+	private String meIdjvm; 
 	@Autowired
 	private Client clientSmp;
 	@Autowired
@@ -61,12 +60,14 @@ public class EvidenceTransferorManager extends EvidenceManager {
 //		} 
 		  List<TCPayload> payloads=null;
 		try {
-			payloads = ownerLocator.getOwnerGateway(request.getEvidenceService()).sendEvidenceRequest(request.getMessage(), request.getEvidenceService());
+			payloads = ownerLocator.getOwnerGateway(request.getEvidenceService()).sendEvidenceRequest(request.getMessage());
 		} catch (ConfigurationException | MessageException e) {
 			// TODO gestion de errores chachi
 		  
 		} 
-		sendRequestMessage( meId,anotherId,  request.getEvidenceService(),request.getId() ,payloads);
+		String from=meId.isEmpty()?meIdjvm:meId;
+		String to=anotherId.isEmpty()?anotherIdjvm:anotherId;
+		sendRequestMessage( from,to,  request.getEvidenceService(),request.getId() ,payloads);
 	  }
 	public boolean sendRequestMessage(String sender,String dataOwnerId,String evidenceServiceUri,String id, List<TCPayload> payloads ) {
 		NodeInfo nodeInfo=clientSmp.getNodeInfo(dataOwnerId,evidenceServiceUri);

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2018-2020 toop.eu
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion> 
+  <groupId>eu.de4a</groupId>
+  <artifactId>de4a-parent-pom</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <name>de4a-parent-pom</name>
+  <description>Base POM to build the DE4A projects</description> 
+  <inceptionYear>2020</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+ <properties>
+   <maven.compiler.release>11</maven.compiler.release>
+	<toop.version>2.1.0</toop.version>
+ </properties>
+
+  
+
+  <dependencyManagement>
+    <dependencies> 
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>ph-jaxb-pom</artifactId>
+        <version>1.1.0</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>ph-commons-parent-pom</artifactId>
+        <version>9.5.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.ubl</groupId>
+        <artifactId>ph-ubl-parent-pom</artifactId>
+        <version>6.4.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>ph-css-parent-pom</artifactId>
+        <version>6.2.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.web</groupId>
+        <artifactId>ph-web-parent-pom</artifactId>
+        <version>9.3.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>ph-schematron-parent-pom</artifactId>
+        <version>5.6.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.peppol</groupId>
+        <artifactId>peppol-commons-parent-pom</artifactId>
+        <version>8.2.5</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.photon</groupId>
+        <artifactId>ph-oton-parent-pom</artifactId>
+        <version>8.2.8</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.bdve</groupId>
+        <artifactId>ph-bdve-parent-pom</artifactId>
+        <version>6.0.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.bdve.rules</groupId>
+        <artifactId>ph-bdve-rules-parent-pom</artifactId>
+        <version>1.0.9</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.phase4</groupId>
+        <artifactId>phase4-parent-pom</artifactId>
+        <version>0.12.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>phoss-directory-parent-pom</artifactId>
+        <version>0.9.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>ph-poi</artifactId>
+        <version>5.0.7</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.activation</groupId>
+        <artifactId>jakarta.activation</artifactId>
+        <version>1.2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>info.picocli</groupId>
+        <artifactId>picocli</artifactId>
+        <version>4.5.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>toop-commons-ng-parent-pom</artifactId>
+        <version>2.1.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>data-services-directory</artifactId>
+        <version>2.1.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+ 
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>tc-api</artifactId>
+        <version>${toop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>tc-mem-external</artifactId>
+        <version>${toop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>tc-mem-phase4</artifactId>
+        <version>${toop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>tc-main</artifactId>
+        <version>${toop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>tc-web-api</artifactId>
+        <version>${toop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>tc-webapp</artifactId>
+        <version>${toop.version}</version>
+        <classifier>classes</classifier>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
+  <dependencies>
+    <!-- JUnit 4 for testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <!-- Sub-projects - must match child directory names; order is important! -->
+  <modules>
+    <module>de4a-connector</module>
+    <module>de4a-commons</module>
+    <module>de4a-evaluator</module> 
+    <module>de4a-pid</module> 
+    <module>smp</module> 
+  </modules>
+
+  <build>
+    <plugins> 
+		<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<version>3.8.1</version>
+		<configuration>
+			<release>11</release>
+		</configuration>
+	</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>8</source>
+        </configuration>
+      </plugin> 
+    </plugins>
+  </build>
+</project>

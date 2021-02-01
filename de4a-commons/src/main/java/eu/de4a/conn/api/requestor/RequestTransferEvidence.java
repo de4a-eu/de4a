@@ -2,7 +2,7 @@
 // Este archivo ha sido generado por la arquitectura JavaTM para la implantación de la referencia de enlace (JAXB) XML v2.3.0 
 // Visite <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Todas las modificaciones realizadas en este archivo se perderán si se vuelve a compilar el esquema de origen. 
-// Generado el: 2021.01.25 a las 10:54:25 PM CET 
+// Generado el: 2021.01.29 a las 09:39:05 PM CET 
 //
 
 
@@ -35,7 +35,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="TimeStamp" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}TimeStampType"/&gt;
  *         &lt;element name="ProcedureId" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}ProcedureIdType" minOccurs="0"/&gt;
  *         &lt;element name="DataEvaluator" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}AgentCVType"/&gt;
- *         &lt;element name="DataOwner" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}AgentCVType"/&gt;
+ *         &lt;element name="DataOwner" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}AgentCVType" minOccurs="0"/&gt;
  *         &lt;element name="DataRequestSubject" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}DataRequestSubjectCVType"/&gt;
  *         &lt;element name="RequestGrounds" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}RequestGroundsType"/&gt;
  *         &lt;element name="CanonicalEvidenceId" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}CanonicalEvidenceIdType"/&gt;
@@ -82,7 +82,7 @@ public class RequestTransferEvidence {
     protected String procedureId;
     @XmlElement(name = "DataEvaluator", required = true)
     protected AgentCVType dataEvaluator;
-    @XmlElement(name = "DataOwner", required = true)
+    @XmlElement(name = "DataOwner")
     protected AgentCVType dataOwner;
     @XmlElement(name = "DataRequestSubject", required = true)
     protected DataRequestSubjectCVType dataRequestSubject;

@@ -14,4 +14,5 @@ module de4acommons {
 	requires java.xml.bind;
 	requires org.apache.logging.log4j;
 	requires org.apache.santuario.xmlsec;
+	requires java.activation;
 }

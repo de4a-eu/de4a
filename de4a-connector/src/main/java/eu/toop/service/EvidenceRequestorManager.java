@@ -1,12 +1,14 @@
 package eu.toop.service;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,30 +36,52 @@ public class EvidenceRequestorManager extends EvidenceManager{
 	private static final Logger logger = LoggerFactory.getLogger (EvidenceRequestorManager.class);
 	@Value("${as4.me.id}")
 	private String meId;
+	@Value("${as4.me.id.jvm:#{null}}")
+	private String meIdjvm; 
 	@Value("${as4.another.id}")
 	private String anotherId;
+	@Value("${as4.another.id.jvm:#{null}}") 
+	private String anotherIdjvm;
 	@Value("${as4.evidence.service}")
 	private String evidenceServiceUri;
 	@Autowired
 	private Client clientSmp; 
 	 
 	  public boolean manageRequest(RequestTransferEvidence request) {
-		Document doc=marshall(request); 
+		String from=meId.isEmpty ()?meIdjvm:meId;
+		String to=anotherId.isEmpty()?anotherIdjvm:anotherId;
+		request.getDataOwner().setId(to);
+		request.getDataOwner().setName("Name of "+to);
+		Document doc=marshall(request);  
 //		meId="9914:tc-ng-test-sender";
 //		anotherId= "9915:tooptest";
-		return sendRequestMessage(meId, anotherId, evidenceServiceUri, doc.getDocumentElement());
+		
+		return sendRequestMessage(from, to, evidenceServiceUri, doc.getDocumentElement());
 	  }
 	private Document marshall(RequestTransferEvidence request ) {   
 		        try
 		        {
-		            JAXBContext jaxbContext = JAXBContext.newInstance(RequestTransferEvidence.class);
-		            Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
-		            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-		            StringWriter sw = new StringWriter(); 
-		            jaxbMarshaller.marshal(request, sw); 
-		            return DOMUtils.stringToDocument(sw.toString()); 
-		 
-		        } catch (JAXBException e) {
+//		            JAXBContext jaxbContext = JAXBContext.newInstance(RequestTransferEvidence.class);
+//		            Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
+//		            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+//		            StringWriter sw = new StringWriter(); 
+//		            jaxbMarshaller.marshal(request, sw); 
+//		            return DOMUtils.stringToDocument(sw.toString()); 
+		        	
+		        	JAXBContext jc = JAXBContext.newInstance(RequestTransferEvidence.class);
+ 
+
+		            // Create the Document
+		            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		            dbf.setNamespaceAware(true);
+		            DocumentBuilder db = dbf.newDocumentBuilder();
+		            Document document = db.newDocument();
+
+		            // Marshal Object to the Document
+		            Marshaller marshaller = jc.createMarshaller();
+		            marshaller.marshal(request, document);
+		            return document;
+		        } catch (JAXBException | ParserConfigurationException e) {
 		           logger.error("Error building request DOM",e);
 		           return null;
 		        } 

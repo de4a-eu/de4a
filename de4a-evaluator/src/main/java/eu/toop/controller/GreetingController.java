@@ -8,6 +8,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -30,7 +33,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,7 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.w3c.dom.Document;
 
-import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
+import eu.de4a.conn.api.requestor.RequestTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
@@ -64,6 +66,7 @@ public class GreetingController {
 	@Value("${de4a.connector.url.requestor.redirect}")
 	private String urlRequestorRedirect;
 	private String id;
+	private RequestTransferEvidence requestEvidencia;
 	//private String response;
 	@GetMapping("/greeting")
 	public String greetingForm(Model model) { 
@@ -71,24 +74,27 @@ public class GreetingController {
 		return "greeting";
 	}
 	@RequestMapping(value = "/greetinggo", method = RequestMethod.POST) 
-	public void greetingSubmit(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {  
+	public String greetingSubmit(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {   
+			requestEvidencia=client.buildRequest(user);
+			user.setRequest(jaxbObjectToXML(requestEvidencia));
+			id=requestEvidencia.getRequestId();  
+			return "showRequest";
+	} 
+	@RequestMapping(value = "/requestEvidence", method = RequestMethod.POST) 
+	public void sendRequest(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {  
 		try {
-			id=client.getEvidenceRequest(user);
-			if(id==null) {
-				logger.error("Error sending evidence request");
-			}else {
-				EvaluatorRequest request=new EvaluatorRequest();
-				request.setIdrequest(id);
-				evaluatorRequestRepository.save(request);
-				httpServletResponse.setHeader("Location", String.format(urlRequestorRedirect, id));//"http://localhost:8083/de4a-connector/getreponse?id="+id);
-				//httpServletResponse.setHeader("Location", "https://des-de4a.redsara.es/de4a-tc-requestor/getreponse?id="+id);
-			    httpServletResponse.setStatus(302); 
-			}
+			EvaluatorRequest request=new EvaluatorRequest();
+			request.setIdrequest(id);
+			evaluatorRequestRepository.save(request);
+			boolean ok = client.getEvidenceRequest(requestEvidencia);
+			httpServletResponse.setHeader("Location", String.format(urlRequestorRedirect, id));//"http://localhost:8083/de4a-connector/getreponse?id="+id);
+			//httpServletResponse.setHeader("Location", "https://des-de4a.redsara.es/de4a-tc-requestor/getreponse?id="+id);
+			httpServletResponse.setStatus(302);  
 		} catch (MessageException e) {
 			logger.error("Error getting evidence request",e);
 		}
 		
-	} 
+	}
 	@GetMapping(value = "/returnEvidence"  )
 	public String receiveEvidence(@RequestParam String id,RedirectAttributes redirectAttributes) 
 	{   
@@ -133,6 +139,22 @@ public class GreetingController {
 		model.addAttribute("userForm", user);
 		return "viewresponse";
 	}
+	private String jaxbObjectToXML(RequestTransferEvidence request) 
+    {
+        try
+        { 
+            JAXBContext jaxbContext = JAXBContext.newInstance(RequestTransferEvidence.class); 
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE); 
+            StringWriter sw = new StringWriter(); 
+            jaxbMarshaller.marshal(request, sw); 
+            return sw.toString(); 
+ 
+        } catch (JAXBException e) {
+            logger.error("Error marshalling object",e);
+            return "";
+        }
+    }
 	private Document obtenerDocumentDeByte(byte[] documentoXml) throws Exception {
 	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	    factory.setNamespaceAware(true);

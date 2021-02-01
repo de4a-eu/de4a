@@ -30,13 +30,21 @@ public class Client {
 	@Value("${de4a.connector.id.seed}")
 	private String seed;
 	@Autowired
-	private RequestBuilder requestBuilder;
-//	@Autowired
-//	private RestTemplateBuilder restTemplate;
-	public String getEvidenceRequest (User user) throws MessageException 
-	{  
+	private RequestBuilder requestBuilder; 
+	public boolean getEvidenceRequest (RequestTransferEvidence request) throws MessageException 
+	{   
+		logger.debug("Sending request {}",request.getRequestId()); 
+		RestTemplate plantilla = new RestTemplate();
+		HttpComponentsClientHttpRequestFactory requestFactory =
+		                new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
+		plantilla.setRequestFactory(requestFactory);
+		ResponseEntity<Ack> ack= plantilla.postForEntity(urlRequestor,request, Ack.class);
+		return ack.getBody().getCode().equals(Ack.OK)?  true:false;
+	} 
+	public RequestTransferEvidence buildRequest(User user) {
 		String requestId=seed+"-"+Calendar.getInstance().getTimeInMillis();
-		logger.debug("Sending request {}",requestId);
+		logger.debug("building request {}",requestId);
 		// String uri = "http://localhost:8083/de4a-connector/request?urlReturn=http://localhost:8682/de4a-evaluator/ReturnPage&evaluatorId="+dataOwnerdI+"&@evaluatorId="+evidenceServiceUri+"&requestId=777"; 
 		String eidasId=user.getEidas();
 		String name=user.getName();
@@ -44,14 +52,7 @@ public class Client {
 		String ap2=user.getAp2()!=null &&!user.getAp2().isEmpty()?user.getAp2():"";
 		String fullname= user.getName()+" "+user.getAp1()+" "+ (ap2.isEmpty()?"":ap2); 
 		String birthDate=user.getBirthDate();
-		RequestTransferEvidence request=requestBuilder.buildRequest(requestId,eidasId,birthDate,name,ap1,fullname);
-		RestTemplate plantilla = new RestTemplate();
-		HttpComponentsClientHttpRequestFactory requestFactory =
-		                new HttpComponentsClientHttpRequestFactory();
-		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
-		plantilla.setRequestFactory(requestFactory);
-		ResponseEntity<Ack> ack= plantilla.postForEntity(urlRequestor,request, Ack.class);
-		return ack.getBody().getCode().equals(Ack.OK)?  requestId:null;
-	} 
+		return requestBuilder.buildRequest(requestId,eidasId,birthDate,name,ap1,fullname);
+	}
 }
  

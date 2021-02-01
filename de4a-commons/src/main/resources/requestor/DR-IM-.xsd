@@ -11,7 +11,7 @@
 				<xs:element name="TimeStamp" type="TimeStampType"/>
 				<xs:element name="ProcedureId" type="ProcedureIdType" minOccurs="0"/>
 				<xs:element name="DataEvaluator" type="AgentCVType"/>
-				<xs:element name="DataOwner" type="AgentCVType"/>
+				<xs:element name="DataOwner" type="AgentCVType" minOccurs="0"/>
 				<xs:element name="DataRequestSubject" type="DataRequestSubjectCVType"/>
 				<xs:element name="RequestGrounds" type="RequestGroundsType"/>
 				<xs:element name="CanonicalEvidenceId" type="CanonicalEvidenceIdType"/>

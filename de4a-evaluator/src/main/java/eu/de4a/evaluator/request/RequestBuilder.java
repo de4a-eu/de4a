@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -85,10 +86,11 @@ public class RequestBuilder {
 	}
 	private XMLGregorianCalendar gimmeGregorian(Date date) {
 		GregorianCalendar c = new GregorianCalendar();
-		c.setTime(Calendar.getInstance().getTime());
+		c.setTime(date);
 		XMLGregorianCalendar date2=null;
 		try {
 			date2 = DatatypeFactory.newInstance().newXMLGregorianCalendar(c); 
+			date2.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
 		} catch (DatatypeConfigurationException e) {
 		 //na tranqui;
 		}
