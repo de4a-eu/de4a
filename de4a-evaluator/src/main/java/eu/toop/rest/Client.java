@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import eu.de4a.conn.api.requestor.RequestTransferEvidence;
+import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.evaluator.request.RequestBuilder;
 import eu.de4a.exception.MessageException;
@@ -31,7 +32,18 @@ public class Client {
 	private String seed;
 	@Autowired
 	private RequestBuilder requestBuilder; 
-	public boolean getEvidenceRequest (RequestTransferEvidence request) throws MessageException 
+	public ResponseTransferEvidence getEvidenceRequestIM (RequestTransferEvidence request) throws MessageException 
+	{   
+		logger.debug("Sending request {}",request.getRequestId()); 
+		RestTemplate plantilla = new RestTemplate();
+		HttpComponentsClientHttpRequestFactory requestFactory =
+		                new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
+		plantilla.setRequestFactory(requestFactory);
+		ResponseEntity<ResponseTransferEvidence> response= plantilla.postForEntity(urlRequestor,request, ResponseTransferEvidence.class);
+		return response.getBody();
+	} 
+	public boolean getEvidenceRequestUSI (RequestTransferEvidence request) throws MessageException 
 	{   
 		logger.debug("Sending request {}",request.getRequestId()); 
 		RestTemplate plantilla = new RestTemplate();

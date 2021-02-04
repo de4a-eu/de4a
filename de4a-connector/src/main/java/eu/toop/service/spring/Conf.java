@@ -16,14 +16,15 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -34,6 +35,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -48,7 +50,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import eu.toop.as4.domibus.soap.ClienteWS;
 import eu.toop.as4.domibus.soap.ClienteWSAuthenticator;
-import eu.toop.scsp.spring.ConfPid;
  
 @Configuration  
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu") 
@@ -56,6 +57,7 @@ import eu.toop.scsp.spring.ConfPid;
 @EnableWebMvc  
 @PropertySource("classpath:application.properties")
 @EnableAspectJAutoProxy
+@EnableAutoConfiguration
 @EnableScheduling 
 @ComponentScan("eu.toop")
 public class Conf implements WebMvcConfigurer {
@@ -152,6 +154,13 @@ public class Conf implements WebMvcConfigurer {
 	      bean.setSuffix(".jsp");
 
 	      return bean;
+	   }
+	   @Bean
+	   @Order(0)
+	   public MultipartFilter multipartFilter() {
+	       MultipartFilter multipartFilter = new MultipartFilter();
+	       multipartFilter.setMultipartResolverBeanName("multipartResolver");
+	       return multipartFilter;
 	   }
 	   @Bean(name = "multipartResolver")
 	   public CommonsMultipartResolver createMultipartResolver() {

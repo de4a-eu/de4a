@@ -15,4 +15,7 @@ module de4acommons {
 	requires org.apache.logging.log4j;
 	requires org.apache.santuario.xmlsec;
 	requires java.activation;
+	requires org.apache.httpcomponents.httpcore;
+	requires spring.core;
+	requires spring.web;
 }

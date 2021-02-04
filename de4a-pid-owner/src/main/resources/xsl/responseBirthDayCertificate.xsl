@@ -26,6 +26,8 @@
 	<xsl:param name="ownerName" />
 	<xsl:param name="canonicalEvidenceId" />
 	<xsl:param name="domesticEvidences" />
+	<xsl:param name="nameMunicipio" />
+	<xsl:param name="sexo" />
 	<xsl:template match="/"> 
 <ResponseTransferEvidence xmlns="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.de4a.eu/2020/data/requestor/pattern/intermediate iem.xsd">
 	<RequestId><xsl:value-of select="$idPeticion" /></RequestId>
@@ -53,7 +55,34 @@
 	</DataRequestSubject>
 	<CanonicalEvidenceId><xsl:value-of select="$canonicalEvidenceId" /></CanonicalEvidenceId>
 	<CanonicalEvidence>
-		<DateOfBirth><xsl:value-of select="$fechaNacimiento" /></DateOfBirth>
+		<DateOfBirth></DateOfBirth>
+			<BirthEvidence xsi:noNamespaceSchemaLocation="BirthEvidence.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+				<IssuingDate><xsl:value-of select="$fechaNacimiento" /></IssuingDate>
+				<IssuingAuthority>
+					<PrefLabel>Registro Civil Central. Ministerio de Justicia</PrefLabel>
+				</IssuingAuthority>
+				<CerfifiedBirth>
+					<Child>
+						<DateOfBirth><xsl:value-of select="$fechaNacimiento" /></DateOfBirth>
+						<PlaceOfBirth>
+							<GeographicName><xsl:value-of select="$nameMunicipio" /></GeographicName>
+						</PlaceOfBirth>
+						<Gender>
+							<xsl:choose>
+								<xsl:when test="$sexo = 'V' ">
+										<xsl:text>http://publications.europa.eu/resource/authority/human-sex/MALE"</xsl:text>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:text>http://publications.europa.eu/resource/authority/human-sex/FEMALE"</xsl:text>
+								</xsl:otherwise>
+							</xsl:choose>
+						</Gender>
+						<GivenName><xsl:value-of select="$nombre" /></GivenName>
+						<FamilyName><xsl:value-of select="$ap1" /></FamilyName>
+					</Child>
+				</CerfifiedBirth>
+			</BirthEvidence>
+			
 	</CanonicalEvidence>  
 		 <xsl:variable name="count"  select="lists:size($domesticEvidences) - 1"/>  
 	   	 <DomesticEvidenceList>

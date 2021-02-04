@@ -90,7 +90,7 @@ public class RequestBuilder {
 		XMLGregorianCalendar date2=null;
 		try {
 			date2 = DatatypeFactory.newInstance().newXMLGregorianCalendar(c); 
-			date2.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
+			//date2.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
 		} catch (DatatypeConfigurationException e) {
 		 //na tranqui;
 		}

@@ -5,6 +5,7 @@ public class DE4AConstants {
 
 	public static final String TAG_EVIDENCE_REQUEST="RequestTransferEvidence"; 
 	public static final String TAG_EVIDENCE_RESPONSE="ResponseTransferEvidence"; 
+	public static final String XPATH_EVIDENCE_RESPONSE="//*[local-name()='ResponseTransferEvidence']";
 	public static final String TAG_NATIONAL_EVIDENCE_RESPONSE="NationalEvidenceResponse"; 
 	public static final String XPATH_REQUEST_ID="//*[local-name()='%s']/*[local-name()='RequestId']/text()"; 
 	public static final String XPATH_ID="//*[local-name()='RequestId']";

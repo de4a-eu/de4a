@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.de4a.scsp.manager.ScspGateway;
-import eu.toop.scsp.spring.ConfPid;
+import eu.de4a.scsp.spring.ConfPid;
 
 @SpringBootTest(classes={ConfPid.class}) 
 @RunWith(SpringRunner.class)   
