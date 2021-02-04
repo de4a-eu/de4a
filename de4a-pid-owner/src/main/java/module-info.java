@@ -23,5 +23,16 @@ requires spring.boot;
 requires spring.boot.autoconfigure;
 requires  transitive eu.toop.connector.api;
 requires java.xml.bind; 
+requires java.net.http;
+requires commons.fileupload;
+requires org.apache.commons.io;
+requires spring.webmvc;
+requires spring.tx;
+requires spring.data.jpa;
+requires java.sql;
+requires spring.orm;
+requires com.zaxxer.hikari;
+requires java.persistence;
+requires spring.data.commons; 
 }
  

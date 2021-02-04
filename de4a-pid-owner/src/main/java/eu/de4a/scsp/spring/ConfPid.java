@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
-import java.text.SimpleDateFormat;
+import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -23,8 +25,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
@@ -32,11 +37,16 @@ import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 import org.springframework.ws.soap.security.wss4j2.support.CryptoFactoryBean;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import eu.de4a.scsp.ws.client.ClientePidWS; 
-@Configuration    
+@Configuration  
 @PropertySource("classpath:application-pid.properties")
 @ComponentScan("eu.de4a.scsp")   
 @Order(Ordered.LOWEST_PRECEDENCE)
+@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu") 
+@EnableTransactionManagement
 public class ConfPid    { 
   private static final Logger LOGGER = LoggerFactory.getLogger (ConfPid.class);
  
@@ -139,5 +149,65 @@ public class ConfPid    {
 		       resolver.setDefaultEncoding("UTF-8");
 		       return resolver;
 		   }
-		    
+		   
+			 @Bean(destroyMethod = "close")
+			public DataSource dataSource() {
+			    HikariConfig dataSourceConfig = new HikariConfig();
+			    dataSourceConfig.setDriverClassName("org.h2.Driver");
+			    dataSourceConfig.setJdbcUrl("jdbc:h2:mem:datajpa");
+			    dataSourceConfig.setUsername("sa");
+			    dataSourceConfig.setPassword("");
+
+			    return (DataSource) new HikariDataSource(dataSourceConfig);
+		    }
+
+		    @Bean
+		    public   LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+			    LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+			    entityManagerFactoryBean.setDataSource((javax.sql.DataSource) dataSource);
+			    entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+			    entityManagerFactoryBean.setPackagesToScan("eu");
+
+			    Properties jpaProperties = new Properties();
+
+			    //Configures the used database dialect. This allows Hibernate to create SQL
+			    //that is optimized for the used database.
+			    jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+
+			    //Specifies the action that is invoked to the database when the Hibernate
+			    //SessionFactory is created or closed.
+			    jpaProperties.put("hibernate.hbm2ddl.auto", 
+			            "create-drop"
+			    );
+
+			    //Configures the naming strategy that is used when Hibernate creates
+			    //new database objects and schema elements
+			    jpaProperties.put("hibernate.ejb.naming_strategy", 
+			            "org.hibernate.cfg.ImprovedNamingStrategy"
+			    );
+
+			    //If the value of this property is true, Hibernate writes all SQL
+			    //statements to the console.
+			    jpaProperties.put("hibernate.show_sql", 
+			            "true"
+			    );
+
+			    //If the value of this property is true, Hibernate will format the SQL
+			    //that is written to the console.
+			    jpaProperties.put("hibernate.format_sql", 
+			            "true"
+			    );
+
+			    entityManagerFactoryBean.setJpaProperties(jpaProperties);
+
+			    return entityManagerFactoryBean;
+			    }
+
+			    @Bean
+			    JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+			        JpaTransactionManager transactionManager = new JpaTransactionManager();
+			        transactionManager.setEntityManagerFactory(entityManagerFactory);
+			        return transactionManager;
+			    }
+			     
 }

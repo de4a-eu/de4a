@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,6 +36,8 @@ import eu.de4a.conn.api.requestor.DomesticEvidenceType;
 import eu.de4a.conn.api.requestor.IssuingTypeType;
 import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.scsp.owner.model.Municipio;
+import eu.de4a.scsp.owner.repository.MunicipioRepository;
 import eu.de4a.scsp.translate.EvidenceTranslator;
 import eu.de4a.util.DE4AConstants; 
 @Component
@@ -42,6 +45,8 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 	private static final Logger logger = LogManager.getLogger(BirthEvidenceTranslator.class); 
 	private static final String	REQUEST_TEMPLATE="xsl/requestBirthDayCertificate.xsl";
 	public static final String	RESPONSE_TEMPLATE="xsl/responseBirthDayCertificate.xsl";
+	private static final String XPATH_MUNICIPIO= "//*[local-name()='PoblacionHechoRegistral']";
+	private static final String XPATH_SEXO= "//*[local-name()='Sexo']";
 	@Autowired
 	Environment env;
 	@Value("${scsp.seed.birthday.certificate}")
@@ -50,6 +55,8 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 	private String cifSolicitante;
 	@Value("${scsp.procedimiento}")
 	private String procedimiento; 
+	@Autowired
+	private MunicipioRepository municipioRepository;
 	public Element translateEvidenceRequest(Element request) throws MessageException {
 		String doc=DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_DOC, request);
 		String ap1=DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_SURNAME, request);
@@ -126,9 +133,13 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 	public static final String XPATH_SCSP_IDPETICION="//*[local-name()='IdPeticion']/text()";  
 	public static final String VILLAGE_PARAM="lugarNacimiento";  
 	public static final String COUNTRY_PARAM="paisNacimiento";  
-
+	public static final String NAME_MUNICIPIO_PARAM="nameMunicipio";  
+	public static final String SEXO_PARAM="sexo";  
 	
 	public Element translateEvidenceResponse(Element response) throws MessageException {
+		if(logger.isDebugEnabled()) {
+			logger.debug("SCSP Response:",  DOMUtils.documentToString(response.getOwnerDocument()));
+		}
 		String doc=DOMUtils.getValueFromXpath( XPATH_SCSP_DOC, response);
 		String ap1=DOMUtils.getValueFromXpath(XPATH_SCSP_AP1, response);
 		String name=DOMUtils.getValueFromXpath(XPATH_SCSP_NAME, response);  
@@ -136,6 +147,16 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 		String pais=DOMUtils.getValueFromXpath(XPATH_SCSP_COUNTRY, response);
 		String poblacion=DOMUtils.getValueFromXpath(XPATH_SCSP_VILLAGE, response); 
 		String idpeticion=DOMUtils.getValueFromXpath(XPATH_SCSP_IDPETICION, response);
+		String municipio=DOMUtils.getValueFromXpath(XPATH_MUNICIPIO, response);
+		String sexo=DOMUtils.getValueFromXpath(XPATH_SEXO, response);
+		Municipio data=new Municipio();
+		String codprovincia=municipio.substring(0,2);
+		String codmunicipio=municipio.substring(2,5);
+		data.setProvincia(codprovincia);
+		data.setMunicipio(codmunicipio);
+		Example<Municipio> example = Example.of(data);
+		List<Municipio>registros=municipioRepository.findAll(example); 
+		String nameMunicipio=registros.get(0).getNombre();
 		TransformerFactory factory = TransformerFactory.newInstance( ); 
 	   	InputStream inputStreamPlantilla = this.getClass().getClassLoader()  .getResourceAsStream( RESPONSE_TEMPLATE); 
 		Source xslDoc = new StreamSource(inputStreamPlantilla);
@@ -153,6 +174,8 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 		        fillParameter(transformerxsl,FECHA_NACIMIENTO_PARAM,birthDate );
 		        fillParameter(transformerxsl,VILLAGE_PARAM,poblacion );
 		        fillParameter(transformerxsl,COUNTRY_PARAM,pais );
+		        fillParameter(transformerxsl,NAME_MUNICIPIO_PARAM,nameMunicipio );
+		        fillParameter(transformerxsl,SEXO_PARAM,sexo );
 		        transformerxsl.setParameter( DOMESTIC_EVIDENCES_PARAM,initDomesticBirthDate(idpeticion) );
 		        transformerxsl.setOutputProperty(OutputKeys.ENCODING, DEFAULT_ENCODING);
 		        transformerxsl.transform(src, new StreamResult(xmlFile));

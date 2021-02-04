@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -27,9 +24,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
 import eu.de4a.scsp.spring.ConfPid;
+ 
 
 @SpringBootTest(classes={ConfPid.class}) 
 @RunWith(SpringRunner.class) 
@@ -54,24 +53,25 @@ public class TestClientPid {
  		headers.setContentType(MediaType.APPLICATION_XML); 
  		HttpEntity<MultiValueMap<String, Object>> requestEntity = new    HttpEntity<MultiValueMap<String, Object>>( 	body, headers); 
  		try {
- 			plantilla.postForEntity("http://localhost:8682/de4a-pid-owner/request",unmarshallMe() , List .class);  
+ 			plantilla.postForEntity("http://localhost:8682/de4a-pid-owner/request",null , List .class);  
  		}catch(Exception e) {
  			e.printStackTrace();
  		}
 		
 		
 	}
-	private  eu.de4a.conn.api.requestor.RequestTransferEvidence  unmarshallMe()  {  
-        try
-        {
-            JAXBContext jaxbContext = JAXBContext.newInstance(eu.de4a.conn.api.requestor.ResponseTransferEvidence.class);
-            javax.xml.bind.Unmarshaller jaxbMarshaller = (Unmarshaller) jaxbContext.createUnmarshaller() ;  
-            return (eu.de4a.conn.api.requestor.RequestTransferEvidence) jaxbMarshaller.unmarshal(getXML()); 
- 
-        } catch (Exception e) {
-        	e.printStackTrace();
+	private  eu.de4a.conn.api.requestor.RequestTransferEvidence  unmarshallMe(Element request)  {  
+//        try
+//        {  
+//        	DOMUtils.stringToDocument(DOMUtils.documentToString(request.getOwnerDocument())); 
+//            JAXBContext jaxbContext = JAXBContext.newInstance(eu.de4a.conn.api.requestor.RequestTransferEvidence.class); 
+//            javax.xml.bind.Unmarshaller jaxbMarshaller = (Unmarshaller) jaxbContext.createUnmarshaller() ;  
+//            return (eu.de4a.conn.api.requestor.RequestTransferEvidence) jaxbMarshaller.unmarshal( request );  
+// 
+//        } catch (Exception e) {
+//        	logger.error("error:",e);
            return null;
-        }  
+      // }  
 }
 	private Document getXML() {
 		try {
