@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -28,13 +29,17 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.helger.commons.collection.iterate.IterableIterator;
+
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.api.smp.NodeInfo;
-import eu.de4a.util.DE4AConstants;
 import eu.toop.as4.client.ResponseWrapper;
+import eu.toop.rest.model.EvidenceService;
+import eu.toop.rest.model.IssuingAuthority;
  
  
 
@@ -44,6 +49,8 @@ public class Client {
 	private RestTemplate restTemplate; 
 	@Value("${smp.endpoint}")
 	private String smpEndpoint;
+	@Value("${idk.endpoint}")
+	private String idkEndpoint;
 	private static final Logger logger =  LoggerFactory.getLogger (Client.class);
 	public NodeInfo  getNodeInfo ( String dataOwnerdI,String evidenceServiceUri){
 		 logger.debug("Gimme node info AS4 {}",dataOwnerdI);
@@ -51,6 +58,36 @@ public class Client {
 		 //String uri = "https://des-de4a.redsara.es/de4a-smp/whois?dataOwnerId="+dataOwnerdI+"&serviceURI="+evidenceServiceUri; 
 		 return restTemplate.getForObject(uri, NodeInfo.class);
 	}
+	
+	public IssuingAuthority getIssuingAuthority(String canonicalEvidenceType, String countryCode) {
+		
+		StringBuilder uri = new StringBuilder(idkEndpoint);
+		uri.append(canonicalEvidenceType);
+		uri.append("/").append(countryCode);
+		
+		return restTemplate.getForObject(uri.toString(), IssuingAuthority.class);
+	}
+	
+	public EvidenceService getEvidenceService(String canonicalEvidenceType, String countryCode, String ...args) {
+		
+		StringBuilder uri = new StringBuilder(idkEndpoint);
+		uri.append(canonicalEvidenceType);
+		uri.append("/").append(countryCode);
+		if(!StringUtils.isEmpty(args)) {
+			Iterator<String> it = new IterableIterator<>(args);
+			while(it.hasNext()) {
+				String nameParam = it.next();
+				if(it.hasNext()) {
+					String valueParam = it.next();
+					uri.append("?").append(nameParam);
+					uri.append("=").append(valueParam);
+				}
+			}
+		}
+		
+		return restTemplate.getForObject(uri.toString(), EvidenceService.class);
+	}
+	
 	public void pushEvidence(String endpoint,ResponseWrapper response) { 
 		logger.debug("Sending response {}",endpoint);
 		// String uri = "http://localhost:8083/de4a-connector/request?urlReturn=http://localhost:8682/de4a-evaluator/ReturnPage&evaluatorId="+dataOwnerdI+"&@evaluatorId="+evidenceServiceUri+"&requestId=777"; 

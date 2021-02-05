@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -30,6 +32,8 @@ import eu.toop.as4.client.regrep.CletusLevelTransformer;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 import eu.toop.rest.Client;
+import eu.toop.rest.model.EvidenceService;
+import eu.toop.rest.model.IssuingAuthority;
 
 @Component 
 public class EvidenceRequestorManager extends EvidenceManager{
@@ -43,12 +47,14 @@ public class EvidenceRequestorManager extends EvidenceManager{
 	private String anotherId;
 	@Value("${as4.another.id.jvm:#{null}}") 
 	private String anotherIdjvm;
+	@Value("${idk.endpoint}")
+	private String idkEndpoint;
 	@Value("${as4.evidence.service}")
 	private String evidenceServiceUri;
 	@Autowired
 	private Client clientSmp; 
 	 
-	  public boolean manageRequest(RequestTransferEvidence request) {
+	public boolean manageRequest(RequestTransferEvidence request) {
 		String from=meId.isEmpty ()?meIdjvm:meId;
 		String to=anotherId.isEmpty()?anotherIdjvm:anotherId;
 		request.getDataOwner().setId(to);
@@ -57,8 +63,25 @@ public class EvidenceRequestorManager extends EvidenceManager{
 //		meId="9914:tc-ng-test-sender";
 //		anotherId= "9915:tooptest";
 		
-		return sendRequestMessage(from, to, evidenceServiceUri, doc.getDocumentElement());
-	  }
+		//Se realiza la llamada al idk para obtener la lista de posibles candidatos
+		IssuingAuthority issuingAuthority = clientSmp.getIssuingAuthority(request.getCanonicalEvidenceId(), "ES");
+		EvidenceService evidenceService;
+		
+		//En este caso solo habra un item en OrganisationalStructure con lo que se vuelve a consultar incluyendo el atuCode de ese item
+		if(issuingAuthority != null && !CollectionUtils.isEmpty(issuingAuthority.getIaOrganisationalStructure()) 
+				&& issuingAuthority.getIaOrganisationalStructure().size() == 1) {
+			evidenceService = 
+					clientSmp.getEvidenceService(request.getCanonicalEvidenceId(), "ES", "atuCode", 
+							issuingAuthority.getIaOrganisationalStructure().get(0).getAtuCode());
+			if(evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataOwner()) && doc != null) {
+				return sendRequestMessage(from, evidenceService.getDataOwner(), evidenceServiceUri, doc.getDocumentElement());
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}	  
+	}
 	private Document marshall(RequestTransferEvidence request ) {   
 		        try
 		        {
