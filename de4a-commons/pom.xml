@@ -80,7 +80,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
 				<version>0.14.0</version>
@@ -96,7 +96,44 @@
 					<generatePackage>eu.de4a.conn.api.requestor</generatePackage>
 					<schemaDirectory>${project.basedir}/src/main/resources/requestor</schemaDirectory> 
 				</configuration>
-			</plugin> 
+			</plugin>  -->
+			<plugin>
+		        <groupId>org.codehaus.mojo</groupId>
+		        <artifactId>jaxb2-maven-plugin</artifactId>
+		        <version>2.3.1</version>
+		        <executions>
+		            <execution>
+		                <id>xjc</id>
+		                <goals>
+		                    <goal>xjc</goal>
+		                </goals>
+		            </execution>
+		        </executions>
+		        <configuration>
+				         
+		          <generateEpisode>false</generateEpisode>
+		            <target>2.1</target>
+		            <sources>
+		                <source>${project.basedir}/src/main/resources/requestor</source> 
+		            </sources> 
+		            <removeOldOutput>false</removeOldOutput>
+		            <packageName>eu.de4a.conn.api.requestor</packageName>  
+		            <outputDirectory>${project.basedir}/src/main/java/</outputDirectory><clearOutputDir>false</clearOutputDir>
+		            <noGeneratedHeaderComments>true</noGeneratedHeaderComments> 
+		        </configuration>
+		        <dependencies>
+		            <dependency>
+		                <groupId>org.glassfish.jaxb</groupId>
+		                <artifactId>jaxb-xjc</artifactId>
+		                <version>${jaxb.version}</version>
+		            </dependency>
+		            <dependency>
+		            	<groupId>jakarta.activation</groupId>
+            			<artifactId>jakarta.activation-api</artifactId>
+              			<version>1.2.2</version>
+           			</dependency>
+		        </dependencies>
+		    </plugin>
 			</plugins>
 					<finalName>de4a-commons</finalName>
 			</build>
