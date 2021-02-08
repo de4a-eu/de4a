@@ -59,12 +59,16 @@ public class Client {
 		logger.debug("building request {}",requestId);
 		// String uri = "http://localhost:8083/de4a-connector/request?urlReturn=http://localhost:8682/de4a-evaluator/ReturnPage&evaluatorId="+dataOwnerdI+"&@evaluatorId="+evidenceServiceUri+"&requestId=777"; 
 		String eidasId=user.getEidas();
-		String name=user.getName();
-		String ap1=user.getAp1();
-		String ap2=user.getAp2()!=null &&!user.getAp2().isEmpty()?user.getAp2():"";
-		String fullname= user.getName()+" "+user.getAp1()+" "+ (ap2.isEmpty()?"":ap2); 
-		String birthDate=user.getBirthDate();
-		return requestBuilder.buildRequest(requestId,eidasId,birthDate,name,ap1,fullname);
+		String name=null ,ap1=null,ap2=null,fullname=null,birthDate=null;
+		if(user.getAp1()!=null) {
+			name=user.getName();
+			ap1=user.getAp1();
+			ap2=user.getAp2()!=null &&!user.getAp2().isEmpty()?user.getAp2():"";
+			fullname= user.getName()+" "+user.getAp1()+" "+ (ap2.isEmpty()?"":ap2); 
+			birthDate=user.getBirthDate();
+		}
+		
+		return requestBuilder.buildRequest(requestId,user.getEvidenceServiceURI(),eidasId,birthDate,name,ap1,fullname);
 	}
 }
  
