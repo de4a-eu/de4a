@@ -18,6 +18,7 @@ import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.evaluator.request.RequestBuilder;
 import eu.de4a.exception.MessageException;
+import eu.de4a.util.EvidenceTypeIds;
 import eu.toop.controller.User;
  
 
@@ -64,7 +65,12 @@ public class Client {
 		String ap2=user.getAp2()!=null &&!user.getAp2().isEmpty()?user.getAp2():"";
 		String fullname= user.getName()+" "+user.getAp1()+" "+ (ap2.isEmpty()?"":ap2); 
 		String birthDate=user.getBirthDate();
-		return requestBuilder.buildRequest(requestId,eidasId,birthDate,name,ap1,fullname);
+		
+		//TODO CanonicalEvidenceType es BirthCertificate en este caso, esto se elegira en la interfaz del evaluator		
+		RequestTransferEvidence request = requestBuilder.buildRequest(requestId,eidasId,birthDate,name,ap1,fullname);
+		request.setCanonicalEvidenceId(EvidenceTypeIds.BIRTHCERTIFICATE.toString());
+		
+		return request;
 	}
 }
  

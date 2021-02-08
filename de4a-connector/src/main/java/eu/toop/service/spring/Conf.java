@@ -59,7 +59,7 @@ import eu.toop.as4.domibus.soap.ClienteWSAuthenticator;
 @EnableAspectJAutoProxy
 @EnableAutoConfiguration
 @EnableScheduling 
-@ComponentScan("eu.toop")
+@ComponentScan("eu")
 public class Conf implements WebMvcConfigurer {
 	private static final Logger LOG =  LoggerFactory.getLogger (Conf.class);
 	 @Bean
@@ -222,7 +222,7 @@ public class Conf implements WebMvcConfigurer {
 			    //If the value of this property is true, Hibernate writes all SQL
 			    //statements to the console.
 			    jpaProperties.put("hibernate.show_sql", 
-			            "false"
+			            "true"
 			    );
 
 			    //If the value of this property is true, Hibernate will format the SQL
@@ -230,6 +230,10 @@ public class Conf implements WebMvcConfigurer {
 			    jpaProperties.put("hibernate.format_sql", 
 			            "true"
 			    );
+			    
+			    jpaProperties.put("spring.h2.console.enabled", "true");
+
+				jpaProperties.put("spring.h2.console.path", "/h2-console");
 
 			    entityManagerFactoryBean.setJpaProperties(jpaProperties);
 
