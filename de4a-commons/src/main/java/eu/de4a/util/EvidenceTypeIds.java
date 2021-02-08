@@ -8,7 +8,7 @@ package eu.de4a.util;
 public enum EvidenceTypeIds {
 	HIGHEREDCERTIFICATE("HigherEdCertificate"), SECONDARYEDCERTIFICATE("SecondaryEdCertificate"),
 	RESIDENCYPROOF("ResidencyProof"), BIRTHCERTIFICATE("BirthCertificate"), MARRIAGECERTIFICATE("MarriageCertificate"),
-	DEATHCERTIFICATE("DeathCertificate");
+	DEATHCERTIFICATE("DeathCertificate"), DOINGBUSINESSABROAD("DoingBusinessAbroad");
 
 	private String value;
 
