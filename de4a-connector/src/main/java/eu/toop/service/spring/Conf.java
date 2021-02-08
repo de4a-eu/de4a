@@ -59,7 +59,7 @@ import eu.toop.as4.domibus.soap.ClienteWSAuthenticator;
 @EnableAspectJAutoProxy
 @EnableAutoConfiguration
 @EnableScheduling 
-@ComponentScan("eu.toop")
+@ComponentScan("eu")
 public class Conf implements WebMvcConfigurer {
 	private static final Logger LOG =  LoggerFactory.getLogger (Conf.class);
 	 @Bean

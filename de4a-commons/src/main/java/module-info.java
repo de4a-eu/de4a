@@ -17,5 +17,5 @@ module de4acommons {
 	requires java.activation;
 	requires org.apache.httpcomponents.httpcore;
 	requires spring.core;
-	requires spring.web;
+	requires transitive spring.web;
 }

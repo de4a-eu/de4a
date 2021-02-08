@@ -50,6 +50,6 @@ public class RequestController {
 		ack.setCode(ok?Ack.OK:Ack.FAIL);
 		ack.setMessage(ok?"In process":"Repeat again"); 
 		return ack;
-	} 
+	}
 }
-	 
+	
