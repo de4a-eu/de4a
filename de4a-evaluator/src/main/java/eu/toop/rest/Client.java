@@ -18,6 +18,7 @@ import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.evaluator.request.RequestBuilder;
 import eu.de4a.exception.MessageException;
+import eu.de4a.util.EvidenceTypeIds;
 import eu.toop.controller.User;
  
 
@@ -68,7 +69,10 @@ public class Client {
 			birthDate=user.getBirthDate();
 		}
 		
-		return requestBuilder.buildRequest(requestId,user.getEvidenceServiceURI(),eidasId,birthDate,name,ap1,fullname);
+		RequestTransferEvidence request = requestBuilder.buildRequest(requestId,eidasId,birthDate,name,ap1,fullname);
+		request.setCanonicalEvidenceId(EvidenceTypeIds.BIRTHCERTIFICATE.toString());
+		
+		return request;
 	}
 }
  

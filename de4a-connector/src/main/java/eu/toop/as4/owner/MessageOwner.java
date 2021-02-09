@@ -9,6 +9,7 @@ public class MessageOwner extends ContextRefreshedEvent {
 	private static final long serialVersionUID = 1L;
 	private Element message;
 	private String id;
+	private String senderId;
 	private String evidenceService;
 	public MessageOwner(ApplicationContext context) {
 	        super(context); 
@@ -37,6 +38,13 @@ public class MessageOwner extends ContextRefreshedEvent {
 	public void setEvidenceService(String evidenceService) {
 		this.evidenceService = evidenceService;
 	}
-     
+    
+	public String getSenderId() {
+		return senderId;
+	}
+	
+	public void setSenderId(String senderId) {
+		this.senderId = senderId;
+	}
 
 }
