@@ -69,7 +69,7 @@ public class Client {
 			birthDate=user.getBirthDate();
 		}
 		
-		RequestTransferEvidence request = requestBuilder.buildRequest(requestId,eidasId,birthDate,name,ap1,fullname);
+		RequestTransferEvidence request = requestBuilder.buildRequest(requestId,user.getEvidenceServiceURI(),eidasId,birthDate,name,ap1,fullname);
 		request.setCanonicalEvidenceId(EvidenceTypeIds.BIRTHCERTIFICATE.toString());
 		
 		return request;
