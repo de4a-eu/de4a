@@ -79,24 +79,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-			</plugin>
-			<!-- <plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.14.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration> 
-					<generateDirectory>${project.basedir}/src/main/java</generateDirectory>
-					<generatePackage>eu.de4a.conn.api.requestor</generatePackage>
-					<schemaDirectory>${project.basedir}/src/main/resources/requestor</schemaDirectory> 
-				</configuration>
-			</plugin>  -->
+			</plugin> 
 			<plugin>
 		        <groupId>org.codehaus.mojo</groupId>
 		        <artifactId>jaxb2-maven-plugin</artifactId>
