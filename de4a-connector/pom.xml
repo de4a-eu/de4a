@@ -303,7 +303,7 @@
 	</dependencies>
 	<build>
 		<plugins> 
-			<plugin>
+		<!-- 	<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
 				<version>0.14.0</version>
@@ -323,7 +323,64 @@
 						<include>domibus.wsdl</include>
 					</schemaIncludes>
 				</configuration>
-			</plugin>
+			</plugin> -->
+			
+			<plugin>
+		        <groupId>org.codehaus.mojo</groupId>
+		        <artifactId>jaxb2-maven-plugin</artifactId>
+		        <version>2.3.1</version>
+		        <executions>
+		            <execution>
+		                <id>xjc</id>
+		                <goals>
+		                    <goal>xjc</goal>
+		                </goals>
+		            </execution>
+		        </executions>
+		         <configuration>
+		         	<generateEpisode>false</generateEpisode>
+                    <packageName>eu.toop.as4.domibus.soap.auto</packageName>
+                    <sourceType>wsdl</sourceType>
+                    <sources>
+                        <source>${project.basedir}/src/main/resources/domibus/domibus.wsdl</source>
+                    </sources>
+                    <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+                    <clearOutputDir>false</clearOutputDir>
+                    <noGeneratedHeaderComments>true</noGeneratedHeaderComments> 
+                </configuration>
+		        
+		        
+		     <!--    <configuration>
+				         
+		          <generateEpisode>false</generateEpisode>
+		            <target>2.1</target>
+		             <sources>
+		                <source>${project.basedir}/src/main/resources/domibus</source> 
+		            </sources>   
+		            <wsdl>true</wsdl>
+				    <xmlschema>false</xmlschema>
+				    <schemaDirectory>${project.basedir}/src/main/resources/domibus</schemaDirectory> 
+		            <removeOldOutput>false</removeOldOutput>
+		            <packageName>eu.toop.as4.domibus.soap.auto</packageName>  
+		            <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+		            <clearOutputDir>false</clearOutputDir>
+		            <noGeneratedHeaderComments>true</noGeneratedHeaderComments> 
+		        </configuration> -->
+		        <dependencies>
+		            <dependency>
+		                <groupId>org.glassfish.jaxb</groupId>
+		                <artifactId>jaxb-xjc</artifactId>
+		                <version>${jaxb.version}</version>
+		            </dependency>
+		            <dependency>
+		            	<groupId>jakarta.activation</groupId>
+            			<artifactId>jakarta.activation-api</artifactId>
+              			<version>1.2.2</version>
+           			</dependency>
+		        </dependencies>
+		    </plugin>
+		    
+		    
 		</plugins>
 		<finalName>de4a-connector</finalName>
 	</build>

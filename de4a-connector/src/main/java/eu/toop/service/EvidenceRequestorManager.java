@@ -6,7 +6,6 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,9 +41,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 	@Value("${as4.another.id}")
 	private String anotherId;
 	@Value("${as4.another.id.jvm:#{null}}") 
-	private String anotherIdjvm;
-	@Value("${as4.evidence.service}")
-	private String evidenceServiceUri;
+	private String anotherIdjvm; 
 	@Autowired
 	private Client clientSmp; 
 	 
@@ -53,32 +50,18 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		String to=anotherId.isEmpty()?anotherIdjvm:anotherId;
 		request.getDataOwner().setId(to);
 		request.getDataOwner().setName("Name of "+to);
-		Document doc=marshall(request);  
-//		meId="9914:tc-ng-test-sender";
-//		anotherId= "9915:tooptest";
+		Document doc=marshall(request);   
 		
-		return sendRequestMessage(from, to, evidenceServiceUri, doc.getDocumentElement());
+		return sendRequestMessage(from, to, request.getEvidenceServiceData().getEvidenceServiceURI(), doc.getDocumentElement());
 	  }
 	private Document marshall(RequestTransferEvidence request ) {   
 		        try
-		        {
-//		            JAXBContext jaxbContext = JAXBContext.newInstance(RequestTransferEvidence.class);
-//		            Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
-//		            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-//		            StringWriter sw = new StringWriter(); 
-//		            jaxbMarshaller.marshal(request, sw); 
-//		            return DOMUtils.stringToDocument(sw.toString()); 
-		        	
-		        	JAXBContext jc = JAXBContext.newInstance(RequestTransferEvidence.class);
- 
-
-		            // Create the Document
+		        {  
+		        	JAXBContext jc = JAXBContext.newInstance(RequestTransferEvidence.class); 
 		            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		            dbf.setNamespaceAware(true);
 		            DocumentBuilder db = dbf.newDocumentBuilder();
-		            Document document = db.newDocument();
-
-		            // Marshal Object to the Document
+		            Document document = db.newDocument(); 
 		            Marshaller marshaller = jc.createMarshaller();
 		            marshaller.marshal(request, document); 
 		            return document;
