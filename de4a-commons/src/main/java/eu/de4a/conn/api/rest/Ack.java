@@ -4,7 +4,10 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
+/**
+ * Modeling of the asynchronous service ACK concept
+ *
+ **/
 @XmlRootElement(name="node")
 @XmlAccessorType(XmlAccessType.PUBLIC_MEMBER) 
 public class Ack {

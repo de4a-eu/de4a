@@ -46,7 +46,20 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 	private static final String	REQUEST_TEMPLATE="xsl/requestBirthDayCertificate.xsl";
 	public static final String	RESPONSE_TEMPLATE="xsl/responseBirthDayCertificate.xsl";
 	private static final String XPATH_MUNICIPIO= "//*[local-name()='PoblacionHechoRegistral']";
-	private static final String XPATH_SEXO= "//*[local-name()='Sexo']";
+	private static final String XPATH_SEXO= "//*[local-name()='Sexo']";	
+	public static final String XPATH_SCSP_DOC="//*[local-name()='Documentacion']/text()";  
+	public static final String XPATH_SCSP_AP1="//*[local-name()='Apellido1']/text()";  
+	public static final String XPATH_SCSP_NAME="//*[local-name()='Nombre']/text()";  
+	public static final String XPATH_SCSP_BIRTHDATE="//*[local-name()='FechaHechoRegistral']/text()";  
+	public static final String XPATH_SCSP_COUNTRY="//*[local-name()='PaisHechoRegistral']/text()";  
+	public static final String XPATH_SCSP_VILLAGE="//*[local-name()='PoblacionHechoRegistral']/text()";  
+	public static final String XPATH_SCSP_IDPETICION="//*[local-name()='IdPeticion']/text()";  
+	public static final String VILLAGE_PARAM="lugarNacimiento";  
+	public static final String COUNTRY_PARAM="paisNacimiento";  
+	public static final String NAME_MUNICIPIO_PARAM="nameMunicipio";  
+	public static final String SEXO_PARAM="sexo";  
+	private static int INDEX_END_PROVINCIA=2;
+	private static int LENGTH_MUNICIPIO=5;
 	@Autowired
 	Environment env;
 	@Value("${scsp.seed.birthday.certificate}")
@@ -124,18 +137,7 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 		}
 	}
 
-	public static final String XPATH_SCSP_DOC="//*[local-name()='Documentacion']/text()";  
-	public static final String XPATH_SCSP_AP1="//*[local-name()='Apellido1']/text()";  
-	public static final String XPATH_SCSP_NAME="//*[local-name()='Nombre']/text()";  
-	public static final String XPATH_SCSP_BIRTHDATE="//*[local-name()='FechaHechoRegistral']/text()";  
-	public static final String XPATH_SCSP_COUNTRY="//*[local-name()='PaisHechoRegistral']/text()";  
-	public static final String XPATH_SCSP_VILLAGE="//*[local-name()='PoblacionHechoRegistral']/text()";  
-	public static final String XPATH_SCSP_IDPETICION="//*[local-name()='IdPeticion']/text()";  
-	public static final String VILLAGE_PARAM="lugarNacimiento";  
-	public static final String COUNTRY_PARAM="paisNacimiento";  
-	public static final String NAME_MUNICIPIO_PARAM="nameMunicipio";  
-	public static final String SEXO_PARAM="sexo";  
-	
+
 	public Element translateEvidenceResponse(Element response) throws MessageException {
 		if(logger.isDebugEnabled()) {
 			logger.debug("SCSP Response:",  DOMUtils.documentToString(response.getOwnerDocument()));
@@ -150,8 +152,8 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 		String municipio=DOMUtils.getValueFromXpath(XPATH_MUNICIPIO, response);
 		String sexo=DOMUtils.getValueFromXpath(XPATH_SEXO, response);
 		Municipio data=new Municipio();
-		String codprovincia=municipio.substring(0,2);
-		String codmunicipio=municipio.substring(2,5);
+		String codprovincia=municipio.substring(0,INDEX_END_PROVINCIA);
+		String codmunicipio=municipio.substring(INDEX_END_PROVINCIA,LENGTH_MUNICIPIO);
 		data.setProvincia(codprovincia);
 		data.setMunicipio(codmunicipio);
 		Example<Municipio> example = Example.of(data);

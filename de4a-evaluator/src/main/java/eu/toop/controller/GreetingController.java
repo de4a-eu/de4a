@@ -68,11 +68,27 @@ public class GreetingController {
 	private String id;
 	private RequestTransferEvidence requestEvidencia;
 	//private String response;
+
+	@RequestMapping(value = "/welcome.html")
+	public String welcome(Model model) { 
+		model.addAttribute("evidenceForm", new Evidencia());
+		return "welcome";
+	}
 	@GetMapping("/greeting")
 	public String greetingForm(Model model) { 
 		model.addAttribute("userForm", new User());
 		return "greeting";
 	}
+	@RequestMapping(value ="/goEvidenceForm", method = RequestMethod.POST)
+	public String goEvidenceForm(Model model,@ModelAttribute("evidenceForm") Evidencia evidencia,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) { 
+		User u=new User();
+		model.addAttribute("userForm",u );
+		if(evidencia.getTipo().equals("DBA")) {  
+			return "dba"; 
+		} 
+		return "nacimiento";
+	}
+	
 	@RequestMapping(value = "/greetinggo", method = RequestMethod.POST) 
 	public String greetingSubmit(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {   
 			requestEvidencia=client.buildRequest(user);
