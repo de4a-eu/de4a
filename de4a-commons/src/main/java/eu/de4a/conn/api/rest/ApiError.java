@@ -13,28 +13,22 @@ import org.springframework.http.HttpStatus;
  * Modeling of exceptions due to non-compliance of the REST service API.
  * 
  * */
-@XmlRootElement(name="node")
+@XmlRootElement(name="ApiError")
 @XmlAccessorType(XmlAccessType.PUBLIC_MEMBER) 
 public class ApiError {
 	private HttpStatus status;
-    private String message;
-    private List<String> errors;
+    private String message; 
+    private String code;
     public ApiError() {
     	
     }
-    public ApiError(HttpStatus status, String message, List<String> errors) {
+    public ApiError(HttpStatus status, String message, String code) {
         super();
         this.status = status;
         this.message = message;
-        this.errors = errors;
+        this.code = code;
     }
-
-    public ApiError(HttpStatus status, String message, String error) {
-        super();
-        this.status = status;
-        this.message = message;
-        errors = Arrays.asList(error);
-    }
+ 
 
 	@XmlElement(name = "status", required = true)
 	public HttpStatus getStatus() {
@@ -53,14 +47,14 @@ public class ApiError {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-
-	@XmlElement(name = "errors", required = true)
-	public List<String> getErrors() {
-		return errors;
+	@XmlElement(name = "code", required = true)
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
 	}
 
-	public void setErrors(List<String> errors) {
-		this.errors = errors;
-	}
+	 
     
 }
