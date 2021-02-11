@@ -97,7 +97,7 @@
 		          <generateEpisode>false</generateEpisode>
 		            <target>2.1</target>
 		            <sources>
-		                <source>${project.basedir}/src/main/resources/requestor</source> 
+		                <source>${project.basedir}/src/main/resources/requestor/</source> 
 		            </sources> 
 		            <removeOldOutput>false</removeOldOutput>
 		            <packageName>eu.de4a.conn.api.requestor</packageName>  
@@ -117,6 +117,8 @@
            			</dependency>
 		        </dependencies>
 		    </plugin>
+		    
+		    
 			</plugins>
 					<finalName>de4a-commons</finalName>
 			</build>
