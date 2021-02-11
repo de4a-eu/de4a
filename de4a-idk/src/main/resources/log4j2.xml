@@ -20,7 +20,7 @@
 			additivity="false">
 			<Appender-ref ref="STDOUT" level="INFO" />
 		</Logger>
-		<Root level="DEBUG">
+		<Root level="ERROR">
 			<AppenderRef ref="STDOUT" />
 			<AppenderRef ref="File" />
 		</Root>

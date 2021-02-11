@@ -91,6 +91,7 @@
 			<xs:element name="MimeType" type="MimeTypeType"/>
 			<xs:element name="DataLanguage" type="DataLanguageType"/>
 			<xs:element name="AddtionalInfo" type="xs:string" minOccurs="0"/>
+			<xs:element name="EvidenceData" type="xs:base64Binary" minOccurs="0"/> 
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="PreviewResponseType">
@@ -272,6 +273,7 @@
 			<xs:element ref="cbc:name"/> -->
 			<xs:element name="id" type="xs:string"/>
 			<xs:element name="name" type="xs:string"/>
+			<xs:element name="urlRedirect" type="xs:string"  minOccurs="0" />
 		</xs:all>
 	</xs:complexType>
 	<!-- End Agent CV -->

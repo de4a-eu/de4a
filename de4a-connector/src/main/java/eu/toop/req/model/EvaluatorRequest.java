@@ -11,6 +11,7 @@ public class EvaluatorRequest {
 	private String idrequest;
 	private String urlreturn;
 	private String idevaluator; 
+	private boolean usi;
 	private boolean done;
 	public String getIdrequest() {
 		return idrequest;
@@ -35,6 +36,12 @@ public class EvaluatorRequest {
 	}
 	public void setDone(boolean done) {
 		this.done = done;
+	}
+	public boolean isUsi() {
+		return usi;
+	}
+	public void setUsi(boolean usi) {
+		this.usi = usi;
 	}
 	 
 	

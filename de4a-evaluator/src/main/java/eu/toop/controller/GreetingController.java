@@ -95,19 +95,19 @@ public class GreetingController {
 			user.setRequest(jaxbObjectToXML(requestEvidencia));
 			id=requestEvidencia.getRequestId();  
 			return "showRequest";
-	} 
+	}  
 	@RequestMapping(value = "/requestEvidence", method = RequestMethod.POST) 
-	public void sendRequest(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {  
+	public String sendRequest(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse,RedirectAttributes redirectAttributes) {  
 		try {
 			EvaluatorRequest request=new EvaluatorRequest();
 			request.setIdrequest(id);
 			evaluatorRequestRepository.save(request);
-			boolean ok = client.getEvidenceRequestUSI(requestEvidencia);
-			httpServletResponse.setHeader("Location", String.format(urlRequestorRedirect, id));//"http://localhost:8083/de4a-connector/getreponse?id="+id);
-			//httpServletResponse.setHeader("Location", "https://des-de4a.redsara.es/de4a-tc-requestor/getreponse?id="+id);
-			httpServletResponse.setStatus(302);  
+			boolean ok = client.getEvidenceRequestIM(requestEvidencia);
+			redirectAttributes.addAttribute("id", id);
+			return "redirect:/returnPage.jsp";
 		} catch (MessageException e) {
 			logger.error("Error getting evidence request",e);
+			return "redirect:/errorPage.jsp";
 		}
 		
 	}
