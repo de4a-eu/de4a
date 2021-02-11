@@ -82,7 +82,7 @@
 					</Child>
 				</CerfifiedBirth>
 			</BirthEvidence>
-			
+			 
 	</CanonicalEvidence>  
 		 <xsl:variable name="count"  select="lists:size($domesticEvidences) - 1"/>  
 	   	 <DomesticEvidenceList>
@@ -98,12 +98,12 @@
   					<xsl:param name="domesticEvidences"/> 
 		 	   		<xsl:if test="$count > -1">
 		 	   			 <xsl:variable name="entity" select="lists:get( $domesticEvidences, $count )" />  
-			    	 	 <DomescticEvidence xmlns="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.de4a.eu/2020/data/requestor/pattern/intermediate iem.xsd">
-							<DomescticEvidenceIdRef><xsl:value-of  select="domestic:getDomesticEvidenceIdRef($entity)"/></DomescticEvidenceIdRef>
+			    	 	 <DomesticEvidence>
+							<DomesticEvidenceIdRef><xsl:value-of  select="domestic:getDomesticEvidenceIdRef($entity)"/></DomesticEvidenceIdRef>
 							<IssuingType><xsl:value-of  select="domestic:getIssuingType($entity)"/></IssuingType>
 							<MimeType><xsl:value-of  select="domestic:getMimeType($entity)"/></MimeType>
 							<DataLanguage><xsl:value-of  select="domestic:getDataLanguage($entity)"/></DataLanguage>
-						</DomescticEvidence> 
+						</DomesticEvidence> 
 						<xsl:call-template name="domesticEvidences_template">
 				          <xsl:with-param name="count" select="$count - 1"/>
 				          <xsl:with-param name="domesticEvidences" select="$domesticEvidences"/>
