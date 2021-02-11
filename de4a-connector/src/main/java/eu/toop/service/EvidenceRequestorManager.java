@@ -104,7 +104,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 					clientSmp.getEvidenceService(request.getCanonicalEvidenceId(), "ES", "atuCode", 
 							issuingAuthority.getIaOrganisationalStructure().get(0).getAtuCode());
 			if(evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataOwner()) && doc != null) {
-				boolean ok= sendRequestMessage(from, evidenceService.getDataOwner(), request.getEvidenceServiceData().getEvidenceServiceURI(), doc.getDocumentElement());
+				boolean ok= sendRequestMessage(from, request.getEvidenceServiceData().getEvidenceServiceURI(), doc.getDocumentElement());
 				if(!ok)return null;
 				try {
 					ok = waitAratito(request.getRequestId());
