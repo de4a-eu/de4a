@@ -19,6 +19,7 @@ import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.evaluator.request.RequestBuilder;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.EvidenceTypeIds;
+import eu.toop.controller.ResponseManager;
 import eu.toop.controller.User;
  
 
@@ -33,16 +34,23 @@ public class Client {
 	private String seed;
 	@Autowired
 	private RequestBuilder requestBuilder; 
-	public ResponseTransferEvidence getEvidenceRequestIM (RequestTransferEvidence request) throws MessageException 
+	@Autowired
+	private ResponseManager responseManager; 
+	public boolean getEvidenceRequestIM (RequestTransferEvidence request) throws MessageException 
 	{   
 		logger.debug("Sending request {}",request.getRequestId()); 
 		RestTemplate plantilla = new RestTemplate();
+		//TODO quitar esto!
+		request.getDataEvaluator().setUrlRedirect(null);
+		request.getDataOwner().setUrlRedirect(null);
+		//---------
 		HttpComponentsClientHttpRequestFactory requestFactory =
 		                new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
 		plantilla.setRequestFactory(requestFactory);
 		ResponseEntity<ResponseTransferEvidence> response= plantilla.postForEntity(urlRequestor,request, ResponseTransferEvidence.class);
-		return response.getBody();
+		responseManager.manageResponse(response.getBody());
+		return response.getBody().getError()==null;
 	} 
 	public boolean getEvidenceRequestUSI (RequestTransferEvidence request) throws MessageException 
 	{   
@@ -70,7 +78,9 @@ public class Client {
 		}
 		
 		RequestTransferEvidence request = requestBuilder.buildRequest(requestId,user.getEvidenceServiceURI(),eidasId,birthDate,name,ap1,fullname);
-		request.setCanonicalEvidenceId(EvidenceTypeIds.BIRTHCERTIFICATE.toString());
+		if(user.getEvidenceServiceURI().equalsIgnoreCase("dba"))
+			request.setCanonicalEvidenceId(EvidenceTypeIds.DOINGBUSINESSABROAD.toString()); 
+		else request.setCanonicalEvidenceId(EvidenceTypeIds.BIRTHCERTIFICATE.toString());
 		
 		return request;
 	}
