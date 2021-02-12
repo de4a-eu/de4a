@@ -82,14 +82,14 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		
 		sendRequestMessage( from, request.getSenderId(), request.getEvidenceService(), request.getId(), payloads);
 	  }
-	public boolean sendRequestMessage(String sender,String dataOwnerId,String evidenceServiceUri,String id, List<TCPayload> payloads ) {
-		NodeInfo nodeInfo=clientSmp.getNodeInfo(dataOwnerId,evidenceServiceUri);
+	public boolean sendRequestMessage(String sender,String dataOwnerId,String evidenceService,String id, List<TCPayload> payloads ) {
+		NodeInfo nodeInfo=clientSmp.getNodeInfo(evidenceService);
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
 			TCPayload canonicalpay=payloads.stream().filter(p->p.getContentID().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
 			Document tosilly=DOMUtils.byteToDocument(canonicalpay.getValue()); 
 			Element requestSillyWrapper=new CletusLevelTransformer().wrapMessage(tosilly.getDocumentElement(), false);
-			as4Client.sendMessage(sender,nodeInfo, evidenceServiceUri,requestSillyWrapper,payloads,false);
+			as4Client.sendMessage(sender,nodeInfo, evidenceService,requestSillyWrapper,payloads,false);
 			return true;
 		}  catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications",e);
