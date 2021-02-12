@@ -3,6 +3,7 @@ package eu.toop.service.spring;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
@@ -16,7 +17,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +27,8 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -36,10 +41,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.MultipartFilter;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
@@ -140,13 +147,12 @@ public class Conf implements WebMvcConfigurer {
 		   return  auth ;
 	   }
 	   
-	 @Override
+	   @Override
 	   public void addViewControllers(ViewControllerRegistry registry) {
-	      registry.addViewController("/").setViewName("index");
-	   }
-	 
-	   @Bean
-	   public ViewResolver viewResolver() {
+		      registry.addViewController("/").setViewName("index");
+	   } 
+	 @Bean
+	 public ViewResolver viewResolver() {
 	      InternalResourceViewResolver bean = new InternalResourceViewResolver();
 
 	      bean.setViewClass(JstlView.class);
@@ -154,32 +160,50 @@ public class Conf implements WebMvcConfigurer {
 	      bean.setSuffix(".jsp");
 
 	      return bean;
-	   }
-	   @Bean
-	   @Order(0)
-	   public MultipartFilter multipartFilter() {
+	 }
+	 @Bean(name = "localeResolver")
+	 public LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}" )String locale) {
+	    SessionLocaleResolver slr = new SessionLocaleResolver();
+	    if(locale!=null && !locale.trim().isEmpty())
+	    	slr.setDefaultLocale(new Locale(locale));
+	    else
+	    	slr.setDefaultLocale(Locale.ENGLISH);
+	    return slr;
+	 }
+	 @Bean
+	 public MessageSource messageSource() {
+	   ReloadableResourceBundleMessageSource messageSource = new 
+	   ReloadableResourceBundleMessageSource();
+	   messageSource.setBasename("classpath:messages/messages"); 
+	   messageSource.setDefaultEncoding("UTF-8");
+	   return messageSource;
+	 }
+	  
+	 @Bean
+	 @Order(0)
+	 public MultipartFilter multipartFilter() {
 	       MultipartFilter multipartFilter = new MultipartFilter();
 	       multipartFilter.setMultipartResolverBeanName("multipartResolver");
 	       return multipartFilter;
-	   }
-	   @Bean(name = "multipartResolver")
-	   public CommonsMultipartResolver createMultipartResolver() {
+	 }
+	 @Bean(name = "multipartResolver")
+	 public CommonsMultipartResolver createMultipartResolver() {
 	       CommonsMultipartResolver resolver=new CommonsMultipartResolver();
 	       resolver.setDefaultEncoding("UTF-8");
 	       return resolver;
-	   }
+	 }
 	 
-	   @Bean(name = "applicationEventMulticaster")
-	   public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
+	 @Bean(name = "applicationEventMulticaster")	
+	 public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
 	       SimpleApplicationEventMulticaster eventMulticaster =
 	         new SimpleApplicationEventMulticaster();
 	       
 	       eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
 	       return eventMulticaster;
-	   }
+	 }
 	   
-		 @Bean(destroyMethod = "close")
-			public DataSource dataSource() {
+	 @Bean(destroyMethod = "close")
+	 public DataSource dataSource() {
 			    HikariConfig dataSourceConfig = new HikariConfig();
 			    dataSourceConfig.setDriverClassName("org.h2.Driver");
 			    dataSourceConfig.setJdbcUrl("jdbc:h2:mem:datajpa");
@@ -192,10 +216,9 @@ public class Conf implements WebMvcConfigurer {
 			    	LOG.error("Fatallity!...error datasource",e);
 			    	return null;
 			    }
-		    }
-
-		    @Bean
-		    public   LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+	 }
+	 @Bean
+	 public   LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
 			    LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
 			    entityManagerFactoryBean.setDataSource((javax.sql.DataSource) dataSource);
 			    entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
@@ -246,37 +269,5 @@ public class Conf implements WebMvcConfigurer {
 			        transactionManager.setEntityManagerFactory(entityManagerFactory);
 			        return transactionManager;
 			    }
-			    
-//			    /** cyclical task scheduling */
-//			    @Bean(destroyMethod = "shutdown")
-//			    public Executor taskExecutor() {
-//			        return Executors.newScheduledThreadPool(10);
-//			    }
-//			    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-//			        taskRegistrar.setScheduler(taskExecutor());
-//			        taskRegistrar.addTriggerTask(
-//			                new Runnable() {
-//			                    public void run() {
-//			                 	   daemon().demonizar();
-//			                    }
-//			                },
-//			                new Trigger() { 
-//			             	   public Date nextExecutionTime(TriggerContext triggerContext) {
-//			             		   Parametro param = parametroRepository.select("daemon.cron");
-//			             		   Date nextExec ;
-//			             		   if(param!=null) {
-//			 	            		   String cron =param.getValor(); 
-//			 	                       CronTrigger trigger = new CronTrigger(cron);
-//			 	                       nextExec = trigger.nextExecutionTime(triggerContext);
-//			                        }else {
-//			                     	   //Entorno sin instanciar, se pospone el lanzamiento
-//			                     	   nextExec=new Date (Calendar.getInstance().getTimeInMillis() + (60 *1000));
-//			                        }
-//			                        return nextExec;
-//			                    }
-//			                }
-//			        );
-//			      
-//			      
-//			    }    
+			     
 }

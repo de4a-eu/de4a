@@ -114,7 +114,7 @@ public class DbaMockitoGateway implements OwnerGateway{
 			    Document docFinal =builder.parse(new InputSource(new StringReader(xmlespecificos))); 
 			    return docFinal  ;
 		}catch(Exception ex) {
-			logger.error("Qué contrariedad", e);
+			logger.error("QuÃ© contrariedad", e);
 			return null;
 		}
 	}
