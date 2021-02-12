@@ -33,6 +33,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,16 +77,23 @@ public class Client {
 		 StringBuilder uri = new StringBuilder(smpEndpoint);
 		 uri.append(scheme).append(doubleSeparator).append(participantId).append("/services/").append(scheme)
 		 	.append(doubleSeparator).append(docId);
-		 SignedServiceMetadataType signedServiceMetadata = restTemplate.getForObject(uri.toString(), SignedServiceMetadataType.class);
-		 ServiceMetadataType serviceMetadata = signedServiceMetadata.getServiceMetadata();
+		 		 
 		 NodeInfo nodeInfo = new NodeInfo();
 		 try {
+			 SignedServiceMetadataType signedServiceMetadata = restTemplate.getForObject(uri.toString(), SignedServiceMetadataType.class);
+			 ServiceMetadataType serviceMetadata = signedServiceMetadata.getServiceMetadata();		 
+		 
 			 nodeInfo.setParticipantIdentifier(serviceMetadata.getServiceInformation().getParticipantIdentifier().getValue());
 			 nodeInfo.setDocumentIdentifier(serviceMetadata.getServiceInformation().getDocumentIdentifier().getValue());
-			 nodeInfo.setEndpointURI(serviceMetadata.getServiceInformation().getProcessList().getProcessAtIndex(0).getServiceEndpointList().getEndpointAtIndex(0).getEndpointURI());
-			 nodeInfo.setCertificate(serviceMetadata.getServiceInformation().getProcessList().getProcessAtIndex(0).getServiceEndpointList().getEndpointAtIndex(0).getCertificate());
-		 } catch (Exception e) {
-			 logger.warn("Se ha producido un error en el parseo de la respuesta SMP", e);
+			 nodeInfo.setEndpointURI(serviceMetadata.getServiceInformation().getProcessList().getProcessAtIndex(0)
+					 .getServiceEndpointList().getEndpointAtIndex(0).getEndpointURI());
+			 nodeInfo.setCertificate(serviceMetadata.getServiceInformation().getProcessList().getProcessAtIndex(0)
+					 .getServiceEndpointList().getEndpointAtIndex(0).getCertificate());
+		 } catch (NullPointerException nPe) {
+			 logger.warn("Se ha producido un error en el parseo de la respuesta SMP", nPe);
+			 return new NodeInfo();
+		 } catch (HttpClientErrorException | HttpServerErrorException httpClientOrServerExc) {
+			 logger.error("No se ha encontrado información del servicio en el servidor SMP");
 			 return new NodeInfo();
 		 }
 		 

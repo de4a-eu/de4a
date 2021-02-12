@@ -104,7 +104,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 					clientSmp.getEvidenceService(request.getCanonicalEvidenceId(), "ES", "atuCode", 
 							issuingAuthority.getIaOrganisationalStructure().get(0).getAtuCode());
 			if(evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataOwner()) && doc != null) {
-				boolean ok= sendRequestMessage(from, request.getEvidenceServiceData().getEvidenceServiceURI(), doc.getDocumentElement());
+				boolean ok= sendRequestMessage(from, evidenceService.getService(), doc.getDocumentElement());
 				if(!ok)return null;
 				try {
 					ok = waitAratito(request.getRequestId());
@@ -169,7 +169,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 			 p.setMimeType(CMimeType.APPLICATION_XML.getAsString ());
 			 p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			 payloads.add(p);
-			as4Client.sendMessage(sender,nodeInfo,evidenceServiceUri,requestSillyWrapper,payloads,true);
+			as4Client.sendMessage(sender, nodeInfo, service, requestSillyWrapper, payloads, true);
 			return true;
 		}  catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications",e);
