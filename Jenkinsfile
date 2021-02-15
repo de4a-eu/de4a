@@ -2,7 +2,7 @@
   
         env.MAVENNAME = 'MAVEN'
         env.MAVENREPO = '/data/jenkins/.m2/repository/'
-        env.JDK11 = 'jdk11'
+        env.JDK11 = 'JDK11'
         env.dirCodigo = ''
 	node 
 	{
