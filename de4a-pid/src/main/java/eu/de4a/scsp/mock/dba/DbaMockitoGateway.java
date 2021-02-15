@@ -3,14 +3,11 @@ package eu.de4a.scsp.mock.dba;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -24,8 +21,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
 
 import eu.de4a.conn.api.requestor.DomesticEvidenceType;
 import eu.de4a.conn.api.requestor.IssuingTypeType;
@@ -63,11 +60,10 @@ public class DbaMockitoGateway implements OwnerGateway{
 		String nameevaluator=DOMUtils.getValueFromXpath( DE4AConstants.XPATH_EVALUATOR_NAME, evidenceRequest);
 		String idowner=DOMUtils.getValueFromXpath( DE4AConstants.XPATH_OWNER_ID, evidenceRequest);
 		String nameownerr=DOMUtils.getValueFromXpath( DE4AConstants.XPATH_OWNER_NAME, evidenceRequest);
-		
-		Document canonical=getCanonicalResponse(e,requestId,idevaluator,nameevaluator,idowner,nameownerr);
 		Document national=getNationalResponse(e);
-		payloads.add(makePayload(DE4AConstants.TAG_EVIDENCE_RESPONSE,MediaType.APPLICATION_XML.toString(),canonical));
-		payloads.add(makePayload(DE4AConstants.TAG_NATIONAL_EVIDENCE_RESPONSE,MediaType.APPLICATION_XML.toString(),national));
+		Document canonical=getCanonicalResponse(e,requestId,idevaluator,nameevaluator,idowner,nameownerr,national);
+		
+		payloads.add(makePayload(DE4AConstants.TAG_EVIDENCE_RESPONSE,MediaType.APPLICATION_XML.toString(),canonical)); 
 		return payloads;
 	} 
 	 
@@ -80,7 +76,7 @@ public class DbaMockitoGateway implements OwnerGateway{
 		return payload ;
 	}
 
-	private Document translateEntity(Entity e, String xsl,String id,String idevaluator,String nameevaluator,String idowner,String nameownerr) {
+	private Document translateEntity(Entity e, String xsl,String id,String idevaluator,String nameevaluator,String idowner,String nameownerr,byte[] national) {
 		TransformerFactory factory = TransformerFactory.newInstance( ); 
 	   	InputStream inputStreamPlantilla = this.getClass().getClassLoader()  .getResourceAsStream( xsl); 
 		Source xslDoc = new StreamSource(inputStreamPlantilla);
@@ -103,36 +99,36 @@ public class DbaMockitoGateway implements OwnerGateway{
 				if(nameownerr!=null)
 					transformerxsl.setParameter( NAME_OWNER_PARAM,nameownerr); 
 		        
-		        if(xsl.equals(XSL_CANONICAL))transformerxsl.setParameter( DOMESTIC_EVIDENCES_PARAM,initDomestic(e.getId()) );
-		        transformerxsl.setOutputProperty(OutputKeys.ENCODING, DEFAULT_ENCODING);
+		        if(xsl.equals(XSL_CANONICAL))transformerxsl.setParameter( DOMESTIC_EVIDENCES_PARAM,initDomestic(e.getId()  ) );
+		        transformerxsl.setOutputProperty(OutputKeys.ENCODING, DEFAULT_ENCODING); 
 		        transformerxsl.transform(src, new StreamResult(xmlFile));
 		        xmlFile.close();
-		        String xmlespecificos= ((ByteArrayOutputStream)xmlFile).toString(); 
-		        DocumentBuilderFactory factoryDom = DocumentBuilderFactory.newInstance();
-				factoryDom.setNamespaceAware(true);
-			    DocumentBuilder builder = factoryDom.newDocumentBuilder();
-			    Document docFinal =builder.parse(new InputSource(new StringReader(xmlespecificos))); 
-			    return docFinal  ;
-		}catch(Exception ex) {
+		        Document doc= DOMUtils.byteToDocument(((ByteArrayOutputStream)xmlFile).toByteArray());
+		        if(xsl.equals(XSL_CANONICAL)) return ((Element) DOMUtils.changeNodo(doc, "//*[local-name()='EvidenceData']",new String( national))).getOwnerDocument() ;
+		        else return doc; 
+		}catch(Exception | MessageException ex) {
 			logger.error("Qué contrariedad", e);
 			return null;
 		}
+	} 
+	private Document getCanonicalResponse(Entity e,String id,String idevaluator,String nameevaluator,String idowner,String nameownerr,Document national) { 
+		byte[]a=DOMUtils.encodeCompressed(national);
+		String sa=new String(a);
+		logger.error(sa);
+		return translateEntity(e, XSL_CANONICAL,id,idevaluator,nameevaluator,idowner,nameownerr, a );  
 	}
-	private Document getCanonicalResponse(Entity e,String id,String idevaluator,String nameevaluator,String idowner,String nameownerr) {
-		return translateEntity(e, XSL_CANONICAL,id,idevaluator,nameevaluator,idowner,nameownerr);
-	
-	}
+
 	private Document getNationalResponse(Entity e ) {
-		return translateEntity(e, XSL_NATIONAL,null,null,null,null,null);
-	
+		Document d= translateEntity(e, XSL_NATIONAL,null,null,null,null,null,null);
+		return d;
 	}
-	private List<DomesticEvidenceType> initDomestic(String id) {
+	private List<DomesticEvidenceType> initDomestic(String id ) {
 			List<DomesticEvidenceType> evidences=new ArrayList<DomesticEvidenceType>(); 
 			DomesticEvidenceType  domestic = new DomesticEvidenceType();
 			domestic.setDataLanguage(LANGUAGE_DEFAULT);
 			domestic.setDomesticEvidenceIdRef(id);
 			domestic.setIssuingType(IssuingTypeType.ORIGINAL_ISSUING);
-			domestic.setMimeType(MediaType.APPLICATION_XML.toString());
+			domestic.setMimeType(MediaType.APPLICATION_XML.toString()); 
 			evidences.add(domestic);
 			return evidences;
 	}
