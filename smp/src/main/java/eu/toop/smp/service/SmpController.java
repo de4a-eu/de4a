@@ -26,7 +26,7 @@ public class SmpController {
 		if(node==null) {
 			logger.debug("No se ha encontrado el nodo con id: "+dataOwnerId);
 			NodeInfo n= new NodeInfo();
-			n.setId(dataOwnerId);
+			n.setParticipantIdentifier(dataOwnerId);
 			return n;
 		}
 		else {
@@ -37,9 +37,9 @@ public class SmpController {
 	}
 	private  NodeInfo build(Node node) { 
 		NodeInfo ni=new NodeInfo();
-		ni.setEndpoint(node.getEndpoint());
-		ni.setId(node.getId());
-		ni.setX509(node.getX509());
+		ni.setEndpointURI(node.getEndpoint());
+		ni.setParticipantIdentifier(node.getId());
+		//ni.setCertificate(node.getX509());
 		return ni;
 	}
 }

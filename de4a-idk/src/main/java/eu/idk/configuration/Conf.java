@@ -6,32 +6,41 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.h2.server.web.WebServlet;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import eu.de4a.config.DataSourceConf;
+
+
+
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu")
+@PropertySource("classpath:application.properties")
+@ConfigurationProperties(prefix = "database")
 @EnableTransactionManagement
-@EnableWebMvc
 public class Conf {
-
-	@Bean(destroyMethod = "close")
-	public DataSource dataSource() {
+	 
+	private DataSourceConf dataSourceConf = new DataSourceConf();
+	
+	@Bean(destroyMethod = "close")	
+	public DataSource dataSource() {		
+		
 		HikariConfig dataSourceConfig = new HikariConfig();
-		dataSourceConfig.setDriverClassName("org.h2.Driver");
-		dataSourceConfig.setJdbcUrl("jdbc:h2:mem:idkDB");
-		dataSourceConfig.setUsername("sa");
-		dataSourceConfig.setPassword("");
-		return (DataSource) new HikariDataSource(dataSourceConfig);
+		dataSourceConfig.setDriverClassName(dataSourceConf.getDriverClassName());
+		dataSourceConfig.setJdbcUrl(dataSourceConf.getUrl());
+		dataSourceConfig.setUsername(dataSourceConf.getUsername());
+		dataSourceConfig.setPassword(dataSourceConf.getPassword());
+		return new HikariDataSource(dataSourceConfig);
 	}
 
 	@Bean
@@ -45,30 +54,25 @@ public class Conf {
 
 		// Configures the used database dialect. This allows Hibernate to create SQL
 		// that is optimized for the used database.
-		jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+		jpaProperties.put("hibernate.dialect", dataSourceConf.getJpaHibernate().getDialectPlatform());
 
 		// Specifies the action that is invoked to the database when the Hibernate
 		// SessionFactory is created or closed.
-		jpaProperties.put("hibernate.hbm2ddl.auto", "create-drop");
+		jpaProperties.put("hibernate.hbm2ddl.auto", dataSourceConf.getJpaHibernate().getDdlAuto());
 
 		// Configures the naming strategy that is used when Hibernate creates
 		// new database objects and schema elements
-		jpaProperties.put("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy");
+		jpaProperties.put("hibernate.ejb.naming_strategy", dataSourceConf.getJpaHibernate().getNamingStrategy());
 
 		// If the value of this property is true, Hibernate writes all SQL
 		// statements to the console.
-		jpaProperties.put("hibernate.show_sql", "true");
+		jpaProperties.put("hibernate.show_sql", dataSourceConf.getJpaHibernate().getShowSql());
 
 		// If the value of this property is true, Hibernate will format the SQL
 		// that is written to the console.
-		jpaProperties.put("hibernate.format_sql", "true");
-
-		jpaProperties.put("spring.h2.console.enabled", "true");
-
-		jpaProperties.put("spring.h2.console.path", "/h2-console");
+		jpaProperties.put("hibernate.format_sql", dataSourceConf.getJpaHibernate().getFormatSql());
 
 		entityManagerFactoryBean.setJpaProperties(jpaProperties);
-
 		return entityManagerFactoryBean;
 	}
 
@@ -81,9 +85,17 @@ public class Conf {
 
 	@Bean
 	public ServletRegistrationBean<WebServlet> h2servletRegistration() {
-		ServletRegistrationBean<WebServlet> registration = new ServletRegistrationBean<WebServlet>(new WebServlet());
+		ServletRegistrationBean<WebServlet> registration = new ServletRegistrationBean<>(new WebServlet());
 		registration.addUrlMappings("/h2-console/*");
 		return registration;
+	}
+
+	public DataSourceConf getDataSourceConf() {
+		return dataSourceConf;
+	}
+
+	public void setDataSourceConf(DataSourceConf dataSourceConf) {
+		this.dataSourceConf = dataSourceConf;
 	}
 
 }

@@ -27,15 +27,7 @@ import eu.toop.rest.Client;
 
 @Component 
 public class EvidenceTransferorManager extends EvidenceManager {
-	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class); 
-	@Value("${as4.me.id}")
-	private String meId;
-	
-	@Value("${as4.another.id}")
-	private String anotherId;
-	@Value("${as4.another.id.jvm:#{null}}")
-	private String anotherIdjvm;
-	
+	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class);	
 	
 	@Value("${as4.me.id.jvm:#{null}}")
 	private String meIdjvm; 
@@ -70,7 +62,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			// TODO gestion de errores chachi
 		  
 		} 
-		String from=meId.isEmpty()?meIdjvm:meId;
+		String from= meIdjvm;
 		
 		//Se almacena la informacion de la request
 		RequestorRequest requestorReq = new RequestorRequest();
@@ -80,9 +72,9 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		requestorReq.setDone(false);
 		requestorRequestRepository.save(requestorReq);
 		
-		sendRequestMessage( from, request.getSenderId(), request.getEvidenceService(), request.getId(), payloads);
+		sendRequestMessage( from, request.getEvidenceService(), request.getId(), payloads);
 	  }
-	public boolean sendRequestMessage(String sender,String dataOwnerId,String evidenceService,String id, List<TCPayload> payloads ) {
+	public boolean sendRequestMessage(String sender, String evidenceService, String id, List<TCPayload> payloads ) {
 		NodeInfo nodeInfo=clientSmp.getNodeInfo(evidenceService);
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
