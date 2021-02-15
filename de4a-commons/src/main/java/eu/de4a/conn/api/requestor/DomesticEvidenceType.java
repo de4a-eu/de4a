@@ -1,10 +1,3 @@
-//
-// Este archivo ha sido generado por la arquitectura JavaTM para la implantación de la referencia de enlace (JAXB) XML v2.3.0 
-// Visite <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
-// Todas las modificaciones realizadas en este archivo se perderán si se vuelve a compilar el esquema de origen. 
-// Generado el: 2021.01.29 a las 09:39:05 PM CET 
-//
-
 
 package eu.de4a.conn.api.requestor;
 
@@ -33,6 +26,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="MimeType" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}MimeTypeType"/&gt;
  *         &lt;element name="DataLanguage" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}DataLanguageType"/&gt;
  *         &lt;element name="AddtionalInfo" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="EvidenceData" type="{http://www.w3.org/2001/XMLSchema}base64Binary" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -47,7 +41,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "issuingType",
     "mimeType",
     "dataLanguage",
-    "addtionalInfo"
+    "addtionalInfo",
+    "evidenceData"
 })
 public class DomesticEvidenceType {
 
@@ -66,6 +61,8 @@ public class DomesticEvidenceType {
     protected String dataLanguage;
     @XmlElement(name = "AddtionalInfo")
     protected String addtionalInfo;
+    @XmlElement(name = "EvidenceData")
+    protected byte[] evidenceData;
 
     /**
      * Obtiene el valor de la propiedad domesticEvidenceIdRef.
@@ -185,6 +182,28 @@ public class DomesticEvidenceType {
      */
     public void setAddtionalInfo(String value) {
         this.addtionalInfo = value;
+    }
+
+    /**
+     * Obtiene el valor de la propiedad evidenceData.
+     * 
+     * @return
+     *     possible object is
+     *     byte[]
+     */
+    public byte[] getEvidenceData() {
+        return evidenceData;
+    }
+
+    /**
+     * Define el valor de la propiedad evidenceData.
+     * 
+     * @param value
+     *     allowed object is
+     *     byte[]
+     */
+    public void setEvidenceData(byte[] value) {
+        this.evidenceData = value;
     }
 
 }

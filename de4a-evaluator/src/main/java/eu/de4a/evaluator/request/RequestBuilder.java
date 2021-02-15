@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -21,6 +20,8 @@ import eu.de4a.conn.api.requestor.CurrentGivenNameType;
 import eu.de4a.conn.api.requestor.DataRequestSubjectCVType;
 import eu.de4a.conn.api.requestor.EvidenceServiceDataType;
 import eu.de4a.conn.api.requestor.ExplicitRequestType;
+import eu.de4a.conn.api.requestor.LegalEntityIdentifierType;
+import eu.de4a.conn.api.requestor.LegalNameType;
 import eu.de4a.conn.api.requestor.NaturalPersonIdentifierType;
 import eu.de4a.conn.api.requestor.RequestGroundsType;
 import eu.de4a.conn.api.requestor.RequestTransferEvidence;
@@ -35,9 +36,7 @@ public class RequestBuilder {
 	@Value("${de4a.specificationId}")
 	private String specification;
 	@Value("${de4a.request.grounds.link}")
-	private String groundsLink; 
-	@Value("${de4a.canonical.evidence.id}")
-	private String canonicalId;
+	private String groundsLink;  
 	@Value("${de4a.evidence.service.uri}")
 	private String serviceUri;
 	@Value("${de4a.return.service.id}")
@@ -48,10 +47,12 @@ public class RequestBuilder {
 		DataRequestSubjectCVType subject=new DataRequestSubjectCVType();
 		NaturalPersonIdentifierType person=new NaturalPersonIdentifierType();
 		person.setIdentifier(eidasId);
-		try {
-			person.setDateOfBirth(gimmeGregorian(new SimpleDateFormat(DE4AConstants.BIRTH_DATE_PATTERN).parse(birthDate)));
-		} catch (ParseException e) {
-			//no worries
+		if(birthDate!=null) {
+			try {
+				person.setDateOfBirth(gimmeGregorian(new SimpleDateFormat(DE4AConstants.BIRTH_DATE_PATTERN).parse(birthDate)));
+			} catch (ParseException e) {
+				//no worries
+			}
 		} 
 		CurrentFamilyNameType ap1Type=new CurrentFamilyNameType();
 		ap1Type.setValue(ap1);
@@ -65,7 +66,18 @@ public class RequestBuilder {
 		subject.setDataSubjectPerson(person);
 		return subject;
 	}
-	public RequestTransferEvidence buildRequest(String requestId,String eidasId,String birthDate,String name,String ap1,String fullName) {
+	
+	public DataRequestSubjectCVType buildSubjectLegal(String eidasId ) {
+		DataRequestSubjectCVType subject=new DataRequestSubjectCVType();
+		LegalEntityIdentifierType legal=new LegalEntityIdentifierType();
+		legal.setLegalEntityIdentifier(eidasId);
+		LegalNameType  legalName=new LegalNameType();
+		legalName.setValue("Name of "+eidasId);
+		legal.setLegalEntityName(legalName); 
+		subject.setDataSubjectCompany(legal);
+		return subject;
+	}
+	public RequestTransferEvidence buildRequest(String requestId,String evidenceServiceURI,String eidasId,String birthDate,String name,String ap1,String fullName) {
 		RequestTransferEvidence request = new RequestTransferEvidence();
 		request.setDataEvaluator(buildAgent(meId, meName));
 		request.setSpecificationId(specification);
@@ -81,7 +93,12 @@ public class RequestBuilder {
 		EvidenceServiceDataType evidenceSevice=new EvidenceServiceDataType();
 		evidenceSevice.setEvidenceServiceURI(serviceUri);
 		request.setEvidenceServiceData(evidenceSevice);
-		request.setDataRequestSubject(buildSubject(eidasId, birthDate, name, ap1, fullName));
+		if(ap1!=null) {
+			request.setDataRequestSubject(buildSubject(eidasId, birthDate, name, ap1, fullName));
+		}else {
+			request.setDataRequestSubject(buildSubjectLegal(eidasId));
+		}
+		
 		return request;
 	}
 	private XMLGregorianCalendar gimmeGregorian(Date date) {
@@ -90,7 +107,7 @@ public class RequestBuilder {
 		XMLGregorianCalendar date2=null;
 		try {
 			date2 = DatatypeFactory.newInstance().newXMLGregorianCalendar(c); 
-			date2.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
+			//date2.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
 		} catch (DatatypeConfigurationException e) {
 		 //na tranqui;
 		}

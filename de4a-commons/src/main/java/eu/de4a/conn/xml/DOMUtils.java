@@ -8,6 +8,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Base64;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -110,6 +112,7 @@ public class DOMUtils {
 
 		    try {
 		      factory = DocumentBuilderFactory.newInstance();
+		      factory.setNamespaceAware(true);
 		      builder = factory.newDocumentBuilder();
 		    } catch (ParserConfigurationException e) {
 		    	String err="Error parsing DOM.";
@@ -157,5 +160,17 @@ public class DOMUtils {
 	  
 		  
 		return null; 
+	 }
+	 public static byte[]serializeJaxbObject(Class<?> clazz,Object o){
+		  ByteArrayOutputStream xmlStream = new ByteArrayOutputStream();
+		  try {
+		         JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
+		         Marshaller marshaller = jaxbContext.createMarshaller(); 
+		         marshaller.marshal(o, xmlStream);
+		         return xmlStream.toByteArray();
+		  } catch ( Exception e) {
+		       	logger.error("Error marshalling jaxb object",e);
+		       	return null;
+		  }
 	 }
 }

@@ -14,9 +14,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import eu.de4a.conn.api.requestor.RequestTransferEvidence;
+import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.evaluator.request.RequestBuilder;
 import eu.de4a.exception.MessageException;
+import eu.de4a.util.EvidenceTypeIds;
+import eu.toop.controller.ResponseManager;
 import eu.toop.controller.User;
  
 
@@ -31,7 +34,25 @@ public class Client {
 	private String seed;
 	@Autowired
 	private RequestBuilder requestBuilder; 
-	public boolean getEvidenceRequest (RequestTransferEvidence request) throws MessageException 
+	@Autowired
+	private ResponseManager responseManager; 
+	public boolean getEvidenceRequestIM (RequestTransferEvidence request) throws MessageException 
+	{   
+		logger.debug("Sending request {}",request.getRequestId()); 
+		RestTemplate plantilla = new RestTemplate();
+		//TODO quitar esto!
+		request.getDataEvaluator().setUrlRedirect(null);
+		request.getDataOwner().setUrlRedirect(null);
+		//---------
+		HttpComponentsClientHttpRequestFactory requestFactory =
+		                new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
+		plantilla.setRequestFactory(requestFactory);
+		ResponseEntity<ResponseTransferEvidence> response= plantilla.postForEntity(urlRequestor,request, ResponseTransferEvidence.class);
+		responseManager.manageResponse(response.getBody());
+		return response.getBody().getError()==null;
+	} 
+	public boolean getEvidenceRequestUSI (RequestTransferEvidence request) throws MessageException 
 	{   
 		logger.debug("Sending request {}",request.getRequestId()); 
 		RestTemplate plantilla = new RestTemplate();
@@ -47,12 +68,21 @@ public class Client {
 		logger.debug("building request {}",requestId);
 		// String uri = "http://localhost:8083/de4a-connector/request?urlReturn=http://localhost:8682/de4a-evaluator/ReturnPage&evaluatorId="+dataOwnerdI+"&@evaluatorId="+evidenceServiceUri+"&requestId=777"; 
 		String eidasId=user.getEidas();
-		String name=user.getName();
-		String ap1=user.getAp1();
-		String ap2=user.getAp2()!=null &&!user.getAp2().isEmpty()?user.getAp2():"";
-		String fullname= user.getName()+" "+user.getAp1()+" "+ (ap2.isEmpty()?"":ap2); 
-		String birthDate=user.getBirthDate();
-		return requestBuilder.buildRequest(requestId,eidasId,birthDate,name,ap1,fullname);
+		String name=null ,ap1=null,ap2=null,fullname=null,birthDate=null;
+		if(user.getAp1()!=null) {
+			name=user.getName();
+			ap1=user.getAp1();
+			ap2=user.getAp2()!=null &&!user.getAp2().isEmpty()?user.getAp2():"";
+			fullname= user.getName()+" "+user.getAp1()+" "+ (ap2.isEmpty()?"":ap2); 
+			birthDate=user.getBirthDate();
+		}
+		
+		RequestTransferEvidence request = requestBuilder.buildRequest(requestId,user.getEvidenceServiceURI(),eidasId,birthDate,name,ap1,fullname);
+		if(request.getEvidenceServiceData().getEvidenceServiceURI().equalsIgnoreCase("dba"))
+			request.setCanonicalEvidenceId(EvidenceTypeIds.DOINGBUSINESSABROAD.toString()); 
+		else request.setCanonicalEvidenceId(EvidenceTypeIds.BIRTHCERTIFICATE.toString());
+		
+		return request;
 	}
 }
  

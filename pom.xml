@@ -204,8 +204,10 @@
     <module>de4a-connector</module>
     <module>de4a-commons</module>
     <module>de4a-evaluator</module> 
-    <module>de4a-pid</module> 
+    <module>de4a-pid</module>  
+    <module>de4a-pid-owner</module> 
     <module>smp</module> 
+	<module>de4a-idk</module>
   </modules>
 
   <build>

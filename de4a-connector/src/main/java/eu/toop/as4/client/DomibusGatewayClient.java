@@ -180,7 +180,7 @@ public class DomibusGatewayClient implements As4GatewayInterface{
       //sender="red_gw";
      // String receiverid="9914:tc-ng-test-sender";
       String requestId="";
-      Messaging messageHeader= MessageFactory.makeMessage(sender,receiver.getId() , requestId, evidenceServiceUri,attacheds);
+      Messaging messageHeader= MessageFactory.makeMessage(sender,receiver.getParticipantIdentifier() , requestId, evidenceServiceUri,attacheds);
       List<LargePayloadType> bodies =new ArrayList<LargePayloadType>();
       LargePayloadType payload=new LargePayloadType();
       payload.setContentType("application/xml");

@@ -1,17 +1,24 @@
 package eu.toop.controller;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.Part;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -23,7 +30,6 @@ import org.w3c.dom.Document;
 
 import com.helger.commons.mime.CMimeType;
 
-import eu.de4a.conn.api.requestor.DomesticEvidenceType;
 import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
@@ -77,18 +83,38 @@ public class ResponseManager {
 	private Document marshallMe(ResponseTransferEvidence evidence) {  
 	        try
 	        {
-	            JAXBContext jaxbContext = JAXBContext.newInstance(ResponseTransferEvidence.class);
-	            Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
-	            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-	            StringWriter sw = new StringWriter(); 
-	            jaxbMarshaller.marshal(evidence, sw); 
-	            return DOMUtils.stringToDocument(sw.toString()); 
-	 
-	        } catch (JAXBException e) {
+//	            JAXBContext jaxbContext = JAXBContext.newInstance(ResponseTransferEvidence.class);
+//	            Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
+//	            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+//	            StringWriter sw = new StringWriter(); 
+//	            jaxbMarshaller.marshal(evidence, sw); 
+//	            LOGGER.error(sw.toString());
+//	            return DOMUtils.stringToDocument(sw.toString()); 
+	        	JAXBContext jaxbContext = JAXBContext.newInstance(ResponseTransferEvidence.class);
+ 		        Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
+	        	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	        	dbf.setNamespaceAware(true);
+	        	DocumentBuilder db = dbf.newDocumentBuilder();
+	        	Document doc = db.newDocument(); 
+	        	jaxbMarshaller.marshal( evidence, doc );
+	        	return doc;
+	        } catch (JAXBException | ParserConfigurationException e) {
 	        	LOGGER.error("Error building request DOM",e);
 	           return null;
 	        }  
 	}
+	public void manageResponse(ResponseTransferEvidence response) throws  MessageException {
+		EvaluatorRequestData datarequest=new  EvaluatorRequestData(); 
+		byte[]data=DOMUtils.serializeJaxbObject(ResponseTransferEvidence.class, response);
+		datarequest.setData(data); 
+		LOGGER.error("--->"+new String(datarequest.getData()));
+		datarequest.setMimetype(CMimeType.APPLICATION_XML.getAsString ()); 
+		datarequest.setIddata(DE4AConstants.TAG_EVIDENCE_RESPONSE);  
+		EvaluatorRequest request=evaluatorRequestRepository.findById(response.getRequestId()).orElse(null);
+		datarequest.setRequest(request);
+		evaluatorRequestDataRepository.save(datarequest); 
+	}
+	 
 	public void manageResponse(MultipartFile[] files) throws IOException, MessageException {
 		LOGGER.debug("Response received"); 
 		String  id=null; 
@@ -106,8 +132,7 @@ public class ResponseManager {
 	            }
 	            datas.add(datarequest);
 	        }
-	        
-	     //  id="request00000001@de4a";
+	         
 	        if(id==null) {
 	        	LOGGER.error("No Id, No evidence response to the citizen...ko!");
 	        }else {

@@ -1,13 +1,12 @@
 package eu.toop.as4.client;
 
-import org.w3c.dom.Document;
-
 /**
  * Encapsulates the request to the AS4 gateway and its identifier
  * */
 public class RequestWrapper {
 	private String id;
 	private String evidenceServiceUri;
+	private String senderId;
 	private Object request;
 	public String getId() {
 		return id;
@@ -27,7 +26,10 @@ public class RequestWrapper {
 	public void setEvidenceServiceUri(String evidenceServiceUri) {
 		this.evidenceServiceUri = evidenceServiceUri;
 	}
-	 
-	
-	
+	public String getSenderId() {
+		return senderId;
+	}
+	public void setSenderId(String senderId) {
+		this.senderId = senderId;
+	}
 }

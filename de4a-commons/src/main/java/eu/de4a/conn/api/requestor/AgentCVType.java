@@ -1,10 +1,3 @@
-//
-// Este archivo ha sido generado por la arquitectura JavaTM para la implantación de la referencia de enlace (JAXB) XML v2.3.0 
-// Visite <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
-// Todas las modificaciones realizadas en este archivo se perderán si se vuelve a compilar el esquema de origen. 
-// Generado el: 2021.01.29 a las 09:39:05 PM CET 
-//
-
 
 package eu.de4a.conn.api.requestor;
 
@@ -26,6 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;all&gt;
  *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="urlRedirect" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/all&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -44,6 +38,7 @@ public class AgentCVType {
     protected String id;
     @XmlElement(required = true)
     protected String name;
+    protected String urlRedirect;
 
     /**
      * Obtiene el valor de la propiedad id.
@@ -91,6 +86,30 @@ public class AgentCVType {
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Obtiene el valor de la propiedad urlRedirect.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getUrlRedirect() {
+        return urlRedirect;
+    }
+
+    /**
+     * Define el valor de la propiedad urlRedirect.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setUrlRedirect(String value) {
+        this.urlRedirect = value;
     }
 
 }

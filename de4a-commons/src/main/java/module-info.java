@@ -10,9 +10,12 @@ module de4acommons {
 	exports eu.de4a.conn.xml;
 
 	requires eu.toop.connector.api;
-	requires java.xml;
-	requires java.xml.bind;
+	requires java.xml; 
 	requires org.apache.logging.log4j;
 	requires org.apache.santuario.xmlsec;
 	requires java.activation;
+	requires org.apache.httpcomponents.httpcore;
+	requires spring.core;
+	requires transitive spring.web;
+	requires transitive java.xml.bind;
 }

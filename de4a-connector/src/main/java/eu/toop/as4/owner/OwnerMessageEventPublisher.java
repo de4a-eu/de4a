@@ -23,6 +23,7 @@ public class OwnerMessageEventPublisher {
 	    	MessageOwner customSpringEvent = new MessageOwner(context);
 	    	customSpringEvent.setMessage((Element)request.getRequest()); 
 	    	customSpringEvent.setId(request.getId());
+	    	customSpringEvent.setSenderId(request.getSenderId());
 	    	customSpringEvent.setEvidenceService(request.getEvidenceServiceUri());
 	    	applicationEventMulticaster.multicastEvent( customSpringEvent);
 	    }

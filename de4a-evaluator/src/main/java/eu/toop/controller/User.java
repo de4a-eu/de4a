@@ -8,6 +8,7 @@ public class User {
 	private String birthDate;
 	private String id;
 	private String response;
+	private String evidenceServiceURI;
 	private String nationalResponse;
 	private String request;
 	public String getEidas() {
@@ -81,6 +82,14 @@ public class User {
 
 	public void setRequest(String request) {
 		this.request = request;
+	}
+
+	public String getEvidenceServiceURI() {
+		return evidenceServiceURI;
+	}
+
+	public void setEvidenceServiceURI(String evidenceServiceURI) {
+		this.evidenceServiceURI = evidenceServiceURI;
 	}
 	
 }

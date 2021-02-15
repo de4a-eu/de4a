@@ -1,5 +1,5 @@
 open  module de4apid { 
-	exports eu.toop.scsp.spring;
+	exports eu.de4a.scsp.spring;
 	exports eu.de4a.scsp.manager;  
 	requires com.helger.commons; 
 	requires   transitive de4acommons;
@@ -20,4 +20,8 @@ open  module de4apid {
 	requires spring.xml;
 	requires spring.web;
 	requires transitive java.xml.bind;
+	requires spring.integration.http;
+	requires spring.webmvc;
+	requires org.apache.commons.io;
+	requires java.annotation;
 }

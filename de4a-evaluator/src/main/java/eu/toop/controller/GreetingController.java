@@ -68,25 +68,56 @@ public class GreetingController {
 	private String id;
 	private RequestTransferEvidence requestEvidencia;
 	//private String response;
+
+	@RequestMapping(value = "/welcome.html")
+	public String welcome(Model model) { 
+		model.addAttribute("evidenceForm", new Evidencia());
+		return "welcome";
+	}
 	@GetMapping("/greeting")
 	public String greetingForm(Model model) { 
 		model.addAttribute("userForm", new User());
 		return "greeting";
 	}
+	@RequestMapping(value ="/goEvidenceForm", method = RequestMethod.POST)
+	public String goEvidenceForm(Model model,@ModelAttribute("evidenceForm") Evidencia evidencia,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) { 
+		User u=new User();
+		model.addAttribute("userForm",u );
+		if(evidencia.getTipo().equals("DBA")) {  
+			return "dba"; 
+		} 
+		return "nacimiento";
+	}
+	
 	@RequestMapping(value = "/greetinggo", method = RequestMethod.POST) 
 	public String greetingSubmit(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {   
 			requestEvidencia=client.buildRequest(user);
 			user.setRequest(jaxbObjectToXML(requestEvidencia));
 			id=requestEvidencia.getRequestId();  
 			return "showRequest";
-	} 
+	}  
 	@RequestMapping(value = "/requestEvidence", method = RequestMethod.POST) 
-	public void sendRequest(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {  
+	public String sendRequest(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse,RedirectAttributes redirectAttributes) {  
 		try {
 			EvaluatorRequest request=new EvaluatorRequest();
 			request.setIdrequest(id);
 			evaluatorRequestRepository.save(request);
-			boolean ok = client.getEvidenceRequest(requestEvidencia);
+			boolean ok = client.getEvidenceRequestIM(requestEvidencia);
+			redirectAttributes.addAttribute("id", id);
+			return "redirect:/returnPage.jsp";
+		} catch (MessageException e) {
+			logger.error("Error getting evidence request",e);
+			return "redirect:/errorPage.jsp";
+		}
+		
+	}
+	@RequestMapping(value = "/requestEvidenceUSI", method = RequestMethod.POST) 
+	public void sendRequestUSI(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {  
+		try {
+			EvaluatorRequest request=new EvaluatorRequest();
+			request.setIdrequest(id);
+			evaluatorRequestRepository.save(request);
+			boolean ok = client.getEvidenceRequestUSI(requestEvidencia);
 			httpServletResponse.setHeader("Location", String.format(urlRequestorRedirect, id));//"http://localhost:8083/de4a-connector/getreponse?id="+id);
 			//httpServletResponse.setHeader("Location", "https://des-de4a.redsara.es/de4a-tc-requestor/getreponse?id="+id);
 			httpServletResponse.setStatus(302);  
