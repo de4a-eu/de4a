@@ -6,15 +6,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Base64;
+import java.util.Arrays;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -23,6 +25,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
@@ -32,20 +36,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import eu.de4a.exception.MessageException;
+import eu.de4a.exception.MessageException; 
 
 public class DOMUtils {
 	private static final Logger logger = LogManager.getLogger(DOMUtils.class);
-	public static String encodeDocBase64(Document doc) throws TransformerException { 
-		DOMSource domSource = new DOMSource(doc);
-		StringWriter writer = new StringWriter();
-		StreamResult result = new StreamResult(writer);
-		TransformerFactory tf = TransformerFactory.newInstance();
-		Transformer transformer = tf.newTransformer();
-		transformer.transform(domSource, result);
-		String data=writer.toString();
-		return  Base64.getEncoder().encodeToString(data.getBytes());
-	}
+ 
 	public static Node changeNodo(Document request,String expression,String value)   { 
 		Node node = null;
 		try{
@@ -173,4 +168,76 @@ public class DOMUtils {
 		       	return null;
 		  }
 	 }
+	 public static Object unmarshall(Class<?> clazz,Document doc) {
+		 try {
+			 JAXBContext jaxbContext = JAXBContext.newInstance( clazz);
+			javax.xml.bind.Unmarshaller jaxbMarshaller = (Unmarshaller) jaxbContext.createUnmarshaller() ;  
+			return  jaxbMarshaller.unmarshal(doc);
+		 } catch ( Exception e) {
+		       	logger.error("Error unmarshalling to jaxb object",e);
+		       	return null;
+		  }
+	 }
+	 
+//	 public static byte[] encodeCompressed(Document doc) {
+//			  
+//	        try {
+//	        	 byte[] input = DOMUtils.documentToString( doc).getBytes(); 
+//			     ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+//			     GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream);
+//			     outputStream.write(input,0, input.length);
+//			     outputStream.close();
+//			     return Base64.encodeBase64(arrayOutputStream.toByteArray());
+//	        } catch (Throwable t) {
+//	        	logger.error("Error encoding compressed",t);
+//		       	return null;
+//	        } 
+//	}
+	 public static byte[] encodeCompressed(Document doc) {
+		// return Base64.encodeBase64(DOMUtils.documentToString( doc).getBytes());
+	        try {
+	        	 byte[] input = DOMUtils.documentToString( doc).getBytes();  
+			     ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+			     GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream);
+			     outputStream.write(input,0, input.length);
+			     outputStream.close();
+			     outputStream.flush(); 
+			     return Base64.encodeBase64(arrayOutputStream.toByteArray());
+	        } catch (Throwable t) {
+	        	logger.error("Error encoding compressed",t);
+		       	return null;
+	        } 
+	}
+	 
+//	 public static Document decodeCompressed(byte[] data) {
+//		  
+//	        try {
+//	        	byte[]decoded=Base64.decodeBase64(data);
+//			    GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decoded));
+//		        byte[] targetArray = IOUtils .toByteArray(gis);
+//		        String s=new String(targetArray
+//		   );
+//			    return DOMUtils.byteToDocument(targetArray);
+//	        } catch (Throwable t) {
+//	        	logger.error("Error decoding compressed",t);
+//		       	return null;
+//	        }
+//	}
+	 
+	 public static Document decodeCompressed(byte[] data) {
+//		try {
+//			return DOMUtils.byteToDocument( Base64.decodeBase64(data));
+//		} catch (MessageException e) {
+//			return null;
+//		}
+	        try {
+	        	byte[]decoded=Base64.decodeBase64( data); 
+			    GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decoded));
+		        byte[] targetArray = IOUtils .toByteArray(gis);  
+			    return DOMUtils.byteToDocument(targetArray);
+	        } catch (Throwable t) {
+	        	logger.error("Error decoding compressed",t);
+		       	return null;
+	        }
+	}
 }
