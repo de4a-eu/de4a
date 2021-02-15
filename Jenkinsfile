@@ -17,19 +17,19 @@
 				{
 					switch (item)
 					{
-						case checklistDefinition[0]: package.compilarPortfolio(mavenName, mavenRepo, JDK11, dirCodigo)
+						case checklistDefinition[0]: package.compilarDE4A(mavenName, mavenRepo, JDK11, dirCodigo)
 						break;
-						case checklistDefinition[1]: tests.runTestsPortfolio(mavenName, mavenRepo, JDK11, JDK11, dirCodigo)
+						case checklistDefinition[1]: tests.runTestsDE4A(mavenName, mavenRepo, JDK11, JDK11, dirCodigo)
 						break;
-						case checklistDefinition[2]: tasks.publishTasksPorfolio(dirCodigo)
+						case checklistDefinition[2]: tasks.publishTasksDE4A(dirCodigo)
 						break;
-						case checklistDefinition[3]: publish.publishTestsPortfolio(dirCodigo)
+						case checklistDefinition[3]: publish.publishTestsDE4A(dirCodigo)
 						break;
-						case checklistDefinition[4]: sendEmail.emailQA()
+						case checklistDefinition[4]: sendEmail.emailQADE4A()
 						break;
-						case checklistDefinition[5]: sendEmail.emailDevelopersPortfolio()
+						case checklistDefinition[5]: sendEmail.emailDevelopersDE4A()
 						break;
-						case checklistDefinition[6]: sendEmail.emailOthers(item)
+						case checklistDefinition[6]: sendEmail.emailOthersDE4A(item)
 						break;
 					}
 				}
