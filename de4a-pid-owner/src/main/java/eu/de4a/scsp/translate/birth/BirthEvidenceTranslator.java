@@ -187,6 +187,7 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 				factoryDom.setNamespaceAware(true);
 			    DocumentBuilder builder = factoryDom.newDocumentBuilder();
 			    Document docFinal =builder.parse(new InputSource(new StringReader(xmlespecificos))); 
+			    DOMUtils.changeNodo(docFinal,DE4AConstants.XPATH_EVIDENCE_DATA,new String(DOMUtils.encodeCompressed(response.getOwnerDocument())));
 			    return docFinal.getDocumentElement();
 		} catch (ParserConfigurationException | SAXException | IOException | TransformerException e) {
 			String err="Error building SCSP request:"+e.getMessage();
@@ -200,4 +201,5 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 		evidences.add(dom);
 		return evidences;
 	}
+	
 }
