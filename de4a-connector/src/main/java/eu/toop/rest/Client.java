@@ -54,9 +54,9 @@ import eu.toop.rest.model.IssuingAuthority;
 public class Client { 
 	@Autowired
 	private RestTemplate restTemplate; 
-	@Value("${smp.endpoint}")
+	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
 	private String smpEndpoint;
-	@Value("${idk.endpoint}")
+	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
 	private String idkEndpoint;
 	private static final Logger logger =  LoggerFactory.getLogger (Client.class);	
 	

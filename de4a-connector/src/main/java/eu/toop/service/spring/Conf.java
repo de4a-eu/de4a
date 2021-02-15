@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -27,7 +28,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -55,219 +55,231 @@ import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import eu.de4a.config.DataSourceConf;
 import eu.toop.as4.domibus.soap.ClienteWS;
 import eu.toop.as4.domibus.soap.ClienteWSAuthenticator;
- 
-@Configuration  
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu") 
 
-@EnableWebMvc  
+@Configuration
+@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu")
+
+@EnableWebMvc
 @PropertySource("classpath:application.properties")
+@ConfigurationProperties(prefix = "database")
 @EnableAspectJAutoProxy
 @EnableAutoConfiguration
-@EnableScheduling 
+@EnableScheduling
 @ComponentScan("eu")
 public class Conf implements WebMvcConfigurer {
-	private static final Logger LOG =  LoggerFactory.getLogger (Conf.class);
-	 @Bean
-	   public ClienteWS clienteWS() {
-		   ClienteWS cliente =  new ClienteWS(messageFactory());
-		   cliente.setMessageSender(httpComponentsMessageSender());
-		   cliente.setMarshaller(marshallerDomibus());
-		   cliente.setUnmarshaller(marshallerDomibus());
-		   return cliente;
-	   }
-	   public AxiomSoapMessageFactory messageFactory() {
-		   return new AxiomSoapMessageFactory();
-	   }
-	   
-	   @Bean
-		public HttpComponentsMessageSender httpComponentsMessageSender() {
-		     HttpComponentsMessageSender httpComponentsMessageSender = new HttpComponentsMessageSender();  
-		     try { 
-		    	 httpComponentsMessageSender.setHttpClient(httpClient());
-		    	 httpComponentsMessageSender.setCredentials(clienteWSAuthenticator().getAuth());
-			} catch (Exception e) {
-				LOG.error("Error creando el sender http",e);
-			}
-		     return httpComponentsMessageSender;
+	private static final Logger LOG = LoggerFactory.getLogger(Conf.class);
+	
+	private DataSourceConf dataSourceConf = new DataSourceConf();
+
+	@Bean
+	public ClienteWS clienteWS() {
+		ClienteWS cliente = new ClienteWS(messageFactory());
+		cliente.setMessageSender(httpComponentsMessageSender());
+		cliente.setMarshaller(marshallerDomibus());
+		cliente.setUnmarshaller(marshallerDomibus());
+		return cliente;
+	}
+
+	public AxiomSoapMessageFactory messageFactory() {
+		return new AxiomSoapMessageFactory();
+	}
+
+	@Bean
+	public HttpComponentsMessageSender httpComponentsMessageSender() {
+		HttpComponentsMessageSender httpComponentsMessageSender = new HttpComponentsMessageSender();
+		try {
+			httpComponentsMessageSender.setHttpClient(httpClient());
+			httpComponentsMessageSender.setCredentials(clienteWSAuthenticator().getAuth());
+		} catch (Exception e) {
+			LOG.error("Error creando el sender http", e);
 		}
-	   @Bean
-	   public RestTemplate restTemplate() {
-			HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClient());
-			return new RestTemplate(httpComponentsClientHttpRequestFactory);
+		return httpComponentsMessageSender;
+	}
+
+	@Bean
+	public RestTemplate restTemplate() {
+		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+				httpClient());
+		return new RestTemplate(httpComponentsClientHttpRequestFactory);
+	}
+
+	public HttpClient httpClient() {
+		SSLConnectionSocketFactory factory;
+		try {
+			factory = sslConnectionSocketFactory();
+			return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
+		} catch (Exception e) {
+			LOG.error("No se puede crear la factorya ssl", e);
 		}
-		public HttpClient httpClient()   {
-			   	SSLConnectionSocketFactory factory;
-				try {
-					factory = sslConnectionSocketFactory();
-					 return HttpClientBuilder.create().setSSLSocketFactory(factory) .build();
-				} catch (Exception e) {
-					LOG.error("No se puede crear la factorya ssl",e);
-				}
-				 return HttpClientBuilder.create()  .build();
-			   
-			  }
+		return HttpClientBuilder.create().build();
 
-			  public SSLConnectionSocketFactory sslConnectionSocketFactory() throws Exception   {
-			    // NoopHostnameVerifier essentially turns hostname verification off as otherwise following error
-			    // is thrown: java.security.cert.CertificateException: No name matching localhost found
-				SSLContext context= sslContext();
-				  return new SSLConnectionSocketFactory( context, NoopHostnameVerifier.INSTANCE);
-	  }
-	   public SSLContext sslContext() throws Exception {
-		   String keystore=System.getProperties().getProperty("javax.net.ssl.keyStore");
-		   String keyStorePassword=System.getProperties().getProperty("javax.net.ssl.keyStorePassword");
-		   String trustStore=System.getProperties().getProperty("javax.net.ssl.trustStore");
-		   String trustStorePassword=System.getProperties().getProperty("javax.net.ssl.trustStorePassword");
-		   String type=System.getProperties().getProperty("javax.net.ssl.keyStoreType");
-		   LOG.warn(String.format("Usando ssl %s  %s  %s  %s ",keystore,keyStorePassword,trustStore,trustStorePassword));
-		   if(keystore==null ||  keyStorePassword==null ||trustStore==null ||trustStorePassword==null ||type==null  ) {
-			   LOG.error("No se ira por SSLContext alguno de los parametros es null");
-			   return null;
-		   }
-		   KeyStore keyStore = KeyStore.getInstance(type.toUpperCase());
-		   keyStore.load(new FileInputStream( new File(keystore)),keyStorePassword.toCharArray());
+	}
 
-			
-		   return SSLContextBuilder.create()
-				        .loadKeyMaterial(keyStore,keyStorePassword.toCharArray())
-				        .loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray()).
-				        build();
-	   } 
-	   @Bean
-	    public Jaxb2Marshaller marshallerDomibus() {
-	        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-	        marshaller.setContextPath("eu.toop.as4.domibus.soap.auto");
-	        return marshaller;
-	    }
-	   @Bean
-	   public ClienteWSAuthenticator clienteWSAuthenticator() { 
-		   ClienteWSAuthenticator auth= new ClienteWSAuthenticator( );
-		   return  auth ;
-	   }
-	   
-	   @Override
-	   public void addViewControllers(ViewControllerRegistry registry) {
-		      registry.addViewController("/").setViewName("index");
-	   } 
-	 @Bean
-	 public ViewResolver viewResolver() {
-	      InternalResourceViewResolver bean = new InternalResourceViewResolver();
+	public SSLConnectionSocketFactory sslConnectionSocketFactory() throws Exception {
+		// NoopHostnameVerifier essentially turns hostname verification off as otherwise
+		// following error
+		// is thrown: java.security.cert.CertificateException: No name matching
+		// localhost found
+		SSLContext context = sslContext();
+		return new SSLConnectionSocketFactory(context, NoopHostnameVerifier.INSTANCE);
+	}
 
-	      bean.setViewClass(JstlView.class);
-	      bean.setPrefix("/WEB-INF/view/");
-	      bean.setSuffix(".jsp");
+	public SSLContext sslContext() throws Exception {
+		String keystore = System.getProperties().getProperty("javax.net.ssl.keyStore");
+		String keyStorePassword = System.getProperties().getProperty("javax.net.ssl.keyStorePassword");
+		String trustStore = System.getProperties().getProperty("javax.net.ssl.trustStore");
+		String trustStorePassword = System.getProperties().getProperty("javax.net.ssl.trustStorePassword");
+		String type = System.getProperties().getProperty("javax.net.ssl.keyStoreType");
+		LOG.debug(String.format("Usando ssl %s  %s  %s  %s ", keystore, keyStorePassword, trustStore,
+				trustStorePassword));
+		if (keystore == null || keyStorePassword == null || trustStore == null || trustStorePassword == null
+				|| type == null) {
+			LOG.error("No se ira por SSLContext alguno de los parametros es null");
+			return null;
+		}
+		KeyStore keyStore = KeyStore.getInstance(type.toUpperCase());
+		keyStore.load(new FileInputStream(new File(keystore)), keyStorePassword.toCharArray());
 
-	      return bean;
-	 }
-	 @Bean(name = "localeResolver")
-	 public LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}" )String locale) {
-	    SessionLocaleResolver slr = new SessionLocaleResolver();
-	    if(locale!=null && !locale.trim().isEmpty())
-	    	slr.setDefaultLocale(new Locale(locale));
-	    else
-	    	slr.setDefaultLocale(Locale.ENGLISH);
-	    return slr;
-	 }
-	 @Bean
-	 public MessageSource messageSource() {
-	   ReloadableResourceBundleMessageSource messageSource = new 
-	   ReloadableResourceBundleMessageSource();
-	   messageSource.setBasename("classpath:messages/messages"); 
-	   messageSource.setDefaultEncoding("UTF-8");
-	   return messageSource;
-	 }
-	  
-	 @Bean
-	 @Order(0)
-	 public MultipartFilter multipartFilter() {
-	       MultipartFilter multipartFilter = new MultipartFilter();
-	       multipartFilter.setMultipartResolverBeanName("multipartResolver");
-	       return multipartFilter;
-	 }
-	 @Bean(name = "multipartResolver")
-	 public CommonsMultipartResolver createMultipartResolver() {
-	       CommonsMultipartResolver resolver=new CommonsMultipartResolver();
-	       resolver.setDefaultEncoding("UTF-8");
-	       return resolver;
-	 }
-	 
-	 @Bean(name = "applicationEventMulticaster")	
-	 public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
-	       SimpleApplicationEventMulticaster eventMulticaster =
-	         new SimpleApplicationEventMulticaster();
-	       
-	       eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
-	       return eventMulticaster;
-	 }
-	   
-	 @Bean(destroyMethod = "close")
-	 public DataSource dataSource() {
-			    HikariConfig dataSourceConfig = new HikariConfig();
-			    dataSourceConfig.setDriverClassName("org.h2.Driver");
-			    dataSourceConfig.setJdbcUrl("jdbc:h2:mem:datajpa");
-			    dataSourceConfig.setUsername("sa");
-			    dataSourceConfig.setPassword("");
-			    try {
-			    return (DataSource) new HikariDataSource(dataSourceConfig);
-			    }catch(Exception e) {
-			    	e.printStackTrace();
-			    	LOG.error("Fatallity!...error datasource",e);
-			    	return null;
-			    }
-	 }
-	 @Bean
-	 public   LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-			    LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
-			    entityManagerFactoryBean.setDataSource((javax.sql.DataSource) dataSource);
-			    entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-			    entityManagerFactoryBean.setPackagesToScan("eu");
+		return SSLContextBuilder.create().loadKeyMaterial(keyStore, keyStorePassword.toCharArray())
+				.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray()).build();
+	}
 
-			    Properties jpaProperties = new Properties();
+	@Bean
+	public Jaxb2Marshaller marshallerDomibus() {
+		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+		marshaller.setContextPath("eu.toop.as4.domibus.soap.auto");
+		return marshaller;
+	}
 
-			    //Configures the used database dialect. This allows Hibernate to create SQL
-			    //that is optimized for the used database.
-			    jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+	@Bean
+	public ClienteWSAuthenticator clienteWSAuthenticator() {
+		return new ClienteWSAuthenticator();
+	}
 
-			    //Specifies the action that is invoked to the database when the Hibernate
-			    //SessionFactory is created or closed.
-			    jpaProperties.put("hibernate.hbm2ddl.auto", 
-			            "create-drop"
-			    );
+	@Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+		registry.addViewController("/").setViewName("index");
+	}
 
-			    //Configures the naming strategy that is used when Hibernate creates
-			    //new database objects and schema elements
-			    jpaProperties.put("hibernate.ejb.naming_strategy", 
-			            "org.hibernate.cfg.ImprovedNamingStrategy"
-			    );
+	@Bean
+	public ViewResolver viewResolver() {
+		InternalResourceViewResolver bean = new InternalResourceViewResolver();
 
-			    //If the value of this property is true, Hibernate writes all SQL
-			    //statements to the console.
-			    jpaProperties.put("hibernate.show_sql", 
-			            "true"
-			    );
+		bean.setViewClass(JstlView.class);
+		bean.setPrefix("/WEB-INF/view/");
+		bean.setSuffix(".jsp");
 
-			    //If the value of this property is true, Hibernate will format the SQL
-			    //that is written to the console.
-			    jpaProperties.put("hibernate.format_sql", 
-			            "true"
-			    );
-			    
-			    jpaProperties.put("spring.h2.console.enabled", "true");
+		return bean;
+	}
 
-				jpaProperties.put("spring.h2.console.path", "/h2-console");
+	@Bean(name = "localeResolver")
+	public LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}") String locale) {
+		SessionLocaleResolver slr = new SessionLocaleResolver();
+		if (locale != null && !locale.trim().isEmpty())
+			slr.setDefaultLocale(new Locale(locale));
+		else
+			slr.setDefaultLocale(Locale.ENGLISH);
+		return slr;
+	}
 
-			    entityManagerFactoryBean.setJpaProperties(jpaProperties);
+	@Bean
+	public MessageSource messageSource() {
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setBasename("classpath:messages/messages");
+		messageSource.setDefaultEncoding("UTF-8");
+		return messageSource;
+	}
 
-			    return entityManagerFactoryBean;
-			    }
+	@Bean
+	@Order(0)
+	public MultipartFilter multipartFilter() {
+		MultipartFilter multipartFilter = new MultipartFilter();
+		multipartFilter.setMultipartResolverBeanName("multipartResolver");
+		return multipartFilter;
+	}
 
-			    @Bean
-			    JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-			        JpaTransactionManager transactionManager = new JpaTransactionManager();
-			        transactionManager.setEntityManagerFactory(entityManagerFactory);
-			        return transactionManager;
-			    }
-			     
+	@Bean(name = "multipartResolver")
+	public CommonsMultipartResolver createMultipartResolver() {
+		CommonsMultipartResolver resolver = new CommonsMultipartResolver();
+		resolver.setDefaultEncoding("UTF-8");
+		return resolver;
+	}
+
+	@Bean(name = "applicationEventMulticaster")
+	public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
+		SimpleApplicationEventMulticaster eventMulticaster = new SimpleApplicationEventMulticaster();
+
+		eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
+		return eventMulticaster;
+	}
+
+	@Bean(destroyMethod = "close")
+	public DataSource dataSource() {
+		HikariConfig dataSourceConfig = new HikariConfig();
+		dataSourceConfig.setDriverClassName(dataSourceConf.getDriverClassName());
+		dataSourceConfig.setJdbcUrl(dataSourceConf.getUrl());
+		dataSourceConfig.setUsername(dataSourceConf.getUsername());
+		dataSourceConfig.setPassword(dataSourceConf.getPassword());
+		
+		try {
+			return new HikariDataSource(dataSourceConfig);
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOG.error("Fatallity!...error datasource", e);
+			return null;
+		}
+	}
+
+	@Bean
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+		entityManagerFactoryBean.setDataSource(dataSource);
+		entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+		entityManagerFactoryBean.setPackagesToScan("eu");
+
+		Properties jpaProperties = new Properties();
+
+		// Configures the used database dialect. This allows Hibernate to create SQL
+		// that is optimized for the used database.
+		jpaProperties.put("hibernate.dialect", dataSourceConf.getJpaHibernate().getDialectPlatform());
+
+		// Specifies the action that is invoked to the database when the Hibernate
+		// SessionFactory is created or closed.
+		jpaProperties.put("hibernate.hbm2ddl.auto", dataSourceConf.getJpaHibernate().getDdlAuto());
+
+		// Configures the naming strategy that is used when Hibernate creates
+		// new database objects and schema elements
+		jpaProperties.put("hibernate.ejb.naming_strategy", dataSourceConf.getJpaHibernate().getNamingStrategy());
+
+		// If the value of this property is true, Hibernate writes all SQL
+		// statements to the console.
+		jpaProperties.put("hibernate.show_sql", dataSourceConf.getJpaHibernate().getShowSql());
+
+		// If the value of this property is true, Hibernate will format the SQL
+		// that is written to the console.
+		jpaProperties.put("hibernate.format_sql", dataSourceConf.getJpaHibernate().getFormatSql());
+
+		entityManagerFactoryBean.setJpaProperties(jpaProperties);
+
+		return entityManagerFactoryBean;
+	}
+
+	@Bean
+	JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+		JpaTransactionManager transactionManager = new JpaTransactionManager();
+		transactionManager.setEntityManagerFactory(entityManagerFactory);
+		return transactionManager;
+	}
+	
+	public DataSourceConf getDataSourceConf() {
+		return dataSourceConf;
+	}
+
+	public void setDataSourceConf(DataSourceConf dataSourceConf) {
+		this.dataSourceConf = dataSourceConf;
+	}
+
 }

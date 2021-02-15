@@ -40,15 +40,9 @@ import eu.toop.rest.model.IssuingAuthority;
 public class EvidenceRequestorManager extends EvidenceManager{
 
 	private static final Logger logger = LoggerFactory.getLogger (EvidenceRequestorManager.class);
-	@Value("${as4.me.id}")
+	@Value("#{'${as4.me.id.jvm:${as4.me.id:}}'}")
 	private String meId;
-	@Value("${as4.me.id.jvm:#{null}}")
-	private String meIdjvm; 
-	@Value("${as4.another.id}")
-	private String anotherId;
-	@Value("${as4.another.id.jvm:#{null}}") 
-	private String anotherIdjvm;
-	@Value("${idk.endpoint}")
+	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
 	private String idkEndpoint;
 	@Value("${as4.evidence.service}")
 	private String evidenceServiceUri;
@@ -60,10 +54,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 	@Autowired
 	private ResponseManager responseManager;  
 	public boolean manageRequest(RequestTransferEvidence request,boolean usi) {
-		String from=meId.isEmpty ()?meIdjvm:meId;
-		String to=anotherId.isEmpty()?anotherIdjvm:anotherId;
-		request.getDataOwner().setId(to);
-		request.getDataOwner().setName("Name of "+to);
+		String from= meId;
 		Document doc=marshall(request);   
 		
 		//Se realiza la llamada al idk para obtener la lista de posibles candidatos
@@ -87,10 +78,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		}	  
 	}
 	public ResponseTransferEvidence manageRequestIM(RequestTransferEvidence request )  {
-		String from=meId.isEmpty ()?meIdjvm:meId;
-		String to=anotherId.isEmpty()?anotherIdjvm:anotherId;
-		request.getDataOwner().setId(to);
-		request.getDataOwner().setName("Name of "+to);
+		String from= meId;
 		Document doc=marshall(request);   
 		
 		//Se realiza la llamada al idk para obtener la lista de posibles candidatos

@@ -10,14 +10,7 @@
   <artifactId>de4a-pid</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>  <name>de4a-pid</name> 
-  <url>http://maven.apache.org</url>
-  <properties>
-	<spring.version>5.2.4.RELEASE</spring.version>
-	<spring-ws.version>3.0.5.RELEASE</spring-ws.version>
-	<jackson-mapper-asl.version>1.9.9</jackson-mapper-asl.version>
-    <jaxb-api.version>2.3.1</jaxb-api.version> 
-    <axiom.version>1.2.22</axiom.version>
-  </properties>
+  <url>http://maven.apache.org</url>  
   <dependencies>
    <dependency>
 			<groupId>org.apache.ws.commons.axiom</groupId>
@@ -91,7 +84,7 @@
 	<dependency>
 		<groupId>com.sun.xml.messaging.saaj</groupId>
             <artifactId>saaj-impl</artifactId>
-		<version>1.5.2</version> 
+		<version>${saaj.impl.version}</version> 
 		<exclusions>
 			<exclusion>
 				<groupId>com.sun.activation</groupId>
@@ -150,7 +143,7 @@
    <dependency>
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
-      <version>${jaxb-api.version}</version> 
+      <version>${jaxb.api.version}</version> 
    </dependency>
 	<dependency>
 	    <groupId>jakarta.xml.bind</groupId>
@@ -168,13 +161,13 @@
 	<dependency>
 	    <groupId>org.glassfish.jaxb</groupId>
 	    <artifactId>jaxb-runtime</artifactId>
-	    <version>${jaxb-api.version}</version>
+	    <version>${jaxb.api.version}</version>
 	</dependency>
 	
 	<dependency>
 	    <groupId>com.h2database</groupId>
 	    <artifactId>h2</artifactId>
-	     <version>1.4.199</version>
+	     <version>${h2.database.version}</version>
 	</dependency>
 	<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -244,7 +237,7 @@
       	<dependency>
             <groupId>org.apache.santuario</groupId>
             <artifactId>xmlsec</artifactId>
-            <version>2.2.0</version>
+            <version>${xmlsec.version}</version>
             <exclusions>
             	<exclusion>
             		<groupId>jakarta.xml.bind</groupId>
@@ -273,12 +266,12 @@
 		<dependency>
 			<groupId>org.springframework.ws</groupId>
 			<artifactId>spring-ws-core</artifactId>
-			<version>${spring-ws.version}</version> 
+			<version>${spring.ws.version}</version> 
 		</dependency> 
 		<dependency>
 			<groupId>org.springframework.ws</groupId>
 			<artifactId>spring-ws-security</artifactId>
-			<version>${spring-ws.version}</version> 
+			<version>${spring.ws.version}</version> 
 			<exclusions>
 				<exclusion>
 					<groupId>jakarta.xml.bind</groupId>

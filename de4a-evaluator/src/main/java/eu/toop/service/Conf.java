@@ -5,6 +5,7 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -22,104 +23,108 @@ import org.springframework.web.servlet.view.JstlView;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu") 
-@Configuration   
 
+import eu.de4a.config.DataSourceConf;
+
+
+@Configuration
+@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu")
 @PropertySource("classpath:application.properties")
-@ComponentScan("eu")  
-public class Conf  implements WebMvcConfigurer {
+@ComponentScan("eu")
+@ConfigurationProperties(prefix = "database")
+public class Conf implements WebMvcConfigurer {
+
+	private DataSourceConf dataSourceConf = new DataSourceConf();
+
+	@Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+		registry.addViewController("/").setViewName("index");
+	}
+
+	@Bean
+	public ViewResolver viewResolver() {
+		InternalResourceViewResolver bean = new InternalResourceViewResolver();
+
+		bean.setViewClass(JstlView.class);
+		bean.setPrefix("/WEB-INF/view/");
+		bean.setSuffix(".jsp");
+
+		return bean;
+	}
+
+	@Bean(name = "multipartResolver")
+	public CommonsMultipartResolver createMultipartResolver() {
+		CommonsMultipartResolver resolver = new CommonsMultipartResolver();
+		resolver.setDefaultEncoding("UTF-8");
+		return resolver;
+	}
+
+	/*
+	 * @Bean(name = "applicationEventMulticaster") public
+	 * ApplicationEventMulticaster simpleApplicationEventMulticaster() {
+	 * SimpleApplicationEventMulticaster eventMulticaster = new
+	 * SimpleApplicationEventMulticaster();
+	 * 
+	 * eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor()); return
+	 * eventMulticaster; }
+	 */
+
+	@Bean(destroyMethod = "close")
+	public DataSource dataSource() {
+		HikariConfig dataSourceConfig = new HikariConfig();
+		dataSourceConfig.setDriverClassName(dataSourceConf.getDriverClassName());
+		dataSourceConfig.setJdbcUrl(dataSourceConf.getUrl());
+		dataSourceConfig.setUsername(dataSourceConf.getUsername());
+		dataSourceConfig.setPassword(dataSourceConf.getPassword());
+		return new HikariDataSource(dataSourceConfig);
+	}
+
+	@Bean
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+		entityManagerFactoryBean.setDataSource((javax.sql.DataSource) dataSource);
+		entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+		entityManagerFactoryBean.setPackagesToScan("eu");
+
+		Properties jpaProperties = new Properties();
+
+		// Configures the used database dialect. This allows Hibernate to create SQL
+		// that is optimized for the used database.
+		jpaProperties.put("hibernate.dialect", dataSourceConf.getJpaHibernate().getDialectPlatform());
+
+		// Specifies the action that is invoked to the database when the Hibernate
+		// SessionFactory is created or closed.
+		jpaProperties.put("hibernate.hbm2ddl.auto", dataSourceConf.getJpaHibernate().getDdlAuto());
+
+		// Configures the naming strategy that is used when Hibernate creates
+		// new database objects and schema elements
+		jpaProperties.put("hibernate.ejb.naming_strategy", dataSourceConf.getJpaHibernate().getNamingStrategy());
+
+		// If the value of this property is true, Hibernate writes all SQL
+		// statements to the console.
+		jpaProperties.put("hibernate.show_sql", dataSourceConf.getJpaHibernate().getShowSql());
+
+		// If the value of this property is true, Hibernate will format the SQL
+		// that is written to the console.
+		jpaProperties.put("hibernate.format_sql", dataSourceConf.getJpaHibernate().getFormatSql());
+
+		entityManagerFactoryBean.setJpaProperties(jpaProperties);
+
+		return entityManagerFactoryBean;
+	}
+
+	@Bean
+	JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+		JpaTransactionManager transactionManager = new JpaTransactionManager();
+		transactionManager.setEntityManagerFactory(entityManagerFactory);
+		return transactionManager;
+	}
 	
-	 @Override
-	   public void addViewControllers(ViewControllerRegistry registry) {
-	      registry.addViewController("/").setViewName("index");
-	   }
-	 
-	   @Bean
-	   public ViewResolver viewResolver() {
-	      InternalResourceViewResolver bean = new InternalResourceViewResolver();
+	public DataSourceConf getDataSourceConf() {
+		return dataSourceConf;
+	}
 
-	      bean.setViewClass(JstlView.class);
-	      bean.setPrefix("/WEB-INF/view/");
-	      bean.setSuffix(".jsp");
-
-	      return bean;
-	   }
-	   @Bean(name = "multipartResolver")
-	   public CommonsMultipartResolver createMultipartResolver() {
-	       CommonsMultipartResolver resolver=new CommonsMultipartResolver();
-	       resolver.setDefaultEncoding("UTF-8");
-	       return resolver;
-	   }
-	 
-	  
-	   
-	   /*
-	   @Bean(name = "applicationEventMulticaster")
-	   public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
-	       SimpleApplicationEventMulticaster eventMulticaster =
-	         new SimpleApplicationEventMulticaster();
-	       
-	       eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
-	       return eventMulticaster;
-	   }*/
-	   
-		 @Bean(destroyMethod = "close")
-			public DataSource dataSource() {
-			    HikariConfig dataSourceConfig = new HikariConfig();
-			    dataSourceConfig.setDriverClassName("org.h2.Driver");
-			    dataSourceConfig.setJdbcUrl("jdbc:h2:mem:datajpa");
-			    dataSourceConfig.setUsername("sa");
-			    dataSourceConfig.setPassword("");
-
-			    return (DataSource) new HikariDataSource(dataSourceConfig);
-		    }
-
-		    @Bean
-		    public   LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-			    LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
-			    entityManagerFactoryBean.setDataSource((javax.sql.DataSource) dataSource);
-			    entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-			    entityManagerFactoryBean.setPackagesToScan("eu");
-
-			    Properties jpaProperties = new Properties();
-
-			    //Configures the used database dialect. This allows Hibernate to create SQL
-			    //that is optimized for the used database.
-			    jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-
-			    //Specifies the action that is invoked to the database when the Hibernate
-			    //SessionFactory is created or closed.
-			    jpaProperties.put("hibernate.hbm2ddl.auto", 
-			            "create-drop"
-			    );
-
-			    //Configures the naming strategy that is used when Hibernate creates
-			    //new database objects and schema elements
-			    jpaProperties.put("hibernate.ejb.naming_strategy", 
-			            "org.hibernate.cfg.ImprovedNamingStrategy"
-			    );
-
-			    //If the value of this property is true, Hibernate writes all SQL
-			    //statements to the console.
-			    jpaProperties.put("hibernate.show_sql", 
-			            "true"
-			    );
-
-			    //If the value of this property is true, Hibernate will format the SQL
-			    //that is written to the console.
-			    jpaProperties.put("hibernate.format_sql", 
-			            "true"
-			    );
-
-			    entityManagerFactoryBean.setJpaProperties(jpaProperties);
-
-			    return entityManagerFactoryBean;
-			    }
-
-			    @Bean
-			    JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-			        JpaTransactionManager transactionManager = new JpaTransactionManager();
-			        transactionManager.setEntityManagerFactory(entityManagerFactory);
-			        return transactionManager;
-			    } 
+	public void setDataSourceConf(DataSourceConf dataSourceConf) {
+		this.dataSourceConf = dataSourceConf;
+	}
 }
