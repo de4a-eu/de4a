@@ -76,8 +76,9 @@ public class EvidenceRequestorManager extends EvidenceManager{
 			evidenceService = 
 					clientSmp.getEvidenceService(request.getCanonicalEvidenceId(), "ES", "atuCode", 
 							issuingAuthority.getIaOrganisationalStructure().get(0).getAtuCode());
-			if(evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataOwner()) && doc != null) {
-				return sendRequestMessage(from, evidenceService.getDataOwner(), evidenceServiceUri, doc.getDocumentElement());
+			if(evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataTransferor()) 
+					&& !StringUtils.isEmpty(evidenceService.getService()) && doc != null) {
+				return sendRequestMessage(from, evidenceService.getService(), doc.getDocumentElement());
 			} else {
 				return false;
 			}
@@ -103,7 +104,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 					clientSmp.getEvidenceService(request.getCanonicalEvidenceId(), "ES", "atuCode", 
 							issuingAuthority.getIaOrganisationalStructure().get(0).getAtuCode());
 			if(evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataOwner()) && doc != null) {
-				boolean ok= sendRequestMessage(from, evidenceService.getDataOwner(), request.getEvidenceServiceData().getEvidenceServiceURI(), doc.getDocumentElement());
+				boolean ok= sendRequestMessage(from, evidenceService.getService(), doc.getDocumentElement());
 				if(!ok)return null;
 				try {
 					ok = waitAratito(request.getRequestId());
@@ -157,9 +158,9 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		           return null;
 		        } 
 	}
-	public boolean sendRequestMessage(String sender,String dataOwnerId,String evidenceServiceUri, Element userMessage) {
-		NodeInfo nodeInfo=clientSmp.getNodeInfo(dataOwnerId,evidenceServiceUri);
-		try {//nodeInfo.setEndpoint("https://eu-domibus-server.redsara.es/domibus/services/msh");sender="domibus-blue" urn:oasis:names:tc:ebcore:partyid-type:unregistered
+	public boolean sendRequestMessage(String sender, String service, Element userMessage) {
+		NodeInfo nodeInfo = clientSmp.getNodeInfo(service);
+		try {
 			logger.debug("Sending  message to as4 gateway ..."); 
 			Element requestSillyWrapper=new CletusLevelTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads=new ArrayList<TCPayload>();
@@ -168,7 +169,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 			 p.setMimeType(CMimeType.APPLICATION_XML.getAsString ());
 			 p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			 payloads.add(p);
-			as4Client.sendMessage(sender,nodeInfo,evidenceServiceUri,requestSillyWrapper,payloads,true);
+			as4Client.sendMessage(sender, nodeInfo, service, requestSillyWrapper, payloads, true);
 			return true;
 		}  catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications",e);

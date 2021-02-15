@@ -78,7 +78,7 @@ public class Client {
 		}
 		
 		RequestTransferEvidence request = requestBuilder.buildRequest(requestId,user.getEvidenceServiceURI(),eidasId,birthDate,name,ap1,fullname);
-		if(user.getEvidenceServiceURI().equalsIgnoreCase("dba"))
+		if(request.getEvidenceServiceData().getEvidenceServiceURI().equalsIgnoreCase("dba"))
 			request.setCanonicalEvidenceId(EvidenceTypeIds.DOINGBUSINESSABROAD.toString()); 
 		else request.setCanonicalEvidenceId(EvidenceTypeIds.BIRTHCERTIFICATE.toString());
 		

@@ -39,7 +39,7 @@ public class SmpController {
 		NodeInfo ni=new NodeInfo();
 		ni.setEndpoint(node.getEndpoint());
 		ni.setId(node.getId());
-		ni.setX509(node.getX509());
+		//ni.setX509(node.getX509());
 		return ni;
 	}
 }

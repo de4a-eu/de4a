@@ -4,10 +4,13 @@ package eu.toop.rest;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -30,10 +33,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.helger.commons.collection.iterate.IterableIterator;
+import com.helger.xsds.bdxr.smp1.ServiceMetadataType;
+import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.api.smp.NodeInfo;
@@ -51,12 +58,46 @@ public class Client {
 	private String smpEndpoint;
 	@Value("${idk.endpoint}")
 	private String idkEndpoint;
-	private static final Logger logger =  LoggerFactory.getLogger (Client.class);
-	public NodeInfo  getNodeInfo ( String dataOwnerdI,String evidenceServiceUri){
-		 logger.debug("Gimme node info AS4 {}",dataOwnerdI);
-		 String uri =String.format(smpEndpoint, dataOwnerdI,evidenceServiceUri); //"http://localhost:8382/smp/whois?dataOwnerId="+dataOwnerdI+"&serviceURI="+evidenceServiceUri; 
-		 //String uri = "https://des-de4a.redsara.es/de4a-smp/whois?dataOwnerId="+dataOwnerdI+"&serviceURI="+evidenceServiceUri; 
-		 return restTemplate.getForObject(uri, NodeInfo.class);
+	private static final Logger logger =  LoggerFactory.getLogger (Client.class);	
+	
+	public NodeInfo getNodeInfo (String service) {
+		 logger.debug("Consulta SMP {}", service);
+		 final String separator = ":";
+		 final String doubleSeparator = "::";
+		 
+		 //Consultamos al SMP el ServiceMetadata a traves del participantId y documentTypeId
+		 //ej.: iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate:1.0
+		 List<String> serviceParams = Arrays.asList(service.split(":service::"));
+		 String scheme = serviceParams.get(0);
+		 List<String> docParams = Arrays.asList(serviceParams.get(1).split(separator));
+		 String participantId = docParams.get(0) + separator + docParams.get(1);
+		 String docId = docParams.get(2) + (docParams.size() > 3 ? separator + docParams.get(3) : "");
+		 
+		 
+		 StringBuilder uri = new StringBuilder(smpEndpoint);
+		 uri.append(scheme).append(doubleSeparator).append(participantId).append("/services/").append(scheme)
+		 	.append(doubleSeparator).append(docId);
+		 		 
+		 NodeInfo nodeInfo = new NodeInfo();
+		 try {
+			 SignedServiceMetadataType signedServiceMetadata = restTemplate.getForObject(uri.toString(), SignedServiceMetadataType.class);
+			 ServiceMetadataType serviceMetadata = signedServiceMetadata.getServiceMetadata();		 
+		 
+			 nodeInfo.setParticipantIdentifier(serviceMetadata.getServiceInformation().getParticipantIdentifier().getValue());
+			 nodeInfo.setDocumentIdentifier(serviceMetadata.getServiceInformation().getDocumentIdentifier().getValue());
+			 nodeInfo.setEndpointURI(serviceMetadata.getServiceInformation().getProcessList().getProcessAtIndex(0)
+					 .getServiceEndpointList().getEndpointAtIndex(0).getEndpointURI());
+			 nodeInfo.setCertificate(serviceMetadata.getServiceInformation().getProcessList().getProcessAtIndex(0)
+					 .getServiceEndpointList().getEndpointAtIndex(0).getCertificate());
+		 } catch (NullPointerException nPe) {
+			 logger.warn("Se ha producido un error en el parseo de la respuesta SMP", nPe);
+			 return new NodeInfo();
+		 } catch (HttpClientErrorException | HttpServerErrorException httpClientOrServerExc) {
+			 logger.error("No se ha encontrado información del servicio en el servidor SMP");
+			 return new NodeInfo();
+		 }
+		 
+		 return nodeInfo;
 	}
 	
 	public IssuingAuthority getIssuingAuthority(String canonicalEvidenceType, String countryCode) {

@@ -91,7 +91,7 @@ public class RequestBuilder {
 		request.setReturnServiceId(returnService);
 		request.setTimeStamp(gimmeGregorian(Calendar.getInstance().getTime()));
 		EvidenceServiceDataType evidenceSevice=new EvidenceServiceDataType();
-		evidenceSevice.setEvidenceServiceURI(evidenceServiceURI);
+		evidenceSevice.setEvidenceServiceURI(serviceUri);
 		request.setEvidenceServiceData(evidenceSevice);
 		if(ap1!=null) {
 			request.setDataRequestSubject(buildSubject(eidasId, birthDate, name, ap1, fullName));
