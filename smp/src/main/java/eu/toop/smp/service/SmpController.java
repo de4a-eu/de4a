@@ -26,7 +26,7 @@ public class SmpController {
 		if(node==null) {
 			logger.debug("No se ha encontrado el nodo con id: "+dataOwnerId);
 			NodeInfo n= new NodeInfo();
-			n.setId(dataOwnerId);
+			//n.setId(dataOwnerId);
 			return n;
 		}
 		else {
