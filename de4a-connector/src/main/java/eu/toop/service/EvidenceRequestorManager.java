@@ -40,9 +40,9 @@ import eu.toop.rest.model.IssuingAuthority;
 public class EvidenceRequestorManager extends EvidenceManager{
 
 	private static final Logger logger = LoggerFactory.getLogger (EvidenceRequestorManager.class);
-	@Value("${as4.me.id.jvm:#{null}}")
-	private String meIdjvm;
-	@Value("${idk.endpoint.jvm:#{null}}")
+	@Value("#{'${as4.me.id.jvm:${as4.me.id:}}'}")
+	private String meId;
+	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
 	private String idkEndpoint;
 	@Value("${as4.evidence.service}")
 	private String evidenceServiceUri;
@@ -54,7 +54,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 	@Autowired
 	private ResponseManager responseManager;  
 	public boolean manageRequest(RequestTransferEvidence request,boolean usi) {
-		String from= meIdjvm;
+		String from= meId;
 		Document doc=marshall(request);   
 		
 		//Se realiza la llamada al idk para obtener la lista de posibles candidatos
@@ -78,7 +78,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		}	  
 	}
 	public ResponseTransferEvidence manageRequestIM(RequestTransferEvidence request )  {
-		String from= meIdjvm;
+		String from= meId;
 		Document doc=marshall(request);   
 		
 		//Se realiza la llamada al idk para obtener la lista de posibles candidatos

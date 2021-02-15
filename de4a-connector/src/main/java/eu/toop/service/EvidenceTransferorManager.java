@@ -28,9 +28,9 @@ import eu.toop.rest.Client;
 @Component 
 public class EvidenceTransferorManager extends EvidenceManager {
 	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class);	
-	
-	@Value("${as4.me.id.jvm:#{null}}")
-	private String meIdjvm; 
+
+	@Value("#{'${as4.me.id.jvm:${as4.me.id:}}'}")
+	private String meId; 
 	@Autowired
 	private Client clientSmp;
 	@Autowired
@@ -62,7 +62,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			// TODO gestion de errores chachi
 		  
 		} 
-		String from= meIdjvm;
+		String from= meId;
 		
 		//Se almacena la informacion de la request
 		RequestorRequest requestorReq = new RequestorRequest();
