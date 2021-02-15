@@ -1,6 +1,5 @@
 package eu.toop.service;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -19,13 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.Document;
 
-import eu.de4a.conn.api.requestor.DomesticEvidenceType;
-import eu.de4a.conn.api.requestor.DomesticsEvidencesType;
 import eu.de4a.conn.api.requestor.ErrorType;
-import eu.de4a.conn.api.requestor.IssuingTypeType;
-import eu.de4a.conn.api.requestor.RequestTransferEvidence;
 import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
+import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
 import eu.toop.as4.client.ResponseWrapper;
@@ -71,6 +68,14 @@ public class ResponseManager {
 			 for (MultipartFile part : response.getAttacheds()) {
 		        	byte[] data =  part.getBytes(); 
 		        	EvaluatorRequestData datarequest=new  EvaluatorRequestData();
+//		        	try {
+//						ResponseTransferEvidence r=(ResponseTransferEvidence) DOMUtils.unmarshall(ResponseTransferEvidence.class, DOMUtils.byteToDocument(data));
+//						Document d= DOMUtils.decodeCompressed(r.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData())  ;
+//						d.getFirstChild();
+//					  } catch (MessageException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 	        		datarequest.setData(data);
 	        		datarequest.setMimetype(part.getContentType());
 	        		datarequest.setIddata( part.getOriginalFilename());   
@@ -118,27 +123,9 @@ public class ResponseManager {
 			try {
 				jaxbContext = JAXBContext.newInstance(eu.de4a.conn.api.requestor.ResponseTransferEvidence.class);
 				javax.xml.bind.Unmarshaller jaxbMarshaller = (Unmarshaller) jaxbContext.createUnmarshaller() ;  
-				ResponseTransferEvidence response= (ResponseTransferEvidence) jaxbMarshaller.unmarshal( new ByteArrayInputStream(data.getData()) );
-				filesAttached.forEach(a->{
-					if(!a.getIddata().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
-						DomesticEvidenceType domestic= response.getDomesticEvidenceList().getDomesticEvidence().stream().filter(p->p.getDomesticEvidenceIdRef().equals(id)).findFirst().orElse(null);
-						if(domestic==null) {
-							 logger.error("It hasn´t been located a domestic evidence with id "+id);
-						}else {
-							 domestic.setEvidenceData(a.getData());
-						}
-					} 
-				}); 
-				DomesticEvidenceType dom=new DomesticEvidenceType();
-				dom.setAddtionalInfo("add");
-				dom.setDataLanguage("es");
-				dom.setDomesticEvidenceIdRef("id");
-				dom.setEvidenceData("tu padr".getBytes());
-				dom.setIssuingType(IssuingTypeType.ORIGINAL_ISSUING);
-				dom.setMimeType("app");
-				DomesticsEvidencesType  list=new   DomesticsEvidencesType();
-				list.getDomesticEvidence().add(dom);
-				response.setDomesticEvidenceList(list);;
+				logger.error(new String(data.getData()));
+				Document doc=DOMUtils.byteToDocument(data.getData());
+				ResponseTransferEvidence response= (ResponseTransferEvidence) jaxbMarshaller.unmarshal(doc); 
 				logger.error(jaxbObjectToXML(response));
 				return response;
 			} catch (JAXBException e) {
@@ -148,7 +135,7 @@ public class ResponseManager {
 		 }
 		 throw new MessageException("It´s not exists a ResponseTransferEvidence for ID:"+id);
 	 } 
-	 
+ 
 	 private String jaxbObjectToXML(ResponseTransferEvidence request) 
 	    {
 	        try

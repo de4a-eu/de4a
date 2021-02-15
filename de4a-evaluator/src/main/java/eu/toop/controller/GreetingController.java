@@ -1,6 +1,5 @@
 package eu.toop.controller;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -11,14 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
@@ -43,6 +38,7 @@ import org.w3c.dom.Document;
 
 import eu.de4a.conn.api.requestor.RequestTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
+import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
 import eu.toop.req.model.EvaluatorRequest;
@@ -66,8 +62,7 @@ public class GreetingController {
 	@Value("${de4a.connector.url.requestor.redirect}")
 	private String urlRequestorRedirect;
 	private String id;
-	private RequestTransferEvidence requestEvidencia;
-	//private String response;
+	private RequestTransferEvidence requestEvidencia; 
 
 	@RequestMapping(value = "/welcome.html")
 	public String welcome(Model model) { 
@@ -104,7 +99,7 @@ public class GreetingController {
 			evaluatorRequestRepository.save(request);
 			boolean ok = client.getEvidenceRequestIM(requestEvidencia);
 			redirectAttributes.addAttribute("id", id);
-			return "redirect:/returnPage.jsp";
+			return ok?"redirect:/returnPage.jsp":"redirect:/errorPage.jsp";
 		} catch (MessageException e) {
 			logger.error("Error getting evidence request",e);
 			return "redirect:/errorPage.jsp";
@@ -156,15 +151,13 @@ public class GreetingController {
 		data.setRequest(request);
 		Example<EvaluatorRequestData> example = Example.of(data);
 		List<EvaluatorRequestData>registros=evaluatorRequestDataRepository.findAll(example); 
-		EvaluatorRequestData dataresponse=registros.stream().filter(d->d.getIddata().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
-		EvaluatorRequestData dataNationalresponse=registros.stream().filter(d->d.getIddata().equals(DE4AConstants.TAG_NATIONAL_EVIDENCE_RESPONSE)).findFirst().orElse(null);
+		EvaluatorRequestData dataresponse=registros.stream().filter(d->d.getIddata().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null); 
 		try {
-			user.setResponse(loadString(dataresponse.getData()));
-			user.setNationalResponse(loadString(dataNationalresponse.getData()));
-			logger.debug("!------------------------------------------------------");
-			logger.debug("Peique molon "+loadString(dataresponse.getData()));
-			logger.debug("!------------------------------------------------------");
-		} catch (Exception e) {
+			Document response=DOMUtils.byteToDocument(dataresponse.getData());
+			user.setResponse(loadString(response)); 
+			String national=DOMUtils.getNodeFromXpath(DE4AConstants.XPATH_EVIDENCE_DATA,response.getDocumentElement()).getTextContent(); 
+			user.setNationalResponse(loadString(DOMUtils.decodeCompressed(national.getBytes() ))); 
+		} catch (Exception | MessageException e) {
 			logger.error("Fatality!",e); 
 		}
 		model.addAttribute("userForm", user);
@@ -186,43 +179,9 @@ public class GreetingController {
             return "";
         }
     }
-	private Document obtenerDocumentDeByte(byte[] documentoXml) throws Exception {
-	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	    factory.setNamespaceAware(true);
-	    DocumentBuilder builder = factory.newDocumentBuilder();
-	    return builder.parse(new ByteArrayInputStream(documentoXml));
-	}
-	private String doctoString(Document xmlDocument)
-	{
-	    TransformerFactory tf = TransformerFactory.newInstance();
-	    Transformer transformer;
-	    try {
-	        transformer = tf.newTransformer();
-	         
-	        // Uncomment if you do not require XML declaration
-	        // transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-	         
-	        //A character stream that collects its output in a string buffer, 
-	        //which can then be used to construct a string.
-	        StringWriter writer = new StringWriter();
-	 
-	        //transform document to string 
-	        transformer.transform(new DOMSource(xmlDocument), new StreamResult(writer));
-	        return  writer.getBuffer().toString();                 //Print to console or logs
-	    } 
-	    catch (TransformerException e) 
-	    {
-	        e.printStackTrace();
-	    }
-	    catch (Exception e) 
-	    {
-	        e.printStackTrace();
-	    }
-	    return null;
-	}
-	private String loadString(byte[] msg) throws Exception {
-		Document doc = obtenerDocumentDeByte(msg);
-		Source xmlInput = new StreamSource(new StringReader(doctoString(doc)));
+  
+	private String loadString(Document doc) throws Exception { 
+		Source xmlInput = new StreamSource(new StringReader(DOMUtils.documentToString(doc)));
         StringWriter stringWriter = new StringWriter();
         StreamResult xmlOutput = new StreamResult(stringWriter);
         TransformerFactory transformerFactory  = TransformerFactory.newInstance();

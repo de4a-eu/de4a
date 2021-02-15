@@ -17,5 +17,7 @@ module de4acommons {
 	requires org.apache.httpcomponents.httpcore;
 	requires spring.core;
 	requires transitive spring.web;
-	requires transitive java.xml.bind;
+	requires transitive java.xml.bind;   
+	requires org.apache.commons.codec;
+	requires org.apache.commons.io;
 }

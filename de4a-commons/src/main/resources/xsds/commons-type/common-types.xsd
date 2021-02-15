@@ -86,7 +86,7 @@
 	</xs:complexType>
 	<xs:complexType name="DomesticEvidenceType">
 		<xs:sequence>
-			<xs:element name="DomesticEvidenceIdRef" type="IdRefType"/>
+			<xs:element name="DomesticEvidenceIdRef"  type="xs:string"/>
 			<xs:element name="IssuingType" type="IssuingTypeType"/>
 			<xs:element name="MimeType" type="MimeTypeType"/>
 			<xs:element name="DataLanguage" type="DataLanguageType"/>

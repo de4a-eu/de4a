@@ -9,7 +9,7 @@ public class DE4AConstants {
 	public static final String TAG_NATIONAL_EVIDENCE_RESPONSE="NationalEvidenceResponse"; 
 	public static final String XPATH_REQUEST_ID="//*[local-name()='%s']/*[local-name()='RequestId']/text()"; 
 	public static final String XPATH_ID="//*[local-name()='RequestId']";
-
+	public static final String XPATH_EVIDENCE_DATA="//*[local-name()='EvidenceData']";
 	public static final String XPATH_EVALUATOR_ID="//*[local-name()='DataEvaluator']/*[local-name()='id']/text()";
 	public static final String XPATH_EVALUATOR_NAME="//*[local-name()='DataEvaluator']/*[local-name()='name']/text()";
 	public static final String XPATH_EVALUATOR_ID_NODE="//*[local-name()='DataEvaluator']/*[local-name()='id']";

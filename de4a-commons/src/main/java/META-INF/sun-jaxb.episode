@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" if-exists="true" version="2.1">
+      
+    <!--
+
+Este archivo ha sido generado por la arquitectura JavaTM para la implantación de la referencia de enlace (JAXB) XML v2.3.0 
+Visite <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
+Todas las modificaciones realizadas en este archivo se perderán si se vuelve a compilar el esquema de origen. 
+Generado el: 2021.02.03 a las 09:19:58 PM CET 
+
+  -->
+      
+    <bindings xmlns:tns="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" if-exists="true" scd="x-schema::tns">
+            
+        <schemaBindings map="false">
+                  
+            <package name="eu.de4a.conn.api.requestor"/>
+                
+        </schemaBindings>
+            
+        <bindings if-exists="true" scd="tns:RequestTransferEvidence">
+                  
+            <class ref="eu.de4a.conn.api.requestor.RequestTransferEvidence"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:AgentCVType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.AgentCVType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:DataRequestSubjectCVType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.DataRequestSubjectCVType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:RequestGroundsType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.RequestGroundsType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:EvidenceServiceDataType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.EvidenceServiceDataType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="tns:ResponseTransferEvidence">
+                  
+            <class ref="eu.de4a.conn.api.requestor.ResponseTransferEvidence"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:CanonicalEvidenceType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.CanonicalEvidenceType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:DomesticsEvidencesType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.DomesticsEvidencesType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:ErrorType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.ErrorType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:NaturalPersonIdentifierType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.NaturalPersonIdentifierType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:LegalEntityIdentifierType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.LegalEntityIdentifierType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:DataEvaluatorType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.DataEvaluatorType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:DataOwnerType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.DataOwnerType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:DomesticEvidenceType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.DomesticEvidenceType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:PreviewResponseType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.PreviewResponseType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:IssuingAuthorityType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.IssuingAuthorityType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:EvidenceServiceType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.EvidenceServiceType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:AdminTerritorialUnitsType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.AdminTerritorialUnitsType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:ServiceInputParametersType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.ServiceInputParametersType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:ServiceInputParameterType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.ServiceInputParameterType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:AditionalInfoType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.AditionalInfoType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:IssuingTypeType">
+                  
+            <typesafeEnumClass ref="eu.de4a.conn.api.requestor.IssuingTypeType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:ServiceInputParameterTypeType">
+                  
+            <typesafeEnumClass ref="eu.de4a.conn.api.requestor.ServiceInputParameterTypeType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:ExplicitRequestType">
+                  
+            <typesafeEnumClass ref="eu.de4a.conn.api.requestor.ExplicitRequestType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:AckType">
+                  
+            <typesafeEnumClass ref="eu.de4a.conn.api.requestor.AckType"/>
+                
+        </bindings>
+          
+    </bindings>
+      
+    <bindings xmlns:tns="http://eidas.europa.eu/attributes/naturalperson" if-exists="true" scd="x-schema::tns">
+            
+        <schemaBindings map="false">
+                  
+            <package name="eu.de4a.conn.api.requestor"/>
+                
+        </schemaBindings>
+            
+        <bindings if-exists="true" scd="~tns:CurrentFamilyNameType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.CurrentFamilyNameType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:CurrentGivenNameType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.CurrentGivenNameType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:CurrentAddressStructuredType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.CurrentAddressStructuredType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:BirthNameType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.BirthNameType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:PlaceOfBirthType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.PlaceOfBirthType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:GenderType">
+                  
+            <typesafeEnumClass ref="eu.de4a.conn.api.requestor.GenderType"/>
+                
+        </bindings>
+          
+    </bindings>
+      
+    <bindings xmlns:tns="http://eidas.europa.eu/attributes/legalperson" if-exists="true" scd="x-schema::tns">
+            
+        <schemaBindings map="false">
+                  
+            <package name="eu.de4a.conn.api.requestor"/>
+                
+        </schemaBindings>
+            
+        <bindings if-exists="true" scd="~tns:LegalNameType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.LegalNameType"/>
+                
+        </bindings>
+            
+        <bindings if-exists="true" scd="~tns:LegalPersonAddressStructuredType">
+                  
+            <class ref="eu.de4a.conn.api.requestor.LegalPersonAddressStructuredType"/>
+                
+        </bindings>
+          
+    </bindings>
+    
+</bindings>
