@@ -98,11 +98,12 @@
   					<xsl:param name="domesticEvidences"/> 
 		 	   		<xsl:if test="$count > -1">
 		 	   			 <xsl:variable name="entity" select="lists:get( $domesticEvidences, $count )" />  
-			    	 	 <DomesticEvidence>
+			    	 	 <DomesticEvidence xmlns="http://www.de4a.eu/2020/data/requestor/pattern/intermediate">
 							<DomesticEvidenceIdRef><xsl:value-of  select="domestic:getDomesticEvidenceIdRef($entity)"/></DomesticEvidenceIdRef>
 							<IssuingType><xsl:value-of  select="domestic:getIssuingType($entity)"/></IssuingType>
 							<MimeType><xsl:value-of  select="domestic:getMimeType($entity)"/></MimeType>
 							<DataLanguage><xsl:value-of  select="domestic:getDataLanguage($entity)"/></DataLanguage>
+							<EvidenceData/>
 						</DomesticEvidence> 
 						<xsl:call-template name="domesticEvidences_template">
 				          <xsl:with-param name="count" select="$count - 1"/>

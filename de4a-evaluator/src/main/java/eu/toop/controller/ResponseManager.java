@@ -105,8 +105,13 @@ public class ResponseManager {
 	}
 	public void manageResponse(ResponseTransferEvidence response) throws  MessageException {
 		EvaluatorRequestData datarequest=new  EvaluatorRequestData(); 
+		//DOMUtils.decodeCompressed(response.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
 		byte[]data=DOMUtils.serializeJaxbObject(ResponseTransferEvidence.class, response);
-		datarequest.setData(data); 
+		datarequest.setData(data);
+		ResponseTransferEvidence r=(ResponseTransferEvidence) DOMUtils.unmarshall(ResponseTransferEvidence.class,DOMUtils.byteToDocument(data));
+		//DOMUtils.decodeCompressed(r.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
+		
+		//DOMUtils.decodeCompressed(response.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
 		LOGGER.error("--->"+new String(datarequest.getData()));
 		datarequest.setMimetype(CMimeType.APPLICATION_XML.getAsString ()); 
 		datarequest.setIddata(DE4AConstants.TAG_EVIDENCE_RESPONSE);  

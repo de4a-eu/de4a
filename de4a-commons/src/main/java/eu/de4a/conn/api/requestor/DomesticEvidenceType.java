@@ -4,7 +4,6 @@ package eu.de4a.conn.api.requestor;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
@@ -21,7 +20,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="DomesticEvidenceIdRef" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}IdRefType"/&gt;
+ *         &lt;element name="DomesticEvidenceIdRef" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="IssuingType" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}IssuingTypeType"/&gt;
  *         &lt;element name="MimeType" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}MimeTypeType"/&gt;
  *         &lt;element name="DataLanguage" type="{http://www.de4a.eu/2020/data/requestor/pattern/intermediate}DataLanguageType"/&gt;
@@ -47,9 +46,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public class DomesticEvidenceType {
 
     @XmlElement(name = "DomesticEvidenceIdRef", required = true)
-    @XmlIDREF
-    @XmlSchemaType(name = "IDREF")
-    protected Object domesticEvidenceIdRef;
+    protected String domesticEvidenceIdRef;
     @XmlElement(name = "IssuingType", required = true)
     @XmlSchemaType(name = "token")
     protected IssuingTypeType issuingType;
@@ -62,17 +59,17 @@ public class DomesticEvidenceType {
     @XmlElement(name = "AddtionalInfo")
     protected String addtionalInfo;
     @XmlElement(name = "EvidenceData")
-    protected byte[] evidenceData;
+    protected byte [] evidenceData;
 
     /**
      * Obtiene el valor de la propiedad domesticEvidenceIdRef.
      * 
      * @return
      *     possible object is
-     *     {@link Object }
+     *     {@link String }
      *     
      */
-    public Object getDomesticEvidenceIdRef() {
+    public String getDomesticEvidenceIdRef() {
         return domesticEvidenceIdRef;
     }
 
@@ -81,10 +78,10 @@ public class DomesticEvidenceType {
      * 
      * @param value
      *     allowed object is
-     *     {@link Object }
+     *     {@link String }
      *     
      */
-    public void setDomesticEvidenceIdRef(Object value) {
+    public void setDomesticEvidenceIdRef(String value) {
         this.domesticEvidenceIdRef = value;
     }
 
@@ -184,26 +181,15 @@ public class DomesticEvidenceType {
         this.addtionalInfo = value;
     }
 
-    /**
-     * Obtiene el valor de la propiedad evidenceData.
-     * 
-     * @return
-     *     possible object is
-     *     byte[]
-     */
-    public byte[] getEvidenceData() {
-        return evidenceData;
-    }
+	public byte[] getEvidenceData() {
+		return evidenceData;
+	}
 
-    /**
-     * Define el valor de la propiedad evidenceData.
-     * 
-     * @param value
-     *     allowed object is
-     *     byte[]
-     */
-    public void setEvidenceData(byte[] value) {
-        this.evidenceData = value;
-    }
+	public void setEvidenceData(byte[] evidenceData) {
+		this.evidenceData = evidenceData;
+	}
+ 
+
+ 
 
 }
