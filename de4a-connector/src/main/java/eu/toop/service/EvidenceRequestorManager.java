@@ -153,8 +153,15 @@ public class EvidenceRequestorManager extends EvidenceManager{
 				doc.getDocumentElement(), request.getRequestId());
 	}
 	
-	private ResponseTransferEvidence handleRequestTransferEvidence(String from, String evidenceServiceUri, Element documentElement, String requestId) {
-		boolean ok = sendRequestMessage(from, evidenceServiceUri, documentElement);
+	private ResponseTransferEvidence handleRequestTransferEvidence(String from, String evidenceServiceUri,
+			Element documentElement, String requestId) {
+		boolean ok = false;
+		try {
+			ok = sendRequestMessage(from, evidenceServiceUri, documentElement);
+		} catch (Exception e) {
+			MessageException me = new MessageException(e.getMessage());
+			return responseManager.getErrorResponse(me);
+		}
 		if (!ok) {
 			return null;
 		}
