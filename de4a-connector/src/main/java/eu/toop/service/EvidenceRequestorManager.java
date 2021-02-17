@@ -92,7 +92,13 @@ public class EvidenceRequestorManager extends EvidenceManager{
 					clientSmp.getEvidenceService(request.getCanonicalEvidenceId(), "ES", "atuCode", 
 							issuingAuthority.getIaOrganisationalStructure().get(0).getAtuCode());
 			if(evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataOwner()) && doc != null) {
-				boolean ok= sendRequestMessage(from, evidenceService.getService(), doc.getDocumentElement());
+				boolean ok=false;
+				try {
+					ok= sendRequestMessage(from, evidenceService.getService(), doc.getDocumentElement());
+				} catch ( Exception e) {
+					MessageException me=new MessageException(e.getMessage());
+					return responseManager.getErrorResponse(me);
+				}
 				if(!ok)return null;
 				try {
 					ok = waitAratito(request.getRequestId());
@@ -147,7 +153,8 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		        } 
 	}
 	public boolean sendRequestMessage(String sender, String service, Element userMessage) {
-		NodeInfo nodeInfo = clientSmp.getNodeInfo(service);
+		String uriSmp=clientSmp.getSmpUri(service);
+		NodeInfo nodeInfo = clientSmp.getNodeInfo(uriSmp);
 		try {
 			logger.debug("Sending  message to as4 gateway ..."); 
 			Element requestSillyWrapper=new CletusLevelTransformer().wrapMessage(userMessage, true);
