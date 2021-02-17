@@ -3,6 +3,10 @@ package eu.toop.rest.model;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
@@ -10,12 +14,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.hibernate.boot.model.source.internal.hbm.XmlElementMetadata;
 import org.springframework.validation.annotation.Validated;
 
 /**
  * IssuingAuthority
  */
 @Validated
+@XmlRootElement(name = "IssuingAuthorityType")
+@XmlAccessorType(XmlAccessType.PROPERTY)
 public class IssuingAuthority implements Serializable {
 	private static final long serialVersionUID = -3352737906437012L;
 	

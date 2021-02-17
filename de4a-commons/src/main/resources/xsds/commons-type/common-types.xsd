@@ -121,19 +121,39 @@
 	<!-- Ends Evidences -->
 	<!-- Starts Others -->
 	<xs:complexType name="IssuingAuthorityType">
-		<xs:annotation>
-			<xs:documentation>To be defined</xs:documentation>
+	<xs:annotation>
+			<xs:documentation>DE4A - Temporal definition</xs:documentation>
 		</xs:annotation>
-		<xs:sequence>
-			<xs:any namespace="##any" processContents="lax"/>
-		</xs:sequence>
+	    <xs:sequence>
+	    	<xs:element name="countryCode" type="xs:string" minOccurs="0"/>
+    		<xs:element name="iaLevelPath" type="xs:string" minOccurs="0"/>
+	    	<xs:sequence>
+		    	<xs:element name="iaOrganisationalStructure" type="atuItem" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+	    	</xs:sequence>
+	    	<xs:element name="iaTotalNum" type="xs:int" minOccurs="0"/>
+	    </xs:sequence>
 	</xs:complexType>
+	<xs:complexType name="atuItem">
+   		<xs:sequence>
+			<xs:element name="atuCode" type="xs:string" minOccurs="0"/>
+			<xs:element name="atuLatinName" type="xs:string" minOccurs="0"/>
+			<xs:element name="atuLevel" type="xs:string" minOccurs="0"/>
+			<xs:element name="atuName" type="xs:string" minOccurs="0"/>
+			<xs:element name="atuPath" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+ 	</xs:complexType>
 	<xs:complexType name="EvidenceServiceType">
 		<xs:annotation>
-			<xs:documentation>To be defined</xs:documentation>
+			<xs:documentation>DE4A - Temporal definition</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
-			<xs:any namespace="##any" processContents="lax"/>
+		    <xs:element name="atuCode" type="xs:string" minOccurs="0"/>
+		    <xs:element name="canonicalEvidence" type="xs:string" minOccurs="0"/>
+		    <xs:element name="countryCode" type="xs:string" minOccurs="0"/>
+		    <xs:element name="dataOwner" type="xs:string" minOccurs="0"/>
+		    <xs:element name="dataTransferor" type="xs:string" minOccurs="0"/>
+		    <xs:element name="redirectURL" type="xs:string" minOccurs="0"/>
+		    <xs:element name="service" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="AdminTerritorialUnitsType">
@@ -236,6 +256,11 @@
 	</xs:simpleType>
 	<!-- Ends Others -->
 	<!-- Start Error types -->
+	<xs:complexType name="ErrorListType">
+		<xs:sequence>
+			<xs:element name="Error" type="ErrorType" minOccurs="1" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
 	<xs:complexType name="ErrorType">
 		<xs:all>
 			<xs:element name="Code" type="CodeErrorType"/>

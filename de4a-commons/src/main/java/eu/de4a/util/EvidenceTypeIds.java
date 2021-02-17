@@ -1,5 +1,9 @@
 package eu.de4a.util;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Canonical evidence types
@@ -11,6 +15,12 @@ public enum EvidenceTypeIds {
 	DEATHCERTIFICATE("DeathCertificate"), DOINGBUSINESSABROAD("DoingBusinessAbroad");
 
 	private String value;
+	private static Map<String, EvidenceTypeIds> lookup = new HashMap<>();
+	
+	static {
+		lookup = Arrays.asList(EvidenceTypeIds.values()).stream()
+				.collect(Collectors.toMap(EvidenceTypeIds::toString, x -> x));
+	}
 
 	EvidenceTypeIds(String value) {
 		this.value = value;
@@ -20,6 +30,10 @@ public enum EvidenceTypeIds {
 	public String toString() {
 		return String.valueOf(value);
 	}
+	
+	public String getValue() {
+		return this.value;
+	}
 
 	public static EvidenceTypeIds fromValue(String text) {
 		for (EvidenceTypeIds b : EvidenceTypeIds.values()) {
@@ -28,5 +42,9 @@ public enum EvidenceTypeIds {
 			}
 		}
 		return null;
+	}
+	
+	public static EvidenceTypeIds getByName(String name) {
+		return lookup.get(name);
 	}
 }

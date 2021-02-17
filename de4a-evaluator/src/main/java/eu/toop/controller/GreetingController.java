@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Example;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,11 +39,18 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.w3c.dom.Document;
 
+import eu.de4a.conn.api.requestor.AtuItem;
+import eu.de4a.conn.api.requestor.EvidenceServiceDataType;
+import eu.de4a.conn.api.requestor.RequestLookupEvidenceServiceData;
+import eu.de4a.conn.api.requestor.RequestLookupRoutingInformation;
 import eu.de4a.conn.api.requestor.RequestTransferEvidence;
+import eu.de4a.conn.api.requestor.ResponseLookupEvidenceServiceData;
+import eu.de4a.conn.api.requestor.ResponseLookupRoutingInformation;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.EvidenceTypeIds;
 import eu.toop.req.model.EvaluatorRequest;
 import eu.toop.req.model.EvaluatorRequestData;
 import eu.toop.req.repository.EvaluatorRequestDataRepository;
@@ -66,7 +76,7 @@ public class GreetingController {
 
 	@RequestMapping(value = "/welcome.html")
 	public String welcome(Model model) { 
-		model.addAttribute("evidenceForm", new Evidencia());
+		model.addAttribute("evidenceForm", new RequestLookupRoutingInformation());
 		return "welcome";
 	}
 	@GetMapping("/greeting")
@@ -75,18 +85,38 @@ public class GreetingController {
 		return "greeting";
 	}
 	@RequestMapping(value ="/goEvidenceForm", method = RequestMethod.POST)
-	public String goEvidenceForm(Model model,@ModelAttribute("evidenceForm") Evidencia evidencia,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) { 
-		User u=new User();
+	public String goEvidenceForm(Model model,@ModelAttribute("evidenceForm") RequestLookupRoutingInformation lookupRouting,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) { 
+		User u = new User();
+		u.setEvidenceTypeId(lookupRouting.getCanonicalEvidenceId());
+		u.setCountry(lookupRouting.getCountry());
 		model.addAttribute("userForm",u );
-		if(evidencia.getTipo().equals("DBA")) {  
-			return "dba"; 
-		} 
-		return "nacimiento";
+		
+		try {
+			ResponseLookupRoutingInformation responseRouting = client.getRoutingInfo(lookupRouting);
+			Map<String, String> iaOrganisationalStructure = responseRouting.getIssuingAuthority().getIaOrganisationalStructure().stream().collect(
+	                Collectors.toMap(AtuItem::getAtuCode, AtuItem::getAtuName));
+			model.addAttribute("iaOrganisationalStructure", iaOrganisationalStructure);
+		} catch (MessageException e) {
+			logger.error("Ha ocurrido un error en la consulta de rounting info", e);
+		}
+		
+		if(EvidenceTypeIds.BIRTHCERTIFICATE.toString().equals(lookupRouting.getCanonicalEvidenceId())) {
+			return "nacimiento";
+		}
+		return "dba";
 	}
 	
 	@RequestMapping(value = "/greetinggo", method = RequestMethod.POST) 
-	public String greetingSubmit(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {   
-			requestEvidencia=client.buildRequest(user);
+	public String greetingSubmit(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {
+			RequestLookupEvidenceServiceData request = new RequestLookupEvidenceServiceData();
+			request.setAdminTerritorialUnit(user.getAtuCode());
+			request.setCanonicalEvidenceId(user.getEvidenceTypeId());
+			request.setCountry(user.getCountry());
+			
+			//Obtenemos el evidenceSeriviceUri del DR-IDK para incluirlo en la RequestTransferEvidence
+			ResponseLookupEvidenceServiceData responseServiceData = client.getLookupServiceData(request);			
+		
+			requestEvidencia = client.buildRequest(user, responseServiceData.getEvidenceService());
 			user.setRequest(jaxbObjectToXML(requestEvidencia));
 			id=requestEvidencia.getRequestId();  
 			return "showRequest";

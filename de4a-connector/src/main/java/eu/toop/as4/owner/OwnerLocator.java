@@ -1,8 +1,6 @@
 package eu.toop.as4.owner;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.Properties;
 
 import javax.naming.ConfigurationException;
 
@@ -11,39 +9,49 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
-import eu.de4a.conn.owner.OwnerGateway; 
+import eu.de4a.conn.owner.OwnerGateway;
+import eu.de4a.exception.MessageException;
+import eu.toop.req.model.EvidenceEntity;
+import eu.toop.req.repository.EvidenceEntityRepository; 
 
 @Component
 public class OwnerLocator {
 	private static final Logger LOGGER = LoggerFactory.getLogger (OwnerLocator.class);
 	@Autowired
-	private ApplicationContext context;
-	public OwnerGateway getOwnerGateway(String evidenceService) throws ConfigurationException {
-		//TODO cambiar la forma de localizacion delpuntonde acceso de los owner
-		Properties prop = new Properties();
+	private ApplicationContext context; 
+	@Autowired
+	private EvidenceEntityRepository evidenceEntityRepository;	
+	@Autowired
+	private MessageSource messageSource;
+	public EvidenceEntity lookupEvidence(String evidenceService) throws NoSuchMessageException, MessageException {
+		EvidenceEntity evidence=evidenceEntityRepository.findById(evidenceService).orElse(null);
+		if(evidence==null) {
+			String[]arg= {evidenceService};
+			throw new MessageException(messageSource.getMessage("error.transferor.evidence.not.exists", arg,LocaleContextHolder.getLocale()) ) ;
+		}
+		return evidence;
+	}
+	public OwnerGateway getOwnerGateway(EvidenceEntity evidence) throws ConfigurationException, NoSuchMessageException, MessageException { 
+		String name=evidence.getOwnerGateway();	 
+		LOGGER.debug("Located owner gateway {} for evidence {}",name,evidence.getIdEvidence());
 		try {
-		    //load a properties file from class path, inside static method
-		    prop.load(OwnerLocator.class.getClassLoader().getResourceAsStream("owners.properties"));
-		    String name=(String) prop.get(evidenceService);
+			return (OwnerGateway) context.getBean(name);
+		}catch(NoSuchBeanDefinitionException nbe) {
+			LOGGER.warn("Bean {} not defined, try static instanceof",name);
 		    try {
-		    	return (OwnerGateway) context.getBean(name);
-		    }catch(NoSuchBeanDefinitionException nbe) {
-		    	LOGGER.warn("Bean {} not defined, try static instanceof",name);
-		    	try {
 		    	Class<?> clazz = Class.forName(name);
 		    	Constructor<?> ctor = clazz.getConstructor(String.class);
 		    	return (OwnerGateway) ctor.newInstance(new Object[] { });
 
-			    }catch(Throwable e) {
+			}catch(Throwable e) {
 			    	LOGGER.error("Error getting bean or class {}",name,e);
-			    	throw new ConfigurationException("Wrong configuration of Owner´s Gateway:"+e.getMessage());
-			    }
-		    }
+			    	throw new ConfigurationException("Wrong configuration of Ownerï¿½s Gateway:"+e.getMessage());
+			}
 		} 
-		catch (IOException ex) {
-			throw new ConfigurationException("Not Located owners.properties:"+ex.getMessage());
-		}
 	}
 }

@@ -6,8 +6,7 @@ module de4acommons {
 	exports eu.de4a.conn.api.canonical;
 	exports eu.de4a.conn.api.rest;
 	exports eu.de4a.conn.api.smp;
-	exports eu.de4a.util;
-	exports eu.de4a.config;
+	exports eu.de4a.util; 
 	exports eu.de4a.conn.xml;
 
 	requires eu.toop.connector.api;
@@ -21,4 +20,5 @@ module de4acommons {
 	requires transitive java.xml.bind;   
 	requires org.apache.commons.codec;
 	requires org.apache.commons.io;
+	requires spring.context;
 }
