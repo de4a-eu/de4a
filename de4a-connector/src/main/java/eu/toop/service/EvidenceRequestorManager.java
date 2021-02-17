@@ -212,24 +212,25 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		           return null;
 		        } 
 	}
+	
 	public boolean sendRequestMessage(String sender, String service, Element userMessage) {
-		String uriSmp=clientSmp.getSmpUri(service);
+		String uriSmp = clientSmp.getSmpUri(service);
 		NodeInfo nodeInfo = clientSmp.getNodeInfo(uriSmp);
 		try {
-			logger.debug("Sending  message to as4 gateway ..."); 
-			Element requestSillyWrapper=new CletusLevelTransformer().wrapMessage(userMessage, true);
-			List<TCPayload> payloads=new ArrayList<TCPayload>();
-			 TCPayload p=new TCPayload();
-			 p.setContentID(DE4AConstants.TAG_EVIDENCE_REQUEST);
-			 p.setMimeType(CMimeType.APPLICATION_XML.getAsString ());
-			 p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
-			 payloads.add(p);
+			logger.debug("Sending  message to as4 gateway ...");
+			Element requestSillyWrapper = new CletusLevelTransformer().wrapMessage(userMessage, true);
+			List<TCPayload> payloads = new ArrayList<>();
+			TCPayload p = new TCPayload();
+			p.setContentID(DE4AConstants.TAG_EVIDENCE_REQUEST);
+			p.setMimeType(CMimeType.APPLICATION_XML.getAsString());
+			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
+			payloads.add(p);
 			as4Client.sendMessage(sender, nodeInfo, service, requestSillyWrapper, payloads, true);
 			return true;
-		}  catch (MEOutgoingException e) {
-			logger.error("Error with as4 gateway comunications",e);
+		} catch (MEOutgoingException e) {
+			logger.error("Error with as4 gateway comunications", e);
 		} catch (MessageException e) {
-			logger.error("Error building regrep message",e);
+			logger.error("Error building regrep message", e);
 		}
 		return false;
 	}
