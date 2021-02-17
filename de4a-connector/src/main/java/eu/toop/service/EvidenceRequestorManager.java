@@ -213,7 +213,8 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		        } 
 	}
 	public boolean sendRequestMessage(String sender, String service, Element userMessage) {
-		NodeInfo nodeInfo = clientSmp.getNodeInfo(service);
+		String uriSmp=clientSmp.getSmpUri(service);
+		NodeInfo nodeInfo = clientSmp.getNodeInfo(uriSmp);
 		try {
 			logger.debug("Sending  message to as4 gateway ..."); 
 			Element requestSillyWrapper=new CletusLevelTransformer().wrapMessage(userMessage, true);
