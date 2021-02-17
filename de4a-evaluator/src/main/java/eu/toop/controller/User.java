@@ -1,5 +1,10 @@
 package eu.toop.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import eu.de4a.conn.api.requestor.AtuItem;
+
 public class User {
 	private String eidas;
 	private String name;
@@ -8,9 +13,12 @@ public class User {
 	private String birthDate;
 	private String id;
 	private String response;
-	private String evidenceServiceURI;
 	private String nationalResponse;
 	private String request;
+	private String evidenceTypeId;
+	private String country;
+	private String atuCode;
+	
 	public String getEidas() {
 		return eidas;
 	}
@@ -83,13 +91,28 @@ public class User {
 	public void setRequest(String request) {
 		this.request = request;
 	}
-
-	public String getEvidenceServiceURI() {
-		return evidenceServiceURI;
+	
+	public String getEvidenceTypeId() {
+		return this.evidenceTypeId;
 	}
 
-	public void setEvidenceServiceURI(String evidenceServiceURI) {
-		this.evidenceServiceURI = evidenceServiceURI;
+	public void setEvidenceTypeId(String evidenceTypeId) {
+		this.evidenceTypeId = evidenceTypeId;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
 	}
 	
+	public String getAtuCode() {
+		return this.atuCode;
+	}
+	
+	public void setAtuCode(String atuCode) {
+		this.atuCode = atuCode;
+	}
 }

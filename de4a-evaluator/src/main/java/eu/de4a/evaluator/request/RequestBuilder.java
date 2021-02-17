@@ -19,6 +19,7 @@ import eu.de4a.conn.api.requestor.CurrentFamilyNameType;
 import eu.de4a.conn.api.requestor.CurrentGivenNameType;
 import eu.de4a.conn.api.requestor.DataRequestSubjectCVType;
 import eu.de4a.conn.api.requestor.EvidenceServiceDataType;
+import eu.de4a.conn.api.requestor.EvidenceServiceType;
 import eu.de4a.conn.api.requestor.ExplicitRequestType;
 import eu.de4a.conn.api.requestor.LegalEntityIdentifierType;
 import eu.de4a.conn.api.requestor.LegalNameType;
@@ -77,28 +78,31 @@ public class RequestBuilder {
 		subject.setDataSubjectCompany(legal);
 		return subject;
 	}
-	public RequestTransferEvidence buildRequest(String requestId,String evidenceServiceURI,String eidasId,String birthDate,String name,String ap1,String fullName) {
+
+	public RequestTransferEvidence buildRequest(String requestId, EvidenceServiceType evidenceServiceType,
+			String eidasId, String birthDate, String name, String ap1, String fullName) {
 		RequestTransferEvidence request = new RequestTransferEvidence();
 		request.setDataEvaluator(buildAgent(meId, meName));
 		request.setSpecificationId(specification);
-		request.setDataOwner(buildAgent("fakeId", "fakeName"));
+		request.setDataOwner(buildAgent(evidenceServiceType.getDataOwner(), evidenceServiceType.getDataOwner()));
 		request.setProcedureId(procedureId);
-		RequestGroundsType grounds=new RequestGroundsType();
+		RequestGroundsType grounds = new RequestGroundsType();
 		grounds.setExplicitRequest(ExplicitRequestType.SDGR_14);
 		grounds.setLawELIPermanentLink(groundsLink);
 		request.setRequestGrounds(grounds);
 		request.setRequestId(requestId);
-		request.setReturnServiceId(returnService);
+		request.setReturnServiceId(evidenceServiceType.getRedirectURL());
 		request.setTimeStamp(gimmeGregorian(Calendar.getInstance().getTime()));
-		EvidenceServiceDataType evidenceSevice=new EvidenceServiceDataType();
-		evidenceSevice.setEvidenceServiceURI(serviceUri);
+		EvidenceServiceDataType evidenceSevice = new EvidenceServiceDataType();
+		evidenceSevice.setEvidenceServiceURI(evidenceServiceType.getService());
 		request.setEvidenceServiceData(evidenceSevice);
-		if(ap1!=null) {
+		request.setCanonicalEvidenceId(evidenceServiceType.getCanonicalEvidence());
+		if (ap1 != null) {
 			request.setDataRequestSubject(buildSubject(eidasId, birthDate, name, ap1, fullName));
-		}else {
+		} else {
 			request.setDataRequestSubject(buildSubjectLegal(eidasId));
 		}
-		
+
 		return request;
 	}
 	private XMLGregorianCalendar gimmeGregorian(Date date) {

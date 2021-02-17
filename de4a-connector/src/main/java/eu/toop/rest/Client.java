@@ -42,6 +42,8 @@ import com.helger.commons.collection.iterate.IterableIterator;
 import com.helger.xsds.bdxr.smp1.ServiceMetadataType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
+import eu.de4a.conn.api.requestor.EvidenceServiceType;
+import eu.de4a.conn.api.requestor.IssuingAuthorityType;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.api.smp.NodeInfo;
 import eu.toop.as4.client.ResponseWrapper;
@@ -100,16 +102,16 @@ public class Client {
 		 return nodeInfo;
 	}
 	
-	public IssuingAuthority getIssuingAuthority(String canonicalEvidenceType, String countryCode) {
+	public IssuingAuthorityType getIssuingAuthority(String canonicalEvidenceType, String countryCode) {
 		
 		StringBuilder uri = new StringBuilder(idkEndpoint);
 		uri.append(canonicalEvidenceType);
 		uri.append("/").append(countryCode);
 		
-		return restTemplate.getForObject(uri.toString(), IssuingAuthority.class);
+		return restTemplate.getForObject(uri.toString(), IssuingAuthorityType.class);
 	}
 	
-	public EvidenceService getEvidenceService(String canonicalEvidenceType, String countryCode, String ...args) {
+	public EvidenceServiceType getEvidenceService(String canonicalEvidenceType, String countryCode, String ...args) {
 		
 		StringBuilder uri = new StringBuilder(idkEndpoint);
 		uri.append(canonicalEvidenceType);
@@ -126,7 +128,7 @@ public class Client {
 			}
 		}
 		
-		return restTemplate.getForObject(uri.toString(), EvidenceService.class);
+		return restTemplate.getForObject(uri.toString(), EvidenceServiceType.class);
 	}
 	
 	public void pushEvidence(String endpoint,ResponseWrapper response) { 
