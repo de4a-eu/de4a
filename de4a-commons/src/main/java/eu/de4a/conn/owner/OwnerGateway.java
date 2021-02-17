@@ -1,10 +1,13 @@
 package eu.de4a.conn.owner;
 
-import java.util.List;
+import org.springframework.context.event.ApplicationEventMulticaster;
+import org.w3c.dom.Element;
 
 import eu.de4a.exception.MessageException;
-import eu.toop.connector.api.rest.TCPayload;
 
 public interface OwnerGateway {
-	public List<TCPayload>   sendEvidenceRequest(org.w3c.dom.Element evidenceRequest) throws MessageException;
+	public Element   sendEvidenceRequest(Element evidenceRequest) throws MessageException;
+	public default void  sendEvidenceRequestAsynchronous(Element evidenceRequest,ApplicationEventMulticaster applicationEventMulticaster) throws MessageException{
+		//override in USI-pattern owner
+	}
 }

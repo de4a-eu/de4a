@@ -46,6 +46,7 @@ import eu.de4a.conn.api.requestor.EvidenceServiceType;
 import eu.de4a.conn.api.requestor.IssuingAuthorityType;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.api.smp.NodeInfo;
+import eu.de4a.conn.xml.DOMUtils;
 import eu.toop.as4.client.ResponseWrapper;
 import eu.toop.rest.model.EvidenceService;
 import eu.toop.rest.model.IssuingAuthority;
@@ -61,28 +62,43 @@ public class Client {
 	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
 	private String idkEndpoint;
 	private static final Logger logger =  LoggerFactory.getLogger (Client.class);	
-	
-	public NodeInfo getNodeInfo (String service) {
-		 logger.debug("Consulta SMP {}", service);
-		 final String separator = ":";
-		 final String doubleSeparator = "::";
-		 
-		 //Consultamos al SMP el ServiceMetadata a traves del participantId y documentTypeId
-		 //ej.: iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate:1.0
-		 List<String> serviceParams = Arrays.asList(service.split(":service::"));
+	private static final String  DOUBLE_SEPARATOR = "::";
+	private static final String  SEPARATOR = ":";
+	public String getSmpUri(String service) { 
+		List<String> serviceParams = Arrays.asList(service.split(":service::"));
 		 String scheme = serviceParams.get(0);
-		 List<String> docParams = Arrays.asList(serviceParams.get(1).split(separator));
-		 String participantId = docParams.get(0) + separator + docParams.get(1);
-		 String docId = docParams.get(2) + (docParams.size() > 3 ? separator + docParams.get(3) : "");
+		 List<String> docParams = Arrays.asList(serviceParams.get(1).split(SEPARATOR));
+		 String participantId = docParams.get(0) + SEPARATOR + docParams.get(1);
+		 String docId = docParams.get(2) + (docParams.size() > 3 ? SEPARATOR + docParams.get(3) : "");
 		 
 		 
 		 StringBuilder uri = new StringBuilder(smpEndpoint);
-		 uri.append(scheme).append(doubleSeparator).append(participantId).append("/services/").append(scheme)
-		 	.append(doubleSeparator).append(docId);
-		 		 
+		 uri.append(scheme).append(DOUBLE_SEPARATOR).append(participantId).append("/services/").append(scheme)
+		 	.append(DOUBLE_SEPARATOR).append(docId);
+		 return uri.toString();
+	}
+	public String getSmpUri(String service,String requestor) { 
+		List<String> serviceParams = Arrays.asList(service.split(":service::"));
+		 String scheme = serviceParams.get(0);
+		 List<String> docParams = Arrays.asList(serviceParams.get(1).split(SEPARATOR)); 
+		 String docId ="";
+		 for(int i=2;i<docParams.size();i++)
+			 docId += (i!=2?SEPARATOR:"")+docParams.get(i); 
+		 StringBuilder uri = new StringBuilder(smpEndpoint);
+		 uri.append(scheme).append(DOUBLE_SEPARATOR).append(requestor).append("/services/").append(scheme)
+		 	.append(DOUBLE_SEPARATOR).append(docId).append(":returnService");
+		 return uri.toString();
+	}
+	public NodeInfo getNodeInfo (String uri) {
+		 logger.debug("Consulta SMP {}", uri);
+		 
+		 
+		 //Consultamos al SMP el ServiceMetadata a traves del participantId y documentTypeId
+		 //ej.: iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate:1.0
+		  
 		 NodeInfo nodeInfo = new NodeInfo();
 		 try {
-			 SignedServiceMetadataType signedServiceMetadata = restTemplate.getForObject(uri.toString(), SignedServiceMetadataType.class);
+			 SignedServiceMetadataType signedServiceMetadata = restTemplate.getForObject(uri, SignedServiceMetadataType.class);
 			 ServiceMetadataType serviceMetadata = signedServiceMetadata.getServiceMetadata();		 
 		 
 			 nodeInfo.setParticipantIdentifier(serviceMetadata.getServiceInformation().getParticipantIdentifier().getValue());
@@ -95,7 +111,7 @@ public class Client {
 			 logger.warn("Se ha producido un error en el parseo de la respuesta SMP", nPe);
 			 return new NodeInfo();
 		 } catch (HttpClientErrorException | HttpServerErrorException httpClientOrServerExc) {
-			 logger.error("No se ha encontrado información del servicio en el servidor SMP");
+			 logger.error("No se ha encontrado informaciï¿½n del servicio en el servidor SMP");
 			 return new NodeInfo();
 		 }
 		 

@@ -1,6 +1,6 @@
 open  module de4apid { 
 	exports eu.de4a.scsp.spring;
-	exports eu.de4a.scsp.manager;  
+	exports eu.de4a.scsp.manager;   
 	requires com.helger.commons; 
 	requires   transitive de4acommons;
 	requires org.apache.commons.logging;
@@ -23,5 +23,5 @@ open  module de4apid {
 	requires spring.integration.http;
 	requires spring.webmvc;
 	requires org.apache.commons.io;
-	requires java.annotation;
+	requires java.annotation; 
 }

@@ -34,5 +34,6 @@ requires spring.orm;
 requires com.zaxxer.hikari;
 requires java.persistence;
 requires spring.data.commons; 
+requires  javax.servlet.api ; 
 }
  

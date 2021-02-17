@@ -48,7 +48,7 @@ public class DbaMockitoGateway implements OwnerGateway{
 	private static final String NAME_OWNER_PARAM="ownerName"; 
 	private static final String TIMESTAMP_PARAM="timeStamp"; 
 	private DbaRepository dbaRepository=new DbaRepository();
-	public List<TCPayload> sendEvidenceRequest(org.w3c.dom.Element evidenceRequest) throws MessageException{
+	public org.w3c.dom.Element sendEvidenceRequest(org.w3c.dom.Element evidenceRequest) throws MessageException{
 		if(logger.isDebugEnabled()) { 
 			logger.debug("Request to DBA Mockito: {}",DOMUtils.documentToString(evidenceRequest.getOwnerDocument()));
 		}
@@ -62,9 +62,9 @@ public class DbaMockitoGateway implements OwnerGateway{
 		String nameownerr=DOMUtils.getValueFromXpath( DE4AConstants.XPATH_OWNER_NAME, evidenceRequest);
 		Document national=getNationalResponse(e);
 		Document canonical=getCanonicalResponse(e,requestId,idevaluator,nameevaluator,idowner,nameownerr,national);
-		
-		payloads.add(makePayload(DE4AConstants.TAG_EVIDENCE_RESPONSE,MediaType.APPLICATION_XML.toString(),canonical)); 
-		return payloads;
+//		
+//		payloads.add(makePayload(DE4AConstants.TAG_EVIDENCE_RESPONSE,MediaType.APPLICATION_XML.toString(),canonical)); 
+		return canonical.getDocumentElement();
 	} 
 	 
 	private  TCPayload  makePayload (String name,String mimetype,Document document){  

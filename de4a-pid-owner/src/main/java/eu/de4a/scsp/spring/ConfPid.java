@@ -31,6 +31,11 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.JstlView;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
@@ -48,8 +53,23 @@ import eu.de4a.scsp.ws.client.ClientePidWS;
 @Order(Ordered.LOWEST_PRECEDENCE)
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu")
 @EnableTransactionManagement
-public class ConfPid {
+public class ConfPid  implements WebMvcConfigurer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfPid.class);
+	  @Override
+	  public void addViewControllers(ViewControllerRegistry registry) {
+	     registry.addViewController("/").setViewName("index");
+	  }
+	
+	  @Bean
+	  public ViewResolver viewResolver() {
+	     InternalResourceViewResolver bean = new InternalResourceViewResolver();
+	
+	     bean.setViewClass(JstlView.class);
+	     bean.setPrefix("/WEB-INF/view/");
+	     bean.setSuffix(".jsp");
+	
+	     return bean;
+  }
 
 	@Bean
 	public ClientePidWS clientePidWS(@Value("${scsp.keystore.path}") String keyStoreLocation,
