@@ -6,6 +6,7 @@ package eu.toop.as4.client;
 public class RequestWrapper {
 	private String id;
 	private String evidenceServiceUri;
+	private String returnServiceUri;
 	private String senderId;
 	private Object request;
 	public String getId() {
@@ -25,6 +26,12 @@ public class RequestWrapper {
 	}
 	public void setEvidenceServiceUri(String evidenceServiceUri) {
 		this.evidenceServiceUri = evidenceServiceUri;
+	}
+	public String getReturnServiceUri() {
+		return returnServiceUri;
+	}
+	public void setReturnServiceUri(String returnServiceUri) {
+		this.returnServiceUri = returnServiceUri;
 	}
 	public String getSenderId() {
 		return senderId;

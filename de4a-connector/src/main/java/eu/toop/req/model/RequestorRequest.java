@@ -10,6 +10,7 @@ public class RequestorRequest {
 	@Id
 	private String idrequest;
 	private String evidenceServiceUri;
+	private String returnServiceUri;
 	private String senderId; 
 	private boolean done;
 	public String getIdrequest() {
@@ -23,6 +24,12 @@ public class RequestorRequest {
 	}
 	public void setEvidenceServiceUri(String evidenceServiceUri) {
 		this.evidenceServiceUri = evidenceServiceUri;
+	}
+	public String getReturnServiceUri() {
+		return returnServiceUri;
+	}
+	public void setReturnServiceUri(String returnServiceUri) {
+		this.returnServiceUri = returnServiceUri;
 	}
 	public String getSenderId() {
 		return senderId;

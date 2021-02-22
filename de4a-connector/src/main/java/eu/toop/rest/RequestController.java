@@ -37,7 +37,7 @@ public class RequestController {
 	@Autowired
 	private MessageSource messageSource;
 
-	@PostMapping(value = "/request/lookupRouting", consumes = { "application/xml" }, produces = { "application/xml" })
+	@PostMapping(value = "/lookupRouting", consumes = { "application/xml" }, produces = { "application/xml" })
 	public @ResponseBody ResponseLookupRoutingInformation lookupRoutingInformation(@Valid @RequestBody RequestLookupRoutingInformation request) {
 		
 		ResponseLookupRoutingInformation response = evidenceRequestorManager.manageRequest(request);
@@ -45,7 +45,7 @@ public class RequestController {
 		return response;		
 	}
 	
-	@PostMapping(value = "/request/lookupEvidenceService", consumes = { "application/xml" }, produces = { "application/xml" })
+	@PostMapping(value = "/lookupEvidenceService", consumes = { "application/xml" }, produces = { "application/xml" })
 	public @ResponseBody ResponseLookupEvidenceServiceData lookupEvidenceServiceData(@Valid @RequestBody RequestLookupEvidenceServiceData request) {
 		ResponseLookupEvidenceServiceData response = evidenceRequestorManager.manageRequest(request);
 		
@@ -61,14 +61,14 @@ public class RequestController {
 					LocaleContextHolder.getLocale());
 			// TODO generar mensaje de error no validacion de esquema
 		}
-		String urlRedirectEvaluator = request.getDataEvaluator().getUrlRedirect();
+		/*String urlRedirectEvaluator = request.getDataEvaluator().getUrlRedirect();
 		String urlRedirectOwner = request.getDataOwner().getUrlRedirect();
 		message = messageSource.getMessage("error.rest.usi.err", null, LocaleContextHolder.getLocale());
 		if (urlRedirectEvaluator == null || urlRedirectOwner == null) {
 			logger.error("It´s mandatory Dataowner and Data Evaluator URL return");
 			message = messageSource.getMessage("error.rest.usi.err", null, LocaleContextHolder.getLocale());
 			return generateResponse(false, message);
-		}
+		}*/
 
 		EvaluatorRequest entity = new EvaluatorRequest();
 		entity.setIdevaluator(request.getDataEvaluator().getId());

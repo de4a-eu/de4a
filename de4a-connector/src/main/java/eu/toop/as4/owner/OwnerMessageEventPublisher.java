@@ -25,6 +25,7 @@ public class OwnerMessageEventPublisher {
 	    	customSpringEvent.setId(request.getId());
 	    	customSpringEvent.setSenderId(request.getSenderId());
 	    	customSpringEvent.setEvidenceService(request.getEvidenceServiceUri());
+	    	customSpringEvent.setReturnService(request.getReturnServiceUri());
 	    	applicationEventMulticaster.multicastEvent( customSpringEvent);
 	    }
 }

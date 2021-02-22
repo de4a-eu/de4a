@@ -1,7 +1,4 @@
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns="http://www.de4a.eu/2020/data/requestor/idk"
-	targetNamespace="http://www.de4a.eu/2020/data/requestor/idk"
-	elementFormDefault="qualified" attributeFormDefault="unqualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" targetNamespace="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:include schemaLocation="../xsds/commons-type/common-types.xsd"/>
 	<xs:element name="RequestLookupRoutingInformation">
 		<xs:complexType>

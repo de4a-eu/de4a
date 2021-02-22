@@ -43,10 +43,14 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
 		Document evidenceRequest=DOMUtils.newDocumentFromInputStream(attachao.getSourceStream());
 		wrapper.setRequest(evidenceRequest.getDocumentElement());
 		try {
-			String id=DOMUtils.getValueFromXpath(String.format(DE4AConstants.XPATH_REQUEST_ID,DE4AConstants.TAG_EVIDENCE_REQUEST),evidenceRequest.getDocumentElement());
+			String id=DOMUtils.getValueFromXpath(String.format(DE4AConstants.XPATH_REQUEST_ID,
+					DE4AConstants.TAG_EVIDENCE_REQUEST),
+					evidenceRequest.getDocumentElement());
 			wrapper.setId(id);
 			wrapper.setSenderId(aRequest.getMetadata().getSenderID().getValue());
 			wrapper.setEvidenceServiceUri(aRequest.getMetadata().getDocumentTypeID().getValue());
+			wrapper.setReturnServiceUri(DOMUtils.getValueFromXpath(DE4AConstants.XPATH_RETURN_SERVICE_ID, 
+					evidenceRequest.getDocumentElement()));
 			if(logger.isDebugEnabled())logger.debug("Request with id {} received",id);
 		} catch (MessageException e) {
 			logger.error("Error handling request id",e);

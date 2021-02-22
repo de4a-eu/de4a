@@ -34,7 +34,7 @@ public class Client {
 	private static final Logger logger = LogManager.getLogger(Client.class); 
 	@Value("${de4a.connector.url.return}")
 	private String urlReturn; 
-	@Value("${de4a.connector.url.requestor.phase4}")
+	@Value("${de4a.connector.url.requestor}")
 	private String urlRequestor; 
 	@Value("${de4a.connector.id.seed}")
 	private String seed;
@@ -73,7 +73,9 @@ public class Client {
 	
 	public boolean getEvidenceRequestIM (RequestTransferEvidence request) throws MessageException 
 	{   
-		logger.debug("Sending request {}",request.getRequestId()); 
+		logger.debug("Sending request {}",request.getRequestId());
+		String urlRequest = urlRequestor + "/request";
+		
 		RestTemplate plantilla = new RestTemplate();
 		//TODO quitar esto!
 		request.getDataEvaluator().setUrlRedirect(null);
@@ -83,7 +85,7 @@ public class Client {
 		                new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
 		plantilla.setRequestFactory(requestFactory);
-		ResponseEntity<ResponseTransferEvidence> response= plantilla.postForEntity(urlRequestor,request, ResponseTransferEvidence.class);
+		ResponseEntity<ResponseTransferEvidence> response= plantilla.postForEntity(urlRequest,request, ResponseTransferEvidence.class);
 		responseManager.manageResponse(response.getBody());
 		return response.getBody().getError()==null;
 	} 
