@@ -8,7 +8,7 @@
 </head>
 <body>
 	<h1>Welcome to European PID Owner</h1>
-	<form:form action="viewresponse?id=<%=request.getParameter("id")%>"  method="post" modelAttribute="evidenceForm">
+	<form:form action="preview?id=<%=request.getParameter("id")%>"  method="post" modelAttribute="evidenceForm">
    			<p>  <input type="submit" value="Authenticate and preview" />  </p> 
 	    	 <input type="hidden" id="id" value="<%=request.getParameter("id")%>"/>  
 	    	 <input type="hidden" id="urlreturn" value="<%=request.getParameter("urlreturn")%>"/>  

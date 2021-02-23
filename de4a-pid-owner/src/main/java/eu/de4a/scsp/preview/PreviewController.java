@@ -1,28 +1,27 @@
-package eu.de4a.scsp.preview;
-
-import java.util.Calendar;
-import java.util.List;
+package eu.de4a.scsp.preview.controller;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Example;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.w3c.dom.Document;
 
-import eu.de4a.conn.xml.DOMUtils;
-import eu.de4a.exception.MessageException;
-import eu.de4a.util.DE4AConstants; 
+import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
+import eu.de4a.scsp.preview.manager.PreviewManager; 
 @Controller
 public class PreviewController {
 	private static final Logger logger =  LoggerFactory.getLogger (PreviewController.class);
-	@RequestMapping(value = "/viewresponse", method = RequestMethod.POST) 
-	public String viewresponse(@RequestParam String id,@RequestParam String urlReturn, Model model,HttpServletResponse httpServletResponse) { 
+	
+	@Autowired
+	private PreviewManager previewManager;
+	@RequestMapping(value = "/preview", method = RequestMethod.POST) 
+	public String preview(@RequestParam String id,@RequestParam String urlReturn, Model model,HttpServletResponse httpServletResponse) { 
+		logger.debug("Solicitando previsualizacion de eviden cia {} ",id);
 //		EvidencerRequest user=new User();
 //		EvaluatorRequest request=evaluatorRequestRepository.findById(id).orElse(null);
 //		EvaluatorRequestData data=new EvaluatorRequestData();
@@ -38,7 +37,11 @@ public class PreviewController {
 //		} catch (Exception | MessageException e) {
 //			logger.error("Fatality!",e); 
 //		}
-		//model.addAttribute("userForm", user);
+		ResponseTransferEvidence response=previewManager.gimmePreview(id);
+		Ciudadano user=new Ciudadano();
+		user.setResponse(puesto que es el preview del owner, aqui metería la respuesta domestica. la maquetacion de la preview de datos es especifica en funcion de servicio.Probablemente
+				quieren que sea similar a ClienteLigero donde tendriamos un xhtml,o xslt que maquete la evidencia domestica. Habra que modelar esto en bbdd);
+		model.addAttribute("userForm", user);
 		return "viewresponse";
 	}
 	private boolean waitAratito(String id) throws InterruptedException { 

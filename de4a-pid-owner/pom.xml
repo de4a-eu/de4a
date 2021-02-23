@@ -292,9 +292,14 @@
 		<dependency>
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>javax.servlet-api</artifactId>
-		    <version>${javax.servlet.api.version}</version>
+		     <version>3.0.1</version>
 		    <scope>provided</scope>
 		</dependency>
+		<dependency>
+  <groupId>javax.servlet</groupId>
+  <artifactId>jstl</artifactId>
+  <version>1.2</version>
+</dependency>
 				<!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
 	<!-- 	<dependency>
 		    <groupId>xerces</groupId>
