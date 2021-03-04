@@ -22,13 +22,11 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import eu.de4a.config.DataSourceConf;
-import eu.de4a.repository.CustomRepositoryImpl;
 
 
 
 @Configuration
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", 
-value = "eu", repositoryBaseClass = CustomRepositoryImpl.class)
+@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu")
 @PropertySource("classpath:application.properties")
 @ConfigurationProperties(prefix = "database")
 @EnableTransactionManagement

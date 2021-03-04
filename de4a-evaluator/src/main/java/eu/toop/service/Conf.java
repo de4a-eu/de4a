@@ -27,7 +27,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import eu.de4a.config.DataSourceConf;
-import eu.de4a.repository.CustomRepositoryImpl;
 
 
 @Configuration

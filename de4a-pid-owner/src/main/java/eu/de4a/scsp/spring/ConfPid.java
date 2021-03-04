@@ -46,7 +46,6 @@ import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import eu.de4a.repository.CustomRepositoryImpl;
 import eu.de4a.scsp.ws.client.ClientePidWS;
 
 @Configuration
