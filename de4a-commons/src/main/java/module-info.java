@@ -30,5 +30,4 @@ module de4acommons {
 	requires spring.beans;
 	requires spring.tx;
 	requires commons.fileupload;
-	requires spring.orm;
 }

@@ -68,7 +68,7 @@ public class DbaMockitoGateway implements OwnerGateway{
 		return canonical.getDocumentElement();
 	} 
 	 
-	private  TCPayload  makePayload (String name,String mimetype,Document document){  
+	private  TCPayload  makePayload (String name,String mimetype,Document document) throws MessageException{  
 				TCPayload payload=new TCPayload();
 				payload.setContentID(name);
 				payload.setMimeType(mimetype); 
