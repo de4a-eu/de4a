@@ -24,8 +24,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.util.DOMUtils;
 
 public class CletusLevelTransformer {
 	private static final Logger log = LoggerFactory.getLogger (CletusLevelTransformer.class);

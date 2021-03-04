@@ -1,8 +1,8 @@
-package eu.toop.req.model;
+package eu.de4a.model;
 
 import java.io.Serializable;
 
-public class EvaluatorRequestDataPK implements Serializable{ 
+public class RequestDataPK implements Serializable{ 
 	private static final long serialVersionUID = 1L;
 	private String idrequest; 
 	private String iddata; 
@@ -42,7 +42,7 @@ public class EvaluatorRequestDataPK implements Serializable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		EvaluatorRequestDataPK other = (EvaluatorRequestDataPK) obj; 
+		RequestDataPK other = (RequestDataPK) obj; 
 		return idrequest.equals(other.getIdrequest()) && iddata.equals(other.getIddata());
 	}
 }

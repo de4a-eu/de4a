@@ -1,17 +1,20 @@
-package eu.toop.req.model;
+package eu.de4a.model;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="evaluator_request")
+@Cacheable(value = false)
 public class EvaluatorRequest {
 	@Id
 	private String idrequest;
 	private String urlreturn;
-	private String idevaluator;
-
+	private String idevaluator; 
+	private boolean usi;
+	private boolean done;
 	public String getIdrequest() {
 		return idrequest;
 	}
@@ -30,6 +33,18 @@ public class EvaluatorRequest {
 	public void setIdevaluator(String idevaluator) {
 		this.idevaluator = idevaluator;
 	}
-	
+	public boolean isDone() {
+		return done;
+	}
+	public void setDone(boolean done) {
+		this.done = done;
+	}
+	public boolean isUsi() {
+		return usi;
+	}
+	public void setUsi(boolean usi) {
+		this.usi = usi;
+	}
+	 
 	
 }

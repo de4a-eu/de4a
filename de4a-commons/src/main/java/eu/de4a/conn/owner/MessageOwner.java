@@ -1,8 +1,7 @@
-package eu.toop.as4.owner;
+package eu.de4a.conn.owner;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class MessageOwner extends ContextRefreshedEvent { 
@@ -11,6 +10,7 @@ public class MessageOwner extends ContextRefreshedEvent {
 	private String id;
 	private String senderId;
 	private String evidenceService;
+	private String returnService;
 	public MessageOwner(ApplicationContext context) {
 	        super(context); 
 	} 
@@ -39,6 +39,14 @@ public class MessageOwner extends ContextRefreshedEvent {
 		this.evidenceService = evidenceService;
 	}
     
+	public String getReturnService() {
+		return returnService;
+	}
+
+	public void setReturnService(String returnService) {
+		this.returnService = returnService;
+	}
+
 	public String getSenderId() {
 		return senderId;
 	}

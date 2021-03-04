@@ -14,15 +14,16 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.util.DOMUtils;
  
 
-public class ClientePidWS extends org.springframework.ws.client.core.WebServiceTemplate{  
+public class ClientePidWS extends WebServiceTemplate{  
 	
 	private String endpointPid; 
 	public ClientePidWS(AxiomSoapMessageFactory messageFactory) {

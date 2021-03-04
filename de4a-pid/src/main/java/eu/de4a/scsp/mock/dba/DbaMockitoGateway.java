@@ -26,10 +26,11 @@ import org.w3c.dom.Node;
 
 import eu.de4a.conn.api.requestor.DomesticEvidenceType;
 import eu.de4a.conn.api.requestor.IssuingTypeType;
+import eu.de4a.conn.owner.MessageOwner;
 import eu.de4a.conn.owner.OwnerGateway;
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.rest.TCPayload;
 @Component
 public class DbaMockitoGateway implements OwnerGateway{  
@@ -48,13 +49,13 @@ public class DbaMockitoGateway implements OwnerGateway{
 	private static final String NAME_OWNER_PARAM="ownerName"; 
 	private static final String TIMESTAMP_PARAM="timeStamp"; 
 	private DbaRepository dbaRepository=new DbaRepository();
-	public org.w3c.dom.Element sendEvidenceRequest(org.w3c.dom.Element evidenceRequest) throws MessageException{
+	public org.w3c.dom.Element sendEvidenceRequest(Element evidenceRequest, boolean isUsi) throws MessageException{
 		if(logger.isDebugEnabled()) { 
 			logger.debug("Request to DBA Mockito: {}",DOMUtils.documentToString(evidenceRequest.getOwnerDocument()));
 		}
 		List<TCPayload> payloads=new ArrayList<TCPayload>();
 		Node id=DOMUtils.getNodeFromXpath(XPATH_LEGAL_ID, evidenceRequest);
-		String requestId=DOMUtils.getValueFromXpath(String.format(DE4AConstants.XPATH_REQUEST_ID, DE4AConstants.TAG_EVIDENCE_REQUEST),evidenceRequest);
+		String requestId=DOMUtils.getValueFromXpath(String.format(DE4AConstants.XPATH_REQUEST_ID, DE4AConstants.TAG_EVIDENCE_REQUEST), evidenceRequest);
 		Entity e=dbaRepository.selectEntity(id.getTextContent()  ); 
 		String idevaluator=DOMUtils.getValueFromXpath( DE4AConstants.XPATH_EVALUATOR_ID, evidenceRequest);
 		String nameevaluator=DOMUtils.getValueFromXpath( DE4AConstants.XPATH_EVALUATOR_NAME, evidenceRequest);

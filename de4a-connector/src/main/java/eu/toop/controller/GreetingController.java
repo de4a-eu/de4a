@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import eu.toop.req.model.EvaluatorRequest;
-import eu.toop.req.repository.EvaluatorRequestRepository;
+import eu.de4a.model.EvaluatorRequest;
+import eu.de4a.repository.EvaluatorRequestRepository;
 import eu.toop.service.EvidenceRequestorManager;
 import eu.toop.service.ResponseManager;
 

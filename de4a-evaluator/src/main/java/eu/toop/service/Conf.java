@@ -1,10 +1,12 @@
 package eu.toop.service;
 
+import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,6 +27,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import eu.de4a.config.DataSourceConf;
+import eu.de4a.repository.CustomRepositoryImpl;
 
 
 @Configuration
@@ -35,7 +38,17 @@ import eu.de4a.config.DataSourceConf;
 public class Conf implements WebMvcConfigurer {
 
 	private DataSourceConf dataSourceConf = new DataSourceConf();
+	
+	@Value("#{'${h2.console.port.jvm:${h2.console.port:'21080'}}'}")
+	private String h2ConsolePort;
 
+	
+	@Bean(initMethod = "start", destroyMethod = "stop")
+	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
+		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers", "-webDaemon", 
+				"-ifNotExists", "-webPort", h2ConsolePort);
+	}
+	
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/").setViewName("index");

@@ -40,9 +40,9 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.commons.string.StringHelper;
 
 import eu.de4a.conn.api.smp.NodeInfo;
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.EMEProtocol;
 import eu.toop.connector.api.me.IMessageExchangeSPI;

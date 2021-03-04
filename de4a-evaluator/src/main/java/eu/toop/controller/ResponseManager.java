@@ -1,8 +1,6 @@
 package eu.toop.controller;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +11,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -31,13 +23,14 @@ import org.w3c.dom.Document;
 import com.helger.commons.mime.CMimeType;
 
 import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.model.EvaluatorRequest;
+import eu.de4a.model.EvaluatorRequestData;
+import eu.de4a.repository.EvaluatorRequestDataRepository;
+import eu.de4a.repository.EvaluatorRequestRepository;
 import eu.de4a.util.DE4AConstants;
-import eu.toop.req.model.EvaluatorRequest;
-import eu.toop.req.model.EvaluatorRequestData;
-import eu.toop.req.repository.EvaluatorRequestDataRepository;
-import eu.toop.req.repository.EvaluatorRequestRepository; 
+import eu.de4a.util.DOMUtils;
+
 @Component 
 public class ResponseManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger (ResponseManager.class);
@@ -103,21 +96,23 @@ public class ResponseManager {
 	           return null;
 	        }  
 	}
-	public void manageResponse(ResponseTransferEvidence response) throws  MessageException {
-		EvaluatorRequestData datarequest=new  EvaluatorRequestData(); 
-		//DOMUtils.decodeCompressed(response.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
-		byte[]data=DOMUtils.serializeJaxbObject(ResponseTransferEvidence.class, response);
+	
+	public void manageResponse(ResponseTransferEvidence response) throws MessageException {
+		EvaluatorRequestData datarequest = new EvaluatorRequestData();
+		// DOMUtils.decodeCompressed(response.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
+		byte[] data = DOMUtils.serializeJaxbObject(ResponseTransferEvidence.class, response);
 		datarequest.setData(data);
-		ResponseTransferEvidence r=(ResponseTransferEvidence) DOMUtils.unmarshall(ResponseTransferEvidence.class,DOMUtils.byteToDocument(data));
-		//DOMUtils.decodeCompressed(r.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
-		
-		//DOMUtils.decodeCompressed(response.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
-		LOGGER.error("--->"+new String(datarequest.getData()));
-		datarequest.setMimetype(CMimeType.APPLICATION_XML.getAsString ()); 
-		datarequest.setIddata(DE4AConstants.TAG_EVIDENCE_RESPONSE);  
-		EvaluatorRequest request=evaluatorRequestRepository.findById(response.getRequestId()).orElse(null);
+		ResponseTransferEvidence r = (ResponseTransferEvidence) DOMUtils.unmarshall(ResponseTransferEvidence.class,
+				DOMUtils.byteToDocument(data));
+		// DOMUtils.decodeCompressed(r.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
+
+		// DOMUtils.decodeCompressed(response.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
+		LOGGER.info("--->" + new String(datarequest.getData()));
+		datarequest.setMimetype(CMimeType.APPLICATION_XML.getAsString());
+		datarequest.setIddata(DE4AConstants.TAG_EVIDENCE_RESPONSE);
+		EvaluatorRequest request = evaluatorRequestRepository.findById(response.getRequestId()).orElse(null);
 		datarequest.setRequest(request);
-		evaluatorRequestDataRepository.save(datarequest); 
+		evaluatorRequestDataRepository.save(datarequest);
 	}
 	 
 	public void manageResponse(MultipartFile[] files) throws IOException, MessageException {

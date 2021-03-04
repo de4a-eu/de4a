@@ -5,7 +5,7 @@
     <body>
         <h3>JOB DONE ¡<%=request.getParameter("id")%>¡</h3> 
     </body>
-     <form id="form" action="viewresponse?id=<%=request.getParameter("id")%>" th:action="@{/download?id=<%=request.getParameter("id")%>}" th:object="${download}" method="POST">
+     <form id="form" action="viewresponse?requestId=<%=request.getParameter("id")%>" th:action="@{/download?id=<%=request.getParameter("id")%>}" th:object="${download}" method="POST">
     	 <input type="hidden" id="id" value="<%=request.getParameter("id")%>"/> 
     </form> 
     <!-- <form  id="form" action = "/download?id=< %=request.getParameter("id")% >" method = "GET">

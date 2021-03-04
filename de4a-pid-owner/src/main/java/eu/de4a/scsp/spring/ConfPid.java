@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
@@ -45,6 +46,7 @@ import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import eu.de4a.repository.CustomRepositoryImpl;
 import eu.de4a.scsp.ws.client.ClientePidWS;
 
 @Configuration
@@ -53,23 +55,33 @@ import eu.de4a.scsp.ws.client.ClientePidWS;
 @Order(Ordered.LOWEST_PRECEDENCE)
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu")
 @EnableTransactionManagement
-public class ConfPid  implements WebMvcConfigurer {
+public class ConfPid implements WebMvcConfigurer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfPid.class);
-	  @Override
-	  public void addViewControllers(ViewControllerRegistry registry) {
-	     registry.addViewController("/").setViewName("index");
-	  }
+
+	@Value("#{'${h2.console.port.jvm:${h2.console.port:'21080'}}'}")
+	private String h2ConsolePort;
 	
-	  @Bean
-	  public ViewResolver viewResolver() {
-	     InternalResourceViewResolver bean = new InternalResourceViewResolver();
-	
-	     bean.setViewClass(JstlView.class);
-	     bean.setPrefix("/WEB-INF/view/");
-	     bean.setSuffix(".jsp");
-	
-	     return bean;
-  }
+	@Bean(initMethod = "start", destroyMethod = "stop")
+	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
+		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers", "-webDaemon", 
+				"-ifNotExists", "-webPort", h2ConsolePort);
+	}
+
+	@Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+		registry.addViewController("/").setViewName("index");
+	}
+
+	@Bean
+	public ViewResolver viewResolver() {
+		InternalResourceViewResolver bean = new InternalResourceViewResolver();
+
+		bean.setViewClass(JstlView.class);
+		bean.setPrefix("/WEB-INF/view/");
+		bean.setSuffix(".jsp");
+
+		return bean;
+	}
 
 	@Bean
 	public ClientePidWS clientePidWS(@Value("${scsp.keystore.path}") String keyStoreLocation,

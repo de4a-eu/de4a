@@ -1,4 +1,4 @@
-package eu.toop.req.model;
+package eu.de4a.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

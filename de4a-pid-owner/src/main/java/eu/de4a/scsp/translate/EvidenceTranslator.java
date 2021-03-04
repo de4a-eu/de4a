@@ -9,8 +9,8 @@ import org.w3c.dom.Element;
 
 import eu.de4a.conn.api.requestor.DomesticEvidenceType;
 import eu.de4a.conn.api.requestor.IssuingTypeType;
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.util.DOMUtils;
 
 public interface EvidenceTranslator {
 	public static final String LANGUAGE_DEFAULT="es";
