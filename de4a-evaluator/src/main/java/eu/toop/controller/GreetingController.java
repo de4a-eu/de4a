@@ -1,23 +1,12 @@
 package eu.toop.controller;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Example;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,21 +29,22 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.w3c.dom.Document;
 
 import eu.de4a.conn.api.requestor.AtuItem;
-import eu.de4a.conn.api.requestor.EvidenceServiceDataType;
 import eu.de4a.conn.api.requestor.RequestLookupEvidenceServiceData;
 import eu.de4a.conn.api.requestor.RequestLookupRoutingInformation;
 import eu.de4a.conn.api.requestor.RequestTransferEvidence;
 import eu.de4a.conn.api.requestor.ResponseLookupEvidenceServiceData;
 import eu.de4a.conn.api.requestor.ResponseLookupRoutingInformation;
+import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
-import eu.de4a.conn.xml.DOMUtils;
+import eu.de4a.conn.owner.model.PreviewRequest;
 import eu.de4a.exception.MessageException;
+import eu.de4a.model.EvaluatorRequest;
+import eu.de4a.model.EvaluatorRequestData;
+import eu.de4a.repository.EvaluatorRequestDataRepository;
+import eu.de4a.repository.EvaluatorRequestRepository;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.DOMUtils;
 import eu.de4a.util.EvidenceTypeIds;
-import eu.toop.req.model.EvaluatorRequest;
-import eu.toop.req.model.EvaluatorRequestData;
-import eu.toop.req.repository.EvaluatorRequestDataRepository;
-import eu.toop.req.repository.EvaluatorRequestRepository;
 import eu.toop.rest.Client;
 
 @Controller 
@@ -72,9 +62,11 @@ public class GreetingController {
 	@Value("${de4a.connector.url.requestor.redirect}")
 	private String urlRequestorRedirect;
 	private String id;
-	private RequestTransferEvidence requestEvidencia; 
+	private RequestTransferEvidence requestEvidencia;
+	
+	private final static String REDIRECT_ADDR = "redirect:/%s";
 
-	@RequestMapping(value = "/welcome.html")
+	@GetMapping(value = "/welcome.html")
 	public String welcome(Model model) { 
 		model.addAttribute("evidenceForm", new RequestLookupRoutingInformation());
 		return "welcome";
@@ -84,7 +76,14 @@ public class GreetingController {
 		model.addAttribute("userForm", new User());
 		return "greeting";
 	}
-	@RequestMapping(value ="/goEvidenceForm", method = RequestMethod.POST)
+	
+	@GetMapping(value = "/redirectOwner")
+	public String redirectOwner(Model model) { 
+		model.addAttribute("userForm", new User());
+		return "redirectOwner";
+	}
+	
+	@PostMapping(value ="/goEvidenceForm")
 	public String goEvidenceForm(Model model,@ModelAttribute("evidenceForm") RequestLookupRoutingInformation lookupRouting,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) { 
 		User u = new User();
 		u.setEvidenceTypeId(lookupRouting.getCanonicalEvidenceId());
@@ -106,7 +105,7 @@ public class GreetingController {
 		return "dba";
 	}
 	
-	@RequestMapping(value = "/greetinggo", method = RequestMethod.POST) 
+	@PostMapping(value = "/greetinggo") 
 	public String greetingSubmit(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {
 			RequestLookupEvidenceServiceData request = new RequestLookupEvidenceServiceData();
 			request.setAdminTerritorialUnit(user.getAtuCode());
@@ -117,32 +116,52 @@ public class GreetingController {
 			ResponseLookupEvidenceServiceData responseServiceData = client.getLookupServiceData(request);			
 		
 			requestEvidencia = client.buildRequest(user, responseServiceData.getEvidenceService());
-			user.setRequest(jaxbObjectToXML(requestEvidencia));
+			user.setRequest(DOMUtils.jaxbObjectToXML(requestEvidencia, RequestTransferEvidence.class));
 			id=requestEvidencia.getRequestId();  
 			return "showRequest";
-	}  
-	@RequestMapping(value = "/requestEvidence", method = RequestMethod.POST) 
-	public String sendRequest(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse,RedirectAttributes redirectAttributes) {  
+	}
+	
+	@PostMapping(value = "/requestEvidence") 
+	public String sendRequest(Model model, HttpServletRequest requesthttp,HttpServletResponse httpServletResponse,RedirectAttributes redirectAttributes) {  
 		try {
-			EvaluatorRequest request=new EvaluatorRequest();
+			EvaluatorRequest request = new EvaluatorRequest();
 			request.setIdrequest(id);
-			evaluatorRequestRepository.save(request);
-			boolean ok = client.getEvidenceRequestIM(requestEvidencia);
-			redirectAttributes.addAttribute("id", id);
-			return ok?"redirect:/returnPage.jsp":"redirect:/errorPage.jsp";
+			
+			String redirectAddr = String.format(REDIRECT_ADDR, "errorPage.jsp");
+			if(!StringUtils.isEmpty(requestEvidencia.getDataOwner().getUrlRedirect())) {
+				//USI pattern
+				request.setUsi(true);
+				evaluatorRequestRepository.save(request);
+				client.getEvidenceRequestUSI(requestEvidencia);
+				PreviewRequest previewRequest = new PreviewRequest();
+				previewRequest.setIdRequest(requestEvidencia.getRequestId());
+				previewRequest.setReturnUrl(requestEvidencia.getDataEvaluator().getUrlRedirect());
+				model.addAttribute("previewRequest", previewRequest);
+				model.addAttribute("idRequest", requestEvidencia.getRequestId());
+				model.addAttribute("redirectUrl", requestEvidencia.getDataOwner().getUrlRedirect());
+				redirectAddr = "redirectOwner";
+			} else {
+				//IM pattern
+				request.setUsi(false);
+				evaluatorRequestRepository.save(request);
+				client.getEvidenceRequestIM(requestEvidencia);
+				redirectAttributes.addAttribute("id", id);
+				redirectAddr = String.format(REDIRECT_ADDR, "returnPage.jsp");			
+			}									
+			return redirectAddr;
 		} catch (MessageException e) {
 			logger.error("Error getting evidence request",e);
-			return "redirect:/errorPage.jsp";
+			return String.format(REDIRECT_ADDR, "errorPage.jsp");
 		}
 		
 	}
-	@RequestMapping(value = "/requestEvidenceUSI", method = RequestMethod.POST) 
+	@PostMapping(value = "/requestEvidenceUSI") 
 	public void sendRequestUSI(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {  
 		try {
 			EvaluatorRequest request=new EvaluatorRequest();
 			request.setIdrequest(id);
 			evaluatorRequestRepository.save(request);
-			boolean ok = client.getEvidenceRequestUSI(requestEvidencia);
+			client.getEvidenceRequestUSI(requestEvidencia);
 			httpServletResponse.setHeader("Location", String.format(urlRequestorRedirect, id));//"http://localhost:8083/de4a-connector/getreponse?id="+id);
 			//httpServletResponse.setHeader("Location", "https://des-de4a.redsara.es/de4a-tc-requestor/getreponse?id="+id);
 			httpServletResponse.setStatus(302);  
@@ -173,54 +192,50 @@ public class GreetingController {
 		}  
 		return ack;
 	} 
-	@RequestMapping(value = "/viewresponse", method = RequestMethod.POST) 
-	public String viewresponse(@RequestParam String id,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse,Model model) { 
-		User user=new User();
-		EvaluatorRequest request=evaluatorRequestRepository.findById(id).orElse(null);
-		EvaluatorRequestData data=new EvaluatorRequestData();
+	
+	@PostMapping(value = "/viewresponse", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+			consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}) 
+	public @ResponseBody Ack viewresponse(@RequestBody ResponseTransferEvidence responseTransferEvidence, HttpServletRequest requesthttp, 
+			HttpServletResponse httpServletResponse,RedirectAttributes redirectAttributes) { 
+		Ack ack = new Ack();		
+		try {
+			responseManager.manageResponse(responseTransferEvidence);
+			ack.setCode(Ack.OK);
+		} catch (MessageException e) {
+			logger.error("There was a problem processing owner USI response");
+			ack.setCode(Ack.FAIL); 
+		}
+		return ack;
+	}
+	
+	@PostMapping(value = "/viewresponse")
+	public String viewresponse(@RequestParam String requestId, HttpServletRequest requesthttp,
+			HttpServletResponse httpServletResponse, Model model) {
+		User user = new User();
+		EvaluatorRequest request = evaluatorRequestRepository.findById(requestId).orElse(null);
+		EvaluatorRequestData data = new EvaluatorRequestData();
 		data.setRequest(request);
 		Example<EvaluatorRequestData> example = Example.of(data);
-		List<EvaluatorRequestData>registros=evaluatorRequestDataRepository.findAll(example); 
-		EvaluatorRequestData dataresponse=registros.stream().filter(d->d.getIddata().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null); 
-		try {
-			Document response=DOMUtils.byteToDocument(dataresponse.getData());
-			user.setResponse(loadString(response)); 
-			String national=DOMUtils.getNodeFromXpath(DE4AConstants.XPATH_EVIDENCE_DATA,response.getDocumentElement()).getTextContent(); 
-			user.setNationalResponse(loadString(DOMUtils.decodeCompressed(national.getBytes() ))); 
-		} catch (Exception | MessageException e) {
-			logger.error("Fatality!",e); 
+		List<EvaluatorRequestData> registros = evaluatorRequestDataRepository.findAll(example);
+		EvaluatorRequestData dataresponse = registros.stream()
+				.filter(d -> d.getIddata().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
+		if(dataresponse != null) {
+			try {
+				Document response = DOMUtils.byteToDocument(dataresponse.getData());
+				user.setResponse(DOMUtils.loadString(response));
+				String national = DOMUtils
+						.getNodeFromXpath(DE4AConstants.XPATH_EVIDENCE_DATA, response.getDocumentElement())
+						.getTextContent();
+				user.setNationalResponse(DOMUtils.loadString(DOMUtils.decodeCompressed(national.getBytes())));
+				model.addAttribute("isResponseReady", "true");
+			} catch (Exception | MessageException e) {
+				logger.error("Fatality!", e);
+			}
+		} else {
+			model.addAttribute("isResponseReady", "false");
 		}
 		model.addAttribute("userForm", user);
+		model.addAttribute("requestId", requestId);
 		return "viewresponse";
-	}
-	private String jaxbObjectToXML(RequestTransferEvidence request) 
-    {
-        try
-        { 
-            JAXBContext jaxbContext = JAXBContext.newInstance(RequestTransferEvidence.class); 
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE); 
-            StringWriter sw = new StringWriter(); 
-            jaxbMarshaller.marshal(request, sw); 
-            return sw.toString(); 
- 
-        } catch (JAXBException e) {
-            logger.error("Error marshalling object",e);
-            return "";
-        }
-    }
-  
-	private String loadString(Document doc) throws Exception { 
-		Source xmlInput = new StreamSource(new StringReader(DOMUtils.documentToString(doc)));
-        StringWriter stringWriter = new StringWriter();
-        StreamResult xmlOutput = new StreamResult(stringWriter);
-        TransformerFactory transformerFactory  = TransformerFactory.newInstance();
-     
-         
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.transform(xmlInput, xmlOutput);
-        return xmlOutput.getWriter().toString(); 
 	}
 }

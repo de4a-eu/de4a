@@ -41,9 +41,11 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.commons.string.StringHelper;
 
 import eu.de4a.conn.api.smp.NodeInfo;
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.model.DomibusRequest;
+import eu.de4a.repository.DomibusRequestRepository;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.DOMUtils;
 import eu.toop.as4.domibus.soap.ClienteWS;
 import eu.toop.as4.domibus.soap.DomibusException;
 import eu.toop.as4.domibus.soap.MessageFactory;
@@ -66,8 +68,6 @@ import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.me.outgoing.MERoutingInformation;
 import eu.toop.connector.api.rest.TCOutgoingMessage;
 import eu.toop.connector.api.rest.TCPayload;
-import eu.toop.req.model.DomibusRequest;
-import eu.toop.req.repository.DomibusRequestRepository;
 @Component
 public class DomibusGatewayClient implements As4GatewayInterface{
   private static final Logger LOGGER = LoggerFactory.getLogger (DomibusGatewayClient.class);

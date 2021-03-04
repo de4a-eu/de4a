@@ -27,6 +27,7 @@ import eu.de4a.conn.api.requestor.NaturalPersonIdentifierType;
 import eu.de4a.conn.api.requestor.RequestGroundsType;
 import eu.de4a.conn.api.requestor.RequestTransferEvidence;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.SMPUtils;
 
 @Component
 public class RequestBuilder { 
@@ -34,6 +35,8 @@ public class RequestBuilder {
 	private String meId;
 	@Value("${de4a.me.evaluator.name}")
 	private String meName;
+	@Value("#{'${de4a.requestor.participantID.jvm:${de4a.requestor.participantID:}}'}")
+	private String requestorId;
 	@Value("${de4a.specificationId}")
 	private String specification;
 	@Value("${de4a.request.grounds.link}")
@@ -41,7 +44,7 @@ public class RequestBuilder {
 	@Value("${de4a.evidence.service.uri}")
 	private String serviceUri;
 	@Value("${de4a.return.service.id}")
-	private String returnService;
+	private String returnUrl;
 	@Value("${de4a.procedure.id}")
 	private String procedureId;
 	public DataRequestSubjectCVType buildSubject(String eidasId,String birthDate,String name,String ap1,String fullName) {
@@ -82,16 +85,20 @@ public class RequestBuilder {
 	public RequestTransferEvidence buildRequest(String requestId, EvidenceServiceType evidenceServiceType,
 			String eidasId, String birthDate, String name, String ap1, String fullName) {
 		RequestTransferEvidence request = new RequestTransferEvidence();
-		request.setDataEvaluator(buildAgent(meId, meName));
+		request.setDataEvaluator(buildAgent(meId, meName, returnUrl));
 		request.setSpecificationId(specification);
-		request.setDataOwner(buildAgent(evidenceServiceType.getDataOwner(), evidenceServiceType.getDataOwner()));
+		request.setDataOwner(buildAgent(evidenceServiceType.getDataOwner(), 
+				evidenceServiceType.getDataOwner(),
+				evidenceServiceType.getRedirectURL()));
 		request.setProcedureId(procedureId);
 		RequestGroundsType grounds = new RequestGroundsType();
 		grounds.setExplicitRequest(ExplicitRequestType.SDGR_14);
 		grounds.setLawELIPermanentLink(groundsLink);
 		request.setRequestGrounds(grounds);
 		request.setRequestId(requestId);
-		request.setReturnServiceId(evidenceServiceType.getRedirectURL());
+		request.setReturnServiceId(SMPUtils.getRequestorReturnService(
+				evidenceServiceType.getService(), 
+				requestorId));
 		request.setTimeStamp(gimmeGregorian(Calendar.getInstance().getTime()));
 		EvidenceServiceDataType evidenceSevice = new EvidenceServiceDataType();
 		evidenceSevice.setEvidenceServiceURI(evidenceServiceType.getService());
@@ -105,6 +112,7 @@ public class RequestBuilder {
 
 		return request;
 	}
+	
 	private XMLGregorianCalendar gimmeGregorian(Date date) {
 		GregorianCalendar c = new GregorianCalendar();
 		c.setTime(date);
@@ -117,10 +125,12 @@ public class RequestBuilder {
 		}
 		return date2;
 	}
-	private AgentCVType buildAgent(String id,String name) {
-		AgentCVType agent=new AgentCVType();
+
+	private AgentCVType buildAgent(String id, String name, String urlRedirect) {
+		AgentCVType agent = new AgentCVType();
 		agent.setId(id);
 		agent.setName(name);
+		agent.setUrlRedirect(urlRedirect);
 		return agent;
 	}
 }

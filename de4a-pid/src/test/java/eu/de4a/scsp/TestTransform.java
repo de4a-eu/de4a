@@ -31,8 +31,8 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import eu.de4a.conn.xml.DOMUtils;
-import eu.de4a.scsp.spring.ConfPid; 
+import eu.de4a.scsp.spring.ConfPid;
+import eu.de4a.util.DOMUtils; 
 @SpringBootTest(classes={ConfPid.class}) 
 @RunWith(SpringRunner.class) 
 public class TestTransform {

@@ -8,6 +8,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 
+import eu.de4a.conn.owner.MessageOwner;
 import eu.toop.as4.client.RequestWrapper;
 
  

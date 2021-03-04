@@ -1,4 +1,4 @@
-package eu.de4a.scsp.preview.controller;
+package eu.de4a.scsp.preview;
 
 public class Ciudadano {
 	private String response;

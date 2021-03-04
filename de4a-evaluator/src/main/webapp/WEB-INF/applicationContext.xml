@@ -18,9 +18,7 @@
 			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
  
 
-	<context:annotation-config />
-	
-	<context:component-scan base-package="eu" />
+	<mvc:annotation-driven/>
 	 
 	 
 </beans>

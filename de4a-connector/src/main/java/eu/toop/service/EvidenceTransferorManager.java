@@ -10,24 +10,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 
 import eu.de4a.conn.api.smp.NodeInfo;
+import eu.de4a.conn.owner.MessageOwner;
 import eu.de4a.conn.owner.MessageResponseOwner;
 import eu.de4a.conn.owner.OwnerGateway;
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.model.EvidenceEntity;
+import eu.de4a.model.RequestorRequest;
+import eu.de4a.repository.RequestorRequestRepository;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.DOMUtils;
+import eu.de4a.util.SMPUtils;
 import eu.toop.as4.client.regrep.CletusLevelTransformer;
-import eu.toop.as4.owner.MessageOwner;
 import eu.toop.as4.owner.OwnerLocator;
-import eu.toop.as4.owner.OwnerMessageEventPublisher;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
-import eu.toop.req.model.EvidenceEntity;
-import eu.toop.req.model.RequestorRequest;
-import eu.toop.req.repository.RequestorRequestRepository;
 import eu.toop.rest.Client;
 
 @Component 
@@ -36,6 +37,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
 
 	@Value("#{'${as4.me.id.jvm:${as4.me.id:}}'}")
 	private String meId; 
+	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
+	private String smpEndpoint;
 	@Autowired
 	private Client clientSmp;
 	@Autowired
@@ -43,7 +46,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 	@Autowired
 	private RequestorRequestRepository requestorRequestRepository;
 	@Autowired
-	private OwnerMessageEventPublisher publisher; 
+	private ApplicationEventMulticaster applicationEventMulticaster;
 	
 	public void queueMessage(MessageOwner request) {
 		Element canonicalResponse = null;
@@ -75,35 +78,46 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			logger.error("Fail...", e);
 			// TODO handler error
 		}
-		if (evidenceEntity.isUsi() == false) {
-			try {
-				canonicalResponse = gateway.sendEvidenceRequest(request.getMessage());
-			} catch (NoSuchMessageException | MessageException e) {
-				logger.error("Fail...", e);
-				// TODO handler error
+		if(gateway != null && evidenceEntity != null) {
+			if (!evidenceEntity.isUsi()) {
+				try {
+					canonicalResponse = gateway.sendEvidenceRequest(request.getMessage(), false);
+				} catch (NoSuchMessageException | MessageException e) {
+					logger.error("Fail...", e);
+					// TODO handler error
+				}
+				
+				String uriSmp = SMPUtils.getSmpUri(smpEndpoint, request.getReturnService());			
+				sendResponseMessage(from, uriSmp, request.getId(), canonicalResponse);
+			} else {
+				try {
+					gateway.sendEvidenceRequestAsynchronous(request.getSenderId(), request.getMessage(), 
+							applicationEventMulticaster);
+				} catch (MessageException e) {
+					logger.error("Fail...",e);
+					//TODO handler error 
+				}
 			}
-			
-			String uriSmp = clientSmp.getSmpReturnUri(request.getSenderId(), request.getEvidenceService());			
-			sendRequestMessage(from, uriSmp, request.getId(), canonicalResponse);
 		}
 	}
 	
-	public void queueMessageResponse( MessageResponseOwner response) {
-		if(logger.isDebugEnabled()) { 
+	public void queueMessageResponse(MessageResponseOwner response) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("Queued a response from USI-Pattern owner:");
 			logger.debug(DOMUtils.documentToString(response.getMessage().getOwnerDocument()));
 		}
-		RequestorRequest usirequest=requestorRequestRepository.findById(response.getId()).orElse(null) ;
-		if(usirequest == null) {
-			logger.error("Not located a request with ID {}",response.getId());
-		}else {
-			sendRequestMessage(meId,usirequest.getEvidenceServiceUri(), usirequest.getIdrequest(), response.getMessage());
+		RequestorRequest usirequest = requestorRequestRepository.findById(response.getId()).orElse(null);
+		if (usirequest == null) {
+			logger.error("Not located a request with ID {}", response.getId());
+		} else {
+			String uriSmp = SMPUtils.getSmpUri(smpEndpoint, usirequest.getReturnServiceUri());
+			sendResponseMessage(meId, uriSmp, usirequest.getIdrequest(), response.getMessage());
 		}
-	}  
+	}
 	
 	
 
-	public boolean sendRequestMessage(String sender, String uriSmp, String id, Element canonicalResponse) {
+	public boolean sendResponseMessage(String sender, String uriSmp, String id, Element canonicalResponse) {
 		// TODO hacer algo decente para el parseo de ids de evidencias.
 		NodeInfo nodeInfo = clientSmp.getNodeInfo(uriSmp, true);
 		try {

@@ -8,8 +8,6 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
      <mvc:annotation-driven/>
- 
-	<context:component-scan base-package="eu.toop.service.spring eu.toop.scsp.spring" />
 	 
  <!-- 
 	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">

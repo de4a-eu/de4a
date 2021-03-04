@@ -8,9 +8,9 @@ import org.w3c.dom.Document;
 
 import com.helger.phase4.attachment.WSS4JAttachment;
 
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.DOMUtils;
 import eu.toop.as4.client.Phase4GatewayClient;
 import eu.toop.as4.client.RequestWrapper;
 import eu.toop.as4.owner.OwnerMessageEventPublisher;

@@ -34,12 +34,12 @@ import org.xml.sax.SAXException;
 
 import eu.de4a.conn.api.requestor.DomesticEvidenceType;
 import eu.de4a.conn.api.requestor.IssuingTypeType;
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.scsp.owner.model.Municipio;
 import eu.de4a.scsp.owner.repository.MunicipioRepository;
 import eu.de4a.scsp.translate.EvidenceTranslator;
-import eu.de4a.util.DE4AConstants; 
+import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.DOMUtils; 
 @Component
 public class BirthEvidenceTranslator implements EvidenceTranslator{
 	private static final Logger logger = LogManager.getLogger(BirthEvidenceTranslator.class); 

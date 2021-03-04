@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 
 import eu.de4a.conn.owner.OwnerGateway;
 import eu.de4a.exception.MessageException;
-import eu.toop.req.model.EvidenceEntity;
-import eu.toop.req.repository.EvidenceEntityRepository; 
+import eu.de4a.model.EvidenceEntity;
+import eu.de4a.repository.EvidenceEntityRepository; 
 
 @Component
 public class OwnerLocator {

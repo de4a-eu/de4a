@@ -1,14 +1,11 @@
 package eu.toop.rest;
- 
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,6 +25,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -49,74 +47,28 @@ import eu.de4a.conn.api.requestor.IssuingAuthorityType;
 import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.api.smp.NodeInfo;
+import eu.de4a.util.RestUtils;
 import eu.toop.as4.client.ResponseWrapper;
- 
- 
 
 @Component
-public class Client { 
+public class Client {
 	@Autowired
-	private RestTemplate restTemplate; 
-	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
-	private String smpEndpoint;
+	private RestTemplate restTemplate;
 	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
 	private String idkEndpoint;
-	private static final Logger logger =  LoggerFactory.getLogger (Client.class);	
-	private static final String DOUBLE_SEPARATOR = "::";
-	private static final String SEPARATOR = ":";
-	private static final String SERVICE = ":service::";
-	private static final String SERVICES_PATH = "/services/";
-	
-	public String getSmpReturnUri(String senderId, String service) {
-		final String docId = ResponseTransferEvidence.class.getSimpleName();
-		final StringBuilder uri = new StringBuilder(smpEndpoint);
-		
-		List<String> serviceParams = Arrays.asList(service.split(SERVICE));
-		String scheme = serviceParams.get(0);
-		
-		uri.append(scheme).append(DOUBLE_SEPARATOR).append(senderId).append(SERVICES_PATH).append(scheme)
-				.append(DOUBLE_SEPARATOR).append(docId);
-		return uri.toString();
-	}
-	
-	public String getSmpUri(String service) {
-		List<String> serviceParams = Arrays.asList(service.split(SERVICE));
-		String scheme = serviceParams.get(0);
-		List<String> docParams = Arrays.asList(serviceParams.get(1).split(SEPARATOR));
-		String participantId = docParams.get(0) + SEPARATOR + docParams.get(1);
-		String docId = docParams.get(2) + (docParams.size() > 3 ? SEPARATOR + docParams.get(3) : "");
+	private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
-		StringBuilder uri = new StringBuilder(smpEndpoint);
-		uri.append(scheme).append(DOUBLE_SEPARATOR).append(participantId).append(SERVICES_PATH).append(scheme)
-				.append(DOUBLE_SEPARATOR).append(docId);
-		return uri.toString();
-	}
-
-	public String getSmpUri(String service, String requestor) {
-		List<String> serviceParams = Arrays.asList(service.split(SERVICE));
-		String scheme = serviceParams.get(0);
-		List<String> docParams = Arrays.asList(serviceParams.get(1).split(SEPARATOR));
-		String docId = "";
-		for (int i = 2; i < docParams.size(); i++)
-			docId += (i != 2 ? SEPARATOR : "") + docParams.get(i);
-		
-		StringBuilder uri = new StringBuilder(smpEndpoint);
-		uri.append(scheme).append(DOUBLE_SEPARATOR).append(requestor).append(SERVICES_PATH).append(scheme)
-				.append(DOUBLE_SEPARATOR).append(docId).append(":returnService");
-		return uri.toString();
-	}
-	
 	/**
 	 * Obtain service metadata info from SMP by participantId and documentTypeId
-	 * <p>scheme : service :: participantId : EvicendeTypeId : version</br>
-	 * ej.: iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate:1.0</p>
+	 * <p>
+	 * scheme : service :: participantId : EvicendeTypeId : version</br>
+	 * ej.: iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate:1.0
+	 * </p>
 	 * 
-	 * @param uri
-	 * 		Url to retrieve service metadata from SMP
-	 * @param isReturnService
-	 * 		Determine if the process looked for it is a returnService or not
-	 * @return NodeInfo
-	 * 		Service metadata
+	 * @param uri             Url to retrieve service metadata from SMP
+	 * @param isReturnService Determine if the process looked for it is a
+	 *                        returnService or not
+	 * @return NodeInfo Service metadata
 	 */
 	public NodeInfo getNodeInfo(String uri, boolean isReturnService) {
 		logger.debug("Consulta SMP {}", uri);
@@ -127,6 +79,9 @@ public class Client {
 		try {
 			SignedServiceMetadataType signedServiceMetadata = restTemplate.getForObject(uri,
 					SignedServiceMetadataType.class);
+			if (signedServiceMetadata == null) {
+				return nodeInfo;
+			}
 			ServiceMetadataType serviceMetadata = signedServiceMetadata.getServiceMetadata();
 
 			nodeInfo.setParticipantIdentifier(
@@ -142,6 +97,7 @@ public class Client {
 						// TODO en base a que se selecciona un endpoint u otro de la lista
 						nodeInfo.setEndpointURI(elem.getServiceEndpointList().getEndpointAtIndex(0).getEndpointURI());
 						nodeInfo.setCertificate(elem.getServiceEndpointList().getEndpointAtIndex(0).getCertificate());
+						nodeInfo.setProcessIdentifier(processId);
 					}
 				});
 
@@ -158,77 +114,58 @@ public class Client {
 
 		return nodeInfo;
 	}
-	
+
 	public IssuingAuthorityType getIssuingAuthority(String canonicalEvidenceType, String countryCode) {
-		
+
 		StringBuilder uri = new StringBuilder(idkEndpoint);
 		uri.append(canonicalEvidenceType);
 		uri.append("/").append(countryCode);
-		
+
 		return restTemplate.getForObject(uri.toString(), IssuingAuthorityType.class);
 	}
-	
-	public EvidenceServiceType getEvidenceService(String canonicalEvidenceType, String countryCode, String ...args) {
-		
+
+	public EvidenceServiceType getEvidenceService(String canonicalEvidenceType, String countryCode, String... args) {
+
 		StringBuilder uri = new StringBuilder(idkEndpoint);
 		uri.append(canonicalEvidenceType);
 		uri.append("/").append(countryCode);
-		if(!StringUtils.isEmpty(args)) {
+		if (!StringUtils.isEmpty(args)) {
 			Iterator<String> it = new IterableIterator<>(args);
-			while(it.hasNext()) {
+			while (it.hasNext()) {
 				String nameParam = it.next();
-				if(it.hasNext()) {
+				if (it.hasNext()) {
 					String valueParam = it.next();
 					uri.append("?").append(nameParam);
 					uri.append("=").append(valueParam);
 				}
 			}
 		}
-		
+
 		return restTemplate.getForObject(uri.toString(), EvidenceServiceType.class);
 	}
-	
-	public void pushEvidence(String endpoint,ResponseWrapper response) { 
-		logger.debug("Sending response {}",endpoint);
-		// String uri = "http://localhost:8083/de4a-connector/request?urlReturn=http://localhost:8682/de4a-evaluator/ReturnPage&evaluatorId="+dataOwnerdI+"&@evaluatorId="+evidenceServiceUri+"&requestId=777"; 
-		 RestTemplate plantilla = new RestTemplate();
-		HttpComponentsClientHttpRequestFactory requestFactory =
-		                new HttpComponentsClientHttpRequestFactory();
-		requestFactory.setHttpClient(HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
-		plantilla.setRequestFactory(requestFactory);
-		MultiValueMap<String, Object> body
-		  = new LinkedMultiValueMap<>();
-		response.getAttacheds().forEach(p->{
-//			body.add("file", p); 
-			body.add("file", new FileSystemResource(convert(p)));
-		});   
- 		HttpHeaders headers = new HttpHeaders();
- 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-// 	 List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-// 	 MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-// 	 converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_XML  ));
-// 	 messageConverters.add(converter);
-// 	 plantilla.setMessageConverters(messageConverters);
- 		HttpEntity<MultiValueMap<String, Object>> requestEntity = new    HttpEntity<MultiValueMap<String, Object>>( 	body, headers); 
-		plantilla.postForEntity(endpoint,requestEntity, Ack.class);  
-		
-	 
-	}  
-	  public static File convert(MultipartFile file)
-	  {    
-	    File convFile = new File(file.getOriginalFilename());
-	    try {
-	        convFile.createNewFile();
-	          FileOutputStream fos = new FileOutputStream(convFile); 
-	            fos.write(file.getBytes());
-	            fos.close(); 
-	    } catch (IOException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-	    } 
 
-	    return convFile;
-	 }
+	public boolean pushEvidence(String endpoint, ResponseTransferEvidence response) {
+		logger.debug("Sending owner response to evaluator {}", endpoint);
+		
+		RestTemplate template = RestUtils.getRestTemplate();
+		ResponseEntity<Ack> ack = template.postForEntity(endpoint, response, Ack.class);
+		return ack.getBody() != null && Ack.OK.equals(ack.getBody().getCode());
+	}
+
+	public static File convert(MultipartFile file) {
+		File convFile = new File(file.getOriginalFilename());
+		try {
+			convFile.createNewFile();
+			FileOutputStream fos = new FileOutputStream(convFile);
+			fos.write(file.getBytes());
+			fos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return convFile;
+	}
 //	public void  pushEvidence( String endpoint,Object o) throws RestClientException{
 //		 logger.debug("Pushing object to evaluator {}",endpoint);   
 //		 HttpHeaders headers = new HttpHeaders();
@@ -247,35 +184,33 @@ public class Client {
 //		 HttpEntity<Document> requestEntity = new HttpEntity<>(reponse, headers); 
 //		 URI uri = restTemplate.postForLocation(endpoint, requestEntity );
 //	} 
-	
-	public void pushEvidence2(String endpoint,org.apache.http.HttpEntity multipart) {
-		//CloseableHttpClient client = HttpClients.createDefault();
-		SSLConnectionSocketFactory scsf=null;
+
+	public void pushEvidence2(String endpoint, org.apache.http.HttpEntity multipart) {
+		// CloseableHttpClient client = HttpClients.createDefault();
+		SSLConnectionSocketFactory scsf = null;
 		try {
-			  scsf =new SSLConnectionSocketFactory(
-				     SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build(), 
-				        NoopHostnameVerifier.INSTANCE); 
-			  
+			scsf = new SSLConnectionSocketFactory(
+					SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build(),
+					NoopHostnameVerifier.INSTANCE);
+
 		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		CloseableHttpClient client =HttpClients.custom().setSSLSocketFactory(scsf).build();
-	    HttpPost httpPost = new HttpPost(endpoint); 
-	    httpPost.setEntity(multipart);
-	    CloseableHttpResponse response=null;
-	    try {
-		  response = client.execute(httpPost);
+		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(scsf).build();
+		HttpPost httpPost = new HttpPost(endpoint);
+		httpPost.setEntity(multipart);
+		CloseableHttpResponse response = null;
+		try {
+			response = client.execute(httpPost);
 		} catch (IOException e) {
-			logger.error("Error pushing evidence to evaluator",e);
+			logger.error("Error pushing evidence to evaluator", e);
 		} finally {
-			 try {
-				 client.close();
-				 response.close();
-			} catch (IOException e) {  
+			try {
+				client.close();
+				response.close();
+			} catch (IOException e) {
 			}
 		}
-	   
-	
 	}
 }

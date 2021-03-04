@@ -3,6 +3,7 @@ package eu.toop.service.spring;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -38,6 +39,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.MultipartFilter;
@@ -56,23 +58,33 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import eu.de4a.config.DataSourceConf;
+import eu.de4a.repository.CustomRepositoryImpl;
 import eu.toop.as4.domibus.soap.ClienteWS;
 import eu.toop.as4.domibus.soap.ClienteWSAuthenticator;
 
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu")
-
 @EnableWebMvc
 @PropertySource("classpath:application.properties")
 @ConfigurationProperties(prefix = "database")
 @EnableAspectJAutoProxy
 @EnableAutoConfiguration
+@EnableTransactionManagement
 @EnableScheduling
 @ComponentScan("eu")
 public class Conf implements WebMvcConfigurer {
 	private static final Logger LOG = LoggerFactory.getLogger(Conf.class);
 	
 	private DataSourceConf dataSourceConf = new DataSourceConf();
+	
+	@Value("#{'${h2.console.port.jvm:${h2.console.port:}}'}")
+	private String h2ConsolePort;
+	
+	@Bean(initMethod = "start", destroyMethod = "stop")
+	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
+		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers", 
+				"-ifNotExists", "-webDaemon", "-webPort", h2ConsolePort);
+	}
 
 	@Bean
 	public ClienteWS clienteWS() {

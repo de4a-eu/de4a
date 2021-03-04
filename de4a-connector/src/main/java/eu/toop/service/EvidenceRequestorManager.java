@@ -4,13 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +27,10 @@ import eu.de4a.conn.api.requestor.ResponseLookupEvidenceServiceData;
 import eu.de4a.conn.api.requestor.ResponseLookupRoutingInformation;
 import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.api.smp.NodeInfo;
-import eu.de4a.conn.xml.DOMUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
+import eu.de4a.util.DOMUtils;
+import eu.de4a.util.SMPUtils;
 import eu.toop.as4.client.regrep.CletusLevelTransformer;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
@@ -48,6 +42,8 @@ public class EvidenceRequestorManager extends EvidenceManager{
 	private static final Logger logger = LoggerFactory.getLogger (EvidenceRequestorManager.class);
 	@Value("#{'${as4.me.id.jvm:${as4.me.id:}}'}")
 	private String meId;
+	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
+	private String smpEndpoint;
 	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
 	private String idkEndpoint;
 	@Value("${as4.evidence.service}")
@@ -100,7 +96,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 	
 	public boolean manageRequest(RequestTransferEvidence request,boolean usi) {
 		String from= meId;
-		Document doc=marshall(request);
+		Document doc = DOMUtils.marshall(RequestTransferEvidence.class, request);
 		
 		if(StringUtils.isEmpty(request.getEvidenceServiceData().getEvidenceServiceURI())) {		
 			//Se realiza la llamada al idk para obtener la lista de posibles candidatos
@@ -124,24 +120,26 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		}
 		return sendRequestMessage(from, request.getEvidenceServiceData().getEvidenceServiceURI(), doc.getDocumentElement());
 	}
-	public ResponseTransferEvidence manageRequestIM(RequestTransferEvidence request )  {
-		String from= meId;
-		Document doc=marshall(request);   
-		
-		if(StringUtils.isEmpty(request.getEvidenceServiceData().getEvidenceServiceURI())) {
-			//Se realiza la llamada al idk para obtener la lista de posibles candidatos
-			IssuingAuthorityType issuingAuthority = clientSmp.getIssuingAuthority(request.getCanonicalEvidenceId(), "ES");
+	
+	public ResponseTransferEvidence manageRequestIM(RequestTransferEvidence request) {
+		String from = meId;
+		Document doc = DOMUtils.marshall(RequestTransferEvidence.class, request);
+
+		if (StringUtils.isEmpty(request.getEvidenceServiceData().getEvidenceServiceURI())) {
+			// Se realiza la llamada al idk para obtener la lista de posibles candidatos
+			IssuingAuthorityType issuingAuthority = clientSmp.getIssuingAuthority(request.getCanonicalEvidenceId(),
+					"ES");
 			EvidenceServiceType evidenceService;
-			
-			//En este caso solo habra un item en OrganisationalStructure con lo que se vuelve a consultar incluyendo el atuCode de ese item
-			if(issuingAuthority != null && !CollectionUtils.isEmpty(issuingAuthority.getIaOrganisationalStructure()) 
+
+			// En este caso solo habra un item en OrganisationalStructure con lo que se
+			// vuelve a consultar incluyendo el atuCode de ese item
+			if (issuingAuthority != null && !CollectionUtils.isEmpty(issuingAuthority.getIaOrganisationalStructure())
 					&& issuingAuthority.getIaOrganisationalStructure().size() == 1) {
-				evidenceService = 
-						clientSmp.getEvidenceService(request.getCanonicalEvidenceId(), "ES", "atuCode", 
-								issuingAuthority.getIaOrganisationalStructure().get(0).getAtuCode());
-				if(evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataOwner()) && doc != null) {
-					return handleRequestTransferEvidence(from, evidenceService.getService(), 
-							doc.getDocumentElement(), request.getRequestId());
+				evidenceService = clientSmp.getEvidenceService(request.getCanonicalEvidenceId(), "ES", "atuCode",
+						issuingAuthority.getIaOrganisationalStructure().get(0).getAtuCode());
+				if (evidenceService != null && !StringUtils.isEmpty(evidenceService.getDataOwner()) && doc != null) {
+					return handleRequestTransferEvidence(from, evidenceService.getService(), doc.getDocumentElement(),
+							request.getRequestId());
 				} else {
 					return null;
 				}
@@ -149,7 +147,7 @@ public class EvidenceRequestorManager extends EvidenceManager{
 				return null;
 			}
 		}
-		return handleRequestTransferEvidence(from, request.getEvidenceServiceData().getEvidenceServiceURI(), 
+		return handleRequestTransferEvidence(from, request.getEvidenceServiceData().getEvidenceServiceURI(),
 				doc.getDocumentElement(), request.getRequestId());
 	}
 	
@@ -194,27 +192,10 @@ public class EvidenceRequestorManager extends EvidenceManager{
 			}  
 			return ok;
 		     
-	} 
-	private Document marshall(RequestTransferEvidence request ) {   
-		        try  {  
-		        	JAXBContext jc = JAXBContext.newInstance(RequestTransferEvidence.class); 
-		            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		            dbf.setNamespaceAware(true);
-		            DocumentBuilder db = dbf.newDocumentBuilder();
-		            Document document = db.newDocument();
-
-		            // Marshal Object to the Document
-		            Marshaller marshaller = jc.createMarshaller();
-		            marshaller.marshal(request, document); 
-		            return document;
-		        } catch (JAXBException | ParserConfigurationException e) {
-		           logger.error("Error building request DOM",e);
-		           return null;
-		        } 
-	}
+	}	
 	
 	public boolean sendRequestMessage(String sender, String service, Element userMessage) {
-		String uriSmp = clientSmp.getSmpUri(service);
+		String uriSmp = SMPUtils.getSmpUri(smpEndpoint, service);
 		NodeInfo nodeInfo = clientSmp.getNodeInfo(uriSmp, false);
 		try {
 			logger.debug("Sending  message to as4 gateway ...");

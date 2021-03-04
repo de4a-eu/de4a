@@ -1,4 +1,4 @@
-package eu.toop.as4.owner;
+package eu.de4a.conn.owner;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
