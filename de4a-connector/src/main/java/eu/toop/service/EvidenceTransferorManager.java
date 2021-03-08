@@ -1,6 +1,8 @@
 package eu.toop.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.naming.ConfigurationException;
@@ -11,9 +13,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import eu.de4a.conn.api.requestor.RequestTransferEvidence;
+import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.api.smp.NodeInfo;
 import eu.de4a.conn.owner.MessageOwner;
 import eu.de4a.conn.owner.MessageResponseOwner;
@@ -24,6 +36,7 @@ import eu.de4a.model.RequestorRequest;
 import eu.de4a.repository.RequestorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
+import eu.de4a.util.FileUtils;
 import eu.de4a.util.SMPUtils;
 import eu.toop.as4.client.regrep.CletusLevelTransformer;
 import eu.toop.as4.owner.OwnerLocator;
@@ -40,7 +53,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
 	private String smpEndpoint;
 	@Autowired
-	private Client clientSmp;
+	private Client client;
 	@Autowired
 	private OwnerLocator ownerLocator;
 	@Autowired
@@ -79,9 +92,12 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			// TODO handler error
 		}
 		if(gateway != null && evidenceEntity != null) {
-			if (!evidenceEntity.isUsi()) {
+			RequestTransferEvidence req = (RequestTransferEvidence) DOMUtils
+					.unmarshall(RequestTransferEvidence.class, request.getMessage().getOwnerDocument());
+			if (StringUtils.isEmpty(req.getDataOwner().getUrlRedirect())) {
 				try {
-					canonicalResponse = gateway.sendEvidenceRequest(request.getMessage(), false);
+					canonicalResponse = client.sendEvidenceRequest(req, evidenceEntity.getEndpoint(), 
+							evidenceEntity.getXpathResponse(), false);
 				} catch (NoSuchMessageException | MessageException e) {
 					logger.error("Fail...", e);
 					// TODO handler error
@@ -91,8 +107,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				sendResponseMessage(from, uriSmp, request.getId(), canonicalResponse);
 			} else {
 				try {
-					gateway.sendEvidenceRequestAsynchronous(request.getSenderId(), request.getMessage(), 
-							applicationEventMulticaster);
+					client.sendEvidenceRequest(req, evidenceEntity.getEndpoint(), 
+							evidenceEntity.getXpathResponse(), true);
 				} catch (MessageException e) {
 					logger.error("Fail...",e);
 					//TODO handler error 
@@ -113,13 +129,11 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			String uriSmp = SMPUtils.getSmpUri(smpEndpoint, usirequest.getReturnServiceUri());
 			sendResponseMessage(meId, uriSmp, usirequest.getIdrequest(), response.getMessage());
 		}
-	}
+	}	
 	
-	
-
 	public boolean sendResponseMessage(String sender, String uriSmp, String id, Element canonicalResponse) {
 		// TODO hacer algo decente para el parseo de ids de evidencias.
-		NodeInfo nodeInfo = clientSmp.getNodeInfo(uriSmp, true);
+		NodeInfo nodeInfo = client.getNodeInfo(uriSmp, true);
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
 
