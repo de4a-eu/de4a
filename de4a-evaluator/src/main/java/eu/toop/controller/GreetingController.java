@@ -64,9 +64,9 @@ public class GreetingController {
 	private String id;
 	private RequestTransferEvidence requestEvidencia;
 	
-	private final static String REDIRECT_ADDR = "redirect:/%s";
+	private static final String REDIRECT_ADDR = "redirect:/%s";
 
-	@GetMapping(value = "/welcome.html")
+	@GetMapping(value = "/")
 	public String welcome(Model model) { 
 		model.addAttribute("evidenceForm", new RequestLookupRoutingInformation());
 		return "welcome";
