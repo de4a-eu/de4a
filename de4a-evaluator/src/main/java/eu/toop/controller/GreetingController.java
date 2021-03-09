@@ -155,21 +155,7 @@ public class GreetingController {
 		}
 		
 	}
-	@PostMapping(value = "/requestEvidenceUSI") 
-	public void sendRequestUSI(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {  
-		try {
-			EvaluatorRequest request=new EvaluatorRequest();
-			request.setIdrequest(id);
-			evaluatorRequestRepository.save(request);
-			client.getEvidenceRequestUSI(requestEvidencia);
-			httpServletResponse.setHeader("Location", String.format(urlRequestorRedirect, id));//"http://localhost:8083/de4a-connector/getreponse?id="+id);
-			//httpServletResponse.setHeader("Location", "https://des-de4a.redsara.es/de4a-tc-requestor/getreponse?id="+id);
-			httpServletResponse.setStatus(302);  
-		} catch (MessageException e) {
-			logger.error("Error getting evidence request",e);
-		}
-		
-	}
+
 	@GetMapping(value = "/returnEvidence"  )
 	public String receiveEvidence(@RequestParam String id,RedirectAttributes redirectAttributes) 
 	{   
