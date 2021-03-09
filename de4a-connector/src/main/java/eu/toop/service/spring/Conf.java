@@ -46,6 +46,7 @@ import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
@@ -60,6 +61,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import eu.de4a.config.DataSourceConf;
 import eu.toop.as4.domibus.soap.ClienteWS;
 import eu.toop.as4.domibus.soap.ClienteWSAuthenticator;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu")
@@ -71,13 +79,40 @@ import eu.toop.as4.domibus.soap.ClienteWSAuthenticator;
 @EnableTransactionManagement
 @EnableScheduling
 @ComponentScan("eu")
+@EnableSwagger2
 public class Conf implements WebMvcConfigurer {
 	private static final Logger LOG = LoggerFactory.getLogger(Conf.class);
 	
 	private DataSourceConf dataSourceConf = new DataSourceConf();
 	
-	@Value("#{'${h2.console.port.jvm:${h2.console.port:}}'}")
+	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
 	private String h2ConsolePort;
+	
+	
+	@Bean
+	public Docket api() {
+		return new Docket(DocumentationType.SWAGGER_2).select()
+				.apis(RequestHandlerSelectors.basePackage("eu"))
+				.paths(PathSelectors.any()).build()
+				.apiInfo(apiInfo());
+	}
+	
+	private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+            .title("DE4A - Connector")
+            .description("Connector component")
+            .version("0.1.0")
+            .termsOfServiceUrl("http://www.de4a.eu")
+            .license("LICENSE")
+            .licenseUrl("APACHE2")
+            .build();
+    }
+	
+	@Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
 	
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
@@ -173,6 +208,7 @@ public class Conf implements WebMvcConfigurer {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/").setViewName("index");
+		registry.addViewController("/swagger-ui/").setViewName("forward:/swagger-ui/index.html");
 	}
 
 	@Bean
