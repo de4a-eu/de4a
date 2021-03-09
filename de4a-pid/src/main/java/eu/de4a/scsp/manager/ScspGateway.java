@@ -36,6 +36,7 @@ import eu.de4a.conn.owner.OwnerGateway;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
+import eu.de4a.util.FileUtils;
 import eu.de4a.util.RestUtils;
 import eu.toop.connector.api.rest.TCPayload;
 
@@ -76,65 +77,16 @@ public class ScspGateway implements OwnerGateway {
 		try {
 			if(!isUsi) {
 				ResponseEntity<Resource> files = restTemplate.postForEntity(urlRequest, entity, Resource.class);
-				return buildResponse(files.getBody());
+				byte[] respBytes = FileUtils.buildResponse(files.getBody().getInputStream(), XPATH_SCSP_RESPONSE);
+				Document respDoc = DOMUtils.byteToDocument(respBytes);
+				return respDoc.getDocumentElement();
 			} else {
 				ResponseEntity<Ack> ack = restTemplate.postForEntity(urlRequest, entity, Ack.class);
 				return DOMUtils.marshall(Ack.class, ack.getBody()).getDocumentElement();
 			}
-		} catch (IOException e) {
-			throw new MessageException("Error comunicaciones con Owner pid:" + e.getMessage());
+		} catch (IOException | NullPointerException e) {
+			throw new MessageException("Error processing response from Owner:" + e.getMessage());
 		}
-	}
-
-	private Element buildResponse(Resource resource) throws MessageException, IOException {
-		List<TCPayload> payloads = new ArrayList<TCPayload>();
-		File temp = Files.createTempFile("de4a-", null).toFile();
-		IOUtils.copy(resource.getInputStream(), new FileOutputStream(temp));
-		ZipFile zip = new ZipFile(temp);
-		Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
-
-		// TODO si no se va a recibir mas que un element y no una lista de payloads, hay
-		// que actualizar el servicio REST del pid-owner
-
-		while (entries.hasMoreElements()) {
-			ZipEntry entry = entries.nextElement();
-			byte[] data = zip.getInputStream(entry).readAllBytes();
-			TCPayload payload = new TCPayload();
-			String name = getName(data, entry.getName());
-			payload.setContentID(name);
-			payload.setValue(data);
-			payloads.add(payload);
-		}
-		zip.close();
-		TCPayload canonicalPayload = payloads.stream()
-				.filter(p -> p.getContentID().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
-		if (canonicalPayload == null) {
-			logger.error("There is no payload with on %s", DE4AConstants.TAG_EVIDENCE_RESPONSE);
-			throw new MessageException("Not exists payload with tag name:" + DE4AConstants.TAG_EVIDENCE_RESPONSE);
-		}
-		Document doc = DOMUtils.byteToDocument(canonicalPayload.getValue());
-		if (doc == null) {
-			throw new MessageException("It`s not a well format XML: " + DE4AConstants.TAG_EVIDENCE_RESPONSE);
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Request: {}", DOMUtils.documentToString(doc));
-		}
-		return doc.getDocumentElement();
-	}
-
-	private String getName(byte[] data, String name) {
-		try {
-			Document doc = DOMUtils.byteToDocument(data);
-			String value = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EVIDENCE_RESPONSE, doc.getDocumentElement());
-			if (value != null && !value.isEmpty())
-				return DE4AConstants.TAG_EVIDENCE_RESPONSE;
-			value = DOMUtils.getValueFromXpath(XPATH_SCSP_RESPONSE, doc.getDocumentElement());
-			if (value != null && !value.isEmpty())
-				return DE4AConstants.TAG_NATIONAL_EVIDENCE_RESPONSE;
-		} catch (MessageException e) {
-
-		}
-		return name;
 	}
 
 }

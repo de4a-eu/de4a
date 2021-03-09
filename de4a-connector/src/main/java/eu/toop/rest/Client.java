@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,21 +22,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.helger.commons.collection.iterate.IterableIterator;
 import com.helger.xsds.bdxr.smp1.ProcessType;
@@ -44,11 +45,13 @@ import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
 import eu.de4a.conn.api.requestor.EvidenceServiceType;
 import eu.de4a.conn.api.requestor.IssuingAuthorityType;
+import eu.de4a.conn.api.requestor.RequestTransferEvidence;
 import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.api.smp.NodeInfo;
-import eu.de4a.util.RestUtils;
-import eu.toop.as4.client.ResponseWrapper;
+import eu.de4a.exception.MessageException;
+import eu.de4a.util.DOMUtils;
+import eu.de4a.util.FileUtils;
 
 @Component
 public class Client {
@@ -147,8 +150,7 @@ public class Client {
 	public boolean pushEvidence(String endpoint, ResponseTransferEvidence response) {
 		logger.debug("Sending owner response to evaluator {}", endpoint);
 		
-		RestTemplate template = RestUtils.getRestTemplate();
-		ResponseEntity<Ack> ack = template.postForEntity(endpoint, response, Ack.class);
+		ResponseEntity<Ack> ack = restTemplate.postForEntity(endpoint, response, Ack.class);
 		return ack.getBody() != null && Ack.OK.equals(ack.getBody().getCode());
 	}
 
@@ -211,6 +213,34 @@ public class Client {
 				response.close();
 			} catch (IOException e) {
 			}
+		}
+	}
+	
+	public Element sendEvidenceRequest(RequestTransferEvidence evidenceRequest, String endpoint, 
+			String xpathResponse, boolean isUsi) 
+			throws MessageException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Request: {}", evidenceRequest.getRequestId());
+		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Collections.singletonList(MediaType.ALL));
+		String urlRequest = endpoint + (isUsi ? "USI" : "");
+
+		HttpEntity<RequestTransferEvidence> entity = new HttpEntity<>(evidenceRequest, headers);
+		restTemplate.getMessageConverters().add(new ResourceHttpMessageConverter());
+		
+		try {
+			if(!isUsi) {
+				ResponseEntity<Resource> files = restTemplate.postForEntity(urlRequest, entity, Resource.class);
+				byte[] respBytes = FileUtils.buildResponse(files.getBody().getInputStream(), xpathResponse);
+				Document respDoc = DOMUtils.byteToDocument(respBytes);
+				return respDoc.getDocumentElement();
+			} else {
+				ResponseEntity<Ack> ack = restTemplate.postForEntity(urlRequest, entity, Ack.class);
+				return DOMUtils.marshall(Ack.class, ack.getBody()).getDocumentElement();
+			}
+		} catch (IOException | NullPointerException e) {
+			throw new MessageException("Error processing response from Owner:" + e.getMessage());
 		}
 	}
 }

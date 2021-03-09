@@ -34,7 +34,7 @@ public class Conf {
 	 
 	private DataSourceConf dataSourceConf = new DataSourceConf();
 	
-	@Value("#{'${h2.console.port.jvm:${h2.console.port:}}'}")
+	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
 	private String h2ConsolePort;
 	
 	@Bean(initMethod = "start", destroyMethod = "stop")

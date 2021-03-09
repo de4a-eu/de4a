@@ -10,7 +10,8 @@ public class EvidenceEntity {
 	@Id
 	private String idEvidence;
 	private String ownerGateway; 
-	private boolean usi;
+	private String endpoint;
+	private String xpathResponse;
 	public String getIdEvidence() {
 		return idEvidence;
 	}
@@ -23,11 +24,17 @@ public class EvidenceEntity {
 	public void setOwnerGateway(String ownerGateway) {
 		this.ownerGateway = ownerGateway;
 	}
-	public boolean isUsi() {
-		return usi;
+	public String getEndpoint() {
+		return endpoint;
 	}
-	public void setUsi(boolean usi) {
-		this.usi = usi;
+	public void setEndpoint(String endpoint) {
+		this.endpoint = endpoint;
+	}
+	public String getXpathResponse() {
+		return xpathResponse;
+	}
+	public void setXpathResponse(String xpathResponse) {
+		this.xpathResponse = xpathResponse;
 	}  
 	
 }
