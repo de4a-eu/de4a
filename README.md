@@ -1,5 +1,5 @@
 # DE4A - CONNECTOR PROJECT
-Repository revolves around [de4a-connector](https://github.com/de4a-wp5/de4a/tree/developer/de4a-connector) component, but in order to test, enhance and complete the functionality, an complete envirorment is created. We will describes the differents packages.
+Repository revolves around [de4a-connector](https://github.com/de4a-wp5/de4a/tree/developer/de4a-connector) component, but in order to test, enhance and complete the functionality, an complete environment is created. We will describes the differents packages.
 
 ## de4a-commons
 Concived as a library that maintains:
@@ -56,4 +56,5 @@ You should be able to compile hole packages from parent POM file:
 mvn clean install -Dmaven.test.skip=true
 ```
 Also it is possible to compile each package separately browsing into the folder and running the command above
+
 **Until [de4a-commons](https://github.com/de4a-wp5/de4a-commons) is on maven central) install the de4a-commons project locally.**
