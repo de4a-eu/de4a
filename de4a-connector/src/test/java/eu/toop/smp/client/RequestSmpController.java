@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import eu.de4a.conn.api.smp.NodeInfo;
+import eu.de4a.connector.model.smp.NodeInfo;
  
 @Controller
 @RequestMapping("/servicedata")

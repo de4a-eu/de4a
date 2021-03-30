@@ -1,9 +1,8 @@
 package eu.toop.smp.client;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
- 
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -16,10 +15,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import com.helger.commons.io.resource.ClassPathResource;
-
-import eu.toop.service.EvidenceRequestorManager;
-import eu.toop.service.spring.Conf;
+import eu.de4a.connector.service.EvidenceRequestorManager;
+import eu.de4a.connector.service.spring.Conf;
 
 @SpringBootTest(classes={Conf.class})
   
@@ -36,7 +33,7 @@ public class TestRequestor {
 
 
 		
-		evidenceRequestorManager.sendRequestMessage("9914:tc-ng-test-sender", "9915:tooptest",  "urn:eu:toop:ns:dataexchange-1p40::Response##urn:eu.toop.response.registeredorganization::1.40",
-				 doc.getDocumentElement());
+		evidenceRequestorManager.sendRequestMessage("9914:tc-ng-test-sender", "urn:eu:toop:ns:dataexchange-1p40::Response##urn:eu.toop.response.registeredorganization::1.40",
+				 doc.getDocumentElement(), null);
 	}
 }
