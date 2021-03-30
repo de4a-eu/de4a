@@ -22,7 +22,6 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import eu.de4a.exception.MessageException;
 import eu.toop.connector.api.rest.TCPayload;
@@ -111,7 +110,7 @@ public class FileUtils {
 	public static String getName(byte[] data, String name, String xPathResp) {
 		try {
 			Document doc = DOMUtils.byteToDocument(data);
-			String value = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EVIDENCE_RESPONSE, doc.getDocumentElement());
+			String value = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EXTRACT_EVIDENCE_RESPONSE, doc.getDocumentElement());
 			if (value != null && !value.isEmpty())
 				return DE4AConstants.TAG_EVIDENCE_RESPONSE;
 			value = DOMUtils.getValueFromXpath(xPathResp, doc.getDocumentElement());

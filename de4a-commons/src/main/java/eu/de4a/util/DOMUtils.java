@@ -6,15 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,7 +19,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -38,7 +34,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.xml.security.utils.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -46,8 +41,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import eu.de4a.conn.api.requestor.RequestTransferEvidence;
-import eu.de4a.exception.MessageException; 
+import eu.de4a.conn.api.canonical.BirthEvidence;
+import eu.de4a.conn.api.canonical.ObjectFactory;
+import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
+import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
+import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
+import eu.de4a.iem.xml.de4a.CDE4AJAXB;
+import eu.de4a.iem.xml.de4a.DE4AMarshaller; 
 
 public class DOMUtils {
 	private static final Logger logger = LogManager.getLogger(DOMUtils.class);
@@ -187,6 +188,19 @@ public class DOMUtils {
 		}
 		return null;
 	}
+	
+	public static String nodeToString(final Node node, final boolean omitXMLDeclaration) {
+		final StringWriter writer = new StringWriter();
+		try {
+			final Transformer t = TransformerFactory.newInstance().newTransformer();
+			t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, omitXMLDeclaration ? "yes" : "no");
+			t.setOutputProperty(OutputKeys.INDENT, "yes");
+			t.transform(new DOMSource(node), new StreamResult(writer));
+		} catch (final TransformerException e) {
+			e.printStackTrace();
+		}
+		return writer.toString();
+	}
 	 
 	 public static Document stringToDocument(String xml) {
 		 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
@@ -217,10 +231,10 @@ public class DOMUtils {
 		  }
 	 }
 	 
-	public static <T> String jaxbObjectToXML(T xmlObj, Class<? extends T> aClass) {
+	public static <T> String jaxbObjectToXML(T xmlObj, Class <?> [] aClasses) {
 		String xmlString = "";
 		try {
-			JAXBContext context = JAXBContext.newInstance(aClass);
+			JAXBContext context = JAXBContext.newInstance(aClasses);
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 			StringWriter sw = new StringWriter();
@@ -232,11 +246,11 @@ public class DOMUtils {
 		}
 	}
 	 
-	public static Object unmarshall(Class<?> clazz, Document doc) {
+	public static Object unmarshall(Class<?> clazz, Node doc) {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
-			javax.xml.bind.Unmarshaller jaxbMarshaller = (Unmarshaller) jaxbContext.createUnmarshaller();
-			return jaxbMarshaller.unmarshal(doc);
+			javax.xml.bind.Unmarshaller jaxbMarshaller = jaxbContext.createUnmarshaller();
+			return jaxbMarshaller.unmarshal(doc, clazz);
 		} catch (Exception e) {
 			logger.error("Error unmarshalling to jaxb object", e);
 			return null;
@@ -322,4 +336,12 @@ public class DOMUtils {
 		       	return null;
 	        }
 	}
+	
+//	public static DE4AMarshaller <RequestForwardEvidenceType> getRequestForwardEvidenceMarshaller() {
+//		final ICommonsList<ClassPathResource> ret = new CommonsArrayList<>();
+//		ret.addAll(CDE4AJAXB.XSDS);
+//		ret.add(CDE4AJAXB.XSD_DE_USI);
+//		return new DE4AMarshaller <> (RequestForwardEvidenceType.class,
+//				ret, new eu.de4a.iem.jaxb.de_usi.ObjectFactory ()::createRequestForwardEvidence);
+//	}
 }

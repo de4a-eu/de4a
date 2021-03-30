@@ -1,7 +1,5 @@
 package eu.toop.rest;
 
-import java.util.Calendar;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,19 +8,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import eu.de4a.conn.api.requestor.EvidenceServiceType;
-import eu.de4a.conn.api.requestor.RequestLookupEvidenceServiceData;
-import eu.de4a.conn.api.requestor.RequestLookupRoutingInformation;
-import eu.de4a.conn.api.requestor.RequestTransferEvidence;
-import eu.de4a.conn.api.requestor.ResponseLookupEvidenceServiceData;
-import eu.de4a.conn.api.requestor.ResponseLookupRoutingInformation;
-import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
-import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.evaluator.request.RequestBuilder;
 import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.AgentType;
+import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
+import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
+import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
+import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.util.RestUtils;
+import eu.de4a.util.XDE4ACanonicalEvidenceType;
+import eu.de4a.util.XDE4AMarshaller;
 import eu.toop.controller.ResponseManager;
 import eu.toop.controller.User;
+import nl.flotsam.xeger.Xeger;
  
 
 @Component
@@ -31,60 +31,57 @@ public class Client {
 	@Value("${de4a.connector.url.return}")
 	private String urlReturn; 
 	@Value("${de4a.connector.url.requestor}")
-	private String urlRequestor; 
-	@Value("${de4a.connector.id.seed}")
-	private String seed;
+	private String urlRequestor;
 	@Autowired
 	private RequestBuilder requestBuilder; 
 	@Autowired
 	private ResponseManager responseManager; 
 	
-	public ResponseLookupRoutingInformation getRoutingInfo(RequestLookupRoutingInformation request) throws MessageException {
+	public ResponseLookupRoutingInformationType getRoutingInfo(RequestLookupRoutingInformationType request) throws MessageException {
 		logger.debug("Sending lookup routing information request {}", request);
-		String urlRequest = urlRequestor + "/lookupRouting";
+		String urlRequest = urlRequestor + "/lookupRoutingInformation";
 		
 		RestTemplate plantilla = RestUtils.getRestTemplate();
-		ResponseEntity<ResponseLookupRoutingInformation> response = plantilla.postForEntity(urlRequest, request, 
-				ResponseLookupRoutingInformation.class);
-		
-		return response.getBody();		
+		ResponseEntity<String> response = plantilla.postForEntity(urlRequest, request, 
+				String.class);
+		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
+		ResponseLookupRoutingInformationType respObj = respMarshaller.read(response.getBody());
+		return respObj;		
 	}
 	
-	public ResponseLookupEvidenceServiceData getLookupServiceData(RequestLookupEvidenceServiceData request) {
-		logger.debug("Sending lookup service data request {}", request);
-		String urlRequest = urlRequestor + "/lookupEvidenceService";
-		
-		RestTemplate plantilla =RestUtils.getRestTemplate();
-		ResponseEntity<ResponseLookupEvidenceServiceData> response = plantilla.postForEntity(urlRequest, request, 
-				ResponseLookupEvidenceServiceData.class);
-		
-		return response.getBody();
-	}
-	
-	public boolean getEvidenceRequestIM (RequestTransferEvidence request) throws MessageException 
+	public boolean getEvidenceRequestIM (RequestTransferEvidenceUSIIMDRType request) throws MessageException 
 	{
 		logger.debug("Sending IM request {}", request.getRequestId());
-		String urlRequest = urlRequestor + "/request";
+		String urlRequest = urlRequestor + "/requestTransferEvidenceIM";
 
 		RestTemplate plantilla = RestUtils.getRestTemplate();
-		ResponseEntity<ResponseTransferEvidence> response = plantilla.postForEntity(urlRequest, request,
-				ResponseTransferEvidence.class);
-		responseManager.manageResponse(response.getBody());
-		return response.getBody().getError() == null;
+		ResponseEntity<String> response = plantilla.postForEntity(urlRequest, 
+				 DE4AMarshaller.drImRequestMarshaller().getAsString(request), String.class);
+		ResponseTransferEvidenceType respObj = XDE4AMarshaller
+				.drImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).read(response.getBody());
+		responseManager.manageResponse(respObj);
+		return respObj.getErrorList() == null;
 	}
 
-	public boolean getEvidenceRequestUSI (RequestTransferEvidence request) throws MessageException 
+	public ResponseErrorType getEvidenceRequestUSI (RequestTransferEvidenceUSIIMDRType request) throws MessageException 
 	{
-		logger.debug("Sending USI equest {}", request.getRequestId());
-		String urlRequest = urlRequestor + "/requestUSI";
+		logger.debug("Sending USI request {}", request.getRequestId());
+		String urlRequest = urlRequestor + "/requestTransferEvidenceUSI";
 
 		RestTemplate plantilla = RestUtils.getRestTemplate();
-		ResponseEntity<Ack> ack = plantilla.postForEntity(urlRequest, request, Ack.class);
-		return ack.getBody().getCode().equals(Ack.OK);
+		ResponseEntity<String> response = plantilla.postForEntity(urlRequest, 
+				DE4AMarshaller.drUsiRequestMarshaller().getAsString(request), String.class);
+		if(response.getBody() != null) {
+			ResponseErrorType responseObj = DE4AMarshaller.drUsiResponseMarshaller().read(response.getBody());
+			return responseObj;
+		}
+		return null;
 	}
 
-	public RequestTransferEvidence buildRequest(User user, EvidenceServiceType evidenceServiceType) {
-		String requestId = seed + "-" + Calendar.getInstance().getTimeInMillis();
+	public RequestTransferEvidenceUSIIMDRType buildRequest(User user, AgentType dataOwner, String canonicalEvidenceTypeId) {
+		String regex = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[8-9a-bA-B][0-9a-fA-F]{3}-[0-9a-fA-F]{12}";
+		Xeger generator = new Xeger(regex);
+		String requestId = generator.generate();
 		logger.debug("building request {}", requestId);
 
 		String eidasId = user.getEidas();
@@ -97,7 +94,7 @@ public class Client {
 			birthDate = user.getBirthDate();
 		}
 
-		RequestTransferEvidence request = requestBuilder.buildRequest(requestId, evidenceServiceType, eidasId,
+		RequestTransferEvidenceUSIIMDRType request = requestBuilder.buildRequest(requestId, dataOwner, canonicalEvidenceTypeId, eidasId,
 				birthDate, name, ap1, fullname);
 		return request;
 	}

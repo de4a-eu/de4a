@@ -10,9 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.de4a.conn.api.smp.NodeInfo;
-import eu.toop.rest.Client;
-import eu.toop.service.spring.Conf;
+import eu.de4a.connector.model.smp.NodeInfo;
+import eu.de4a.connector.rest.Client;
+import eu.de4a.connector.service.spring.Conf;
 
 @SpringBootTest(classes={Conf.class})
   
@@ -24,7 +24,7 @@ public class TestSMPClient {
 	private Client client;
 	@Test
 	public void testNodeMine() {
-		NodeInfo info=client.getNodeInfo("9915:tooptest","");
+		NodeInfo info=client.getNodeInfo("9915:tooptest",false);
 		Assert.assertNotNull(info);
 	}
 }

@@ -10,11 +10,11 @@
 	<h1>Carpeta Ciudadana Europea</h1>
 	<form:form action="goEvidenceForm" method="post"
 		modelAttribute="evidenceForm">
-		<form:select path="canonicalEvidenceId">
+		<form:select path="canonicalEvidenceTypeId">
 			<form:option value="BirthCertificate">Birth Certificate</form:option>
 			<form:option value="DoingBusinessAbroad">Doing Business Abroad</form:option>
 		</form:select>
-		<form:select path="country">
+		<form:select path="countryCode">
 			<form:option value="ES">ES</form:option>
 		</form:select>
 		<p>
