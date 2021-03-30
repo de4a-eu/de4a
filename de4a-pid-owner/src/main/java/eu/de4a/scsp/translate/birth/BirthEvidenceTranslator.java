@@ -8,6 +8,9 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,20 +29,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import eu.de4a.conn.api.requestor.DomesticEvidenceType;
-import eu.de4a.conn.api.requestor.IssuingTypeType;
+import eu.de4a.conn.api.canonical.BirthEvidence;
+import eu.de4a.conn.api.canonical.ObjectFactory;
 import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.CanonicalEvidenceType;
+import eu.de4a.iem.jaxb.common.types.DomesticEvidenceType;
+import eu.de4a.iem.jaxb.common.types.DomesticsEvidencesType;
+import eu.de4a.iem.jaxb.common.types.IssuingTypeType;
+import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
+import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.scsp.owner.model.Municipio;
 import eu.de4a.scsp.owner.repository.MunicipioRepository;
 import eu.de4a.scsp.translate.EvidenceTranslator;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils; 
+
+
 @Component
 public class BirthEvidenceTranslator implements EvidenceTranslator{
 	private static final Logger logger = LogManager.getLogger(BirthEvidenceTranslator.class); 
@@ -136,6 +149,61 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 			 transformerxsl.setParameter(label,value); 
 		}
 	}
+	
+	public ResponseExtractEvidenceType translateExtractEvidenceResponse(Element response)
+			throws MessageException {
+		
+		ResponseExtractEvidenceType responseExtractEvidence = new ResponseExtractEvidenceType();
+		DomesticsEvidencesType domesticEvidences = initDomesticBirthDate(response.getOwnerDocument());
+		responseExtractEvidence.setDomesticEvidenceList(domesticEvidences);
+		
+		Element processedResponse = translateEvidenceResponse(response);
+		Node canonicalEvidence = DOMUtils.getNodeFromXpath("//*[local-name()='BirthEvidence']", 
+				processedResponse);
+		CanonicalEvidenceType canonicalEvidenceType = new CanonicalEvidenceType();
+		ObjectFactory factory = new ObjectFactory();
+		BirthEvidence canonicalEvidenceObj = factory.createBirthEvidence();
+		Unmarshaller jaxbUnmarshaller;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(BirthEvidence.class);
+			jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			canonicalEvidenceObj = (BirthEvidence) jaxbUnmarshaller.unmarshal(canonicalEvidence);
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		canonicalEvidenceType.setAny(canonicalEvidenceObj);
+		
+		responseExtractEvidence.setCanonicalEvidence(canonicalEvidenceType);
+		return responseExtractEvidence;
+	}
+	
+	public RequestForwardEvidenceType translateRequestForwardEvidence(Element response) throws MessageException {
+		RequestForwardEvidenceType requestForwardEvidence = new RequestForwardEvidenceType();
+		DomesticsEvidencesType domesticEvidences = initDomesticBirthDate(response.getOwnerDocument());
+		requestForwardEvidence.setDomesticEvidenceList(domesticEvidences);
+		
+		Element processedResponse = translateEvidenceResponse(response);
+		Node canonicalEvidence = DOMUtils.getNodeFromXpath("//*[local-name()='BirthEvidence']", 
+				processedResponse);
+		CanonicalEvidenceType canonicalEvidenceType = new CanonicalEvidenceType();
+		ObjectFactory factory = new ObjectFactory();
+		BirthEvidence canonicalEvidenceObj = factory.createBirthEvidence();
+		Unmarshaller jaxbUnmarshaller;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(BirthEvidence.class);
+			jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			canonicalEvidenceObj = (BirthEvidence) jaxbUnmarshaller.unmarshal(canonicalEvidence);
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		canonicalEvidenceType.setAny(canonicalEvidenceObj);
+		
+		requestForwardEvidence.setCanonicalEvidence(canonicalEvidenceType);
+		
+		return requestForwardEvidence;		
+	}
 
 
 	public Element translateEvidenceResponse(Element response) throws MessageException {
@@ -178,7 +246,8 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 		        fillParameter(transformerxsl,COUNTRY_PARAM,pais );
 		        fillParameter(transformerxsl,NAME_MUNICIPIO_PARAM,nameMunicipio );
 		        fillParameter(transformerxsl,SEXO_PARAM,sexo );
-		        transformerxsl.setParameter( DOMESTIC_EVIDENCES_PARAM,initDomesticBirthDate(idpeticion) );
+		        transformerxsl.setParameter( DOMESTIC_EVIDENCES_PARAM,initDomesticBirthDateList( 
+		        		response.getOwnerDocument()));
 		        transformerxsl.setOutputProperty(OutputKeys.ENCODING, DEFAULT_ENCODING);
 		        transformerxsl.transform(src, new StreamResult(xmlFile));
 		        xmlFile.close();
@@ -187,7 +256,7 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 				factoryDom.setNamespaceAware(true);
 			    DocumentBuilder builder = factoryDom.newDocumentBuilder();
 			    Document docFinal =builder.parse(new InputSource(new StringReader(xmlespecificos))); 
-			    DOMUtils.changeNodo(docFinal,DE4AConstants.XPATH_EVIDENCE_DATA,new String(DOMUtils.encodeCompressed(response.getOwnerDocument())));
+			    //DOMUtils.changeNodo(docFinal,DE4AConstants.XPATH_EVIDENCE_DATA,new String(DOMUtils.encodeCompressed(response.getOwnerDocument())));
 			    return docFinal.getDocumentElement();
 		} catch (ParserConfigurationException | SAXException | IOException | TransformerException e) {
 			String err="Error building SCSP request:"+e.getMessage();
@@ -195,9 +264,19 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 			throw new MessageException(err);
 		} 
 	} 
-	public static List<DomesticEvidenceType> initDomesticBirthDate(String id) {
-		List<DomesticEvidenceType> evidences=new ArrayList<DomesticEvidenceType>(); 
-		DomesticEvidenceType dom= EvidenceTranslator.buildDomesticEvidence(id, IssuingTypeType.ORIGINAL_ISSUING, org.springframework.http.MediaType.APPLICATION_XML.toString(), EvidenceTranslator.LANGUAGE_DEFAULT);
+	public static DomesticsEvidencesType initDomesticBirthDate(Document data) {
+		DomesticsEvidencesType domesticEvidences = new DomesticsEvidencesType();
+		List<DomesticEvidenceType> evidences = initDomesticBirthDateList(data);
+		domesticEvidences.setDomesticEvidence(evidences);		
+		domesticEvidences.setLang(EvidenceTranslator.LANGUAGE_DEFAULT);
+		return domesticEvidences;
+	}
+	
+	public static List<DomesticEvidenceType> initDomesticBirthDateList(Document data) {
+		List<DomesticEvidenceType> evidences=new ArrayList<>(); 
+		DomesticEvidenceType dom= EvidenceTranslator.buildDomesticEvidence(IssuingTypeType.ORIGINAL_ISSUING,
+				MediaType.APPLICATION_XML.toString(), 
+				EvidenceTranslator.LANGUAGE_DEFAULT, data);
 		evidences.add(dom);
 		return evidences;
 	}

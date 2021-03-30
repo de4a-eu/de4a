@@ -5,7 +5,7 @@
 	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"    
 	xmlns:lists="xalan://java.util.List" 
-	xmlns:domestic="xalan://eu.de4a.conn.api.requestor.DomesticEvidenceType" 
+	xmlns:domestic="xalan://eu.de4a.iem.jaxb.common.types.DomesticEvidenceType" 
     exclude-result-prefixes="lists domestic"> 
 
 <!-- xmlns:lists="java:java.util.List" 
@@ -29,7 +29,7 @@
 	<xsl:param name="nameMunicipio" />
 	<xsl:param name="sexo" />
 	<xsl:template match="/"> 
-<ResponseTransferEvidence xmlns="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.de4a.eu/2020/data/requestor/pattern/intermediate iem.xsd">
+<ResponseExtractEvidence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.de4a.eu/2020/data/requestor/pattern/intermediate iem.xsd">
 	<RequestId><xsl:value-of select="$idPeticion" /></RequestId>
 	<SpecificationId>De4a-1.0.0</SpecificationId>
 	<TimeStamp><xsl:value-of select="$timeStamp" /></TimeStamp>
@@ -55,7 +55,6 @@
 	</DataRequestSubject>
 	<CanonicalEvidenceId><xsl:value-of select="$canonicalEvidenceId" /></CanonicalEvidenceId>
 	<CanonicalEvidence>
-		<DateOfBirth></DateOfBirth>
 			<BirthEvidence xsi:noNamespaceSchemaLocation="BirthEvidence.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 				<IssuingDate><xsl:value-of select="$fechaNacimiento" /></IssuingDate>
 				<IssuingAuthority>
@@ -91,7 +90,7 @@
 					          <xsl:with-param name="domesticEvidences" select="$domesticEvidences"/>
 			</xsl:call-template>
 		</DomesticEvidenceList> 
-</ResponseTransferEvidence>
+</ResponseExtractEvidence>
 </xsl:template>
 <xsl:template name="domesticEvidences_template">
   					<xsl:param name="count"/>
@@ -99,7 +98,6 @@
 		 	   		<xsl:if test="$count > -1">
 		 	   			 <xsl:variable name="entity" select="lists:get( $domesticEvidences, $count )" />  
 			    	 	 <DomesticEvidence xmlns="http://www.de4a.eu/2020/data/requestor/pattern/intermediate">
-							<DomesticEvidenceIdRef><xsl:value-of  select="domestic:getDomesticEvidenceIdRef($entity)"/></DomesticEvidenceIdRef>
 							<IssuingType><xsl:value-of  select="domestic:getIssuingType($entity)"/></IssuingType>
 							<MimeType><xsl:value-of  select="domestic:getMimeType($entity)"/></MimeType>
 							<DataLanguage><xsl:value-of  select="domestic:getDataLanguage($entity)"/></DataLanguage>

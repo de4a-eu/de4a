@@ -1,11 +1,21 @@
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (1, 'CompanyRegistration', 'lau', 'ES', null, null);
 
-INSERT INTO IssuingAuthority (id, evidenceType, countryCode, iaLevelPath) VALUES (1, 'HigherEdCertificate','PT', 'nuts0/edu');
-INSERT INTO IssuingAuthority (id, evidenceType, countryCode, iaLevelPath) VALUES (2, 'BirthCertificate','ES', 'nuts0/soc');
-INSERT INTO IssuingAuthority (id, evidenceType, countryCode, iaLevelPath) VALUES (3, 'DoingBusinessAbroad','ES', 'nuts0/soc');
-INSERT INTO AtuItem (id, id_issuingAuthority, atuLevel, atuPath, atuCode, atuName, atuLatinName) VALUES (1, 1, 'nuts0', 'nuts0/edu', 'ptUniversityOfLisbon', 'Universidad de Lisboa', 'Universidad de Lisboa');
-INSERT INTO AtuItem (id, id_issuingAuthority, atuLevel, atuPath, atuCode, atuName, atuLatinName) VALUES (2, 2, 'nuts0', 'nuts0/soc', 'MPTFP-SGAD', 'Registro Civil', 'Registro Civil');
-INSERT INTO AtuItem (id, id_issuingAuthority, atuLevel, atuPath, atuCode, atuName, atuLatinName) VALUES (3, 3, 'nuts0', 'nuts0/soc', 'MPTFP-SGAD', 'DBA_MOCK', 'DBA_MOCK');
-INSERT INTO EvidenceService (id, countryCode, atuCode, canonicalEvidence, service, dataOwner, dataTransferor, redirectURL) VALUES (1, 'PT', 'ptUniversityOfLisbon', 'HigherEdCertificate', 'urn::de4a.eu:identifiers:service::9991:PT000000029:HighEdEdCertificate:1.0', 'iso6523-actorid-upis::9991:PT000000101', 'iso6523-actorid-upis::9991:PT000000029', 'https://fenix-edu-inesc.pt/usip');
---INSERT INTO EvidenceService (id, countryCode, atuCode, canonicalEvidence, service, dataOwner, dataTransferor, redirectURL) VALUES (2, 'ES', 'MPTFP-SGAD', 'BirthCertificate', 'iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate:2.0', 'iso6523-actorid-upis::9921:E00000000T', 'iso6523-actorid-upis::9921:ESS2833002E', 'http://localhost:8782/de4a-pid-owner/preview');
-INSERT INTO EvidenceService (id, countryCode, atuCode, canonicalEvidence, service, dataOwner, dataTransferor, redirectURL) VALUES (2, 'ES', 'MPTFP-SGAD', 'BirthCertificate', 'iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate:2.0', 'iso6523-actorid-upis::9921:E00000000T', 'iso6523-actorid-upis::9921:ESS2833002E', null);
-INSERT INTO EvidenceService (id, countryCode, atuCode, canonicalEvidence, service, dataOwner, dataTransferor, redirectURL) VALUES (3, 'ES', 'MPTFP-SGAD', 'DoingBusinessAbroad', 'iso6523-actorid-upis:service::9921:ESS2833002E:DoingBusinessAbroad:1.0', 'iso6523-actorid-upis::9921:ESS2833002E', 'iso6523-actorid-upis::9921:ESS2833002E', 'http://localhost:8782/de4a-pid-owner/preview');
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (2, 'CompanyRegistration', 'nuts0', 'SI', null, null);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (1, 'SI031', 'Mura', 'iso6523-actorid-upis::9991:SI990000105', 'Vlada Mure', 2);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (1, 'usip', 'https://moai.gov.si/usip', 1);
+
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (3, 'CompanyRegistration', 'nuts0', 'LU', null, null);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (2, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9991:LU000000025', 'CENTRE DES TECHNOLOGIES DE L''INFORMATION DE L''ETAT''', 3);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (2, 'ip', null, 2);
+
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (4, 'CompanyRegistration', 'nuts0', 'SI', null, null);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (3, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:SI990000105', 'Minister za notranje zadeve', 4);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (3, 'ip', null, 3);
+INSERT INTO Param (id, title, id_provision) VALUES (1, 'SI/nuts3', 3);
+INSERT INTO ParamsSet (id, id_param, paramValue) VALUES (1, 1, 'SI/SI031');
+INSERT INTO ParamsSet (id, id_param, paramValue) VALUES (2, 1, 'SI/SI034');
+
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (5, 'BirthCertificate', 'nuts0', 'ES', null, null);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (4, 'ES', 'España', 'iso6523-actorid-upis::9921:ESS2833002E', 'Ministerio de Justicia', 5);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (4, 'ip', null , 4);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (2, 'usip', 'https://ctie.lu/usip', 4);

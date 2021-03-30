@@ -10,7 +10,9 @@
 	<h1>National Evidence to be forwarded</h1>
 	<p>Req. ID: ${requestId}</p>
 	<p>XML National Evidence:</p>
-	<textarea rows="20" cols="200">${responseFormat}</textarea>
+	<textarea rows="20" cols="200">${nationalEvidence}</textarea>
+	<p>RequestForwardEvidence:</p>
+	<textarea rows="20" cols="200">${requestForwardEvidence}</textarea>
 	<p> Here could be some additional input parameters to complete evidence </p>
 	<form:form action="goResponse" modelAttribute="previewResponse">
 		<input type="submit" value="Ok. Continue"></input>

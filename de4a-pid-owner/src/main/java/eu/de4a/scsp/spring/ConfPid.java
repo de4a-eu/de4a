@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
@@ -27,10 +30,15 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -205,7 +213,7 @@ public class ConfPid implements WebMvcConfigurer {
 		dataSourceConfig.setUsername(user);
 		dataSourceConfig.setPassword(password);
 
-		return (DataSource) new HikariDataSource(dataSourceConfig);
+		return new HikariDataSource(dataSourceConfig);
 	}
 
 	@Bean
@@ -253,6 +261,19 @@ public class ConfPid implements WebMvcConfigurer {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManager.setEntityManagerFactory(entityManagerFactory);
 		return transactionManager;
+	}
+	
+	@Bean
+	public RestTemplate restTemplate() {
+		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+				httpClientPid());
+		RestTemplate template = new RestTemplate(httpComponentsClientHttpRequestFactory);
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+		MappingJackson2XmlHttpMessageConverter converter = new MappingJackson2XmlHttpMessageConverter();
+		converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
+		messageConverters.add(converter);
+		template.setMessageConverters(messageConverters);
+		return new RestTemplate(httpComponentsClientHttpRequestFactory);
 	}
 
 }

@@ -8,24 +8,4 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
      <mvc:annotation-driven/>
-	 
- <!-- 
-	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-	    <property name="mediaTypes">
-		  <map>
-		      <entry key="html" value="text/html"/>
-		      <entry key="json" value="application/json"/>
-		      <entry key="xml"  value="application/xml"/>
-		  </map>
-		</property>
-	     <property name="viewResolvers">
-		    <list>
-		      <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-		        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
-		        <property name="prefix" value="/WEB-INF/jsp/"/>
-		        <property name="suffix" value=".jsp"/>
-		      </bean>
-		    </list>
-		</property>
-	</bean> -->
 </beans>

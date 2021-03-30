@@ -48,6 +48,6 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener> 
      <listener>
-	    <listener-class>eu.toop.as4.servlet.TCWebAppListener</listener-class>
+	    <listener-class>eu.de4a.connector.as4.servlet.TCWebAppListener</listener-class>
 	  </listener>
 </web-app>

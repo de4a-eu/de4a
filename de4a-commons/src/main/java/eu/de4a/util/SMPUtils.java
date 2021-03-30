@@ -24,38 +24,39 @@ public class SMPUtils {
 	 * @param requestor
 	 * @return smpUri uri to retrieve processId returnService of requestor from SMP
 	 */
-	public static String getSmpUri(String smpEndpoint, String service, String requestor) {
-		List<String> serviceParams = Arrays.asList(service.split(SERVICE));
-		String scheme = serviceParams.get(0);
-		List<String> docParams = Arrays.asList(serviceParams.get(1).split(SEPARATOR));
-		StringBuilder docId = new StringBuilder("");
-		for (int i = 2; i < docParams.size(); i++) {
-			docId.append((i != 2 ? SEPARATOR : ""));
-			docId.append(docParams.get(i));
-		}
-		StringBuilder uri = new StringBuilder(smpEndpoint);
-		uri.append(scheme).append(DOUBLE_SEPARATOR).append(requestor).append(SERVICES_PATH).append(scheme)
-				.append(DOUBLE_SEPARATOR).append(docId);
-		return uri.toString();
-	}
+//	public static String getSmpUri(String smpEndpoint, String service, String requestor) {
+//		List<String> serviceParams = Arrays.asList(service.split(SERVICE));
+//		String scheme = serviceParams.get(0);
+//		List<String> docParams = Arrays.asList(serviceParams.get(1).split(SEPARATOR));
+//		StringBuilder docId = new StringBuilder("");
+//		for (int i = 2; i < docParams.size(); i++) {
+//			docId.append((i != 2 ? SEPARATOR : ""));
+//			docId.append(docParams.get(i));
+//		}
+//		StringBuilder uri = new StringBuilder(smpEndpoint);
+//		uri.append(scheme).append(DOUBLE_SEPARATOR).append(requestor).append(SERVICES_PATH).append(scheme)
+//				.append(DOUBLE_SEPARATOR).append(docId);
+//		return uri.toString();
+//	}
 
 	/**
-	 * Retrieve SMP uri for passed service
+	 * Retrieve SMP uri for passed AgentUrn
+	 * Eg. urn:de4a-eu:provision::9920:ESS2833002E
+	 * Eg. iso6523-actorid-upis::9991:SI990000105
 	 * 
 	 * @param smpEndpoint
-	 * @param service
-	 * @return mpUri uri to retrieve processId service of transferor from SMP
+	 * @param participantId
+	 * @param canonicalEvidenceTypeId
+	 * @return Smp uri to retrieve service of transferor
 	 */
-	public static String getSmpUri(String smpEndpoint, String service) {
-		List<String> serviceParams = Arrays.asList(service.split(SERVICE));
-		String scheme = serviceParams.get(0);
-		List<String> docParams = Arrays.asList(serviceParams.get(1).split(SEPARATOR));
-		String participantId = docParams.get(0) + SEPARATOR + docParams.get(1);
-		String docId = docParams.get(2) + (docParams.size() > 3 ? SEPARATOR + docParams.get(3) : "");
+	public static String getSmpUri(String smpEndpoint, String agentUrn, String canonicalEvidenceTypeId) {
+		List<String> identifierParams = Arrays.asList(agentUrn.split(DOUBLE_SEPARATOR));
+		String scheme = identifierParams.get(0);
+		String participantId = identifierParams.get(1);
 
 		StringBuilder uri = new StringBuilder(smpEndpoint);
 		uri.append(scheme).append(DOUBLE_SEPARATOR).append(participantId).append(SERVICES_PATH).append(scheme)
-				.append(DOUBLE_SEPARATOR).append(docId);
+				.append(DOUBLE_SEPARATOR).append(canonicalEvidenceTypeId);
 		return uri.toString();
 	}
 

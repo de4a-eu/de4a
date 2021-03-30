@@ -24,17 +24,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import eu.toop.as4.domibus.soap.ClienteWS;
-import eu.toop.as4.domibus.soap.DomibusException;
-import eu.toop.as4.domibus.soap.MessageFactory;
-import eu.toop.as4.domibus.soap.ResponseAndHeader;
-import eu.toop.as4.domibus.soap.auto.LargePayloadType;
-import eu.toop.as4.domibus.soap.auto.Messaging;
-import eu.toop.as4.domibus.soap.auto.PartInfo;
-import eu.toop.as4.domibus.soap.auto.PartProperties;
-import eu.toop.as4.domibus.soap.auto.Property;
-import eu.toop.as4.domibus.soap.auto.RetrieveMessageResponse;
-import eu.toop.service.spring.Conf;
+import eu.de4a.connector.as4.domibus.soap.ClienteWS;
+import eu.de4a.connector.as4.domibus.soap.DomibusException;
+import eu.de4a.connector.as4.domibus.soap.MessageFactory;
+import eu.de4a.connector.as4.domibus.soap.ResponseAndHeader;
+import eu.de4a.connector.as4.domibus.soap.auto.LargePayloadType;
+import eu.de4a.connector.as4.domibus.soap.auto.Messaging;
+import eu.de4a.connector.as4.domibus.soap.auto.PartInfo;
+import eu.de4a.connector.as4.domibus.soap.auto.PartProperties;
+import eu.de4a.connector.as4.domibus.soap.auto.Property;
+import eu.de4a.connector.as4.domibus.soap.auto.RetrieveMessageResponse;
+import eu.de4a.connector.service.spring.Conf;
 
 @SpringBootTest(classes={Conf.class})
   
