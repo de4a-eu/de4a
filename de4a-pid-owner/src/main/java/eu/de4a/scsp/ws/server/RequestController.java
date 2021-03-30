@@ -1,64 +1,56 @@
 package eu.de4a.scsp.ws.server;
 
-import java.io.StringWriter;
-import java.util.Calendar;
-import java.util.Date;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.datatype.DatatypeConstants;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import eu.de4a.conn.api.requestor.RequestTransferEvidence;
-import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
+import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
+import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 import eu.de4a.scsp.preview.manager.PreviewManager;
 import eu.de4a.util.DE4AConstants;
-import eu.de4a.util.DOMUtils;
+import eu.de4a.util.XDE4ACanonicalEvidenceType;
+import eu.de4a.util.XDE4AMarshaller;
 
 @Controller  
-public class RequestPidController {
-	private static final Logger logger =  LoggerFactory.getLogger (RequestPidController.class);
+public class RequestController {
+	private static final Logger logger =  LoggerFactory.getLogger (RequestController.class);
 	@Autowired
 	private PreviewManager previewManager;
 	
 		
-	@PostMapping(value = "/request", consumes = { "application/xml", "application/json" }, produces = {
-			MediaType.APPLICATION_OCTET_STREAM_VALUE })
-	public ResponseEntity<Resource> sendRequest(@RequestBody RequestTransferEvidence request) throws MessageException {
+	@PostMapping(value = "/requestExtractEvidenceIM")
+	public @ResponseBody String sendRequest(@RequestBody String request) throws MessageException {
 
-		logger.debug("Received Canonical Request for being  sent to PID ");
-		Element evidenceRequest = marshall(request).getDocumentElement();
+		logger.debug("Received RequestExtractEvidence - IM pattern ");
+		RequestExtractEvidenceIMType requestObj = DE4AMarshaller.doImRequestMarshaller().read(request);
+		ResponseExtractEvidenceType responseExtract = previewManager.getPIDResponseExtract(DE4AMarshaller
+				.doImRequestMarshaller().getAsDocument(requestObj).getDocumentElement(), false);
 		
-		return previewManager.getPIDResponse(evidenceRequest);
+		//temp Marshaller while IDE4ACanonicalEvidenceType for BirthCertificate is created
+		return XDE4AMarshaller.doImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE)
+				.getAsString(responseExtract);
 	}
 	
-	@PostMapping(value = "/requestUSI", consumes = { "application/xml", "application/json" }, produces = { "application/xml" })
-	public @ResponseBody Ack requestUsi(@RequestBody RequestTransferEvidence request) throws MessageException {
-		logger.debug("Received Canonical Request by USI pattern");
+	@PostMapping(value = "/requestExtractEvidenceUSI")
+	public @ResponseBody String requestUsi(@RequestBody String request) throws MessageException {
+		logger.debug("Received RequestExtractEvidence - USI pattern");
+		
+		RequestExtractEvidenceUSIType requestObj = DE4AMarshaller.doUsiRequestMarshaller().read(request);
 		
 		// Register request
-		Document evidenceRequest = marshall(request);
-		previewManager.registerRequestorRequestData(request, evidenceRequest.getDocumentElement(), 
-				false, DE4AConstants.TAG_EVIDENCE_REQUEST);
+		previewManager.registerRequestorRequestData(requestObj, false, 
+				DE4AConstants.TAG_EXTRACT_EVIDENCE_REQUEST);
 		
-		Ack ack = new Ack();
-		ack.setCode(Ack.OK);
-		ack.setMessage("Success");
-		
-		return ack;
+		return DE4AMarshaller.doUsiResponseMarshaller().getAsString(DE4AResponseDocumentHelper
+				.createResponseError(true));
 	}
  
 	/* 
@@ -108,10 +100,10 @@ public class RequestPidController {
 			  
 			return responseHttp; 
 					
-	} */
+	} 
 	
 	
-	private Document marshall(RequestTransferEvidence request ) {   
+	private Document marshall(RequestExtractEvidenceIMType request ) {   
         try
         {
         	Date date=new Date(request.getDataRequestSubject().getDataSubjectPerson().getDateOfBirth().toGregorianCalendar().getTimeInMillis(  ));
@@ -121,7 +113,7 @@ public class RequestPidController {
         	request.getDataRequestSubject().getDataSubjectPerson().getDateOfBirth() .setMonth(time.get(Calendar.MONTH)+1);
         	request.getDataRequestSubject().getDataSubjectPerson().getDateOfBirth() .setYear(time.get(Calendar.YEAR));  
         	request.getDataRequestSubject().getDataSubjectPerson().getDateOfBirth() .setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-            JAXBContext jaxbContext = JAXBContext.newInstance(RequestTransferEvidence.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(RequestExtractEvidenceIMType.class);
             javax.xml.bind.Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             StringWriter sw = new StringWriter(); 
@@ -132,5 +124,5 @@ public class RequestPidController {
            logger.error("Error building request DOM",e);
            return null;
         } 
-	}
+	}*/
 }

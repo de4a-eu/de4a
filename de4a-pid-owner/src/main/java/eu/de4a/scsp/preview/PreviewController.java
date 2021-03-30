@@ -1,6 +1,8 @@
 package eu.de4a.scsp.preview;
 
 
+import java.time.LocalDateTime;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,17 +13,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.w3c.dom.Document;
 
-import eu.de4a.conn.api.rest.Ack;
 import eu.de4a.conn.owner.model.PreviewResponse;
 import eu.de4a.exception.MessageException;
-import eu.de4a.model.RequestorRequest;
-import eu.de4a.model.RequestorRequestData;
+import eu.de4a.iem.jaxb.common.types.AckType;
+import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
+import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
+import eu.de4a.scsp.owner.model.RequestorRequest;
 import eu.de4a.scsp.owner.model.PreviewRequest;
 import eu.de4a.scsp.preview.manager.PreviewManager;
-import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
+import eu.de4a.util.XDE4ACanonicalEvidenceType;
+import eu.de4a.util.XDE4AMarshaller;
 
 @Controller
 public class PreviewController {
@@ -59,9 +62,12 @@ public class PreviewController {
 			HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {
 		
 		//Retrieve response logic
-		Document response = previewManager.gimmePreview(previewRequest.getIdRequest());
+		RequestForwardEvidenceType requestForward = previewManager.gimmePreview(previewRequest.getIdRequest());
 		try {
-			model.addAttribute("responseFormat", DOMUtils.loadString(response));
+			model.addAttribute("nationalEvidence", DOMUtils.loadString(DOMUtils.decodeCompressed(
+					requestForward.getDomesticEvidenceList().getDomesticEvidenceAtIndex(0).getEvidenceData())));
+			model.addAttribute("requestForwardEvidence", XDE4AMarshaller.deUsiRequestMarshaller(
+					XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).formatted().getAsString(requestForward));
 			model.addAttribute("requestId", previewRequest.getIdRequest());
 			model.addAttribute("returnUrl", previewRequest.getReturnUrl());
 			model.addAttribute("previewResponse", new PreviewResponse());
@@ -81,13 +87,15 @@ public class PreviewController {
 	public String goResponse(Model model, @ModelAttribute("previewResponse") PreviewResponse previewResponse,
 			HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {
 				
-		RequestorRequestData reqData = previewManager.getPendingRequest(previewResponse.getRequestId(), 
-				DE4AConstants.TAG_EVIDENCE_REQUEST);
-		if(reqData != null) {
+		RequestorRequest request = previewManager.getRequestorRequest(previewResponse.getRequestId());
+		if(request != null) {
 			try {
-				Document docReq = DOMUtils.byteToDocument(reqData.getData());
-				Ack ack = client.sendTransferEvidenceUsi(previewManager.getPIDResponse(docReq.getDocumentElement()));
-				if(Ack.OK.equals(ack.getCode())) {
+				RequestForwardEvidenceType  requestForward = previewManager.getRequestForwardEvidenceFromRequest(request);
+				requestForward.setRequestId(previewResponse.getRequestId());
+				requestForward.setTimeStamp(LocalDateTime.now());
+				
+				ResponseErrorType response = client.sendRequestForwardEvidence(requestForward);
+				if(AckType.OK.equals(response.getAck())) {
 					model.addAttribute("previewResponse", previewResponse);
 					model.addAttribute("requestId", previewResponse.getRequestId());
 					model.addAttribute("returnUrl", previewResponse.getReturnUrl());

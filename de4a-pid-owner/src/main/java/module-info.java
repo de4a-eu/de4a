@@ -24,6 +24,7 @@ open module de4a.pid.owner {
 	requires spring.boot.autoconfigure;
 	requires transitive eu.toop.connector.api;
 	requires java.xml.bind;
+	requires com.fasterxml.jackson.core;
 	requires java.net.http;
 	requires commons.fileupload;
 	requires org.apache.commons.io;
@@ -37,4 +38,7 @@ open module de4a.pid.owner {
 	requires spring.data.commons;
 	requires javax.servlet.api;
 	requires com.h2database;
+	requires eu.de4a.edm;
+	requires com.helger.ubl20;
+	requires com.helger.commons;
 }
