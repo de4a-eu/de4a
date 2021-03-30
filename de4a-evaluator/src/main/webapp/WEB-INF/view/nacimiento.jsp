@@ -10,9 +10,8 @@
 	<h1>Personal data</h1>	
 	
 	<form:form action="greetinggo"  method="post" modelAttribute="userForm">
-    <!--  <form action="greetinggo" th:action="@{/greetinggo}" th:object="${greetinggo}" method="post">--> 
-    	<form:label path="atuCode" >Administrative Territorial Unit: </form:label><form:select path="atuCode"> 
-			<form:options items="${iaOrganisationalStructure}"/> 
+    	<form:label path="dataOwnerId" >Data Owner Pref. Label: </form:label><form:select path="dataOwnerId"> 
+			<form:options items="${dataOwnerList}"/> 
 		</form:select>
         <p>Eidas ID (eg:SI/ES/10000949C):  <form:input type="text" path="eidas"/>	</p>
    		<p>Name (eg: OLGA):  <form:input type="text" path="name"/>	</p>

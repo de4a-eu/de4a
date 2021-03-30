@@ -4,15 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.Part;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +13,18 @@ import org.w3c.dom.Document;
 
 import com.helger.commons.mime.CMimeType;
 
-import eu.de4a.conn.api.requestor.ResponseTransferEvidence;
 import eu.de4a.exception.MessageException;
-import eu.de4a.model.EvaluatorRequest;
-import eu.de4a.model.EvaluatorRequestData;
-import eu.de4a.repository.EvaluatorRequestDataRepository;
-import eu.de4a.repository.EvaluatorRequestRepository;
+import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
+import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
+import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.evaluator.model.EvaluatorRequest;
+import eu.de4a.evaluator.model.EvaluatorRequestData;
+import eu.de4a.evaluator.repository.EvaluatorRequestDataRepository;
+import eu.de4a.evaluator.repository.EvaluatorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
+import eu.de4a.util.XDE4ACanonicalEvidenceType;
+import eu.de4a.util.XDE4AMarshaller;
 
 @Component 
 public class ResponseManager {
@@ -73,43 +68,32 @@ public class ResponseManager {
 		} 
 		
 	}
-	private Document marshallMe(ResponseTransferEvidence evidence) {  
-	        try
-	        {
-//	            JAXBContext jaxbContext = JAXBContext.newInstance(ResponseTransferEvidence.class);
-//	            Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
-//	            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-//	            StringWriter sw = new StringWriter(); 
-//	            jaxbMarshaller.marshal(evidence, sw); 
-//	            LOGGER.error(sw.toString());
-//	            return DOMUtils.stringToDocument(sw.toString()); 
-	        	JAXBContext jaxbContext = JAXBContext.newInstance(ResponseTransferEvidence.class);
- 		        Marshaller jaxbMarshaller = jaxbContext.createMarshaller(); 
-	        	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	        	dbf.setNamespaceAware(true);
-	        	DocumentBuilder db = dbf.newDocumentBuilder();
-	        	Document doc = db.newDocument(); 
-	        	jaxbMarshaller.marshal( evidence, doc );
-	        	return doc;
-	        } catch (JAXBException | ParserConfigurationException e) {
-	        	LOGGER.error("Error building request DOM",e);
-	           return null;
-	        }  
-	}
 	
-	public void manageResponse(ResponseTransferEvidence response) throws MessageException {
+	public void manageResponse(ResponseTransferEvidenceType response) throws MessageException {
 		EvaluatorRequestData datarequest = new EvaluatorRequestData();
-		// DOMUtils.decodeCompressed(response.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
-		byte[] data = DOMUtils.serializeJaxbObject(ResponseTransferEvidence.class, response);
+		byte[] data = XDE4AMarshaller
+				.drImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).getAsBytes(response);
 		datarequest.setData(data);
-		ResponseTransferEvidence r = (ResponseTransferEvidence) DOMUtils.unmarshall(ResponseTransferEvidence.class,
-				DOMUtils.byteToDocument(data));
-		// DOMUtils.decodeCompressed(r.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
-
-		// DOMUtils.decodeCompressed(response.getDomesticEvidenceList().getDomesticEvidence().get(0).getEvidenceData());
-		LOGGER.info("--->" + new String(datarequest.getData()));
+		LOGGER.info("--->" 
+				+ new String(XDE4AMarshaller.drImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE)
+						.formatted().getAsString(response)));
 		datarequest.setMimetype(CMimeType.APPLICATION_XML.getAsString());
 		datarequest.setIddata(DE4AConstants.TAG_EVIDENCE_RESPONSE);
+		EvaluatorRequest request = evaluatorRequestRepository.findById(response.getRequestId()).orElse(null);
+		datarequest.setRequest(request);
+		evaluatorRequestDataRepository.save(datarequest);
+	}
+	
+	public void manageResponse(RequestForwardEvidenceType response) throws MessageException {
+		EvaluatorRequestData datarequest = new EvaluatorRequestData();
+		XDE4AMarshaller<RequestForwardEvidenceType> marshaller = XDE4AMarshaller.deUsiRequestMarshaller(
+				XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE);
+		byte[] data = marshaller.getAsBytes(response);
+		datarequest.setData(data);
+		LOGGER.info("--->" 
+				+ new String(marshaller.formatted().getAsString(response)));
+		datarequest.setMimetype(CMimeType.APPLICATION_XML.getAsString());
+		datarequest.setIddata(DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);
 		EvaluatorRequest request = evaluatorRequestRepository.findById(response.getRequestId()).orElse(null);
 		datarequest.setRequest(request);
 		evaluatorRequestDataRepository.save(datarequest);
@@ -144,21 +128,6 @@ public class ResponseManager {
 	        	}
 	        }
 	        
-	}
-//	private void filling(  EvaluatorRequest request,List<EvaluatorRequestData>datas) {
-//		datas.forEach(d->{ 
-//			 d.setRequest(request);
-//			 x
-//		 });
-//	}
-	private byte[]  getBytes(Part part) {
-		try  {
-            return IOUtils.toByteArray(part.getInputStream());
-        } catch (IOException e) {
-			LOGGER.error("Error getting inputstream from multipart response",e);
-			return null;
-		}	
-	}
-	 
+	}	 
  
 }
