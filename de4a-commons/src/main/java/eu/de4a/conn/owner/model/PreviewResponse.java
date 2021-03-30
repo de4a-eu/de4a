@@ -3,16 +3,16 @@ package eu.de4a.conn.owner.model;
 import org.w3c.dom.Document;
 
 public class PreviewResponse {
-	private Document response;
+	private Document requestForward;
 	private String requestId;
 	private String returnUrl;
 	
 	
 	public Document getResponse() {
-		return response;
+		return requestForward;
 	}
 	public void setResponse(Document response) {
-		this.response = response;
+		this.requestForward = response;
 	}
 	public String getRequestId() {
 		return requestId;
