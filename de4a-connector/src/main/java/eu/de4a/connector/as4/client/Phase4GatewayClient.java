@@ -135,26 +135,16 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 				LOGGER.error("Error attaching files", e);
 			}
 			Document evidence = null;
-			String canonicalEvidenceId = null;
+			String requestId = null;
 			try {
 				evidence = DOMUtils.byteToDocument(a.getData().bytes());
-				canonicalEvidenceId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_CANONICAL_EVICENCE_ID, evidence.getDocumentElement());
+				requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, evidence.getDocumentElement());
 			} catch (MessageException e1) {
 				LOGGER.error("Error managing evidence dom", e1);
 			}
-			if (a.getContentID().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)) {								
-				ResponseTransferEvidenceType responseTransferEvidence = XDE4AMarshaller
-						.drImResponseMarshaller(XDE4ACanonicalEvidenceType.getXDE4CanonicalEvidenceType(canonicalEvidenceId)).read(evidence);
-				responsewrapper.setTagDataId(DE4AConstants.TAG_EVIDENCE_RESPONSE);
-				responsewrapper.setId(responseTransferEvidence.getRequestId());
-				responsewrapper.setResponseDocument(evidence);
-			} else if (a.getContentID().equals(DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST)) {			
-				RequestForwardEvidenceType requestForwardEvidence = XDE4AMarshaller
-						.deUsiRequestMarshaller(XDE4ACanonicalEvidenceType.getXDE4CanonicalEvidenceType(canonicalEvidenceId)).read(evidence);
-				responsewrapper.setTagDataId(DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);
-				responsewrapper.setId(requestForwardEvidence.getRequestId());
-				responsewrapper.setResponseDocument(evidence);
-			}
+			responsewrapper.setTagDataId(a.getContentID());
+			responsewrapper.setId(requestId);
+			responsewrapper.setResponseDocument(evidence);
 		});
 		return responsewrapper;
 	}
