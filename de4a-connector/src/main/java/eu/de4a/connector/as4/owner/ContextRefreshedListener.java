@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import eu.de4a.connector.service.EvidenceTransferorManager;
+import eu.de4a.connector.api.manager.EvidenceTransferorManager;
 
 @Component
 public class ContextRefreshedListener implements ApplicationListener<ContextRefreshedEvent> {

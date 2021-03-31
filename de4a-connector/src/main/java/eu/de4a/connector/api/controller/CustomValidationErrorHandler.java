@@ -1,4 +1,4 @@
-package eu.de4a.connector.rest;
+package eu.de4a.connector.api.controller;
 
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;

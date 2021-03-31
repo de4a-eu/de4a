@@ -1,4 +1,4 @@
-package eu.de4a.connector.rest;
+package eu.de4a.connector.api.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,9 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
 import eu.de4a.connector.api.RequestApi;
+import eu.de4a.connector.api.manager.EvidenceRequestorManager;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
-import eu.de4a.connector.service.EvidenceRequestorManager;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;

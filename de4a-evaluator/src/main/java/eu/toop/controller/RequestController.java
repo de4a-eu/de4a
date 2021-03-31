@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import eu.de4a.conn.owner.model.PreviewRequest;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.AgentType;
+import eu.de4a.iem.jaxb.common.types.CanonicalEvidenceidkType;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
@@ -41,7 +42,6 @@ import eu.de4a.evaluator.repository.EvaluatorRequestDataRepository;
 import eu.de4a.evaluator.repository.EvaluatorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.de4a.util.EvidenceTypeIds;
 import eu.de4a.util.XDE4ACanonicalEvidenceType;
 import eu.de4a.util.XDE4AMarshaller;
 import eu.toop.rest.Client;
@@ -63,7 +63,6 @@ public class RequestController {
 	private String id;
 	private RequestTransferEvidenceUSIIMDRType requestEvidencia;
 	
-	private static final String REDIRECT_ADDR = "redirect:/%s";
 
 	@GetMapping(value = "/")
 	public String welcome(Model model) { 
@@ -95,21 +94,24 @@ public class RequestController {
 				});
 			});
 			model.addAttribute("dataOwnerList", dataOwnerLabels);
-		} catch (MessageException e) {
-			logger.error("Ha ocurrido un error en la consulta de rounting info", e);
+		} catch (Exception | MessageException e) {
+			logger.error("Error retrieving routing info", e);
+			model.addAttribute("errorCode", "Error retrieving routing info");
+			model.addAttribute("errorDescription", e.getMessage());
+			return "errorPage";
 		}
 		u.setEvidenceTypeId(lookupRouting.getCanonicalEvidenceTypeId());
 		u.setCountry(lookupRouting.getCountryCode());
 		model.addAttribute("userForm",u );
 		
-		if(EvidenceTypeIds.BIRTHCERTIFICATE.toString().equals(lookupRouting.getCanonicalEvidenceTypeId())) {
+		if(CanonicalEvidenceidkType.BIRTH_CERTIFICATE.toString().equals(lookupRouting.getCanonicalEvidenceTypeId())) {
 			return "nacimiento";
 		}
 		return "dba";
 	}
 	
 	@PostMapping(value = "/greetinggo") 
-	public String greetingSubmit(@ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {
+	public String greetingSubmit(Model model, @ModelAttribute("userForm") User user,HttpServletRequest requesthttp,HttpServletResponse httpServletResponse) {
 		RequestLookupRoutingInformationType request = new RequestLookupRoutingInformationType();
 			request.setDataOwnerId(user.getDataOwnerId());
 			request.setCanonicalEvidenceTypeId(user.getEvidenceTypeId());
@@ -134,10 +136,20 @@ public class RequestController {
 					id=requestEvidencia.getRequestId();  
 					return "showRequest";
 				} else {
-					return String.format(REDIRECT_ADDR, "errorPage.jsp");
+					StringBuilder errorCodes = new StringBuilder();
+					StringBuilder errorMessages = new StringBuilder();
+					response.getErrorList().getError().stream().forEach(e -> {
+						errorCodes.append(e.getCode()).append("  --  ");
+						errorMessages.append(e.getText()).append("\\n\\r");
+					});
+					model.addAttribute("errorCode", errorCodes.toString());
+					model.addAttribute("errorDescription", errorMessages.toString());
+					return "errorPage";
 				}
 			} catch (Exception | MessageException e) {
-				return String.format(REDIRECT_ADDR, "errorPage.jsp");
+				model.addAttribute("errorCode", "Error building request");
+				model.addAttribute("errorDescription", e.getMessage());
+				return "errorPage";
 			}
 	}
 	
@@ -147,7 +159,7 @@ public class RequestController {
 			EvaluatorRequest request = new EvaluatorRequest();
 			request.setIdrequest(id);
 			
-			String redirectAddr = String.format(REDIRECT_ADDR, "errorPage.jsp");
+			String returnPage = "errorPage";
 			if(!ObjectUtils.isEmpty(requestEvidencia.getDataOwner().getRedirectURL())) {
 				//USI pattern
 				request.setUsi(true);
@@ -160,19 +172,21 @@ public class RequestController {
 				model.addAttribute("previewRequest", previewRequest);
 				model.addAttribute("idRequest", requestEvidencia.getRequestId());
 				model.addAttribute("redirectUrl", requestEvidencia.getDataOwner().getRedirectURL());
-				redirectAddr = "redirectOwner";
+				returnPage = "redirectOwner";
 			} else {
 				//IM pattern
 				request.setUsi(false);
 				evaluatorRequestRepository.save(request);
 				client.getEvidenceRequestIM(requestEvidencia);
 				redirectAttributes.addAttribute("id", id);
-				redirectAddr = String.format(REDIRECT_ADDR, "returnPage.jsp");			
+				returnPage = "returnPage";			
 			}									
-			return redirectAddr;
+			return returnPage;
 		} catch (MessageException e) {
 			logger.error("Error getting evidence request",e);
-			return String.format(REDIRECT_ADDR, "errorPage.jsp");
+			model.addAttribute("errorCode", "Error getting evidence request");
+			model.addAttribute("errorDescription", e.getMessage());
+			return "errorPage";
 		}
 		
 	}

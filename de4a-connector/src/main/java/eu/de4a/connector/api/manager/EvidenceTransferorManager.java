@@ -1,4 +1,4 @@
-package eu.de4a.connector.service;
+package eu.de4a.connector.api.manager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.as4.owner.MessageOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
 import eu.de4a.connector.as4.owner.OwnerLocator;
-import eu.de4a.connector.rest.Client;
+import eu.de4a.connector.client.Client;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
@@ -52,7 +52,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		ResponseTransferEvidenceType responseTransferEvidenceType = null;
 		OwnerAddresses evidenceEntity = null;
 		if (logger.isDebugEnabled()) {
-			logger.debug("Queued a message to send a owner implementation:");
+			logger.debug("Queued message to send to owner:");
 			logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
 		}
 		try {
@@ -75,7 +75,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 							req, evidenceEntity.getEndpoint(), false);
 				} catch (NoSuchMessageException | MessageException e) {
 					logger.error("Fail...", e);
-					// TODO handler error
+					// TODO error handling
 				}			
 				sendResponseMessage(meId, requestorReq.getReturnServiceUri(), XDE4AMarshaller.drImResponseMarshaller(
 						XDE4ACanonicalEvidenceType.getXDE4CanonicalEvidenceType(req.getCanonicalEvidenceTypeId()))
@@ -90,7 +90,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 					client.sendEvidenceRequest(req, evidenceEntity.getEndpoint(), true);
 				} catch (MessageException e) {
 					logger.error("Fail...",e);
-					//TODO handler error 
+					//TODO error handling 
 				}
 			}
 			// Save request information			
@@ -104,12 +104,12 @@ public class EvidenceTransferorManager extends EvidenceManager {
 	
 	public void queueMessageResponse(MessageResponseOwner response) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Queued a response from USI-Pattern owner:");
+			logger.debug("Queued response from owner USI-Pattern:");
 			logger.debug(DOMUtils.documentToString(response.getMessage().getOwnerDocument()));
 		}
 		RequestorRequest usirequest = requestorRequestRepository.findById(response.getId()).orElse(null);
 		if (usirequest == null) {
-			logger.error("Not located a request with ID {}", response.getId());
+			logger.error("Does not exists any request with ID {}", response.getId());
 		} else {
 			sendResponseMessage(meId, usirequest.getReturnServiceUri(), response.getMessage(), 
 					DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);

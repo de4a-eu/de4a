@@ -41,136 +41,132 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import eu.de4a.conn.api.canonical.BirthEvidence;
-import eu.de4a.conn.api.canonical.ObjectFactory;
 import eu.de4a.exception.MessageException;
-import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
-import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
-import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
-import eu.de4a.iem.xml.de4a.CDE4AJAXB;
-import eu.de4a.iem.xml.de4a.DE4AMarshaller; 
 
 public class DOMUtils {
 	private static final Logger logger = LogManager.getLogger(DOMUtils.class);
- 
-	public static Node changeNodo(Document request,String expression,String value)   { 
+
+	public static Node changeNodo(Document request, String expression, String value) {
 		Node node = null;
-		try{
+		try {
 			XPath xpath = XPathFactory.newInstance().newXPath();
-			node = (Node)xpath.evaluate(expression,request,XPathConstants.NODE);
+			node = (Node) xpath.evaluate(expression, request, XPathConstants.NODE);
 			node.setTextContent(value);
-		}catch(XPathExpressionException e){
-			logger.error(String.format("No se ha podido acceder al elemento indicado '%s'",expression),e);
-			 
+		} catch (XPathExpressionException e) {
+			logger.error(String.format("No se ha podido acceder al elemento indicado '%s'", expression), e);
+
 		}
 		return node;
 	}
+
 	public static String getValueFromXpath(String xpath, Element message) throws MessageException {
-		try{
+		try {
 			XPath xPath = XPathFactory.newInstance().newXPath();
-			NodeList nodes = (NodeList)xPath.evaluate(xpath, message , XPathConstants.NODESET);
-			if(nodes!=null && nodes.getLength()>0){
+			NodeList nodes = (NodeList) xPath.evaluate(xpath, message, XPathConstants.NODESET);
+			if (nodes != null && nodes.getLength() > 0) {
 				return nodes.item(0).getTextContent();
 			}
 			return null;
-		} catch (XPathExpressionException e) { 
-			String err="xpath error in building wrapping message.";
-			logger.error(err,e);
-			throw new MessageException(err+ e.getMessage());
-		} 
+		} catch (XPathExpressionException e) {
+			String err = "xpath error in building wrapping message.";
+			logger.error(err, e);
+			throw new MessageException(err + e.getMessage());
+		}
 	}
+
 	public static Node getNodeFromXpath(String xpath, Element message) throws MessageException {
-		try{
+		try {
 			XPath xPath = XPathFactory.newInstance().newXPath();
-			NodeList nodes = (NodeList)xPath.evaluate(xpath, message , XPathConstants.NODESET);
-			if(nodes!=null && nodes.getLength()>0){
-				return nodes.item(0) ;
+			NodeList nodes = (NodeList) xPath.evaluate(xpath, message, XPathConstants.NODESET);
+			if (nodes != null && nodes.getLength() > 0) {
+				return nodes.item(0);
 			}
 			return null;
-		} catch (XPathExpressionException e) { 
-			String err="xpath error in building wrapping message.";
-			logger.error(err,e);
-			throw new MessageException(err+ e.getMessage());
-		} 
+		} catch (XPathExpressionException e) {
+			String err = "xpath error in building wrapping message.";
+			logger.error(err, e);
+			throw new MessageException(err + e.getMessage());
+		}
 	}
 
 	public static byte[] documentToByte(Document document) throws MessageException {
 		Transformer transformer;
 		try {
-			transformer = TransformerFactory.newInstance().newTransformer();		
-	        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-	        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-	        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-	
-	        StringWriter writer = new StringWriter();
-	        Result result = new StreamResult(writer);
-	        DOMSource source = new DOMSource(document);
+			transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+
+			StringWriter writer = new StringWriter();
+			Result result = new StreamResult(writer);
+			DOMSource source = new DOMSource(document);
 			transformer.transform(source, result);
 			return writer.getBuffer().toString().getBytes();
 		} catch (TransformerFactoryConfigurationError | TransformerException e) {
-			String err="Error convert bytes from DOM";
-			logger.error(err,e);
-			throw new MessageException(err+ e.getMessage());
+			String err = "Error convert bytes from DOM";
+			logger.error(err, e);
+			throw new MessageException(err + e.getMessage());
 		}
 	}
-	
-	public static Document byteToDocument(byte[] documentoXml)throws MessageException  {
-		    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		    factory.setNamespaceAware(true);
-		    DocumentBuilder builder;
-			try {
-				builder = factory.newDocumentBuilder();
-			    return builder.parse(new ByteArrayInputStream(documentoXml)); 
-			} catch (ParserConfigurationException | SAXException | IOException e) {
-				String err="xpath error in building DOM from bytes";
-				logger.error(err,e);
-				throw new MessageException(err+ e.getMessage());
-			}
+
+	public static Document byteToDocument(byte[] documentoXml) throws MessageException {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
+		DocumentBuilder builder;
+		try {
+			builder = factory.newDocumentBuilder();
+			return builder.parse(new ByteArrayInputStream(documentoXml));
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			String err = "xpath error in building DOM from bytes";
+			logger.error(err, e);
+			throw new MessageException(err + e.getMessage());
+		}
 	}
-	
-	 public static Document newDocumentFromInputStream(InputStream in) {
-		    DocumentBuilderFactory factory = null;
-		    DocumentBuilder builder = null;
-		    Document ret = null;
 
-		    try {
-		      factory = DocumentBuilderFactory.newInstance();
-		      factory.setNamespaceAware(true);
-		      builder = factory.newDocumentBuilder();
-		    } catch (ParserConfigurationException e) {
-		    	String err="Error parsing DOM.";
-				logger.error(err,e);
-		    }
+	public static Document newDocumentFromInputStream(InputStream in) {
+		DocumentBuilderFactory factory = null;
+		DocumentBuilder builder = null;
+		Document ret = null;
 
-		    try {
-		      ret = builder.parse(new InputSource(in));
-		    } catch (SAXException e) {
-		    	String err="Error parsing DOM.";
-				logger.error(err,e);
-		    } catch (IOException e) {
-		    	String err="Error parsing DOM.";
-				logger.error(err,e);
-		    }
-		    return ret;
-		  }
-	 public static String documentToString(Document doc) {
-		
-	    try {
-	    	DOMSource domSource = new DOMSource(doc);
-		    StringWriter writer = new StringWriter();
-		    StreamResult result = new StreamResult(writer);
-		    TransformerFactory tf = TransformerFactory.newInstance();
-		    Transformer transformer = tf.newTransformer();
-		    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-		    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		try {
+			factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			builder = factory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			String err = "Error parsing DOM.";
+			logger.error(err, e);
+		}
+
+		try {
+			ret = builder.parse(new InputSource(in));
+		} catch (SAXException e) {
+			String err = "Error parsing DOM.";
+			logger.error(err, e);
+		} catch (IOException e) {
+			String err = "Error parsing DOM.";
+			logger.error(err, e);
+		}
+		return ret;
+	}
+
+	public static String documentToString(Document doc) {
+
+		try {
+			DOMSource domSource = new DOMSource(doc);
+			StringWriter writer = new StringWriter();
+			StreamResult result = new StreamResult(writer);
+			TransformerFactory tf = TransformerFactory.newInstance();
+			Transformer transformer = tf.newTransformer();
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.transform(domSource, result);
 			return writer.toString();
 		} catch (Exception e) {
-			logger.error("Error doc->string",e);
+			logger.error("Error doc->string", e);
 		}
-	    return null;
-	 }
-	 
+		return null;
+	}
+
 	public static String loadString(Document doc) throws Exception {
 		try {
 			Source xmlInput = new StreamSource(new StringReader(documentToString(doc)));
@@ -188,7 +184,7 @@ public class DOMUtils {
 		}
 		return null;
 	}
-	
+
 	public static String nodeToString(final Node node, final boolean omitXMLDeclaration) {
 		final StringWriter writer = new StringWriter();
 		try {
@@ -201,37 +197,36 @@ public class DOMUtils {
 		}
 		return writer.toString();
 	}
-	 
-	 public static Document stringToDocument(String xml) {
-		 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
-	        DocumentBuilder builder;  
-	        try 
-	        {  
-	        	factory.setNamespaceAware(true);
-	            builder = factory.newDocumentBuilder();  
-	            Document doc = builder.parse( new InputSource( new StringReader( xml )) ); 
-	            return doc; 
-	        } catch (Exception e) {  
-	        	logger.error("Error string -> doc",e);
-	        } 
-	  
-		  
-		return null; 
-	 }
-	 public static byte[]serializeJaxbObject(Class<?> clazz,Object o){
-		  ByteArrayOutputStream xmlStream = new ByteArrayOutputStream();
-		  try {
-		         JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
-		         Marshaller marshaller = jaxbContext.createMarshaller(); 
-		         marshaller.marshal(o, xmlStream);
-		         return xmlStream.toByteArray();
-		  } catch ( Exception e) {
-		       	logger.error("Error marshalling jaxb object",e);
-		       	return null;
-		  }
-	 }
-	 
-	public static <T> String jaxbObjectToXML(T xmlObj, Class <?> [] aClasses) {
+
+	public static Document stringToDocument(String xml) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder;
+		try {
+			factory.setNamespaceAware(true);
+			builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(new InputSource(new StringReader(xml)));
+			return doc;
+		} catch (Exception e) {
+			logger.error("Error string -> doc", e);
+		}
+
+		return null;
+	}
+
+	public static byte[] serializeJaxbObject(Class<?> clazz, Object o) {
+		ByteArrayOutputStream xmlStream = new ByteArrayOutputStream();
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			marshaller.marshal(o, xmlStream);
+			return xmlStream.toByteArray();
+		} catch (Exception e) {
+			logger.error("Error marshalling jaxb object", e);
+			return null;
+		}
+	}
+
+	public static <T> String jaxbObjectToXML(T xmlObj, Class<?>[] aClasses) {
 		String xmlString = "";
 		try {
 			JAXBContext context = JAXBContext.newInstance(aClasses);
@@ -245,7 +240,7 @@ public class DOMUtils {
 			return xmlString;
 		}
 	}
-	 
+
 	public static Object unmarshall(Class<?> clazz, Node doc) {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
@@ -274,74 +269,31 @@ public class DOMUtils {
 			return null;
 		}
 	}
-	 
-//	 public static byte[] encodeCompressed(Document doc) {
-//			  
-//	        try {
-//	        	 byte[] input = DOMUtils.documentToString( doc).getBytes(); 
-//			     ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-//			     GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream);
-//			     outputStream.write(input,0, input.length);
-//			     outputStream.close();
-//			     return Base64.encodeBase64(arrayOutputStream.toByteArray());
-//	        } catch (Throwable t) {
-//	        	logger.error("Error encoding compressed",t);
-//		       	return null;
-//	        } 
-//	}
-	 public static byte[] encodeCompressed(Document doc) {
-		// return Base64.encodeBase64(DOMUtils.documentToString( doc).getBytes());
-	        try {
-	        	 byte[] input = DOMUtils.documentToString( doc).getBytes();  
-			     ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-			     GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream);
-			     outputStream.write(input,0, input.length);
-			     outputStream.close();
-			     outputStream.flush(); 
-			     return Base64.encodeBase64(arrayOutputStream.toByteArray());
-	        } catch (Throwable t) {
-	        	logger.error("Error encoding compressed",t);
-		       	return null;
-	        } 
+
+	public static byte[] encodeCompressed(Document doc) {
+		try {
+			byte[] input = DOMUtils.documentToString(doc).getBytes();
+			ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+			GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream);
+			outputStream.write(input, 0, input.length);
+			outputStream.close();
+			outputStream.flush();
+			return Base64.encodeBase64(arrayOutputStream.toByteArray());
+		} catch (Throwable t) {
+			logger.error("Error encoding compressed", t);
+			return null;
+		}
 	}
-	 
-//	 public static Document decodeCompressed(byte[] data) {
-//		  
-//	        try {
-//	        	byte[]decoded=Base64.decodeBase64(data);
-//			    GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decoded));
-//		        byte[] targetArray = IOUtils .toByteArray(gis);
-//		        String s=new String(targetArray
-//		   );
-//			    return DOMUtils.byteToDocument(targetArray);
-//	        } catch (Throwable t) {
-//	        	logger.error("Error decoding compressed",t);
-//		       	return null;
-//	        }
-//	}
-	 
-	 public static Document decodeCompressed(byte[] data) {
-//		try {
-//			return DOMUtils.byteToDocument( Base64.decodeBase64(data));
-//		} catch (MessageException e) {
-//			return null;
-//		}
-	        try {
-	        	byte[]decoded=Base64.decodeBase64( data); 
-			    GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decoded));
-		        byte[] targetArray = IOUtils .toByteArray(gis);  
-			    return DOMUtils.byteToDocument(targetArray);
-	        } catch (Throwable t) {
-	        	logger.error("Error decoding compressed",t);
-		       	return null;
-	        }
+
+	public static Document decodeCompressed(byte[] data) {
+		try {
+			byte[] decoded = Base64.decodeBase64(data);
+			GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decoded));
+			byte[] targetArray = IOUtils.toByteArray(gis);
+			return DOMUtils.byteToDocument(targetArray);
+		} catch (Throwable t) {
+			logger.error("Error decoding compressed", t);
+			return null;
+		}
 	}
-	
-//	public static DE4AMarshaller <RequestForwardEvidenceType> getRequestForwardEvidenceMarshaller() {
-//		final ICommonsList<ClassPathResource> ret = new CommonsArrayList<>();
-//		ret.addAll(CDE4AJAXB.XSDS);
-//		ret.add(CDE4AJAXB.XSD_DE_USI);
-//		return new DE4AMarshaller <> (RequestForwardEvidenceType.class,
-//				ret, new eu.de4a.iem.jaxb.de_usi.ObjectFactory ()::createRequestForwardEvidence);
-//	}
 }
