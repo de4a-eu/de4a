@@ -1,4 +1,4 @@
-package eu.de4a.connector.service;
+package eu.de4a.connector.api.manager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -16,8 +16,8 @@ import org.w3c.dom.Element;
 import com.helger.commons.mime.CMimeType;
 
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
+import eu.de4a.connector.client.Client;
 import eu.de4a.connector.model.smp.NodeInfo;
-import eu.de4a.connector.rest.Client;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ErrorType;
@@ -32,29 +32,29 @@ import eu.de4a.util.SMPUtils;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 
-@Component 
-public class EvidenceRequestorManager extends EvidenceManager{
+@Component
+public class EvidenceRequestorManager extends EvidenceManager {
 
-	private static final Logger logger = LoggerFactory.getLogger (EvidenceRequestorManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(EvidenceRequestorManager.class);
 	@Value("#{'${as4.me.id.jvm:${as4.me.id:}}'}")
 	private String meId;
 	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
 	private String smpEndpoint;
 	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
 	private String idkEndpoint;
-	@Value("${as4.timeout.miliseconds:#{60000}}") 
+	@Value("${as4.timeout.miliseconds:#{60000}}")
 	private long timeout;
-	
+
 	@Autowired
-	private Client client; 
+	private Client client;
 	@Autowired
-	private ResponseManager responseManager;  
-	
+	private ResponseManager responseManager;
+
 	public ResponseLookupRoutingInformationType manageRequest(RequestLookupRoutingInformationType request) {
 		ResponseLookupRoutingInformationType response = new ResponseLookupRoutingInformationType();
-		
-		if(request != null && !ObjectUtils.isEmpty(request.getCanonicalEvidenceTypeId())) {
-			if(ObjectUtils.isEmpty(request.getDataOwnerId())) {
+
+		if (request != null && !ObjectUtils.isEmpty(request.getCanonicalEvidenceTypeId())) {
+			if (ObjectUtils.isEmpty(request.getDataOwnerId())) {
 				return client.getSources(request);
 			} else {
 				return client.getProvisions(request);
@@ -66,31 +66,31 @@ public class EvidenceRequestorManager extends EvidenceManager{
 			error.setText("Bad request. Missing mandatory fields");
 			response.getErrorList().addError(error);
 		}
-		
+
 		return response;
 	}
-	
+
 	public boolean manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
-		String from= meId;
+		String from = meId;
 		Document doc = DE4AMarshaller.drUsiRequestMarshaller().getAsDocument(request);
-		
-		if(ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {		
+
+		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
 			return false;
 		}
-		return sendRequestMessage(from, request.getDataOwner().getAgentUrn(), 
-				doc.getDocumentElement(), request.getCanonicalEvidenceTypeId());
+		return sendRequestMessage(from, request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
+				request.getCanonicalEvidenceTypeId());
 	}
-	
+
 	public ResponseTransferEvidenceType manageRequestIM(RequestTransferEvidenceUSIIMDRType request) {
 		String from = meId;
 		Document doc = DE4AMarshaller.drImRequestMarshaller().getAsDocument(request);
 		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
-				return null;
+			return null;
 		}
-		return handleRequestTransferEvidence(from, request.getDataOwner().getAgentUrn(),
-				doc.getDocumentElement(), request.getRequestId(), request.getCanonicalEvidenceTypeId());
+		return handleRequestTransferEvidence(from, request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
+				request.getRequestId(), request.getCanonicalEvidenceTypeId());
 	}
-	
+
 	private ResponseTransferEvidenceType handleRequestTransferEvidence(String from, String dataOwnerId,
 			Element documentElement, String requestId, String canonicalEvidenceTypeId) {
 		boolean ok = false;
@@ -108,9 +108,10 @@ public class EvidenceRequestorManager extends EvidenceManager{
 
 		} catch (InterruptedException e) {
 			logger.error("Error waiting for response", e);
+			return null;
 		}
 		if (!ok) {
-			logger.error("No se ha conseguido la repsuesta antes del timeout!!!");
+			logger.error("No response before timeout");
 			return null;
 		}
 		try {
@@ -119,22 +120,21 @@ public class EvidenceRequestorManager extends EvidenceManager{
 			return responseManager.getErrorResponse(e);
 		}
 	}
-	
-	private boolean waitResponse(String id) throws InterruptedException { 
-		long init=Calendar.getInstance().getTimeInMillis();
-		boolean wait=!responseManager.isDone(id);
-		boolean ok=!wait;
-			while ( wait) {
-			       logger.debug("Waiting for ThreadB to complete...");
-			       Thread.sleep(500);
-			       ok=responseManager.isDone(id);
-			       wait=!ok && Calendar.getInstance().getTimeInMillis()-init<timeout;
-			}  
-			return ok;
-		     
-	}	
-	
-	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage, 
+
+	private boolean waitResponse(String id) throws InterruptedException {
+		long init = Calendar.getInstance().getTimeInMillis();
+		boolean wait = !responseManager.isDone(id);
+		boolean ok = !wait;
+		while (wait) {
+			logger.debug("Waiting for response to complete...");
+			Thread.sleep(700);
+			ok = responseManager.isDone(id);
+			wait = !ok && Calendar.getInstance().getTimeInMillis() - init < timeout;
+		}
+		return ok;
+	}
+
+	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
 			String canonicalEvidenceTypeId) {
 		String uriSmp = SMPUtils.getSmpUri(smpEndpoint, dataOwnerId, canonicalEvidenceTypeId);
 		NodeInfo nodeInfo = client.getNodeInfo(uriSmp, false);
@@ -156,6 +156,5 @@ public class EvidenceRequestorManager extends EvidenceManager{
 		}
 		return false;
 	}
-	
 
 }

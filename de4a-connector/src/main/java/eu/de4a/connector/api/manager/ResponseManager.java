@@ -1,4 +1,4 @@
-package eu.de4a.connector.service;
+package eu.de4a.connector.api.manager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 
 import eu.de4a.connector.as4.client.ResponseWrapper;
-import eu.de4a.connector.rest.Client;
+import eu.de4a.connector.client.Client;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ErrorType;
@@ -98,11 +98,11 @@ public class ResponseManager {
 	public boolean isDone(String id) {
 		entityManager.clear();
 		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);		
-		return evaluator == null ? false : evaluator.isDone();
+		return evaluator != null && evaluator.isDone();
 	}
 
 	public ResponseTransferEvidenceType getResponse(String id) throws MessageException {
-		logger.debug("Processing ResponseTransferEvidence with id ", id);
+		logger.debug("Processing ResponseTransferEvidence with id {}", id);
 		
 		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);
 		EvaluatorRequestData data = new EvaluatorRequestData();
