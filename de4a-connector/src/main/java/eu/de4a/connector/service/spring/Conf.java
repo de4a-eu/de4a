@@ -199,7 +199,7 @@ public class Conf implements WebMvcConfigurer {
 		// is thrown: java.security.cert.CertificateException: No name matching
 		// localhost found
 		SSLContext context = sslContext();
-		return new SSLConnectionSocketFactory(context, NoopHostnameVerifier.INSTANCE);
+		return new SSLConnectionSocketFactory(context);
 	}
 
 	public SSLContext sslContext() throws Exception {
@@ -208,8 +208,6 @@ public class Conf implements WebMvcConfigurer {
 		String trustStore = System.getProperties().getProperty("javax.net.ssl.trustStore");
 		String trustStorePassword = System.getProperties().getProperty("javax.net.ssl.trustStorePassword");
 		String type = System.getProperties().getProperty("javax.net.ssl.keyStoreType");
-		LOG.debug(String.format("Usando ssl %s  %s  %s  %s ", keystore, keyStorePassword, trustStore,
-				trustStorePassword));
 		if (keystore == null || keyStorePassword == null || trustStore == null || trustStorePassword == null
 				|| type == null) {
 			LOG.error("No se ira por SSLContext alguno de los parametros es null");

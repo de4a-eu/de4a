@@ -104,7 +104,7 @@ public class RequestController {
 		u.setCountry(lookupRouting.getCountryCode());
 		model.addAttribute("userForm",u );
 		
-		if(CanonicalEvidenceidkType.BIRTH_CERTIFICATE.toString().equals(lookupRouting.getCanonicalEvidenceTypeId())) {
+		if(CanonicalEvidenceidkType.BIRTH_CERTIFICATE.value().equals(lookupRouting.getCanonicalEvidenceTypeId())) {
 			return "nacimiento";
 		}
 		return "dba";
@@ -178,7 +178,7 @@ public class RequestController {
 				request.setUsi(false);
 				evaluatorRequestRepository.save(request);
 				client.getEvidenceRequestIM(requestEvidencia);
-				redirectAttributes.addAttribute("id", id);
+				model.addAttribute("idRequest", requestEvidencia.getRequestId());
 				returnPage = "returnPage";			
 			}									
 			return returnPage;
