@@ -1,5 +1,5 @@
-# DE4A - CONNECTOR PROJECT
-Repository revolves around [de4a-connector](https://github.com/de4a-wp5/de4a/tree/developer/de4a-connector) component, but in order to test, enhance and complete the functionality, an complete environment is created. We will describes the differents packages.
+# DE4A - CONNECTOR
+Connector component. Check out following instructions and descriptions.
 
 ## de4a-commons
 Concived as a library that maintains:
