@@ -1,4 +1,4 @@
-package eu.de4a.connector.service;
+package eu.de4a.connector.api.manager;
 
 import javax.annotation.PostConstruct;
 

@@ -1,4 +1,4 @@
-package eu.de4a.connector.rest;
+package eu.de4a.connector.api.controller;
  
 import java.util.List;
 

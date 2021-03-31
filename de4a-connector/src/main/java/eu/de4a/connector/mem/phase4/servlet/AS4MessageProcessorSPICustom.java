@@ -36,8 +36,8 @@ import com.helger.phase4.servlet.spi.AS4SignalMessageProcessorResult;
 import com.helger.phase4.servlet.spi.IAS4ServletMessageProcessorSPI;
 import com.helger.xml.serialize.write.XMLWriter;
 
+import eu.de4a.connector.api.manager.ApplicationContextProvider;
 import eu.de4a.connector.as4.handler.IncomingAS4PKHandler;
-import eu.de4a.connector.service.ApplicationContextProvider;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.me.incoming.IMEIncomingHandler;
 import eu.toop.connector.api.me.incoming.IncomingEDMErrorResponse;

@@ -10,8 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.de4a.connector.client.Client;
 import eu.de4a.connector.model.smp.NodeInfo;
-import eu.de4a.connector.rest.Client;
 import eu.de4a.connector.service.spring.Conf;
 
 @SpringBootTest(classes={Conf.class})
