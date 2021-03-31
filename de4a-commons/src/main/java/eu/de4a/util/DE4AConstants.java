@@ -50,6 +50,20 @@ public class DE4AConstants {
 	public static final String XPATH_EIDAS_FULLNAME_NODE="//*[local-name()='PersonBirthName']";   
 	public static final String XPATH_EIDAS_BIRTHDATE_NODE="//*[local-name()='PersonBirthDate']"; 
 	
+	//SMP request MessageType
+	public static final String MESSAGE_TYPE_REQUEST = "request";
+	
+	//SMP response MessageType
+	public static final String MESSAGE_TYPE_RESPONSE = "response";
+	
+	public static final String DOUBLE_SEPARATOR = "::";
+	
+	public static final String SERVICES_PATH = "/services/";
+	
+	// URN Scheme for SMP identifiers
+	public static final String URN_SCHEME = "urn:de4a-eu:";
+	
+	public static final String CANONICAL_EVIDENCE_TYPE = "CanonicalEvidenceType";
 	
 	public static final String BIRTH_DATE_PATTERN="yyyy-MM-dd";
 	

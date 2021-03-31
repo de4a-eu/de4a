@@ -15,7 +15,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -124,8 +123,8 @@ public class Conf implements WebMvcConfigurer {
             .description("DE4A Connector component - eDelivery Exchange")
             .version("0.1.0")
             .termsOfServiceUrl("http://www.de4a.eu")
-            .license("https://www.apache.org/licenses/LICENSE-2.0")
-            .licenseUrl("APACHE2")
+            .licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
+            .license("APACHE2")
             .build();
     }
 	
