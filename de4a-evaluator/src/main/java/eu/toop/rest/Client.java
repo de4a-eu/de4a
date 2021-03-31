@@ -28,8 +28,6 @@ import nl.flotsam.xeger.Xeger;
 @Component
 public class Client {
 	private static final Logger logger = LogManager.getLogger(Client.class); 
-	@Value("${de4a.connector.url.return}")
-	private String urlReturn; 
 	@Value("${de4a.connector.url.requestor}")
 	private String urlRequestor;
 	@Autowired

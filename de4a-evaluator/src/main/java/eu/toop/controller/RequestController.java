@@ -50,6 +50,7 @@ import eu.toop.rest.Client;
 @Scope("session")
 public class RequestController {
 	private static final Logger logger =  LoggerFactory.getLogger (RequestController.class);
+	
 	@Autowired
 	private Client client;
 	@Autowired 
@@ -57,9 +58,8 @@ public class RequestController {
 	@Autowired
 	private EvaluatorRequestDataRepository evaluatorRequestDataRepository; 
 	@Autowired
-	private ResponseManager responseManager; 
-	@Value("${de4a.connector.url.requestor.redirect}")
-	private String urlRequestorRedirect;
+	private ResponseManager responseManager;
+	
 	private String id;
 	private RequestTransferEvidenceUSIIMDRType requestEvidencia;
 	
