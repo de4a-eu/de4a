@@ -29,14 +29,10 @@ public class RequestBuilder {
 	private String meId;
 	@Value("${de4a.me.evaluator.name}")
 	private String meName;
-	@Value("#{'${de4a.requestor.participantID.jvm:${de4a.requestor.participantID:}}'}")
-	private String requestorId;
 	@Value("${de4a.specificationId}")
 	private String specification;
 	@Value("${de4a.request.grounds.link}")
 	private String groundsLink;
-	@Value("${de4a.evidence.service.uri}")
-	private String serviceUri;
 	@Value("${de4a.return.service.id}")
 	private String returnUrl;
 	@Value("${de4a.procedure.id}")
