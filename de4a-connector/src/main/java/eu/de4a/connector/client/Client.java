@@ -53,7 +53,7 @@ public class Client {
 	private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
 	/**
-	 * Obtain service metadata info from SMP by participantId and documentTypeId
+	 * Obtain service metadata info from SMP by participantId and envidenceTypeId
 	 * <p>
 	 * scheme : service :: participantId : EvicendeTypeId</br>
 	 * eg.: iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate
@@ -61,13 +61,13 @@ public class Client {
 	 * 
 	 * @param uri             Url to retrieve service metadata from SMP
 	 * @param isReturnService Determine if the process looked for it is a
-	 *                        returnService or not
+	 *                        response or request
 	 * @return NodeInfo Service metadata
 	 */
 	public NodeInfo getNodeInfo(String uri, boolean isReturnService) {
 		logger.debug("Request SMP {}", uri);
-		final String serviceProc = "service";
-		final String returnServiceProc = "returnService";
+		final String serviceProc = "request";
+		final String returnServiceProc = "response";
 
 		NodeInfo nodeInfo = new NodeInfo();
 		try {
