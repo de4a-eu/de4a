@@ -1,2 +1,6 @@
 /.project
 /.settings/
+
+#Ignore out of scope project modules
+de4a-evaluator/
+de4a-pid-owner/
