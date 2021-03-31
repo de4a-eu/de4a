@@ -3,10 +3,10 @@
     <head>
     </head>
     <body>
-        <h3>JOB DONE ¡<%=request.getParameter("id")%>¡</h3> 
+        <h3>JOB DONE REQ: </h3> <h4><%=request.getParameter("id")%><%=request.getParameter("id")%></h4>
     </body>
      <form id="form" action="viewresponse?requestId=<%=request.getParameter("id")%>" th:action="@{/download?id=<%=request.getParameter("id")%>}" th:object="${download}" method="POST">
-    	 <input type="hidden" id="requestId" value="<%=request.getParameter("id")%>"/> 
+    	 <input type="hidden" id="id" value="<%=request.getParameter("id")%>"/> 
     </form> 
     <!-- <form  id="form" action = "/download?id=< %=request.getParameter("id")% >" method = "GET">
      </form>-->
