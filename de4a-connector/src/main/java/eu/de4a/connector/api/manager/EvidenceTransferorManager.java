@@ -29,15 +29,14 @@ import eu.de4a.util.DOMUtils;
 import eu.de4a.util.SMPUtils;
 import eu.de4a.util.XDE4ACanonicalEvidenceType;
 import eu.de4a.util.XDE4AMarshaller;
+import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 
 @Component 
 public class EvidenceTransferorManager extends EvidenceManager {
 	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class);	
-
-	@Value("#{'${as4.me.id.jvm:${as4.me.id:}}'}")
-	private String meId; 
+ 
 	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
 	private String smpEndpoint;
 	@Autowired
@@ -77,7 +76,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 					logger.error("Fail...", e);
 					// TODO error handling
 				}			
-				sendResponseMessage(meId, requestorReq.getReturnServiceUri(), XDE4AMarshaller.drImResponseMarshaller(
+				sendResponseMessage(req.getDataEvaluator().getAgentUrn(), requestorReq.getReturnServiceUri(), XDE4AMarshaller.drImResponseMarshaller(
 						XDE4ACanonicalEvidenceType.getXDE4CanonicalEvidenceType(req.getCanonicalEvidenceTypeId()))
 						.getAsDocument(responseTransferEvidenceType).getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
 			} else {
@@ -111,7 +110,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		if (usirequest == null) {
 			logger.error("Does not exists any request with ID {}", response.getId());
 		} else {
-			sendResponseMessage(meId, usirequest.getReturnServiceUri(), response.getMessage(), 
+			sendResponseMessage(usirequest.getSenderId(), usirequest.getReturnServiceUri(), response.getMessage(), 
 					DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);
 		}
 	}	
@@ -121,6 +120,11 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
 
+			String senderId = sender;
+			if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
+				senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
+			}
+			
 			// TODO update as4 client, it is not handling payloads list anymore
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload payload = new TCPayload();
@@ -129,7 +133,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			payload.setMimeType("application/xml");
 			payloads.add(payload);
 			Element requestSillyWrapper = new RegRepTransformer().wrapMessage(message, false);
-			as4Client.sendMessage(sender, nodeInfo, nodeInfo.getDocumentIdentifier(), requestSillyWrapper, payloads, false);
+			as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestSillyWrapper, payloads, false);
 			return true;
 		} catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications", e);
