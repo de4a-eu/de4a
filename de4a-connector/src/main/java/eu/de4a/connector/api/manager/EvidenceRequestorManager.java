@@ -29,6 +29,7 @@ import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.de4a.util.SMPUtils;
+import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 
@@ -36,8 +37,6 @@ import eu.toop.connector.api.rest.TCPayload;
 public class EvidenceRequestorManager extends EvidenceManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(EvidenceRequestorManager.class);
-	@Value("#{'${as4.me.id.jvm:${as4.me.id:}}'}")
-	private String meId;
 	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
 	private String smpEndpoint;
 	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
@@ -71,23 +70,21 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	}
 
 	public boolean manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
-		String from = meId;
 		Document doc = DE4AMarshaller.drUsiRequestMarshaller().getAsDocument(request);
 
 		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
 			return false;
 		}
-		return sendRequestMessage(from, request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
+		return sendRequestMessage(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
 				request.getCanonicalEvidenceTypeId());
 	}
 
 	public ResponseTransferEvidenceType manageRequestIM(RequestTransferEvidenceUSIIMDRType request) {
-		String from = meId;
 		Document doc = DE4AMarshaller.drImRequestMarshaller().getAsDocument(request);
 		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
 			return null;
 		}
-		return handleRequestTransferEvidence(from, request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
+		return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
 				request.getRequestId(), request.getCanonicalEvidenceTypeId());
 	}
 
@@ -137,7 +134,11 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
 			String canonicalEvidenceTypeId) {
 		String uriSmp = SMPUtils.getSmpUri(smpEndpoint, dataOwnerId, canonicalEvidenceTypeId);
+		String senderId = sender;
 		NodeInfo nodeInfo = client.getNodeInfo(uriSmp, false);
+		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
+			senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
+		}
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
 			Element requestSillyWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
@@ -147,7 +148,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			p.setMimeType(CMimeType.APPLICATION_XML.getAsString());
 			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			payloads.add(p);
-			as4Client.sendMessage(sender, nodeInfo, dataOwnerId, requestSillyWrapper, payloads, false);
+			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestSillyWrapper, payloads, false);
 			return true;
 		} catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications", e);
