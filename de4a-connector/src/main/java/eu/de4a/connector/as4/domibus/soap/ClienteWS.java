@@ -3,6 +3,7 @@ package eu.de4a.connector.as4.domibus.soap;
 import java.io.IOException;
 import java.util.List;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -44,22 +45,21 @@ public class ClienteWS extends   WebServiceGatewaySupport {
 	 *  https://eu-domibus-client.redsara.es/domibus/services/backend
 		https://eu-domibus-server.redsara.es/domibus/services/backend
 	 * 
-	 * */
-	//private static final String ENDPOINT_DOMIBUS="https://eu-domibus-client.redsara.es/domibus/services/backend";
+	 **/
 	private static final String ENDPOINT_SERVER_TEST_DOMIBUS="https://eu-domibus-server.redsara.es/domibus/services/backend";
-	private static final Logger LOGGER = LoggerFactory.getLogger (ClienteWS.class);	  
+	private static final Logger LOG = LoggerFactory.getLogger (ClienteWS.class);	  
 	public ClienteWS(AxiomSoapMessageFactory messageFactory) {
 		this.setMessageFactory(messageFactory); 
 	}  
     public ListPendingMessagesResponse getPendindMessages( ) {
-    	LOGGER.debug("Getting Pending Messages from Domibus");
+    	LOG.debug("Getting Pending Messages from Domibus");
     	ListPendingMessagesRequest request = new ListPendingMessagesRequest(); 
     	getWebServiceTemplate().setDefaultUri(ENDPOINT_SERVER_TEST_DOMIBUS);
     	ListPendingMessagesResponse response = (ListPendingMessagesResponse) getWebServiceTemplate()      .marshalSendAndReceive(request);
         return response;
     }
     public RetrieveMessageResponse getMessage(String id) {
-    	LOGGER.debug("Getting messge  from Domibus --> id:"+id);
+    	LOG.debug("Getting messge  from Domibus --> id: {}", id);
     	RetrieveMessageRequest request = new RetrieveMessageRequest(); 
     	getWebServiceTemplate().setDefaultUri(ENDPOINT_SERVER_TEST_DOMIBUS);
     	request.setMessageID(id);
@@ -88,7 +88,7 @@ public class ClienteWS extends   WebServiceGatewaySupport {
     		    });
     }
     public SubmitResponse submitMessage( final Messaging messsageHeader, List<LargePayloadType> bodies) throws DomibusException {
-    	LOGGER.debug("submit messge  from Domibus --> to Domibus  ");
+    	LOG.debug("submit messge  from Domibus --> to Domibus  ");
     	SubmitRequest request = new SubmitRequest(); 
     	getWebServiceTemplate().setDefaultUri(ENDPOINT_SERVER_TEST_DOMIBUS); 
     	request.getPayload().addAll(bodies);   
@@ -100,10 +100,14 @@ public class ClienteWS extends   WebServiceGatewaySupport {
 		                    SoapMessage soapMessage = (SoapMessage)message;
 		                    SoapHeader header = soapMessage.getSoapHeader();
 		                    DOMSource headerSource = getHeaderMessageSubmit(messsageHeader);
-		                    Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		                    transformer.transform(headerSource, header.getResult());
+		                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		                    transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		                    transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		                    transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+		                    Transformer tr = transformerFactory.newTransformer();
+		                    tr.transform(headerSource, header.getResult());
 		                } catch (Exception e) {
-		                	LOGGER.error("Soap header processing error",e);
+		                	LOG.error("Soap header processing error",e);
 		                }
 					
 				}
@@ -111,7 +115,7 @@ public class ClienteWS extends   WebServiceGatewaySupport {
 	        });
 	    	return response;
     	}catch(Exception e) {
-    		LOGGER.error("uf...",e);
+    		LOG.error("Error SOAP connecting with Domibus", e);
     		throw new DomibusException("Error SOAP connecting with Domibus", e);
     	}
         
@@ -119,12 +123,18 @@ public class ClienteWS extends   WebServiceGatewaySupport {
     private DOMSource getHeaderMessageSubmit(Messaging mess) throws JAXBException, TransformerConfigurationException, ParserConfigurationException {
     	JAXBContext jc = JAXBContext.newInstance(Messaging.class);  
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document document = db.newDocument(); 
         Marshaller marshaller = jc.createMarshaller();      
         marshaller.marshal(mess, document); 
         // writing the Document object to console
         TransformerFactory tf = TransformerFactory.newInstance();
+        tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         Transformer transformer = tf.newTransformer(); 
         // set the properties for a formatted output - if false the output will be on one single line
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");

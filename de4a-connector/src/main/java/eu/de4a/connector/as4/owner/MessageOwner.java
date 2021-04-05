@@ -6,7 +6,7 @@ import org.w3c.dom.Element;
 
 public class MessageOwner extends ContextRefreshedEvent { 
 	private static final long serialVersionUID = 1L;
-	private Element message;
+	private transient Element message;
 	private String id;
 	private String senderId;
 	private String evidenceService;

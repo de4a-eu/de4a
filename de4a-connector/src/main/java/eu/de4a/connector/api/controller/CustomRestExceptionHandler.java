@@ -1,5 +1,6 @@
 package eu.de4a.connector.api.controller;
  
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.UnmarshalException;
@@ -33,9 +34,9 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMissingServletRequestParameter(
 	  MissingServletRequestParameterException ex, HttpHeaders headers, 
 	  HttpStatus status, WebRequest request) {
-	  String error = ex.getParameterName() + " parameter is missing y a peique eso no le mola";
+	  String error = ex.getParameterName() + " parameter is missing";
 	  ApiError apiError =  new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), error);
-	  return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	  return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
 	} 
 	
 	@Override
@@ -46,10 +47,14 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			headers.setAccept(mediaTypes);
 		}
-		String args[]= {ex.getContentType().toString(),mediaTypes.toString()};
-		String err= messageSource.getMessage("error.400.mimetype", args,LocaleContextHolder.getLocale()); 
+		List<String> args = new ArrayList<>();
+		if(ex.getContentType() != null) {
+			args.add(ex.getContentType().toString());
+		}
+		args.add(mediaTypes.toString());
+		String err= messageSource.getMessage("error.400.mimetype", args.toArray(),LocaleContextHolder.getLocale()); 
 		ApiError apiError =  new ApiError(HttpStatus.BAD_REQUEST, err,""+HttpStatus.BAD_REQUEST.value());
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+		return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotReadable( HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -63,7 +68,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 		  ApiError apiError =  new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage(), error);
 		  HttpHeaders httpheader=new HttpHeaders();
 		  httpheader.setContentType(   org.springframework.http.MediaType.APPLICATION_XML );
-		  return new ResponseEntity<Object>(apiError, httpheader, apiError.getStatus());
+		  return new ResponseEntity<>(apiError, httpheader, apiError.getStatus());
 	}
 	@Override
 	protected ResponseEntity<Object> handleNoHandlerFoundException(
@@ -72,6 +77,6 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 		 	ApiError apiError =  new ApiError(HttpStatus.NOT_FOUND, err,""+HttpStatus.NOT_FOUND.value());
 			HttpHeaders httpheader=new HttpHeaders();
 			httpheader.setContentType(   org.springframework.http.MediaType.APPLICATION_XML );
-			return new ResponseEntity<Object>(apiError, httpheader, apiError.getStatus());
+			return new ResponseEntity<>(apiError, httpheader, apiError.getStatus());
 	}	
 }

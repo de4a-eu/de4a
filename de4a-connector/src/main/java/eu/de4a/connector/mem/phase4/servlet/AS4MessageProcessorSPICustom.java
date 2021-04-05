@@ -67,7 +67,7 @@ public class AS4MessageProcessorSPICustom implements IAS4ServletMessageProcessor
   private static final Logger LOGGER = LoggerFactory.getLogger (AS4MessageProcessorSPICustom.class);
 
   private static IMEIncomingHandler s_aIncomingHandler; 
-  private IncomingAS4PKHandler meHandler;
+  private transient IncomingAS4PKHandler meHandler;
   public static void setIncomingHandler (@Nonnull final IMEIncomingHandler aIncomingHandler)
   {
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
@@ -155,7 +155,7 @@ public class AS4MessageProcessorSPICustom implements IAS4ServletMessageProcessor
                                                                                                                     aUserMessage.getCollaborationInfo ()
                                                                                                                                 .getService ()
                                                                                                                                 .getValue ()));
-        LOGGER.info ("Incoming Transport Metadata: " + aMetadata.toString ());
+        LOGGER.info ("Incoming Transport Metadata: {}", aMetadata);
 
         final String sTopLevelContentID = aMainPayload.getId ();
 

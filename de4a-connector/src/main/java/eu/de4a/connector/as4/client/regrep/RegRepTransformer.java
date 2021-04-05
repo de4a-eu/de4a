@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -50,6 +51,9 @@ public class RegRepTransformer {
 			String template = request ? REQUEST_TEMPLATE : RESPONSE_TEMPLATE;
 			log.debug("wrapping canonical request");
 			TransformerFactory factory = TransformerFactory.newInstance();
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 			InputStream inputStreamPlantilla = this.getClass().getClassLoader().getResourceAsStream(template);
 			Source xslDoc = new StreamSource(inputStreamPlantilla);
 			Source src = new DOMSource();
@@ -66,6 +70,9 @@ public class RegRepTransformer {
 			xmlFile.close();
 			String xmlespecificos = ((ByteArrayOutputStream) xmlFile).toString();
 			DocumentBuilderFactory factoryDom = DocumentBuilderFactory.newInstance();
+			factoryDom.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			factoryDom.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+			factoryDom.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			factoryDom.setNamespaceAware(true);
 			DocumentBuilder builder = factoryDom.newDocumentBuilder();
 			Document docFinal = builder.parse(new InputSource(new StringReader(xmlespecificos)));

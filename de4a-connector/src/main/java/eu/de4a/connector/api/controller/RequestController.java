@@ -60,7 +60,7 @@ public class RequestController implements RequestApi {
 		evaluatorRequestRepository.save(entity);
 		
 		boolean ok = evidenceRequestorManager.manageRequestUSI(reqObj);
-		return generateResponse(reqObj, ok);
+		return generateResponse(ok);
 	}
 	
 	public String sendRequestIM(String request) {
@@ -90,7 +90,7 @@ public class RequestController implements RequestApi {
 				XDE4ACanonicalEvidenceType.getXDE4CanonicalEvidenceType(reqObj.getCanonicalEvidenceTypeId())).getAsString(response);
 	}
 
-	private String generateResponse(RequestTransferEvidenceUSIIMDRType request, boolean success) {
+	private String generateResponse(boolean success) {
 		ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(success);
 		
 		if(!success) {
