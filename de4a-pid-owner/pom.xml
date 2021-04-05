@@ -43,11 +43,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-core</artifactId>
-			<version>${jaxb.core.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>eu-de4a</groupId>
 			<artifactId>de4a-commons</artifactId>
 			<version>${project.version}</version>
@@ -225,18 +220,6 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.apache.santuario</groupId>
-			<artifactId>xmlsec</artifactId>
-			<version>${xmlsec.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>jakarta.xml.bind</groupId>
-					<artifactId>jakarta.xml.bind-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/xalan/xalan -->
 		<dependency>
 			<groupId>xalan</groupId>
@@ -247,9 +230,12 @@
 					<groupId>xml-apis</groupId>
 					<artifactId>xml-apis</artifactId>
 				</exclusion>
+				<exclusion>
+		            <groupId>xerces</groupId>
+		            <artifactId>xercesImpl</artifactId>
+		        </exclusion>
 			</exclusions>
 		</dependency>
-
 		<dependency>
 			<groupId>jaxen</groupId>
 			<artifactId>jaxen</artifactId>

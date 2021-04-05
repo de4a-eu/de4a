@@ -22,7 +22,6 @@ open module de4a.pid.owner {
 	requires java.xml;
 	requires spring.boot;
 	requires spring.boot.autoconfigure;
-	requires transitive eu.toop.connector.api;
 	requires java.xml.bind;
 	requires com.fasterxml.jackson.core;
 	requires java.net.http;
