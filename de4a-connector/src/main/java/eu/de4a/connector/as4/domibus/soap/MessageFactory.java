@@ -28,6 +28,9 @@ public class MessageFactory {
 	private static final String MESSAGE_PRO_NAME_RECIPIENT="finalRecipient";
 	private static final String MESSAGE_PRO_VALUE_RECIPIENT_DEFAULT="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
 	
+	private MessageFactory() {
+		//Empty constructor
+	}
 	
 	public static Messaging makeMessage(String domibusMeId,String domibusOtherId,String conversationId,  String evidenceService,List<PartInfo> attacheds) {
 		Messaging messaging = new Messaging(); 
@@ -73,25 +76,7 @@ public class MessageFactory {
 		col.setConversationId(conversationId); 
 		return col;
 	}
-	 
-/*RetrieveMessageRequest request = new RetrieveMessageRequest(); 
-    	getWebServiceTemplate().setDefaultUri(ENDPOINT_DOMIBUS);
-    	request.setMessageID(messageId);
-    	Messaging mes=new Messaging();
-    	mes.setMustUnderstand(true);
-    	UserMessage userMessage=new UserMessage();
-    	PartyInfo partyInfo=new PartyInfo();
-    	From from = new From();
-    	from.setRole(ROLE_FROM); 
-    	from.setPartyId(getPartyId(domibusMeId));
-    	To to = new To();
-    	to.setRole(ROLE_FROM); 
-    	to.setPartyId(getPartyId(domibusOtherId));
-    	partyInfo.setTo(to); 
-    	userMessage.setPartyInfo(partyInfo);
-    	
-    	
-    	mes.setUserMessage(userMessage);*/
+
 	public static UserMessage instance(){
 		return new UserMessage();
 	}

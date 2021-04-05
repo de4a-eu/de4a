@@ -18,13 +18,9 @@ import com.helger.commons.string.StringHelper;
 
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
-import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
-import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.de4a.util.FileUtils;
-import eu.de4a.util.XDE4ACanonicalEvidenceType;
-import eu.de4a.util.XDE4AMarshaller;
 import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.EMEProtocol;
 import eu.toop.connector.api.me.IMessageExchangeSPI;

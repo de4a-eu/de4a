@@ -57,15 +57,12 @@ public class TCWebAppListener extends WebAppListener
   protected void afterContextInitialized (final ServletContext aSC)
   { 
     // Use default handler 
-	  NothingIncomingAS4PKHandler handler= WebApplicationContextUtils.getRequiredWebApplicationContext(aSC).getBean(NothingIncomingAS4PKHandler.class);
-	  //peique 
-      
+	  NothingIncomingAS4PKHandler handler= WebApplicationContextUtils.getRequiredWebApplicationContext(aSC)
+			  .getBean(NothingIncomingAS4PKHandler.class);      
 
     // Don't write audit logs
     AuditHelper.setAuditor (new DoNothingAuditor (LoggedInUserManager.getInstance ()));
     TCInit.initGlobally (aSC, handler);
-//    EvidenceRequestorManager evidenceRequestorManager = WebApplicationContextUtils.getWebApplicationContext(aSC ).getBean(EvidenceRequestorManager.class ) ;
-//    evidenceRequestorManager.yourfather();
   }
 
   @Override
