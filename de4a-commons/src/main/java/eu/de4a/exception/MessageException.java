@@ -20,6 +20,7 @@ public class MessageException extends Throwable{
 	public void setCode(String code) {
 		this.code = code;
 	}
+	@Override
 	public String getMessage() {
 		return message;
 	}

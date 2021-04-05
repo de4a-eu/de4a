@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -45,6 +46,10 @@ import eu.de4a.exception.MessageException;
 
 public class DOMUtils {
 	private static final Logger logger = LogManager.getLogger(DOMUtils.class);
+	
+	private DOMUtils() {
+		//empty private constructor
+	}
 
 	public static Node changeNodo(Document request, String expression, String value) {
 		Node node = null;
@@ -92,7 +97,9 @@ public class DOMUtils {
 	public static byte[] documentToByte(Document document) throws MessageException {
 		Transformer transformer;
 		try {
-			transformer = TransformerFactory.newInstance().newTransformer();
+			TransformerFactory tf = TransformerFactory.newInstance();
+			tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			transformer = tf.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -111,9 +118,11 @@ public class DOMUtils {
 
 	public static Document byteToDocument(byte[] documentoXml) throws MessageException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(true);
-		DocumentBuilder builder;
 		try {
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			factory.setNamespaceAware(true);
+			DocumentBuilder builder;
+		
 			builder = factory.newDocumentBuilder();
 			return builder.parse(new ByteArrayInputStream(documentoXml));
 		} catch (ParserConfigurationException | SAXException | IOException e) {
@@ -127,23 +136,21 @@ public class DOMUtils {
 		DocumentBuilderFactory factory = null;
 		DocumentBuilder builder = null;
 		Document ret = null;
+		String err = "Error parsing DOM.";
 
 		try {
 			factory = DocumentBuilderFactory.newInstance();
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setNamespaceAware(true);
 			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			String err = "Error parsing DOM.";
+		} catch (ParserConfigurationException e) {			
 			logger.error(err, e);
+			return null;
 		}
 
 		try {
 			ret = builder.parse(new InputSource(in));
-		} catch (SAXException e) {
-			String err = "Error parsing DOM.";
-			logger.error(err, e);
-		} catch (IOException e) {
-			String err = "Error parsing DOM.";
+		} catch (SAXException | IOException e) {
 			logger.error(err, e);
 		}
 		return ret;
@@ -156,6 +163,7 @@ public class DOMUtils {
 			StringWriter writer = new StringWriter();
 			StreamResult result = new StreamResult(writer);
 			TransformerFactory tf = TransformerFactory.newInstance();
+			tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			Transformer transformer = tf.newTransformer();
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -173,6 +181,7 @@ public class DOMUtils {
 			StringWriter stringWriter = new StringWriter();
 			StreamResult xmlOutput = new StreamResult(stringWriter);
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
 			Transformer transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
@@ -188,7 +197,9 @@ public class DOMUtils {
 	public static String nodeToString(final Node node, final boolean omitXMLDeclaration) {
 		final StringWriter writer = new StringWriter();
 		try {
-			final Transformer t = TransformerFactory.newInstance().newTransformer();
+			final TransformerFactory tf = TransformerFactory.newInstance();
+			tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			final Transformer t = tf.newTransformer();
 			t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, omitXMLDeclaration ? "yes" : "no");
 			t.setOutputProperty(OutputKeys.INDENT, "yes");
 			t.transform(new DOMSource(node), new StreamResult(writer));
@@ -200,8 +211,10 @@ public class DOMUtils {
 
 	public static Document stringToDocument(String xml) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder;
 		try {
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			DocumentBuilder builder;
+		
 			factory.setNamespaceAware(true);
 			builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(new InputSource(new StringReader(xml)));
@@ -222,7 +235,7 @@ public class DOMUtils {
 			return xmlStream.toByteArray();
 		} catch (Exception e) {
 			logger.error("Error marshalling jaxb object", e);
-			return null;
+			return new byte[0];
 		}
 	}
 
@@ -256,6 +269,7 @@ public class DOMUtils {
 		try {
 			JAXBContext jc = JAXBContext.newInstance(clazz);
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			dbf.setNamespaceAware(true);
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			Document document = db.newDocument();
@@ -281,7 +295,7 @@ public class DOMUtils {
 			return Base64.encodeBase64(arrayOutputStream.toByteArray());
 		} catch (Throwable t) {
 			logger.error("Error encoding compressed", t);
-			return null;
+			return new byte[0];
 		}
 	}
 

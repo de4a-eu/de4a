@@ -7,6 +7,10 @@ import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 
 public class MessagesUtils {
+	
+	private MessagesUtils() {
+		//empty private constructor
+	}
 
 	public static RequestExtractEvidenceIMType transformRequestToOwnerIM(RequestTransferEvidenceUSIIMDRType evidenceRequest) {
 		RequestExtractEvidenceIMType requestExtractEvidence = new RequestExtractEvidenceIMType();

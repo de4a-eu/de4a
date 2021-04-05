@@ -28,23 +28,24 @@ import eu.toop.connector.api.rest.TCPayload;
 
 public class FileUtils {
 	
+	private static final String DE4A_PREFIX = "de4a-";
+	
 	FileUtils() {
 		//empty constructor
 	}
 
 	public static File convert(MultipartFile file, File tempdir) throws IOException {
 		File convFile = null;
-		convFile = File.createTempFile("de4a-", ".xml", tempdir);
-		FileOutputStream fos = new FileOutputStream(convFile);
-		fos.write(file.getBytes());
-		fos.close();
-
-		return convFile;
+		convFile = File.createTempFile(DE4A_PREFIX, ".xml", tempdir);
+		try(FileOutputStream fos = new FileOutputStream(convFile)) {
+			fos.write(file.getBytes());	
+			return convFile;
+		}
 	}
 
 	public static MultipartFile getMultipart(String label, String mimetype, byte[] data) throws IOException {
 		File tempFile = null;
-		tempFile = File.createTempFile("de4a-", null);
+		tempFile = File.createTempFile(DE4A_PREFIX, null);
 
 		DiskFileItem item = new DiskFileItem(label, mimetype, false, label, 1, tempFile.getParentFile());
 		ByteArrayInputStream in = new ByteArrayInputStream(data);
@@ -81,30 +82,28 @@ public class FileUtils {
 	
 	public static byte[] buildResponse(InputStream inputStream, String xPathNationalResp) throws MessageException, IOException {
 		List<TCPayload> payloads = new ArrayList<TCPayload>();
-		File temp = Files.createTempFile("de4a-", null).toFile();
+		File temp = Files.createTempFile(DE4A_PREFIX, null).toFile();
 		IOUtils.copy(inputStream, new FileOutputStream(temp));
-		ZipFile zip = new ZipFile(temp);
-		Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
-
-		// TODO si no se va a recibir mas que un element y no una lista de payloads, hay
-		// que actualizar el servicio REST del pid-owner
-
-		while (entries.hasMoreElements()) {
-			ZipEntry entry = entries.nextElement();
-			byte[] data = zip.getInputStream(entry).readAllBytes();
-			TCPayload payload = new TCPayload();
-			String name = getName(data, entry.getName(), xPathNationalResp);
-			payload.setContentID(name);
-			payload.setValue(data);
-			payloads.add(payload);
+		try(ZipFile zip = new ZipFile(temp)) {
+			Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
+	
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
+				byte[] data = zip.getInputStream(entry).readAllBytes();
+				TCPayload payload = new TCPayload();
+				String name = getName(data, entry.getName(), xPathNationalResp);
+				payload.setContentID(name);
+				payload.setValue(data);
+				payloads.add(payload);
+			}
+			zip.close();
+			TCPayload canonicalPayload = payloads.stream()
+					.filter(p -> p.getContentID().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
+			if (canonicalPayload == null) {
+				throw new MessageException("Not exists payload with tag name:" + DE4AConstants.TAG_EVIDENCE_RESPONSE);
+			}
+			return canonicalPayload.getValue();
 		}
-		zip.close();
-		TCPayload canonicalPayload = payloads.stream()
-				.filter(p -> p.getContentID().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
-		if (canonicalPayload == null) {
-			throw new MessageException("Not exists payload with tag name:" + DE4AConstants.TAG_EVIDENCE_RESPONSE);
-		}
-		return canonicalPayload.getValue();
 	}
 
 	public static String getName(byte[] data, String name, String xPathResp) {
@@ -117,7 +116,7 @@ public class FileUtils {
 			if (value != null && !value.isEmpty())
 				return DE4AConstants.TAG_NATIONAL_EVIDENCE_RESPONSE;
 		} catch (MessageException e) {
-
+			
 		}
 		return name;
 	}
