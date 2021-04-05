@@ -67,6 +67,10 @@ public class DE4AConstants {
 	
 	public static final String BIRTH_DATE_PATTERN="yyyy-MM-dd";
 	
+	private DE4AConstants() {
+		//empty private constructor
+	}
+	
 	public static final ClassPathResource XSD_BIRTH_CERTIFICATE = new ClassPathResource ("xsds/canonicalEvidences/BirthCertificate.xsd", 
 			DE4AConstants.class.getClassLoader());
 	

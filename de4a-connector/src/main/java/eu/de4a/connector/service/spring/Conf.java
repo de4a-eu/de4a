@@ -2,7 +2,13 @@ package eu.de4a.connector.service.spring;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -192,16 +198,12 @@ public class Conf implements WebMvcConfigurer {
 
 	}
 
-	public SSLConnectionSocketFactory sslConnectionSocketFactory() throws Exception {
-		// NoopHostnameVerifier essentially turns hostname verification off as otherwise
-		// following error
-		// is thrown: java.security.cert.CertificateException: No name matching
-		// localhost found
+	public SSLConnectionSocketFactory sslConnectionSocketFactory() {
 		SSLContext context = sslContext();
 		return new SSLConnectionSocketFactory(context);
 	}
 
-	public SSLContext sslContext() throws Exception {
+	public SSLContext sslContext() {
 		String keystore = System.getProperties().getProperty("javax.net.ssl.keyStore");
 		String keyStorePassword = System.getProperties().getProperty("javax.net.ssl.keyStorePassword");
 		String trustStore = System.getProperties().getProperty("javax.net.ssl.trustStore");
@@ -212,11 +214,18 @@ public class Conf implements WebMvcConfigurer {
 			LOG.error("No se ira por SSLContext alguno de los parametros es null");
 			return null;
 		}
-		KeyStore keyStore = KeyStore.getInstance(type.toUpperCase());
-		keyStore.load(new FileInputStream(new File(keystore)), keyStorePassword.toCharArray());
+		try (FileInputStream fis = new FileInputStream(new File(keystore))) {
+			KeyStore keyStore = KeyStore.getInstance(type.toUpperCase());
+			keyStore.load(fis, keyStorePassword.toCharArray());
 
-		return SSLContextBuilder.create().loadKeyMaterial(keyStore, keyStorePassword.toCharArray())
-				.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray()).build();
+			return SSLContextBuilder.create().loadKeyMaterial(keyStore, keyStorePassword.toCharArray())
+					.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray()).build();
+		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
+				| KeyManagementException | UnrecoverableKeyException e) {
+			String msg = "Cannot load certificate";
+			LOG.error(msg, e);
+			return null;
+		}
 	}
 
 	@Bean

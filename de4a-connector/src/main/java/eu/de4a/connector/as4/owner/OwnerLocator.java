@@ -35,7 +35,16 @@ public class OwnerLocator {
 		}
 		return evidence;
 	}
-	@Deprecated
+	/**
+	 * @deprecated - previous solution to retrieve owner through evidenceType
+	 * 
+	 * @param evidence
+	 * @return
+	 * @throws ConfigurationException
+	 * @throws NoSuchMessageException
+	 * @throws MessageException
+	 */
+	@Deprecated(forRemoval = true)
 	public OwnerGateway getOwnerGateway(OwnerAddresses evidence) throws ConfigurationException, NoSuchMessageException, MessageException { 
 		String name="";//evidence.getOwnerGateway();	 
 		LOGGER.debug("Located owner gateway {} for evidence {}",name,evidence.getAgentUrn());

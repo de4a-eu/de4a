@@ -1,4 +1,6 @@
 package eu.de4a.connector.as4.domibus.jms; 
+import java.util.Arrays;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -9,6 +11,7 @@ import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.RedeliveryPolicy;
+import org.springframework.http.MediaType;
  
 public class ActiveMQMessageProducer {
   
@@ -92,9 +95,9 @@ public class ActiveMQMessageProducer {
 		 messageMap.setStringProperty("payload_1_mimeContentId", "cid:cid_of_payload_1");
 		 messageMap.setStringProperty("payload_2_mimeContentId", "cid:cid_of_payload_2");
 		 messageMap.setStringProperty("payload_3_mimeContentId", "cid:cid_of_payload_3");
-		 messageMap.setStringProperty("payload_1_mimeType", "application/xml");
-		 messageMap.setStringProperty("payload_2_mimeType", "application/xml");
-		 messageMap.setStringProperty("payload_3_mimeType", "application/xml");
+		 messageMap.setStringProperty("payload_1_mimeType", MediaType.APPLICATION_XML_VALUE);
+		 messageMap.setStringProperty("payload_2_mimeType", MediaType.APPLICATION_XML_VALUE);
+		 messageMap.setStringProperty("payload_3_mimeType", MediaType.APPLICATION_XML_VALUE);
 		 messageMap.setStringProperty("payload_1_description", "description1");
 		 messageMap.setStringProperty("payload_2_description", "description2");
 		 messageMap.setStringProperty("payload_3_description", "description3");
@@ -108,18 +111,6 @@ public class ActiveMQMessageProducer {
 		 messageMap.setBytes("payload_3", payload);
 		 return messageMap;
 	 }
-//    private TextMessage buildTextMessageWithProperty(final String action) throws JMSException {
-//        Gson gson = new Gson();
-//        String eventMsg = gson.toJson(DataUtil.buildDummyCustomerEvent());
-//        TextMessage textMessage = session.createTextMessage(eventMsg);
-// 
-//        Random rand = new Random();
-//        int value = rand.nextInt(100);
-//        textMessage.setStringProperty(ACTION_HEADER, action);
-//        textMessage.setStringProperty(ACTION_ID_HEADER, String.valueOf(value));
-// 
-//        return textMessage;
-//    }
  
     private void setDdestination(final boolean isDestinationTopic, final String destinationName) throws JMSException {
         if (isDestinationTopic) {
@@ -146,6 +137,7 @@ public class ActiveMQMessageProducer {
  
     private void setConnectionFactory(final String activeMqBrokerUri, final String username, final String password) {
         connFactory = new ActiveMQConnectionFactory(username, password, activeMqBrokerUri);
+        ((ActiveMQConnectionFactory) connFactory).setTrustedPackages(Arrays.asList("eu.de4a"));
  
         ((ActiveMQConnectionFactory) connFactory).setUseAsyncSend(true);
  

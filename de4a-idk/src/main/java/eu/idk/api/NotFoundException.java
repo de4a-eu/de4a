@@ -8,6 +8,7 @@ public class NotFoundException extends ApiException {
         super(code, msg);
         this.code = code;
     }
+    @Override
 	public int getCode() {
 		return code;
 	}

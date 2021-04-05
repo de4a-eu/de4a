@@ -24,6 +24,7 @@ public class IdkApiController implements IdkApi {
 
 	private static final Logger log = LoggerFactory.getLogger(IdkApiController.class);
 	private static final String REQUEST_LOG = "Processing request with: {}, {}";
+	private static final String JSON_ERROR = "There was an error on JSON conversion";
 
 	@Autowired
 	private SourceRepository sourceRepository;
@@ -50,7 +51,7 @@ public class IdkApiController implements IdkApi {
 		try {
 			jsonResponse = mapper.writeValueAsString(availableSources);
 		} catch (JsonProcessingException e) {
-			new ResponseEntity<>("There was an error on JSON conversion", HttpStatus.INTERNAL_SERVER_ERROR);
+			new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(jsonResponse, HttpStatus.ACCEPTED);
 	}
@@ -70,7 +71,7 @@ public class IdkApiController implements IdkApi {
 		try {
 			jsonResponse = mapper.writeValueAsString(availableSources);
 		} catch (JsonProcessingException e) {
-			new ResponseEntity<>("There was an error on JSON conversion", HttpStatus.INTERNAL_SERVER_ERROR);
+			new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(jsonResponse, HttpStatus.ACCEPTED);
 	}
@@ -90,7 +91,7 @@ public class IdkApiController implements IdkApi {
 		try {
 			jsonResponse = mapper.writeValueAsString(availableSources);
 		} catch (JsonProcessingException e) {
-			new ResponseEntity<>("There was an error on JSON conversion", HttpStatus.INTERNAL_SERVER_ERROR);
+			new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(jsonResponse, HttpStatus.ACCEPTED);
 	}
