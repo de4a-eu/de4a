@@ -1,14 +1,5 @@
 package eu.idk.model;
 
-import com.helger.commons.annotation.CodingStyleguideUnaware;
-import com.helger.commons.annotation.ReturnsMutableCopy;
-import com.helger.commons.equals.EqualsHelper;
-import com.helger.commons.hashcode.HashCodeGenerator;
-import com.helger.commons.lang.IExplicitlyCloneable;
-import com.helger.commons.string.ToStringGenerator;
-
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -28,6 +19,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+
+import com.helger.commons.annotation.CodingStyleguideUnaware;
+import com.helger.commons.annotation.ReturnsMutableCopy;
+import com.helger.commons.equals.EqualsHelper;
+import com.helger.commons.hashcode.HashCodeGenerator;
+import com.helger.commons.lang.IExplicitlyCloneable;
+import com.helger.commons.string.ToStringGenerator;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Provision", propOrder = { "Provision", "redirectURL", "Param" })
