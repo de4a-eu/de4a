@@ -26,14 +26,14 @@ import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
+import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.model.EvaluatorRequestData;
 import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.de4a.util.XDE4ACanonicalEvidenceType;
-import eu.de4a.util.XDE4AMarshaller;
 
 @Component
 @Aspect
@@ -111,11 +111,8 @@ public class ResponseManager {
 		List<EvaluatorRequestData> filesAttached = evaluatorRequestDataRepository.findAll(example);
 		if(!CollectionUtils.isEmpty(filesAttached)) {
 			Document doc = getDocumentFromAttached(filesAttached, DE4AConstants.TAG_EVIDENCE_RESPONSE);
-			if(doc != null) {
-				String canonicalEvidenceId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_CANONICAL_EVICENCE_ID, 
-						doc.getDocumentElement());			
-				return XDE4AMarshaller.drImResponseMarshaller(XDE4ACanonicalEvidenceType
-						.getXDE4CanonicalEvidenceType(canonicalEvidenceId))
+			if(doc != null) {			
+				return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 						.read(doc);
 			}
 		}
