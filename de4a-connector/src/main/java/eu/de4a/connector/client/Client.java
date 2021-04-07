@@ -39,10 +39,9 @@ import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
+import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.util.DOMUtils;
 import eu.de4a.util.MessagesUtils;
-import eu.de4a.util.XDE4ACanonicalEvidenceType;
-import eu.de4a.util.XDE4AMarshaller;
 
 @Component
 public class Client {
@@ -194,9 +193,8 @@ public class Client {
 
 				// Transform ResponseExtractEvidence into ResponseTransferEvidence
 				// TODO move to utils class
-				ResponseExtractEvidenceType responseExtractEvidenceType = XDE4AMarshaller
-						.doImResponseMarshaller(XDE4ACanonicalEvidenceType
-								.getXDE4CanonicalEvidenceType(evidenceRequest.getCanonicalEvidenceTypeId()))
+				ResponseExtractEvidenceType responseExtractEvidenceType = DE4AMarshaller
+						.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 						.read(response.getBody());
 				return MessagesUtils.transformResponseTransferEvidenceUSI(responseExtractEvidenceType, evidenceRequest);
 			} else {
