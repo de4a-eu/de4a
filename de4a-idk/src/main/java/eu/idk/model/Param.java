@@ -47,7 +47,7 @@ public class Param implements IExplicitlyCloneable {
 
 	@XmlElement(name = "ParamsSet", required = true)
 	@OneToMany(mappedBy = "param", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<ParamsSet> paramsSet = new HashSet<>();
+	private Set<ParamSets> paramsSet = new HashSet<>();
 
 	public Long getId() {
 		return id;
@@ -75,11 +75,11 @@ public class Param implements IExplicitlyCloneable {
 	}
 
 	@Nullable
-	public Set<ParamsSet> getParamsSet() {
+	public Set<ParamSets> getParamsSet() {
 		return this.paramsSet;
 	}
 
-	public void setParamsSet(@Nullable Set<ParamsSet> value) {
+	public void setParamsSet(@Nullable Set<ParamSets> value) {
 		this.paramsSet = value;
 	}
 

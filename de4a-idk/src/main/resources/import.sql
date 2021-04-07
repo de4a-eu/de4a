@@ -12,8 +12,8 @@ INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvi
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (3, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:SI990000105', 'Minister za notranje zadeve', 4);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (3, 'ip', null, 3);
 INSERT INTO Param (id, title, id_provision) VALUES (1, 'SI/nuts3', 3);
-INSERT INTO ParamsSet (id, id_param, paramValue) VALUES (1, 1, 'SI/SI031');
-INSERT INTO ParamsSet (id, id_param, paramValue) VALUES (2, 1, 'SI/SI034');
+INSERT INTO ParamSets (id, id_param, paramValue) VALUES (1, 1, 'SI/SI031');
+INSERT INTO ParamSets (id, id_param, paramValue) VALUES (2, 1, 'SI/SI034');
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (5, 'BirthCertificate', 'nuts0', 'ES', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (4, 'ES', 'España', 'iso6523-actorid-upis::9921:ESS2833002E', 'Ministerio de Justicia', 5);
