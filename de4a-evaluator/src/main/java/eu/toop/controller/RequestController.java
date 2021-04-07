@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Controller;
@@ -89,7 +88,7 @@ public class RequestController {
 			ResponseLookupRoutingInformationType responseRouting = client.getRoutingInfo(lookupRouting);
 			Map<String, String> dataOwnerLabels = new HashMap<>();
 			responseRouting.getAvailableSources().getSource().forEach(s -> {
-				s.getProvisionsItem().getProvisionItem().stream().forEach(i -> {
+				s.getProvisionItems().getProvisionItem().stream().forEach(i -> {
 					dataOwnerLabels.put(i.getDataOwnerId(), i.getDataOwnerPrefLabel());
 				});
 			});
@@ -123,7 +122,7 @@ public class RequestController {
 				if(response.getErrorList() == null) {
 					AgentType dataOwner = new AgentType();
 					response.getAvailableSources().getSource().stream().forEach(s -> {
-						s.getProvisionsItem().getProvisionItem().stream().forEach(p -> {
+						s.getProvisionItems().getProvisionItem().stream().forEach(p -> {
 							dataOwner.setAgentUrn(p.getDataOwnerId());
 							dataOwner.setAgentName(p.getDataOwnerPrefLabel());
 							dataOwner.setRedirectURL(p.getProvision().getRedirectURL());
