@@ -5,17 +5,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import eu.de4a.iem.jaxb.common.types.AtuLevelType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
+import eu.de4a.iem.jaxb.common.types.ParamSetsType;
 import eu.de4a.iem.jaxb.common.types.ParamType;
-import eu.de4a.iem.jaxb.common.types.ParamsSetType;
 import eu.de4a.iem.jaxb.common.types.ParamsType;
 import eu.de4a.iem.jaxb.common.types.ProvisionItemType;
+import eu.de4a.iem.jaxb.common.types.ProvisionItemsType;
 import eu.de4a.iem.jaxb.common.types.ProvisionType;
 import eu.de4a.iem.jaxb.common.types.ProvisionTypeType;
-import eu.de4a.iem.jaxb.common.types.ProvisionsItemType;
 import eu.de4a.iem.jaxb.common.types.SourceType;
 import eu.idk.model.ProvisionItem;
 import eu.idk.model.Source;
@@ -30,18 +30,18 @@ public class RequestManager {
 			sourceType.setCountryCode(source.getCountryCode());
 			sourceType.setNumProvisions(source.getNumProvisions());
 			sourceType.setOrganisation(source.getOrganisation());
-			ProvisionsItemType provisionsItem = new ProvisionsItemType();
+			ProvisionItemsType provisionsItem = new ProvisionItemsType();
 			provisionsItem.setProvisionItem(new ArrayList<>());
 			extractProvisionItems(source, provisionsItem, dataOwnerId);
-			sourceType.setProvisionsItem(provisionsItem);
+			sourceType.setProvisionItems(provisionsItem);
 			availableSources.addSource(sourceType);
 		});
 	}
 
-	private void extractProvisionItems(Source source, ProvisionsItemType provisionsItem, String dataOwnerId) {
+	private void extractProvisionItems(Source source, ProvisionItemsType provisionItems, String dataOwnerId) {
 		source.getProvisionItems().stream().forEach(x -> {
-			if (StringUtils.isEmpty(dataOwnerId)
-					|| !StringUtils.isEmpty(dataOwnerId) && dataOwnerId.equals(x.getDataOwnerId())) {
+			if (ObjectUtils.isEmpty(dataOwnerId)
+					|| !ObjectUtils.isEmpty(dataOwnerId) && dataOwnerId.equals(x.getDataOwnerId())) {
 				ProvisionItemType provisionItem = new ProvisionItemType();
 				provisionItem.setAtuCode(x.getAtuCode());
 				provisionItem.setAtuLatinName(x.getAtuLatinName());
@@ -49,7 +49,7 @@ public class RequestManager {
 				provisionItem.setDataOwnerPrefLabel(x.getDataOwnerPrefLabel());
 				ProvisionType provision = new ProvisionType();
 				extractProvision(provision, provisionItem,x);
-				provisionsItem.addProvisionItem(provisionItem);
+				provisionItems.addProvisionItem(provisionItem);
 			}
 		});
 	}
@@ -63,13 +63,13 @@ public class RequestManager {
 				provisionItemOrg.getProvision().getParams().stream().forEach(p -> {
 					ParamType param = new ParamType();
 					param.setTitle(p.getTitle());
-					ParamsSetType paramsSet = new ParamsSetType();
+					ParamSetsType paramsSet = new ParamSetsType();
 					if (p.getParamsSet() != null) {
 						p.getParamsSet().stream().forEach(ps -> {
 							paramsSet.addParamSet(ps.getParamValue());
 						});
 					}
-					param.setParamsSet(paramsSet);
+					param.setParamSets(paramsSet);
 				});
 				provision.setParams(params);
 			}
