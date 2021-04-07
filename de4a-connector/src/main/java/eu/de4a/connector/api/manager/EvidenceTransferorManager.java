@@ -20,6 +20,7 @@ import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.connector.model.OwnerAddresses;
 import eu.de4a.connector.model.RequestorRequest;
 import eu.de4a.connector.model.smp.NodeInfo;
@@ -27,8 +28,6 @@ import eu.de4a.connector.repository.RequestorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.de4a.util.SMPUtils;
-import eu.de4a.util.XDE4ACanonicalEvidenceType;
-import eu.de4a.util.XDE4AMarshaller;
 import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
@@ -76,8 +75,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
 					logger.error("Fail...", e);
 					// TODO error handling
 				}			
-				sendResponseMessage(req.getDataEvaluator().getAgentUrn(), requestorReq.getReturnServiceUri(), XDE4AMarshaller.drImResponseMarshaller(
-						XDE4ACanonicalEvidenceType.getXDE4CanonicalEvidenceType(req.getCanonicalEvidenceTypeId()))
+				sendResponseMessage(req.getDataEvaluator().getAgentUrn(), requestorReq.getReturnServiceUri(), 
+						DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 						.getAsDocument(responseTransferEvidenceType).getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
 			} else {
 				req = DE4AMarshaller.drUsiRequestMarshaller().read(request.getMessage());

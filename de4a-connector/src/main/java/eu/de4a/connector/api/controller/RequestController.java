@@ -20,8 +20,7 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
-import eu.de4a.util.XDE4ACanonicalEvidenceType;
-import eu.de4a.util.XDE4AMarshaller;
+import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 
 @Controller
 @Validated
@@ -82,12 +81,13 @@ public class RequestController implements RequestApi {
 			entity.setUsi(false);
 			evaluatorRequestRepository.save(entity);
 			logger.debug("Saving evaluator request evaluator:{},request:{},urlreturn:{}",
-					reqObj.getDataEvaluator().getAgentNameValue(), reqObj.getRequestId(), reqObj.getDataEvaluator().getRedirectURL());
+					reqObj.getDataEvaluator().getAgentNameValue(), reqObj.getRequestId(), 
+					reqObj.getDataEvaluator().getRedirectURL());
 			response = evidenceRequestorManager.manageRequestIM(reqObj);
 
 //		}
-		return XDE4AMarshaller.drImResponseMarshaller(
-				XDE4ACanonicalEvidenceType.getXDE4CanonicalEvidenceType(reqObj.getCanonicalEvidenceTypeId())).getAsString(response);
+		return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
+				.getAsString(response);
 	}
 
 	private String generateResponse(boolean success) {
