@@ -36,5 +36,6 @@ mvn clean install
 ```
 WAR output file will be located on the /target folder
 ##### Constraints
-- [de4a-commons library](https://github.com/de4a-wp5/de4a-commons) are required, so until package is on maven central, you need to install locally
+- [de4a-commons library](https://github.com/de4a-wp5/de4a-commons) **development branch** are required, so until package is on maven central, you need to install locally
 - Some of common versions with another modules of de4a-connector are on POM parent
+- tested on tomcat 9 and Java 11
