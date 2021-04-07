@@ -21,10 +21,10 @@ import com.helger.commons.lang.IExplicitlyCloneable;
 import com.helger.commons.string.ToStringGenerator;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ParamsSet", propOrder = { "paramSet" })
+@XmlType(name = "ParamSets", propOrder = { "paramSet" })
 @CodingStyleguideUnaware
 @Entity
-public class ParamsSet implements IExplicitlyCloneable {
+public class ParamSets implements IExplicitlyCloneable {
 	
 	@Id
 	private Long id;
@@ -67,7 +67,7 @@ public class ParamsSet implements IExplicitlyCloneable {
 			return true;
 		if (o == null || !getClass().equals(o.getClass()))
 			return false;
-		ParamsSet rhs = (ParamsSet) o;
+		ParamSets rhs = (ParamSets) o;
 		if (!EqualsHelper.equalsCollection(this.paramValue, rhs.paramValue))
 			return false;
 		return true;
@@ -93,7 +93,7 @@ public class ParamsSet implements IExplicitlyCloneable {
 		return getParamValue().isEmpty();
 	}
 
-	public void cloneTo(@Nonnull ParamsSet ret) {
+	public void cloneTo(@Nonnull ParamSets ret) {
 		if (this.paramValue == null) {
 			ret.paramValue = null;
 		} else {
@@ -103,8 +103,8 @@ public class ParamsSet implements IExplicitlyCloneable {
 
 	@Nonnull
 	@ReturnsMutableCopy
-	public ParamsSet clone() {
-		ParamsSet ret = new ParamsSet();
+	public ParamSets clone() {
+		ParamSets ret = new ParamSets();
 		cloneTo(ret);
 		return ret;
 	}
