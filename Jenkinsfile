@@ -18,6 +18,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Build'){
             when {
                 branch 'main'
@@ -31,6 +32,7 @@ pipeline {
             steps {
                 sh 'mvn clean package'
             }
+            */
             // TODO: add pushing to a future de4a maven repo?
             // TODO: add building a release on a tag and push to GitHub?
         }
