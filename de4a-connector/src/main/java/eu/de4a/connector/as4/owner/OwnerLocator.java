@@ -9,14 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
-import eu.de4a.exception.MessageException;
 import eu.de4a.connector.model.OwnerAddresses;
-import eu.de4a.connector.repository.EvidenceEntityRepository; 
+import eu.de4a.connector.repository.OwnerAddressesRepository;
+import eu.de4a.exception.MessageException; 
 
 @Component
 public class OwnerLocator {
@@ -24,14 +22,13 @@ public class OwnerLocator {
 	@Autowired
 	private ApplicationContext context; 
 	@Autowired
-	private EvidenceEntityRepository evidenceEntityRepository;	
-	@Autowired
-	private MessageSource messageSource;
-	public OwnerAddresses lookupEvidence(String evidenceService) throws NoSuchMessageException, MessageException {
-		OwnerAddresses evidence=evidenceEntityRepository.findById(evidenceService).orElse(null);
+	private OwnerAddressesRepository evidenceEntityRepository;
+	
+	
+	public OwnerAddresses lookupOwnerAddress(String dataOwnerId) throws NoSuchMessageException, MessageException {
+		OwnerAddresses evidence=evidenceEntityRepository.findById(dataOwnerId).orElse(null);
 		if(evidence==null) {
-			String[]arg= {evidenceService};
-			throw new MessageException(messageSource.getMessage("error.transferor.evidence.not.exists", arg,LocaleContextHolder.getLocale()) ) ;
+			throw new MessageException(String.format("Does not exists information for Owner id {}", dataOwnerId)) ;
 		}
 		return evidence;
 	}
