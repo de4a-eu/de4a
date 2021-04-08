@@ -48,20 +48,20 @@ public class EvidenceTransferorManager extends EvidenceManager {
 	
 	public void queueMessage(MessageOwner request) {
 		ResponseTransferEvidenceType responseTransferEvidenceType = null;
-		OwnerAddresses evidenceEntity = null;
+		OwnerAddresses ownerAddress = null;
 		if (logger.isDebugEnabled()) {
 			logger.debug("Queued message to send to owner:");
 			logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
 		}
 		try {
-			evidenceEntity = ownerLocator.lookupEvidence(request.getEvidenceService());
+			ownerAddress = ownerLocator.lookupOwnerAddress(request.getEvidenceService());
 
 		} catch (MessageException e) {
 			logger.error("No evidence with name {}", request.getEvidenceService());
 			// TODO error handling
 		}
 		RequestorRequest requestorReq = new RequestorRequest();
-		if(evidenceEntity != null) {
+		if(ownerAddress != null) {
 			RequestTransferEvidenceUSIIMDRType req = DE4AMarshaller.drImRequestMarshaller().read(request.getMessage());
 			if (req != null) {
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
@@ -70,7 +70,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 						req.getCanonicalEvidenceTypeId()));
 				try {
 					responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(
-							req, evidenceEntity.getEndpoint(), false);
+							req, ownerAddress.getEndpoint(), false);
 				} catch (NoSuchMessageException | MessageException e) {
 					logger.error("Fail...", e);
 					// TODO error handling
@@ -85,7 +85,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				requestorReq.setReturnServiceUri(SMPUtils.getSmpUri(smpEndpoint, request.getSenderId(), 
 						req.getCanonicalEvidenceTypeId()));
 				try {
-					client.sendEvidenceRequest(req, evidenceEntity.getEndpoint(), true);
+					client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
 				} catch (MessageException e) {
 					logger.error("Fail...",e);
 					//TODO error handling 
