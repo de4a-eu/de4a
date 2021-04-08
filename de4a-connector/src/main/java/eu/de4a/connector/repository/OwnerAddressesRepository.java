@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import eu.de4a.connector.model.OwnerAddresses;
 
 @Repository
-public interface EvidenceEntityRepository extends JpaRepository<OwnerAddresses, String> {
+public interface OwnerAddressesRepository extends JpaRepository<OwnerAddresses, String> {
 
 }
