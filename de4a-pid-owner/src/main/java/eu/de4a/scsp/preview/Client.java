@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
 import eu.de4a.exception.MessageException;
@@ -36,7 +36,7 @@ public class Client {
 		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, request,
 				String.class);
 		ResponseErrorType responseObj = null;
-		if(!StringUtils.isEmpty(response.getBody())) {
+		if(!ObjectUtils.isEmpty(response.getBody())) {
 			responseObj = DE4AMarshaller.dtUsiResponseMarshaller().read(response.getBody());
 		} else {
 			//TODO error handling

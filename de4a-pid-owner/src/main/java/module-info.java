@@ -5,7 +5,6 @@ open module de4a.pid.owner {
 	exports eu.de4a.scsp.ws.client;
 
 	requires transitive de4acommons;
-	requires org.apache.commons.logging;
 	requires org.apache.httpcomponents.httpclient;
 	requires org.apache.httpcomponents.httpcore;
 	requires org.apache.logging.log4j;
@@ -38,6 +37,9 @@ open module de4a.pid.owner {
 	requires javax.servlet.api;
 	requires com.h2database;
 	requires eu.de4a.edm;
+	requires transitive com.helger.jaxb;
+	requires transitive com.helger.commons;
+	requires transitive com.helger.xml;
 	requires com.helger.ubl20;
-	requires com.helger.commons;
+	requires com.helger.xsds.xml;
 }
