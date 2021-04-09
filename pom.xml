@@ -46,6 +46,7 @@
 		<axiom.version>1.2.22</axiom.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<logback.version>1.2.3</logback.version>
+		<log4j2.version>2.14.1</log4j2.version>
 		<springfox-version>3.0.0</springfox-version>
 		<h2.database.version>1.4.199</h2.database.version>
 		<activemq.client.version>5.15.14</activemq.client.version>
