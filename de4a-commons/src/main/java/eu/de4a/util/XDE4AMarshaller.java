@@ -28,6 +28,7 @@ import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.jaxb.GenericJAXBMarshaller;
 import com.helger.jaxb.JAXBContextCache;
 
+import eu.de4a.conn.api.canonical.EvidencesResources;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
@@ -43,7 +44,9 @@ import eu.de4a.iem.xml.de4a.DE4ANamespaceContext;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 
 /**
- * DE4A Marshaller factory for the core data format
+ * XDE4A Marshaller factory for the core data format
+ * 
+ * Walk-around to include on jaxb context object factories of canonical evidence not included on de4a-iem
  *
  * @author Philip Helger
  */
@@ -59,8 +62,8 @@ public class XDE4AMarshaller<JAXBTYPE> extends GenericJAXBMarshaller<JAXBTYPE> {
 	protected JAXBContext getJAXBContext(final ClassLoader aClassLoader) throws JAXBException {
 
 		if (isUseContextCache())
-			return JAXBContextCache.getInstance().getFromCache(new CommonsArrayList<>(DE4AConstants.aClasses));
-		return JAXBContext.newInstance(DE4AConstants.aClasses);
+			return JAXBContextCache.getInstance().getFromCache(new CommonsArrayList<>(EvidencesResources.aClasses));
+		return JAXBContext.newInstance(EvidencesResources.aClasses);
 	}
 	
 
