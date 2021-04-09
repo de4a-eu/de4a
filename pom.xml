@@ -33,7 +33,7 @@
 		<log4j-api.version>2.13.0</log4j-api.version>
 		<spring.version>5.2.4.RELEASE</spring.version>
 		<spring.ws.version>3.0.10.RELEASE</spring.ws.version>
-		<spring.boot.version>2.3.7.RELEASE</spring.boot.version>
+		<spring.boot.version>2.4.4</spring.boot.version>
 		<jackson-mapper-asl.version>1.9.9</jackson-mapper-asl.version>
 		<jackson.databind.version>2.12.2</jackson.databind.version>
 		<jaxb.api.version>2.3.1</jaxb.api.version>
