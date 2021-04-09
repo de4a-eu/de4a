@@ -13,18 +13,17 @@ import org.w3c.dom.Document;
 
 import com.helger.commons.mime.CMimeType;
 
-import eu.de4a.exception.MessageException;
-import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
-import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
-import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.evaluator.model.EvaluatorRequest;
 import eu.de4a.evaluator.model.EvaluatorRequestData;
 import eu.de4a.evaluator.repository.EvaluatorRequestDataRepository;
 import eu.de4a.evaluator.repository.EvaluatorRequestRepository;
+import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
+import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
+import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.iem.xml.de4a.EDE4ACanonicalEvidenceType;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.de4a.util.XDE4ACanonicalEvidenceType;
-import eu.de4a.util.XDE4AMarshaller;
 
 @Component 
 public class ResponseManager {
@@ -71,11 +70,11 @@ public class ResponseManager {
 	
 	public void manageResponse(ResponseTransferEvidenceType response) throws MessageException {
 		EvaluatorRequestData datarequest = new EvaluatorRequestData();
-		byte[] data = XDE4AMarshaller
-				.drImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).getAsBytes(response);
+		byte[] data = DE4AMarshaller
+				.drImResponseMarshaller(EDE4ACanonicalEvidenceType.NONE).getAsBytes(response);
 		datarequest.setData(data);
 		LOGGER.info("--->" 
-				+ new String(XDE4AMarshaller.drImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE)
+				+ new String(DE4AMarshaller.drImResponseMarshaller(EDE4ACanonicalEvidenceType.NONE)
 						.formatted().getAsString(response)));
 		datarequest.setMimetype(CMimeType.APPLICATION_XML.getAsString());
 		datarequest.setIddata(DE4AConstants.TAG_EVIDENCE_RESPONSE);
@@ -86,8 +85,8 @@ public class ResponseManager {
 	
 	public void manageResponse(RequestForwardEvidenceType response) throws MessageException {
 		EvaluatorRequestData datarequest = new EvaluatorRequestData();
-		XDE4AMarshaller<RequestForwardEvidenceType> marshaller = XDE4AMarshaller.deUsiRequestMarshaller(
-				XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE);
+		DE4AMarshaller<RequestForwardEvidenceType> marshaller = DE4AMarshaller.deUsiRequestMarshaller(
+				EDE4ACanonicalEvidenceType.NONE);
 		byte[] data = marshaller.getAsBytes(response);
 		datarequest.setData(data);
 		LOGGER.info("--->" 
