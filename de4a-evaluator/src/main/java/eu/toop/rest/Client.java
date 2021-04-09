@@ -17,9 +17,7 @@ import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
-import eu.de4a.util.RestUtils;
-import eu.de4a.util.XDE4ACanonicalEvidenceType;
-import eu.de4a.util.XDE4AMarshaller;
+import eu.de4a.iem.xml.de4a.EDE4ACanonicalEvidenceType;
 import eu.toop.controller.ResponseManager;
 import eu.toop.controller.User;
 import nl.flotsam.xeger.Xeger;
@@ -33,14 +31,16 @@ public class Client {
 	@Autowired
 	private RequestBuilder requestBuilder; 
 	@Autowired
-	private ResponseManager responseManager; 
+	private ResponseManager responseManager;
+	@Autowired
+	private RestTemplate restTemplate;
 	
 	public ResponseLookupRoutingInformationType getRoutingInfo(RequestLookupRoutingInformationType request) throws MessageException {
 		logger.debug("Sending lookup routing information request {}", request);
 		String urlRequest = urlRequestor + "/lookupRoutingInformation";
 		
-		RestTemplate plantilla = RestUtils.getRestTemplate();
-		ResponseEntity<String> response = plantilla.postForEntity(urlRequest, request, 
+		
+		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, request, 
 				String.class);
 		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
 		ResponseLookupRoutingInformationType respObj = respMarshaller.read(response.getBody());
@@ -52,11 +52,11 @@ public class Client {
 		logger.debug("Sending IM request {}", request.getRequestId());
 		String urlRequest = urlRequestor + "/requestTransferEvidenceIM";
 
-		RestTemplate plantilla = RestUtils.getRestTemplate();
-		ResponseEntity<String> response = plantilla.postForEntity(urlRequest, 
+		
+		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, 
 				 DE4AMarshaller.drImRequestMarshaller().getAsString(request), String.class);
-		ResponseTransferEvidenceType respObj = XDE4AMarshaller
-				.drImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).read(response.getBody());
+		ResponseTransferEvidenceType respObj = DE4AMarshaller
+				.drImResponseMarshaller(EDE4ACanonicalEvidenceType.NONE).read(response.getBody());
 		responseManager.manageResponse(respObj);
 		return respObj.getErrorList() == null;
 	}
@@ -66,8 +66,8 @@ public class Client {
 		logger.debug("Sending USI request {}", request.getRequestId());
 		String urlRequest = urlRequestor + "/requestTransferEvidenceUSI";
 
-		RestTemplate plantilla = RestUtils.getRestTemplate();
-		ResponseEntity<String> response = plantilla.postForEntity(urlRequest, 
+		
+		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, 
 				DE4AMarshaller.drUsiRequestMarshaller().getAsString(request), String.class);
 		if(response.getBody() != null) {
 			ResponseErrorType responseObj = DE4AMarshaller.drUsiResponseMarshaller().read(response.getBody());

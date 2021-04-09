@@ -35,14 +35,13 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
+import eu.de4a.iem.xml.de4a.EDE4ACanonicalEvidenceType;
 import eu.de4a.evaluator.model.EvaluatorRequest;
 import eu.de4a.evaluator.model.EvaluatorRequestData;
 import eu.de4a.evaluator.repository.EvaluatorRequestDataRepository;
 import eu.de4a.evaluator.repository.EvaluatorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.de4a.util.XDE4ACanonicalEvidenceType;
-import eu.de4a.util.XDE4AMarshaller;
 import eu.toop.rest.Client;
 
 @Controller 
@@ -203,8 +202,8 @@ public class RequestController {
 			HttpServletResponse httpServletResponse,RedirectAttributes redirectAttributes) { 
 		boolean success;
 		try {
-			RequestForwardEvidenceType requestForwardObj = XDE4AMarshaller.deUsiRequestMarshaller(
-					XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).read(requestForward);
+			RequestForwardEvidenceType requestForwardObj = DE4AMarshaller.deUsiRequestMarshaller(
+					EDE4ACanonicalEvidenceType.NONE).read(requestForward);
 			responseManager.manageResponse(requestForwardObj);
 			success = true;
 		} catch (MessageException e) {
@@ -230,10 +229,10 @@ public class RequestController {
 			dataresponse = registros.stream()
 					.filter(d -> d.getIddata().equals(DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST)).findFirst().orElse(null);
 			if(dataresponse != null) {
-				RequestForwardEvidenceType response = XDE4AMarshaller
-						.deUsiRequestMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).read(dataresponse.getData());
-				user.setResponse(XDE4AMarshaller
-						.deUsiRequestMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).formatted().getAsString(response));			
+				RequestForwardEvidenceType response = DE4AMarshaller
+						.deUsiRequestMarshaller(EDE4ACanonicalEvidenceType.NONE).read(dataresponse.getData());
+				user.setResponse(DE4AMarshaller
+						.deUsiRequestMarshaller(EDE4ACanonicalEvidenceType.NONE).formatted().getAsString(response));			
 				response.getDomesticEvidenceList().getDomesticEvidence().stream().forEach(x -> {
 					try {						
 						user.setNationalResponse((user.getNationalResponse() != null ? user.getNationalResponse() + "\n\r" : "") 
@@ -248,10 +247,10 @@ public class RequestController {
 			dataresponse = registros.stream()
 					.filter(d -> d.getIddata().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
 			if(dataresponse != null) {
-				ResponseTransferEvidenceType response = XDE4AMarshaller
-						.drImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).read(dataresponse.getData());
-				user.setResponse(XDE4AMarshaller
-						.drImResponseMarshaller(XDE4ACanonicalEvidenceType.BIRTH_CERTIFICATE).formatted().getAsString(response));
+				ResponseTransferEvidenceType response = DE4AMarshaller
+						.drImResponseMarshaller(EDE4ACanonicalEvidenceType.NONE).read(dataresponse.getData());
+				user.setResponse(DE4AMarshaller
+						.drImResponseMarshaller(EDE4ACanonicalEvidenceType.NONE).formatted().getAsString(response));
 			
 				response.getDomesticEvidenceList().getDomesticEvidence().stream().forEach(x -> {
 					try {						
