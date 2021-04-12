@@ -9,11 +9,12 @@ pipeline {
             }
             agent {
                 docker {
-                    image 'maven:3.6.3-jdk-11'
+                    image 'maven:3-adoptopenjdk-11'
                     args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                 }
             }
             steps {
+                sh 'echo $GITHUB_ACCESS_TOKEN'
                 sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000/sonarqube -Dsonar.login=$SONAR_TOKEN -DGITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN --settings jenkins-settings.xml'
             }
         }
@@ -24,7 +25,7 @@ pipeline {
             }
             agent {
                 docker {
-                    image 'maven:3.6.3-jdk-11'
+                    image 'maven:3-adoptopenjdk-11'
                     args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                 }
             }
