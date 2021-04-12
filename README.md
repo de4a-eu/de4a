@@ -23,6 +23,7 @@ idk/src/main/resources/import.sql
 idk/src/main/resources/application.properties
 ```
 #### Spring config
+
 ```sh
 idk/src/main/eu/idk/configuration/Conf.java
 ```
