@@ -1,7 +1,9 @@
-<servers>
-    <server>
-        <id>github</id>
-        <username>phax</username>
-        <password>${env.GITHUB_ACCESS_TOKEN}</password>
-    </server>
-</servers>
+<settings>
+    <servers>
+	<server>
+	    <id>github</id>
+	    <username>phax</username>
+	    <password>${env.GITHUB_ACCESS_TOKEN}</password>
+	</server>
+    </servers>
+</settings>
