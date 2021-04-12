@@ -18,7 +18,6 @@ pipeline {
             }
         }
 
-        /*
         stage('Build'){
             when {
                 branch 'main'
@@ -26,7 +25,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3.6.3-jdk-11'
-                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
+                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default --settings jenkins-settings.xml'
                 }
             }
             steps {
@@ -35,7 +34,6 @@ pipeline {
             // TODO: add pushing to a future de4a maven repo?
             // TODO: add building a release on a tag and push to GitHub?
         }
-        */
     }
     post {
         failure {
