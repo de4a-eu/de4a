@@ -306,5 +306,15 @@
         <enabled>false</enabled>
       </releases>
     </repository>
+    <repository>
+      <id>github.de4a-iem</id>
+      <url>https://maven.pkg.github.com/de4a-wp5/de4a-commons/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
   </repositories>
 </project>
