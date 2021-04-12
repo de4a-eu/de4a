@@ -3,6 +3,7 @@ package eu.toop.smp.client;
 
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ public class TestSMPClient {
 	@Autowired
 	private Client client;
 	@Test
+	@Ignore
 	public void testNodeMine() {
 		NodeInfo info=client.getNodeInfo("9915:tooptest",false);
 		Assert.assertNotNull(info);
