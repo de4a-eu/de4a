@@ -48,9 +48,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 			headers.setAccept(mediaTypes);
 		}
 		List<String> args = new ArrayList<>();
-		if(ex.getContentType() != null) {
-			args.add(ex.getContentType().toString());
-		}
+		args.add(String.valueOf(ex.getContentType()));
 		args.add(mediaTypes.toString());
 		String err= messageSource.getMessage("error.400.mimetype", args.toArray(),LocaleContextHolder.getLocale()); 
 		ApiError apiError =  new ApiError(HttpStatus.BAD_REQUEST, err,""+HttpStatus.BAD_REQUEST.value());

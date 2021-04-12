@@ -105,6 +105,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 
 		} catch (InterruptedException e) {
 			logger.error("Error waiting for response", e);
+			Thread.currentThread().interrupt();
 			return null;
 		}
 		if (!ok) {

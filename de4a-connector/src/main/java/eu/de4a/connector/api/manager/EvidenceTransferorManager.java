@@ -74,10 +74,12 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				} catch (NoSuchMessageException | MessageException e) {
 					logger.error("Fail...", e);
 					// TODO error handling
-				}			
-				sendResponseMessage(req.getDataEvaluator().getAgentUrn(), requestorReq.getReturnServiceUri(), 
-						DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-						.getAsDocument(responseTransferEvidenceType).getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
+				}
+				if(responseTransferEvidenceType != null) {
+					sendResponseMessage(req.getDataEvaluator().getAgentUrn(), requestorReq.getReturnServiceUri(), 
+							DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
+							.getAsDocument(responseTransferEvidenceType).getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
+				}
 			} else {
 				req = DE4AMarshaller.drUsiRequestMarshaller().read(request.getMessage());
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());

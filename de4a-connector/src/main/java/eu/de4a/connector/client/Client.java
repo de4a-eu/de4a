@@ -71,9 +71,11 @@ public class Client {
 		NodeInfo nodeInfo = new NodeInfo();
 		try {
 			String signedServiceMetadataXML = restTemplate.getForObject(uri, String.class);
-			BDXR1MarshallerSignedServiceMetadataType smpMarshaller = new BDXR1MarshallerSignedServiceMetadataType(true);
-			SignedServiceMetadataType signedServiceMetadata = smpMarshaller.read(signedServiceMetadataXML);
-			if (signedServiceMetadata == null) {
+			SignedServiceMetadataType signedServiceMetadata = null;
+			if(!ObjectUtils.isEmpty(signedServiceMetadataXML)) {
+				signedServiceMetadata = new BDXR1MarshallerSignedServiceMetadataType(true)
+						.read(signedServiceMetadataXML);
+			} else {
 				return nodeInfo;
 			}
 			ServiceMetadataType serviceMetadata = signedServiceMetadata.getServiceMetadata();
@@ -169,7 +171,7 @@ public class Client {
 		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, request, String.class);
 		ResponseErrorType responseObj = null;
 		if (!ObjectUtils.isEmpty(response.getBody()) && HttpStatus.ACCEPTED.equals(response.getStatusCode())) {
-			responseObj = DE4AMarshaller.deUsiResponseMarshaller().read(response.getBody());
+			responseObj = DE4AMarshaller.deUsiResponseMarshaller().read(String.valueOf(response.getBody()));
 		} else {
 			// TODO error handling
 			return false;
@@ -195,7 +197,7 @@ public class Client {
 				// TODO move to utils class
 				ResponseExtractEvidenceType responseExtractEvidenceType = DE4AMarshaller
 						.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-						.read(response.getBody());
+						.read(String.valueOf(response.getBody()));
 				return MessagesUtils.transformResponseTransferEvidenceUSI(responseExtractEvidenceType, evidenceRequest);
 			} else {
 				RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
@@ -205,7 +207,7 @@ public class Client {
 				if (ObjectUtils.isEmpty(response.getBody())) {
 					return DE4AResponseDocumentHelper.createResponseError(false);
 				}
-				return DE4AMarshaller.doUsiResponseMarshaller().read(response.getBody());
+				return DE4AMarshaller.doUsiResponseMarshaller().read(String.valueOf(response.getBody()));
 			}
 		} catch (NullPointerException e) {
 			throw new MessageException("Error processing response from Owner:" + e.getMessage());
