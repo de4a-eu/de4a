@@ -10,7 +10,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3.6.3-jdk-11'
-                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
+                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default -e GITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN'
                 }
             }
             steps {
