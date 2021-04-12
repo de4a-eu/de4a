@@ -7,12 +7,12 @@ pipeline {
                     branch 'developer'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
                 }
             }
-            //agent {
-                //docker {
-                //    image 'maven:3.6.3-jdk-11'
-                //    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
-                //}
-            //}
+            agent {
+                docker {
+                    image 'maven:3.6.3-jdk-11'
+                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
+                }
+            }
             steps {
                 sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000/sonarqube -Dsonar.login=$SONAR_TOKEN'
             }
@@ -35,7 +35,7 @@ pipeline {
             // TODO: add pushing to a future de4a maven repo?
             // TODO: add building a release on a tag and push to GitHub?
         }
-            */
+        */
     }
     post {
         failure {
