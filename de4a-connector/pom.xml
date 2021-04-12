@@ -261,13 +261,17 @@
 				</executions>
 				<configuration>
 					<generateEpisode>false</generateEpisode>
+					<bindingIncludes>
+						<bindingInclude>bindings-domibus.xjb</bindingInclude>
+					</bindingIncludes>
 					<packageName>eu.de4a.connector.as4.domibus.soap.auto</packageName>
+					<bindingDirectory>${basedir}/src/main/jaxb</bindingDirectory>
 					<sourceType>wsdl</sourceType>
 					<sources>
 						<source>${project.basedir}/src/main/resources/domibus/domibus.wsdl</source>
 					</sources>
-					<outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
-					<clearOutputDir>false</clearOutputDir>
+					<outputDirectory>${basedir}/target/generated-sources/</outputDirectory>
+					<clearOutputDir>true</clearOutputDir>
 					<noGeneratedHeaderComments>true</noGeneratedHeaderComments>
 				</configuration>
 				<dependencies>
