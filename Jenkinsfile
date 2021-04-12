@@ -25,7 +25,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3.6.3-jdk-11'
-                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default --settings jenkins-settings.xml'
+                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default --settings jenkins-settings.xml -e GITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN'
                 }
             }
             steps {
