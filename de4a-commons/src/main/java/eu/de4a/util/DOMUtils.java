@@ -58,7 +58,7 @@ public class DOMUtils {
 			node = (Node) xpath.evaluate(expression, request, XPathConstants.NODE);
 			node.setTextContent(value);
 		} catch (XPathExpressionException e) {
-			logger.error(String.format("No se ha podido acceder al elemento indicado '%s'", expression), e);
+			logger.error(String.format("Error accessing indicated element '%s'", expression), e);
 
 		}
 		return node;
