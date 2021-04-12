@@ -35,6 +35,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -286,7 +287,11 @@ public class DOMUtils {
 
 	public static byte[] encodeCompressed(Document doc) {
 		try {
-			byte[] input = DOMUtils.documentToString(doc).getBytes();
+			String docStr = DOMUtils.documentToString(doc);
+			byte[] input = new byte[0];			
+			if(!ObjectUtils.isEmpty(docStr)) {
+				input = docStr.getBytes();
+			}
 			ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
 			GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream);
 			outputStream.write(input, 0, input.length);
