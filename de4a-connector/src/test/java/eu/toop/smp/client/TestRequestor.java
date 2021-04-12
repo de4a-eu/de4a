@@ -7,6 +7,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class TestRequestor {
 	private EvidenceRequestorManager evidenceRequestorManager;
 	 
 	@Test
+	@Ignore
 	public void sendTestEvidenceRequest() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException { 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = factory.newDocumentBuilder();
