@@ -25,11 +25,11 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3.6.3-jdk-11'
-                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default --settings jenkins-settings.xml'
+                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                 }
             }
             steps {
-                sh 'mvn clean package -DGITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN'
+                sh 'mvn clean package -DGITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN --settings jenkins-settings.xml'
             }
             // TODO: add pushing to a future de4a maven repo?
             // TODO: add building a release on a tag and push to GitHub?
