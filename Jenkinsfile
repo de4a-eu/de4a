@@ -14,7 +14,6 @@ pipeline {
                 }
             }
             steps {
-                sh 'echo $GITHUB_ACCESS_TOKEN'
                 sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000/sonarqube -Dsonar.login=$SONAR_TOKEN -DGITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN --settings jenkins-settings.xml'
             }
         }
@@ -30,7 +29,6 @@ pipeline {
                 }
             }
             steps {
-                sh 'echo $GITHUB_ACCESS_TOKEN'
                 sh 'mvn clean package -DGITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN --settings jenkins-settings.xml'
             }
             // TODO: add pushing to a future de4a maven repo?
