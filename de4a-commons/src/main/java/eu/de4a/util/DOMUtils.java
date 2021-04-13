@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.security.CodeSource;
-import java.text.MessageFormat;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -64,7 +62,7 @@ public class DOMUtils {
 			node = (Node) xpath.evaluate(expression, request, XPathConstants.NODE);
 			node.setTextContent(value);
 		} catch (XPathExpressionException e) {
-			logger.error(String.format("No se ha podido acceder al elemento indicado '%s'", expression), e);
+			logger.error(String.format("Error accessing indicated element '%s'", expression), e);
 
 		}
 		return node;
