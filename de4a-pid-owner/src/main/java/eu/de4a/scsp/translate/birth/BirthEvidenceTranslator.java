@@ -8,6 +8,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -96,13 +97,14 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 		String ownerId=DOMUtils.getValueFromXpath(DE4AConstants.XPATH_OWNER_ID, request);
 		String ownerName=DOMUtils.getValueFromXpath(DE4AConstants.XPATH_OWNER_NAME, request);
 		String canonicalEvidenceId=DOMUtils.getValueFromXpath(DE4AConstants.XPATH_CANONICAL_EVICENCE_ID, request);
-		TransformerFactory factory = TransformerFactory.newInstance(); 
 	   	InputStream inputStreamPlantilla = this.getClass().getClassLoader()  .getResourceAsStream( REQUEST_TEMPLATE); 
 		Source xslDoc = new StreamSource(inputStreamPlantilla);
 		Source src = new DOMSource () ; 
         OutputStream xmlFile = new ByteArrayOutputStream( );
-        Transformer transformerxsl;
-		try {
+        TransformerFactory factory;
+        try {
+        		factory = TransformerFactory.newInstance("org.apache.xalan.processor.TransformerFactoryImpl", null);
+				Transformer transformerxsl;		
 				transformerxsl = factory.newTransformer(xslDoc);
 				fillParameter(transformerxsl,ID_PETICION_PARAM,EvidenceTranslator.getIdPeticion(seed)); 
 		        fillParameter(transformerxsl,TIMESTAMP_PARAM,EvidenceTranslator.getCurrentTime()); 
@@ -227,7 +229,7 @@ public class BirthEvidenceTranslator implements EvidenceTranslator{
 		Example<Municipio> example = Example.of(data);
 		List<Municipio>registros=municipioRepository.findAll(example); 
 		String nameMunicipio=registros.get(0).getNombre();
-		TransformerFactory factory = TransformerFactory.newInstance( ); 
+		TransformerFactory factory = TransformerFactory.newInstance("org.apache.xalan.processor.TransformerFactoryImpl", null); 
 	   	InputStream inputStreamPlantilla = this.getClass().getClassLoader()  .getResourceAsStream( RESPONSE_TEMPLATE); 
 		Source xslDoc = new StreamSource(inputStreamPlantilla);
 		Source src = new DOMSource () ; 

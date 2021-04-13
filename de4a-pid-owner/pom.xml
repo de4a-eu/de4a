@@ -19,12 +19,6 @@
 			<groupId>eu.de4a</groupId>
 			<artifactId>de4a-iem</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>net.sf.saxon</groupId>
-					<artifactId>Saxon-HE</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.ws.commons.axiom</groupId>
@@ -47,10 +41,6 @@
 			<artifactId>de4a-commons</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
-				<exclusion>
-					<groupId>net.sf.saxon</groupId>
-					<artifactId>Saxon-HE</artifactId>
-				</exclusion>
 				<exclusion>
 					<groupId>com.sun.activation</groupId>
 					<artifactId>jakarta.activation</artifactId>

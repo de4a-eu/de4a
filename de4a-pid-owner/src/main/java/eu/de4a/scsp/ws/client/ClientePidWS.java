@@ -51,7 +51,7 @@ public class ClientePidWS extends WebServiceTemplate{
             Source source = new DOMSource(node);
             ByteArrayOutputStream out = new ByteArrayOutputStream(); 
             Result result = new StreamResult(out);
-            TransformerFactory factory = TransformerFactory.newInstance();
+            TransformerFactory factory = TransformerFactory.newInstance("org.apache.xalan.processor.TransformerFactoryImpl", null);
             Transformer transformer = factory.newTransformer();
             transformer.transform(source, result);
             return out.toByteArray();
