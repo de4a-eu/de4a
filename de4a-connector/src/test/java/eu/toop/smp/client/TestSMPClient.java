@@ -24,7 +24,7 @@ public class TestSMPClient {
 	@Autowired
 	private Client client;
 	@Test
-	@Ignore
+	@Ignore("until test are defined and compilant")
 	public void testNodeMine() {
 		NodeInfo info=client.getNodeInfo("9915:tooptest",false);
 		Assert.assertNotNull(info);
