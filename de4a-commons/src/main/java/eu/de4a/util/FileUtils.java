@@ -81,7 +81,7 @@ public class FileUtils {
 	}
 	
 	public static byte[] buildResponse(InputStream inputStream, String xPathNationalResp) throws MessageException, IOException {
-		List<TCPayload> payloads = new ArrayList<TCPayload>();
+		List<TCPayload> payloads = new ArrayList<>();
 		File temp = Files.createTempFile(DE4A_PREFIX, null).toFile();
 		IOUtils.copy(inputStream, new FileOutputStream(temp));
 		try(ZipFile zip = new ZipFile(temp)) {
@@ -96,7 +96,6 @@ public class FileUtils {
 				payload.setValue(data);
 				payloads.add(payload);
 			}
-			zip.close();
 			TCPayload canonicalPayload = payloads.stream()
 					.filter(p -> p.getContentID().equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst().orElse(null);
 			if (canonicalPayload == null) {
@@ -116,7 +115,7 @@ public class FileUtils {
 			if (value != null && !value.isEmpty())
 				return DE4AConstants.TAG_NATIONAL_EVIDENCE_RESPONSE;
 		} catch (MessageException e) {
-			
+			return null;
 		}
 		return name;
 	}
