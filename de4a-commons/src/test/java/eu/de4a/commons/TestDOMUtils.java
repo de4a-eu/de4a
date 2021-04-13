@@ -2,6 +2,8 @@ package eu.de4a.commons;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 
 import javax.xml.transform.TransformerException;
@@ -20,7 +22,7 @@ public class TestDOMUtils {
 
 	// @Ignore
 	@Test
-	public void testXalanTransformer() throws TransformerException, MessageException {
+	public void test1() throws TransformerException, MessageException {
 		Document doc = DOMUtils.stringToDocument(xmlString);
 		assertNotNull(doc);
 		String str = DOMUtils.documentToString(doc);
@@ -39,6 +41,13 @@ public class TestDOMUtils {
 		assertNotNull(nodeValue);
 		String value = DOMUtils.getValueFromXpath("//*[local-name()='test']", doc.getDocumentElement());
 		assertNotNull(value);
+		str = DOMUtils.loadString(doc3);
+		assertNotNull(str);
+		InputStream is = new ByteArrayInputStream(xmlString.getBytes());
+		Document doc4 = DOMUtils.newDocumentFromInputStream(is);
+		assertNotNull(doc4);
+		Node node1 = DOMUtils.changeNodo(doc4, "//*[local-name()='test']", "Bye world");
+		assertNotNull(node1);
 	}
 	
 }
