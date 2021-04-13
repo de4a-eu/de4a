@@ -17,6 +17,12 @@
 		<dependency>
 			<groupId>eu.de4a</groupId>
 			<artifactId>de4a-iem</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun.activation</groupId>
+					<artifactId>jakarta.activation</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>eu.toop</groupId>
