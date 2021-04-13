@@ -73,7 +73,7 @@ public final class XDE4AMarshallerTest
     // Request
     _testReadWrite (XDE4AMarshaller.deUsiRequestMarshaller (IDE4ACanonicalEvidenceType.NONE),
                     new File (BASE_PATH + "xde4a/DE1-USI-request.xml"));
-    _testReadWrite (XDE4AMarshaller.deUsiRequestMarshaller (EDE4ACanonicalEvidenceType.T42_COMPANY_INFO_V04),
+    _testReadWrite (XDE4AMarshaller.deUsiRequestMarshaller (EDE4ACanonicalEvidenceType.T42_COMPANY_INFO_V06),
                     new File (BASE_PATH + "xde4a/t4.2/0.4/DE1-USI-request-T42.xml"));
 
     // Response
@@ -97,7 +97,7 @@ public final class XDE4AMarshallerTest
     // Response
     _testReadWrite (XDE4AMarshaller.doImResponseMarshaller (IDE4ACanonicalEvidenceType.NONE),
                     new File (BASE_PATH + "xde4a/DO1-IM-response.xml"));
-    _testReadWrite (XDE4AMarshaller.doImResponseMarshaller (EDE4ACanonicalEvidenceType.T42_COMPANY_INFO_V04),
+    _testReadWrite (XDE4AMarshaller.doImResponseMarshaller (EDE4ACanonicalEvidenceType.T42_COMPANY_INFO_V06),
                     new File (BASE_PATH + "xde4a/t4.2/0.4/DO1-IM-response-T42.xml"));
   }
 
@@ -120,7 +120,7 @@ public final class XDE4AMarshallerTest
     // Response
     _testReadWrite (XDE4AMarshaller.drImResponseMarshaller (IDE4ACanonicalEvidenceType.NONE),
                     new File (BASE_PATH + "xde4a/DR1-IM-response.xml"));
-    _testReadWrite (XDE4AMarshaller.drImResponseMarshaller (EDE4ACanonicalEvidenceType.T42_COMPANY_INFO_V04),
+    _testReadWrite (XDE4AMarshaller.drImResponseMarshaller (EDE4ACanonicalEvidenceType.T42_COMPANY_INFO_V06),
                     new File (BASE_PATH + "xde4a/t4.2/0.4/DR1-IM-response-T42.xml"));
   }
 
@@ -140,7 +140,7 @@ public final class XDE4AMarshallerTest
     // Request
     _testReadWrite (XDE4AMarshaller.dtUsiRequestMarshaller (IDE4ACanonicalEvidenceType.NONE),
                     new File (BASE_PATH + "xde4a/DT1-USI-request.xml"));
-    _testReadWrite (XDE4AMarshaller.dtUsiRequestMarshaller (EDE4ACanonicalEvidenceType.T42_COMPANY_INFO_V04),
+    _testReadWrite (XDE4AMarshaller.dtUsiRequestMarshaller (EDE4ACanonicalEvidenceType.T42_COMPANY_INFO_V06),
                     new File (BASE_PATH + "xde4a/t4.2/0.4/DT1-USI-request-T42.xml"));
 
     // Response
