@@ -177,10 +177,6 @@
 			<artifactId>toop-edm</artifactId>
 			<exclusions>
 				<exclusion>
-					<groupId>net.sf.saxon</groupId>
-					<artifactId>Saxon-HE</artifactId>
-				</exclusion>
-				<exclusion>
 					<groupId>com.sun.xml.bind</groupId>
 					<artifactId>jaxb-impl</artifactId>
 				</exclusion>
