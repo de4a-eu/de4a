@@ -53,11 +53,11 @@ public class Provision {
 	@OneToMany(mappedBy = "provision", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<Param> params = null;
 	
-	Provision() {
+	public Provision() {
 		//empty constructor
 	}
 	
-	Provision(Provision prov) {
+	public Provision(Provision prov) {
 		this.id = prov.getId();
 		this.params = prov.getParams();
 		this.provisionItem = prov.getProvisionItem();
