@@ -1,5 +1,7 @@
 package eu.toop.as4.domibus.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -57,11 +59,11 @@ public class TestClientDomibus {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document doc = builder.parse(new ByteArrayInputStream(targetArray));
+		builder.parse(new ByteArrayInputStream(targetArray));
 	}
 
 	@Test
-	@Ignore
+	@Ignore("until test are defined and compilant")
 	public void sendTest()
 			throws FileNotFoundException, SAXException, IOException, ParserConfigurationException, DomibusException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -98,8 +100,7 @@ public class TestClientDomibus {
 
 		payload2.setValue(new DataHandler(source2));
 		bodies.add(payload2);
-
-		clienteWS.submitMessage(messageHeader, bodies);
+		assertNotNull(clienteWS.submitMessage(messageHeader, bodies), "Test complete");
 	}
 
 	private byte[] documentToByte(Document document) {

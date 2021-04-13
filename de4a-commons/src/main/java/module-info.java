@@ -8,7 +8,6 @@ module de4acommons {
 	requires java.xml.bind;
 	requires org.apache.logging.log4j;
 	requires org.apache.santuario.xmlsec;
-	requires java.activation;
 	requires spring.core;
 	requires transitive spring.web;
 	requires org.apache.commons.codec;
@@ -23,4 +22,5 @@ module de4acommons {
 	requires com.helger.xsds.ccts.cct.schemamodule;
 	requires com.helger.xsds.xlink;
 	requires transitive com.helger.xml;
+	requires java.xml;
 }

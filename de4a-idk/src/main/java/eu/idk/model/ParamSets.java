@@ -14,17 +14,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.helger.commons.annotation.CodingStyleguideUnaware;
-import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.equals.EqualsHelper;
 import com.helger.commons.hashcode.HashCodeGenerator;
-import com.helger.commons.lang.IExplicitlyCloneable;
 import com.helger.commons.string.ToStringGenerator;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ParamSets", propOrder = { "paramSet" })
 @CodingStyleguideUnaware
 @Entity
-public class ParamSets implements IExplicitlyCloneable {
+public class ParamSets {
 	
 	@Id
 	private Long id;
@@ -68,9 +66,7 @@ public class ParamSets implements IExplicitlyCloneable {
 		if (o == null || !getClass().equals(o.getClass()))
 			return false;
 		ParamSets rhs = (ParamSets) o;
-		if (!EqualsHelper.equalsCollection(this.paramValue, rhs.paramValue))
-			return false;
-		return true;
+		return EqualsHelper.equalsCollection(this.paramValue, rhs.paramValue);
 	}
 
 	public int hashCode() {
@@ -99,13 +95,5 @@ public class ParamSets implements IExplicitlyCloneable {
 		} else {
 			ret.paramValue = this.paramValue;
 		}
-	}
-
-	@Nonnull
-	@ReturnsMutableCopy
-	public ParamSets clone() {
-		ParamSets ret = new ParamSets();
-		cloneTo(ret);
-		return ret;
 	}
 }

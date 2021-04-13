@@ -19,10 +19,8 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 import com.helger.commons.annotation.CodingStyleguideUnaware;
-import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.equals.EqualsHelper;
 import com.helger.commons.hashcode.HashCodeGenerator;
-import com.helger.commons.lang.IExplicitlyCloneable;
 import com.helger.commons.string.ToStringGenerator;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -30,7 +28,7 @@ import com.helger.commons.string.ToStringGenerator;
 		"provision" })
 @CodingStyleguideUnaware
 @Entity
-public class ProvisionItem implements IExplicitlyCloneable {
+public class ProvisionItem {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -159,14 +157,6 @@ public class ProvisionItem implements IExplicitlyCloneable {
 		ret.atuLatinName = this.atuLatinName;
 		ret.dataOwnerId = this.dataOwnerId;
 		ret.dataOwnerPrefLabel = this.dataOwnerPrefLabel;
-		ret.provision = (this.provision == null) ? null : this.provision.clone();
-	}
-
-	@Nonnull
-	@ReturnsMutableCopy
-	public ProvisionItem clone() {
-		ProvisionItem ret = new ProvisionItem();
-		cloneTo(ret);
-		return ret;
+		ret.provision = (this.provision == null) ? null : new Provision(provision);
 	}
 }
