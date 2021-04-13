@@ -23,4 +23,5 @@ module de4acommons {
 	requires com.helger.xsds.xlink;
 	requires transitive com.helger.xml;
 	requires java.xml;
+	requires java.activation;
 }

@@ -27,6 +27,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.scsp.spring.ConfPid;
  
 
@@ -60,7 +61,7 @@ public class TestClientPid {
 		
 		
 	}
-	private  eu.de4a.conn.api.requestor.RequestTransferEvidence  unmarshallMe(Element request)  {  
+	private  RequestTransferEvidenceUSIIMDRType  unmarshallMe(Element request)  {  
 //        try
 //        {  
 //        	DOMUtils.stringToDocument(DOMUtils.documentToString(request.getOwnerDocument())); 
