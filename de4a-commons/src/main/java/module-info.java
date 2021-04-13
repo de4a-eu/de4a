@@ -6,6 +6,7 @@ module de4acommons {
 	exports eu.de4a.util; 
 
 	requires java.xml.bind;
+	opens eu.de4a.conn.api.canonical to java.xml.bind;
 	requires org.apache.logging.log4j;
 	requires org.apache.santuario.xmlsec;
 	requires spring.core;
@@ -23,5 +24,6 @@ module de4acommons {
 	requires com.helger.xsds.xlink;
 	requires transitive com.helger.xml;
 	requires java.xml;
+	requires spring.beans;
 	requires java.activation;
 }

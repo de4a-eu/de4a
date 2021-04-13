@@ -10,9 +10,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -233,66 +230,6 @@ public class DOMUtils {
 		}
 
 		return null;
-	}
-
-	public static byte[] serializeJaxbObject(Class<?> clazz, Object o) {
-		ByteArrayOutputStream xmlStream = new ByteArrayOutputStream();
-		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
-			Marshaller marshaller = jaxbContext.createMarshaller();
-			marshaller.marshal(o, xmlStream);
-			return xmlStream.toByteArray();
-		} catch (Exception e) {
-			logger.error("Error marshalling jaxb object", e);
-			return new byte[0];
-		}
-	}
-
-	public static <T> String jaxbObjectToXML(T xmlObj, Class<?>[] aClasses) {
-		String xmlString = "";
-		try {
-			JAXBContext context = JAXBContext.newInstance(aClasses);
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-			StringWriter sw = new StringWriter();
-			marshaller.marshal(xmlObj, sw);
-			return sw.toString();
-		} catch (JAXBException e) {
-			e.printStackTrace();
-			return xmlString;
-		}
-	}
-
-	public static Object unmarshall(Class<?> clazz, Node doc) {
-		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
-			javax.xml.bind.Unmarshaller jaxbMarshaller = jaxbContext.createUnmarshaller();
-			return jaxbMarshaller.unmarshal(doc, clazz);
-		} catch (Exception e) {
-			logger.error("Error unmarshalling to jaxb object", e);
-			return null;
-		}
-	}
-
-	public static Document marshall(Class<?> clazz, Object obj) {
-		try {
-			JAXBContext jc = JAXBContext.newInstance(clazz);
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-			dbf.setNamespaceAware(true);
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document document = db.newDocument();
-
-			// Marshal Object to the Document
-			Marshaller marshaller = jc.createMarshaller();
-			marshaller.marshal(obj, document);
-			return document;
-		} catch (JAXBException | ParserConfigurationException e) {
-			logger.error("Error marshalling object to DOM", e);
-			return null;
-		}
 	}
 
 	public static byte[] encodeCompressed(Document doc) {

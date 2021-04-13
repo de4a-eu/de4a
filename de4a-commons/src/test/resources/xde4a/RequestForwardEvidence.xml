@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns9:RequestForwardEvidence xmlns:ns15="http://www.w3.org/ns/corevocabulary/BasicComponents" xmlns:ns14="http://www.de4a.eu/2020/data/requestor/idk" xmlns:ns13="http://www.de4a.eu/2020/data/requestor/pattern/usi" xmlns:ns12="http://www.de4a.eu/2020/data/requestor/pattern/intermediate" xmlns:ns11="http://www.de4a.eu/2020/data/owner/pattern/usi" xmlns:ns10="http://www.de4a.eu/2020/data/owner/pattern/intermediate" xmlns:ns9="http://www.de4a.eu/2020/data/evaluator/pattern/usi" xmlns:ns8="https://data.europe.eu/semanticassets/ns/cv/common/dataTypes-2.0.0#" xmlns="" xmlns:de4a="http://www.de4a.eu/2020/commons/type" xmlns:eilp="http://eidas.europa.eu/attributes/legalperson" xmlns:einp="http://eidas.europa.eu/attributes/naturalperson" xmlns:de4aid="http://www.de4a.eu/2020/commons/identity/type" xmlns:ns2="http://www.w3.org/1999/xlink">
+  <de4a:RequestId>Bb4fff20-ee1f-4CAD-8289-2D2cdaeA2c8d</de4a:RequestId>
+  <de4a:TimeStamp>2021-04-07T13:29:56.66Z</de4a:TimeStamp>
+  <de4a:CanonicalEvidence>
+    <BirthEvidence>
+      <IssuingDate>1940-06-03</IssuingDate>
+          <IssuingAuthority>
+        <PrefLabel>Registro Civil Central. Ministerio de Justicia</PrefLabel>
+      </IssuingAuthority>
+          <CerfifiedBirth>
+        <Child>
+          <DateOfBirth>1940-06-03</DateOfBirth>
+                  <PlaceOfBirth>
+            <GeographicName>Barcelona</GeographicName>
+          </PlaceOfBirth>
+                  <Gender>http://publications.europa.eu/resource/authority/human-sex/FEMALE"</Gender>
+                  <GivenName>OLGA</GivenName>
+                  <FamilyName>SAN MIGUEL</FamilyName>
+        </Child>
+      </CerfifiedBirth>
+    </BirthEvidence>
+  </de4a:CanonicalEvidence>
+  <de4a:DomesticEvidenceList xml:lang="es">
+    <de4a:DomesticEvidence>
+      <de4a:IssuingType>OriginalIssuing</de4a:IssuingType>
+          <de4a:MimeType>application/xml</de4a:MimeType>
+          <de4a:DataLanguage>es</de4a:DataLanguage>
+          <de4a:EvidenceData>SDRzSUFBQUFBQUFBQUoxVzIyN2pOaEI5TDlCL0VQeGEyS1RrdTZGb29UcE80a1dTRFd4bDI3ZUFrV2lIZ0NTNnBCU25uOVZ2Nkk5MUtPdEdtMHE3RFJBa25ITm1lT1lpa3U2WGp5UzIzcW1RaktkWFBYdUFleFpOUXg2eGRIL1ZldzV1K3JQZUY4L2RVSG5JcWN5SUJmUlVYdlhlc3V5d1FJaWxHUlVKalJnSndYOGdhQ1NKSUFNcWtRemxBVkg1UjA0VEl0SDNJUkpWaU40cHhrSnljcURwZXgxTGhtK0tPd0JVUVFNdTlrajlnNEJFWTM2Z3FQSTh5cnoyaW5nb0I1eElKdnRBU1F1dm81VEl3WGlFc0kxT2tGcGh1dytBK3FWaExsajJaei9QV0t6K1F0YUREeGxWNFQ4a3E4TWZqOGZCY1ZoRWhSZzIrdjNoZmx2bzdMTVVja2xEMnZOKy9zbXlYRDhUN0RYUHVDeVdZRmhIVHpSanFpemVyK3ROY1BkaVQrenBkRDZhejhlanFlT2lGbDU2UE9iSktxWUpUVlVVMjBYYXV1UUVMS0hiakNRSHo4R08zY2VqUHA0RzluRGh6QmZqeVdBMkdmNkNuUVhHTG1xSXBlY0s1RWE4WE1GNkNUM2U4OUtLTVI2NlNEUFZ4SHNHUFNieFNnZ3V2RUNRaEFGT1hLVFphM2JBYUhKUU1WZ0NVZXE1OFFwSlpxZ1VpTFNOUzMxTEtqSzJZNkVDdHQrdnQ4dmw0MjliYkZkYTIzRFJCcVQzd1FXOXFVeVltbTdhRkxFeFhwT211SUFVeTF1YVVzSENsbDJWRC9pdFBFOE5ZN3ZTdkhWbTloRG13NGV1MVVhZHk1TlhRVXZrZ2FWTVF2VVl0eUpxZmMybEdnUW9xVVpxYlk0dVRWc2VndzlNWUViMWpkWVJERXhaRTlGbWdjWWhhSFJXYXZZNk9BYkpIU0V1UWMzM09XVVJpYXBwNFlLMGZTOUJ6ZmRKOEJDT2xJU3B5ZGVnMDFqb09FekY1Z1crelRrZTQvRUxWai9qWWp3K0RYT1MvMThpbVppYVhQUUpkc05TRXF0a3ZRQkczZG9KbmxqWGRBU3RiaEROWWNsVHFYcFRTV0lxRmMya3g4OVRkWUlRbUNSemhrdWVIR0thOFRieGEwNVNheVVQNU8rL2VGei9VMlZxOGpnUHpYWnRkRjcrYklyaDcvS0RsSTJJaTh4REJDZEpsc2ZFK0JsNTMrNXYvVXF3VHZBUE5JYTZjdHZiK28vV3cvcjJlWFVQcDBKdE5aSWRiM25uZjJ0b2pxYnZVa2o3QkRudjMvODR0V3J2ZFZUV0lvL1VCZEJlbnZIYUFvTE4wMlpWaktzOXc1UFpiRFpVcnAwU2IyajRSb296cnJpMGpSZUpNeDVYRjhrNVhhdU1ZUThYZFJ5aWJpcnRSWUhCeU5GUUZZREw4c29GNklmZkZKRUtSWnRRdmJZMHRkY0dwbGlrWnlXdVJmaFJjZm1TbU1xeXdTWis2VkVVNFJFRWxSK2hQUi9oUHA3ME1WemtKbHdmL0IvY3M5RjRCMkhob3R6RFpRRTNiYWV3TTFvdGJ0Z1M5KytobnZoclhKVDhqSXBuMko2ZkluVlJUTkVJTzVkdjQxa1o1aExyS05obnJKcFU0MVNhbEpRd1g3SjNWbVl6c2VGYnNlM1RSanB1Q0JEd0JEcnVUTlhYVUsrTktlL2hVUGZHNDJtVlpySHVTSzFMZGROV09QaDNUQ1Nuejg3WVZJMXhFZVRzSWRkQ0RHKy9DN1BCVFg4SmJ2eUhkZUJmK3lkZjQydXdTZmtpYUZWN2ZmeGI5V2tkRXZVTDBmaHcwOHhGTVYzVWZseitBK3h1ejMvakRBQUE=</de4a:EvidenceData>
+    </de4a:DomesticEvidence>
+  </de4a:DomesticEvidenceList>
+</ns9:RequestForwardEvidence>
