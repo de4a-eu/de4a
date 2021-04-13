@@ -1,12 +1,5 @@
 package eu.idk.model;
 
-import com.helger.commons.annotation.CodingStyleguideUnaware;
-import com.helger.commons.annotation.ReturnsMutableCopy;
-import com.helger.commons.equals.EqualsHelper;
-import com.helger.commons.hashcode.HashCodeGenerator;
-import com.helger.commons.lang.IExplicitlyCloneable;
-import com.helger.commons.string.ToStringGenerator;
-
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -26,12 +19,17 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
+import com.helger.commons.annotation.CodingStyleguideUnaware;
+import com.helger.commons.equals.EqualsHelper;
+import com.helger.commons.hashcode.HashCodeGenerator;
+import com.helger.commons.string.ToStringGenerator;
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Source", propOrder = { "countryCode", "atuLevel", "numProvisions", "organisation", "provisionsItem" })
 @CodingStyleguideUnaware
 @Entity
 @Table(name = "Source")
-public class Source implements IExplicitlyCloneable {
+public class Source {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -140,9 +138,7 @@ public class Source implements IExplicitlyCloneable {
 			return false;
 		if (!EqualsHelper.equals(this.organisation, rhs.organisation))
 			return false;
-		if (!EqualsHelper.equals(this.provisionItems, rhs.provisionItems))
-			return false;
-		return true;
+		return EqualsHelper.equals(this.provisionItems, rhs.provisionItems);
 	}
 
 	public int hashCode() {
@@ -162,13 +158,5 @@ public class Source implements IExplicitlyCloneable {
 		ret.numProvisions = this.numProvisions;
 		ret.organisation = this.organisation;
 		ret.provisionItems = (this.provisionItems == null) ? null : this.provisionItems;
-	}
-
-	@Nonnull
-	@ReturnsMutableCopy
-	public Source clone() {
-		Source ret = new Source();
-		cloneTo(ret);
-		return ret;
 	}
 }

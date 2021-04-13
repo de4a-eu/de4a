@@ -21,17 +21,15 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 import com.helger.commons.annotation.CodingStyleguideUnaware;
-import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.equals.EqualsHelper;
 import com.helger.commons.hashcode.HashCodeGenerator;
-import com.helger.commons.lang.IExplicitlyCloneable;
 import com.helger.commons.string.ToStringGenerator;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Provision", propOrder = { "Provision", "redirectURL", "Param" })
 @CodingStyleguideUnaware
 @Entity
-public class Provision implements IExplicitlyCloneable {
+public class Provision {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -55,6 +53,17 @@ public class Provision implements IExplicitlyCloneable {
 	@OneToMany(mappedBy = "provision", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<Param> params = null;
 	
+	Provision() {
+		//empty constructor
+	}
+	
+	Provision(Provision prov) {
+		this.id = prov.getId();
+		this.params = prov.getParams();
+		this.provisionItem = prov.getProvisionItem();
+		this.provisionType = prov.getProvisionType();
+		this.redirectURL = prov.getRedirectURL();
+	}
 
 	public Long getId() {
 		return id;
@@ -109,9 +118,7 @@ public class Provision implements IExplicitlyCloneable {
 			return false;
 		if (!EqualsHelper.equals(this.provisionType, rhs.provisionType))
 			return false;
-		if (!EqualsHelper.equals(this.redirectURL, rhs.redirectURL))
-			return false;
-		return true;
+		return EqualsHelper.equals(this.redirectURL, rhs.redirectURL);
 	}
 
 	public int hashCode() {
@@ -128,13 +135,5 @@ public class Provision implements IExplicitlyCloneable {
 		ret.params = (this.params == null) ? null : this.params;
 		ret.provisionType = this.provisionType;
 		ret.redirectURL = this.redirectURL;
-	}
-
-	@Nonnull
-	@ReturnsMutableCopy
-	public Provision clone() {
-		Provision ret = new Provision();
-		cloneTo(ret);
-		return ret;
 	}
 }

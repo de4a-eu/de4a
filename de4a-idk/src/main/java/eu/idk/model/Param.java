@@ -21,17 +21,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.helger.commons.annotation.CodingStyleguideUnaware;
-import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.equals.EqualsHelper;
 import com.helger.commons.hashcode.HashCodeGenerator;
-import com.helger.commons.lang.IExplicitlyCloneable;
 import com.helger.commons.string.ToStringGenerator;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Param", propOrder = { "title", "paramsSet" })
 @CodingStyleguideUnaware
 @Entity
-public class Param implements IExplicitlyCloneable {
+public class Param {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -91,9 +89,7 @@ public class Param implements IExplicitlyCloneable {
 		Param rhs = (Param) o;
 		if (!EqualsHelper.equals(this.paramsSet, rhs.paramsSet))
 			return false;
-		if (!EqualsHelper.equals(this.title, rhs.title))
-			return false;
-		return true;
+		return EqualsHelper.equals(this.title, rhs.title);
 	}
 
 	public int hashCode() {
@@ -108,13 +104,5 @@ public class Param implements IExplicitlyCloneable {
 	public void cloneTo(@Nonnull Param ret) {
 		ret.paramsSet = (this.paramsSet == null) ? null : this.paramsSet;
 		ret.title = this.title;
-	}
-
-	@Nonnull
-	@ReturnsMutableCopy
-	public Param clone() {
-		Param ret = new Param();
-		cloneTo(ret);
-		return ret;
 	}
 }
