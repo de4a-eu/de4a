@@ -211,7 +211,7 @@ public class Conf implements WebMvcConfigurer {
 		String type = System.getProperties().getProperty("javax.net.ssl.keyStoreType");
 		if (keystore == null || keyStorePassword == null || trustStore == null || trustStorePassword == null
 				|| type == null) {
-			LOG.error("No se ira por SSLContext alguno de los parametros es null");
+			LOG.error("SSL connection will not stablished, some parameters are not setted");
 			return null;
 		}
 		try (FileInputStream fis = new FileInputStream(new File(keystore))) {
@@ -219,6 +219,7 @@ public class Conf implements WebMvcConfigurer {
 			keyStore.load(fis, keyStorePassword.toCharArray());
 
 			return SSLContextBuilder.create().loadKeyMaterial(keyStore, keyStorePassword.toCharArray())
+					.setProtocol("TLSv1.2")
 					.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray()).build();
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
