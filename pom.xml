@@ -301,10 +301,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
-				<configuration>
-			        <destFile>${sonar.coverage.jacoco.xmlReportPaths}</destFile>
-			        <append>true</append>
-			    </configuration>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -312,6 +308,13 @@
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>report</id>
+						<goals>
+							<goal>report-aggregate</goal>
+						</goals>
+						<phase>test</phase>
+					</execution>					
 				</executions>
 			</plugin>
 		</plugins>
