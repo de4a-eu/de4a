@@ -56,12 +56,6 @@
 		<saaj.impl.version>1.5.2</saaj.impl.version>
 		<xmlsec.version>2.2.1</xmlsec.version>
 		<jacoco.version>0.8.6</jacoco.version>
-
-		<!-- Sonar/Jacoco -->
-		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.language>java</sonar.language>
 	</properties>
 
 	<dependencyManagement>
