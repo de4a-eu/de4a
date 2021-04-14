@@ -133,6 +133,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 
 	}
 
+	@Override
 	public void sendMessage(String sender, NodeInfo receiver, String evidenceServiceUri, Element requestUsuario,
 			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
 
@@ -196,6 +197,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 		}
 	}
 
+	@Override
 	public ResponseWrapper processResponseAs4(IncomingEDMResponse responseas4) {
 		LOGGER.debug("Processing AS4 response...");
 		ResponseWrapper responsewrapper = new ResponseWrapper();
