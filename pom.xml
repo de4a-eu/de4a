@@ -300,9 +300,10 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
 				<configuration>
-			        <destFile>${sonar.jacoco.reportPath}</destFile>
-			        <append>false</append>
+			        <destFile>${sonar.coverage.jacoco.xmlReportPaths}</destFile>
+			        <append>true</append>
 			    </configuration>
 				<executions>
 					<execution>
