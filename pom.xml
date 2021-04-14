@@ -259,7 +259,7 @@
 			<dependency>
 				<groupId>eu.de4a</groupId>
 				<artifactId>de4a-iem</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.1.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -301,9 +301,9 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-			        <destFile>${sonar.jacoco.reportPath}</destFile>
-			        <append>false</append>
-			    </configuration>
+			    <destFile>${sonar.jacoco.reportPath}</destFile>
+			    <append>false</append>
+			  </configuration>
 				<executions>
 					<execution>
 						<id>report</id>
