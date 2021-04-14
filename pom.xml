@@ -307,11 +307,10 @@
 			    </configuration>
 				<executions>
 					<execution>
-						<id>report</id>
+						<id>prepare-agent</id>
 						<goals>
-							<goal>report-aggregate</goal>
+							<goal>prepare-agent</goal>
 						</goals>
-						<phase>test</phase>
 					</execution>
 				</executions>
 			</plugin>
