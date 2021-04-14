@@ -259,7 +259,7 @@
 			<dependency>
 				<groupId>eu.de4a</groupId>
 				<artifactId>de4a-iem</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.1.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
