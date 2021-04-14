@@ -71,7 +71,7 @@ public class ResponseManager {
 		}
 	}
 
-	private List<EvaluatorRequestData> saveData(ResponseWrapper response, EvaluatorRequest evaluator) {
+	private List<EvaluatorRequestData> saveData(ResponseWrapper response, EvaluatorRequest evaluatorRequest) {
 		try {
 			logger.debug("Saving data for response with id {}", response.getId());
 			List<EvaluatorRequestData> datas = new ArrayList<>();
@@ -82,10 +82,12 @@ public class ResponseManager {
 				dataresponse.setMimetype(part.getContentType());
 				dataresponse.setIddata(part.getOriginalFilename());
 				datas.add(dataresponse);
+				
+				dataresponse.setRequest(evaluatorRequest);
+				evaluatorRequestDataRepository.save(dataresponse);
 			}
 			for (EvaluatorRequestData d : datas) {
-				d.setRequest(evaluator);
-				evaluatorRequestDataRepository.save(d);
+				
 			}
 			return datas;
 		} catch (IOException io) {
