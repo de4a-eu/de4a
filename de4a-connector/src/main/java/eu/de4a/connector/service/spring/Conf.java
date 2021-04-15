@@ -89,7 +89,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", value = "eu.de4a.connector")
 @EnableWebMvc
-@PropertySource("classpath:application.properties")
+@PropertySource({"classpath:application.properties", "classpath:phase4.properties"})
 @ConfigurationProperties(prefix = "database")
 @EnableAspectJAutoProxy
 @EnableAutoConfiguration
@@ -104,6 +104,17 @@ public class Conf implements WebMvcConfigurer {
 		
 	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
 	private String h2ConsolePort;
+	
+	@Value("${phase4.keystore.path}") 
+	private String keystore;
+	@Value("${phase4.keystore.password}") 
+	private String keyStorePassword;
+	@Value("${phase4.truststore.path}") 
+	private String trustStore;
+	@Value("${phase4.truststore.password}")
+	private String trustStorePassword;
+	@Value("${phase4.keystore.type}") 
+	private String type;
 	
 	
 	@Bean
@@ -190,7 +201,7 @@ public class Conf implements WebMvcConfigurer {
 			factory = sslConnectionSocketFactory();
 			return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
 		} catch (Exception e) {
-			LOG.error("No se puede crear la factorya ssl", e);
+			LOG.error("Unable to create SSL factory", e);
 		}
 		return HttpClientBuilder.create().build();
 
@@ -202,11 +213,6 @@ public class Conf implements WebMvcConfigurer {
 	}
 
 	public SSLContext sslContext() {
-		String keystore = System.getProperties().getProperty("javax.net.ssl.keyStore");
-		String keyStorePassword = System.getProperties().getProperty("javax.net.ssl.keyStorePassword");
-		String trustStore = System.getProperties().getProperty("javax.net.ssl.trustStore");
-		String trustStorePassword = System.getProperties().getProperty("javax.net.ssl.trustStorePassword");
-		String type = System.getProperties().getProperty("javax.net.ssl.keyStoreType");
 		if (keystore == null || keyStorePassword == null || trustStore == null || trustStorePassword == null
 				|| type == null) {
 			LOG.error("SSL connection will not stablished, some parameters are not setted");
