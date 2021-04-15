@@ -13,6 +13,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -23,6 +25,7 @@ import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.de4a.util.FileUtils;
 
+@RunWith(JUnit4.class)
 public class TestFileUtils {
 	private static final String BASE_PATH = "src/test/resources/";
 
@@ -42,7 +45,7 @@ public class TestFileUtils {
 			List<File> files = new ArrayList<>(1);
 			File tempdir = Files.createTempDirectory("de4a-temp").toFile();
 			files.add(FileUtils.convert(mpFile, tempdir));
-			byte[] encodedFile = FileUtils.empaquetarZip(tempdir);
+			byte[] encodedFile = FileUtils.packageZip(tempdir);
 			assertNotNull(encodedFile);
 		} catch (ParserConfigurationException | SAXException | IOException | MessageException e) {
 			e.printStackTrace();
