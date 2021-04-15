@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -108,7 +109,7 @@ public class DOMUtils {
 				Result result = new StreamResult(writer);
 				DOMSource source = new DOMSource(document);
 				transformer.transform(source, result);
-				return writer.getBuffer().toString().getBytes();
+				return writer.getBuffer().toString().getBytes(StandardCharsets.UTF_8);
 			}
 		} catch (TransformerFactoryConfigurationError | TransformerException e) {
 			String err = "Error convert bytes from DOM";
@@ -240,11 +241,10 @@ public class DOMUtils {
 				input = docStr.getBytes();
 			}
 			ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-			GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream);
-			outputStream.write(input, 0, input.length);
-			outputStream.close();
-			outputStream.flush();
-			return Base64.encodeBase64(arrayOutputStream.toByteArray());
+			try (GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream)) {
+				outputStream.write(input, 0, input.length);
+				return Base64.encodeBase64(arrayOutputStream.toByteArray());
+			}
 		} catch (Exception e) {
 			logger.error("Error encoding compressed", e);
 			return new byte[0];
@@ -252,9 +252,8 @@ public class DOMUtils {
 	}
 
 	public static Document decodeCompressed(byte[] data) {
-		try {
-			byte[] decoded = Base64.decodeBase64(data);
-			GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decoded));
+		byte[] decoded = Base64.decodeBase64(data);
+		try (GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decoded))) {
 			byte[] targetArray = IOUtils.toByteArray(gis);
 			return DOMUtils.byteToDocument(targetArray);
 		} catch (Exception | MessageException e) {

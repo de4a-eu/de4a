@@ -25,7 +25,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import eu.de4a.connector.as4.domibus.soap.ClienteWS;
+import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.connector.as4.domibus.soap.DomibusException;
 import eu.de4a.connector.as4.domibus.soap.MessageFactory;
 import eu.de4a.connector.as4.domibus.soap.ResponseAndHeader;
@@ -52,27 +52,30 @@ import eu.toop.connector.api.rest.TCPayload;
 public class DomibusGatewayClient implements As4GatewayInterface {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DomibusGatewayClient.class);
 	@Autowired
-	private ClienteWS clienteWS;
+	private DomibusClientWS domibusClientWS;
 	@Autowired
 	private OwnerMessageEventPublisher publisher;
 	@Autowired
 	private DomibusRequestRepository domibusRequestRepository;
+	
 	@Value("${as4.gateway.implementation.bean}")
 	private String nameAs4Gateway;
+	@Value("#{'${domibus.endpoint.jvm:${domibus.endpoint:}}'}")
+	private String domibusEndpoint;
 
 	@Scheduled(fixedRate = 1000)
 	public void lookUpPendingMessage() {
 		if (nameAs4Gateway.equalsIgnoreCase(DomibusGatewayClient.class.getSimpleName())) {
 			// Prepared for future configuration of dynamic as4 in database. In future no
 			// properties
-			ListPendingMessagesResponse messagesPendingList = clienteWS.getPendindMessages();
+			ListPendingMessagesResponse messagesPendingList = domibusClientWS.getPendindMessages(domibusEndpoint);
 			messagesPendingList.getMessageID().forEach(id -> {
 				DomibusRequest req = domibusRequestRepository.findById(id).orElse(null);
 				if (req == null) {
 					req = new DomibusRequest();
 					req.setIdrequest(id);
 					domibusRequestRepository.save(req);
-					ResponseAndHeader response = clienteWS.getMessageWithHeader(id);
+					ResponseAndHeader response = domibusClientWS.getMessageWithHeader(id, domibusEndpoint);
 					LargePayloadType payload = null;
 					if (response != null && response.getInfo() != null) {
 						RetrieveMessageResponse message = response.getMessage();
@@ -133,10 +136,11 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 
 	}
 
+	@Override
 	public void sendMessage(String sender, NodeInfo receiver, String evidenceServiceUri, Element requestUsuario,
 			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
 
-		List<PartInfo> attacheds = new ArrayList<PartInfo>();
+		List<PartInfo> attacheds = new ArrayList<>();
 		PartInfo partInfo = new PartInfo();
 		PartInfo partInfo2 = new PartInfo();
 		String idmessageattached = "cid:message";
@@ -156,7 +160,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 		String requestId = "";
 		Messaging messageHeader = MessageFactory.makeMessage(sender, receiver.getParticipantIdentifier(), requestId,
 				evidenceServiceUri, attacheds);
-		List<LargePayloadType> bodies = new ArrayList<LargePayloadType>();
+		List<LargePayloadType> bodies = new ArrayList<>();
 		LargePayloadType payload = new LargePayloadType();
 		payload.setContentType(MediaType.APPLICATION_XML_VALUE);
 		payload.setPayloadId(idmessageattached);
@@ -189,13 +193,14 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 			LOGGER.error("body id {}", b.getPayloadId());
 		});
 		try {
-			clienteWS.submitMessage(messageHeader, bodies);
+			domibusClientWS.submitMessage(messageHeader, bodies, domibusEndpoint);
 		} catch (DomibusException e) {
 			LOGGER.error("Error submitting as4 to Domibus gateway", e);
 			throw new MEOutgoingException(e.getMessage(), e);
 		}
 	}
 
+	@Override
 	public ResponseWrapper processResponseAs4(IncomingEDMResponse responseas4) {
 		LOGGER.debug("Processing AS4 response...");
 		ResponseWrapper responsewrapper = new ResponseWrapper();
