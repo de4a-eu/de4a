@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import eu.de4a.connector.as4.domibus.soap.ClienteWS;
+import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.connector.as4.domibus.soap.DomibusException;
 import eu.de4a.connector.as4.domibus.soap.MessageFactory;
 import eu.de4a.connector.as4.domibus.soap.ResponseAndHeader;
@@ -43,7 +43,7 @@ import eu.de4a.connector.service.spring.Conf;
 @RunWith(SpringRunner.class)
 public class TestClientDomibus {
 	@Autowired
-	private ClienteWS clienteWS;
+	private DomibusClientWS clienteWS;
 
 	// @Test
 	public void getMessageID()
