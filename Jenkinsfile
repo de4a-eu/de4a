@@ -47,18 +47,24 @@ pipeline {
             steps {
                 script{
                     def img
-                    if (env.BRANCH_NAME == 'developer') {
+                    if (env.BRANCH_NAME == 'main') {
                         dir('de4a-idk') {
-                            img = docker.build('de4a/mock-idk','--build-arg VERSION=$VERSION .')
+                            img = docker.build('de4a/mock-idk','.')
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
                                 img.push('$VERSION')
                             }
                         }
+                        dir('de4a-connector') {
+                            img = docker.build('de4a/connector','.')
+                            docker.withRegistry('','docker-hub-token') {
+                                img.push('latest')
+                                img.push('$VERSION')
+                            }
+
                     }
                 }
 	    }
-
 	}
     }
     post {
