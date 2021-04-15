@@ -23,7 +23,8 @@ import eu.idk.service.RequestManager;
 public class IdkApiController implements IdkApi {
 
 	private static final Logger log = LoggerFactory.getLogger(IdkApiController.class);
-	private static final String REQUEST_LOG = "Processing request with: {}, {}";
+	private static final String REQUEST_LOG_PARAM = "Processing request with: {}";
+	private static final String REQUEST_LOG_PARAMS = "Processing request with: {}, {}";
 	private static final String JSON_ERROR = "There was an error on JSON conversion";
 
 	@Autowired
@@ -38,60 +39,60 @@ public class IdkApiController implements IdkApi {
 	@Override
 	public ResponseEntity<String> ialCanonicalEvidenceTypeIdCountryCodeGet(String canonicalEvidenceTypeId,
 			String countryCode) {
-		log.debug(REQUEST_LOG, canonicalEvidenceTypeId, countryCode);
+		log.debug(REQUEST_LOG_PARAMS, canonicalEvidenceTypeId, countryCode);
 		AvailableSourcesType availableSources = new AvailableSourcesType();
 		String jsonResponse = null;
 		List<Source> sources = sourceRepository.findByCanonicalEvidenceTypeIdAndCountryCode(canonicalEvidenceTypeId, countryCode);
 		if (sources != null) {
 			manager.extractSourceInfo(sources, availableSources, null);
 		} else {
-			new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			jsonResponse = mapper.writeValueAsString(availableSources);
 		} catch (JsonProcessingException e) {
-			new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(jsonResponse, HttpStatus.ACCEPTED);
 	}
 
 	@Override
 	public ResponseEntity<String> ialCanonicalEvidenceTypeIdGet(String canonicalEvidenceTypeId) {
-		log.debug(REQUEST_LOG, canonicalEvidenceTypeId);
+		log.debug(REQUEST_LOG_PARAM, canonicalEvidenceTypeId);
 		AvailableSourcesType availableSources = new AvailableSourcesType();
 		String jsonResponse = null;
 		List<Source> sources = sourceRepository.findByCanonicalEvidenceTypeId(canonicalEvidenceTypeId);
 		if (sources != null) {
 			manager.extractSourceInfo(sources, availableSources, null);
 		} else {
-			new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			jsonResponse = mapper.writeValueAsString(availableSources);
 		} catch (JsonProcessingException e) {
-			new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(jsonResponse, HttpStatus.ACCEPTED);
 	}
 
 	@Override
 	public ResponseEntity<String> provisionGet(String canonicalEvidenceTypeId, String dataOwnerId) {
-		log.debug(REQUEST_LOG, canonicalEvidenceTypeId, dataOwnerId);
+		log.debug(REQUEST_LOG_PARAMS, canonicalEvidenceTypeId, dataOwnerId);
 		AvailableSourcesType availableSources = new AvailableSourcesType();
 		String jsonResponse = null;
 		List<Source> sources = sourceRepository.findByCanonicalEvidenceTypeId(canonicalEvidenceTypeId);
 		if (sources != null) {
 			manager.extractSourceInfo(sources, availableSources, dataOwnerId);
 		} else {
-			new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			jsonResponse = mapper.writeValueAsString(availableSources);
 		} catch (JsonProcessingException e) {
-			new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(JSON_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(jsonResponse, HttpStatus.ACCEPTED);
 	}
