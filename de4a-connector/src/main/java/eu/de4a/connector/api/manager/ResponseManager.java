@@ -86,9 +86,6 @@ public class ResponseManager {
 				dataresponse.setRequest(evaluatorRequest);
 				evaluatorRequestDataRepository.save(dataresponse);
 			}
-			for (EvaluatorRequestData d : datas) {
-				
-			}
 			return datas;
 		} catch (IOException io) {
 			logger.error("Error saving evidence data", io);
