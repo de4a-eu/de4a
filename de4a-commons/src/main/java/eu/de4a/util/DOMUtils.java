@@ -243,8 +243,8 @@ public class DOMUtils {
 			ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
 			try (GZIPOutputStream outputStream = new GZIPOutputStream(arrayOutputStream)) {
 				outputStream.write(input, 0, input.length);
-				return Base64.encodeBase64(arrayOutputStream.toByteArray());
 			}
+			return Base64.encodeBase64(arrayOutputStream.toByteArray());
 		} catch (Exception e) {
 			logger.error("Error encoding compressed", e);
 			return new byte[0];
