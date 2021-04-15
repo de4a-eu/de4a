@@ -61,7 +61,7 @@ pipeline {
                                 img.push('latest')
                                 img.push('$VERSION')
                             }
-
+			}
                     }
                 }
 	    }
