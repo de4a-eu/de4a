@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="info" strict="true">
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<!-- Location may be an issue when async logging is used! -->
+			<PatternLayout
+				pattern="[IDK][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
+		</Console>
+		<File name="File" fileName="${sys:catalina.base}/logs/idk.log">
+			<PatternLayout>
+				<pattern>%d %p %C{1.} [%t] %m%n</pattern>
+			</PatternLayout>
+		</File>
+	</Appenders>
+
+
+	<Loggers>
+		<Logger name="org.apache.http" level="DEBUG" additivity="false">
+			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="File" />
+		</Logger>
+
+		<Logger name="eu" level="DEBUG" additivity="false">
+			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="File" />
+		</Logger>
+		<Logger name="com.helger.xservlet.requesttrack" level="INFO"
+			additivity="false">
+			<Appender-ref ref="STDOUT" level="INFO" />
+		</Logger>
+		<Root level="ERROR">
+			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="File" />
+		</Root>
+	</Loggers>
+</Configuration>
