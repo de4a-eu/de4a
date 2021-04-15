@@ -45,7 +45,7 @@ public class FileUtils {
 		return new CommonsMultipartFile(item);
 	}
 	
-	public static byte[] empaquetarZip(File tempDir) throws IOException {
+	public static byte[] packageZip(File tempDir) throws IOException {
 		String fileSeparator = System.getProperty("file.separator");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(baos);

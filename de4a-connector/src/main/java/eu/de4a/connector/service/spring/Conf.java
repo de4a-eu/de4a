@@ -71,8 +71,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import eu.de4a.config.DataSourceConf;
-import eu.de4a.connector.as4.domibus.soap.ClienteWS;
-import eu.de4a.connector.as4.domibus.soap.ClienteWSAuthenticator;
+import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
@@ -149,8 +148,8 @@ public class Conf implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public ClienteWS clienteWS() {
-		ClienteWS cliente = new ClienteWS(messageFactory());
+	public DomibusClientWS clienteWS() {
+		DomibusClientWS cliente = new DomibusClientWS(messageFactory());
 		cliente.setMessageSender(httpComponentsMessageSender());
 		cliente.setMarshaller(marshallerDomibus());
 		cliente.setUnmarshaller(marshallerDomibus());
@@ -166,7 +165,6 @@ public class Conf implements WebMvcConfigurer {
 		HttpComponentsMessageSender httpComponentsMessageSender = new HttpComponentsMessageSender();
 		try {
 			httpComponentsMessageSender.setHttpClient(httpClient());
-			httpComponentsMessageSender.setCredentials(clienteWSAuthenticator().getAuth());
 		} catch (Exception e) {
 			LOG.error("Error creating http sender", e);
 		}
@@ -234,11 +232,6 @@ public class Conf implements WebMvcConfigurer {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath("eu.de4a.connector.as4.domibus.soap.auto");
 		return marshaller;
-	}
-
-	@Bean
-	public ClienteWSAuthenticator clienteWSAuthenticator() {
-		return new ClienteWSAuthenticator();
 	}
 
 	@Override
