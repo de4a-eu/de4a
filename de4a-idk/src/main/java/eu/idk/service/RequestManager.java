@@ -34,7 +34,9 @@ public class RequestManager {
 			provisionsItem.setProvisionItem(new ArrayList<>());
 			extractProvisionItems(source, provisionsItem, dataOwnerId);
 			sourceType.setProvisionItems(provisionsItem);
-			availableSources.addSource(sourceType);
+			if(!provisionsItem.getProvisionItem().isEmpty()) {
+				availableSources.addSource(sourceType);
+			}
 		});
 	}
 
