@@ -1,16 +1,17 @@
 pipeline {
     agent none
+
     stages {
         stage('Test') {
             when {
                 anyOf {
-                    branch 'master'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
+                    branch 'developer-tmp'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
                 }
             }
             agent {
                 docker {
                     image 'maven:3-adoptopenjdk-11'
-                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
+                        args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                 }
             }
             steps {
@@ -25,7 +26,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-adoptopenjdk-11'
-                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
+                        args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                 }
             }
             steps {
@@ -36,13 +37,13 @@ pipeline {
             // TODO: add building a release on a tag and push to GitHub?
         }
 
-	stage('Docker'){
-	    when {
-		branch 'master'
-	    }
-	    agent { label 'master' }
+        stage('Docker'){
+            when {
+                branch 'master'
+            }
+            agent { label 'master' }
             environment {
-                VERSION=readMavenPom().getVersion().replace("-SNAPSHOT","")
+                VERSION=readMavenPom().getVersion()
             }
             steps {
                 script{
@@ -61,11 +62,11 @@ pipeline {
                                 img.push('latest')
                                 img.push('$VERSION')
                             }
-			}
+                        }
                     }
                 }
-	    }
-	}
+            }
+        }
     }
     post {
         failure {
@@ -82,8 +83,7 @@ pipeline {
         success {
             node('master') {
                 script {
-                    if(currentBuild.getPreviousBuild() &&
-                       currentBuild.getPreviousBuild().getResult().toString() != 'SUCCESS') {
+                    if(currentBuild.getPreviousBuild() && currentBuild.getPreviousBuild().getResult().toString() != 'SUCCESS') {
                         slackSend color: "good", message: ":baby-yoda: This is the way! :baby-yoda: \nJob name: ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}\nGit Author: ${env.CHANGE_AUTHOR}, Branch: ${env.GIT_BRANCH}, ${env.GIT_URL}\n"
                     }
                 }

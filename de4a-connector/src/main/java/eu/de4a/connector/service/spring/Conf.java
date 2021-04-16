@@ -105,15 +105,18 @@ public class Conf implements WebMvcConfigurer {
 	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
 	private String h2ConsolePort;
 	
-	@Value("${phase4.keystore.path}") 
+	@Value("${ssl.context.enabled}")
+	private String sslContextEnabled;
+	
+	@Value("${ssl.keystore.path}") 
 	private String keystore;
-	@Value("${phase4.keystore.password}") 
+	@Value("${ssl.keystore.password}") 
 	private String keyStorePassword;
-	@Value("${phase4.truststore.path}") 
+	@Value("${ssl.truststore.path}") 
 	private String trustStore;
-	@Value("${phase4.truststore.password}")
+	@Value("${ssl.truststore.password}")
 	private String trustStorePassword;
-	@Value("${phase4.keystore.type}") 
+	@Value("${ssl.keystore.type}") 
 	private String type;
 	
 	
@@ -195,11 +198,15 @@ public class Conf implements WebMvcConfigurer {
 		return new RestTemplate(httpComponentsClientHttpRequestFactory);
 	}
 
-	public HttpClient httpClient() {
-		SSLConnectionSocketFactory factory;
-		try {
-			factory = sslConnectionSocketFactory();
-			return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
+	public HttpClient httpClient() {		
+		try {			
+			LOG.debug("SSL context setted to: {}", sslContextEnabled);
+			if(Boolean.TRUE.toString().equals(sslContextEnabled)) {
+				SSLConnectionSocketFactory factory = sslConnectionSocketFactory();
+				return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
+			} else {
+				return HttpClientBuilder.create().build();
+			}
 		} catch (Exception e) {
 			LOG.error("Unable to create SSL factory", e);
 		}
