@@ -20,6 +20,10 @@
 		</license>
 	</licenses>
 	<properties>
+		<!-- Project encoding -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        
 		<maven.compiler.release>11</maven.compiler.release>
 		<commons.io.version>2.6</commons.io.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
@@ -286,6 +290,14 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<source>8</source>
@@ -296,9 +308,9 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
 				<configuration>
-			        <destFile>${sonar.coverage.jacoco.xmlReportPaths}</destFile>
-			        <append>true</append>
-			    </configuration>
+					<destFile>${sonar.coverage.jacoco.xmlReportPaths}</destFile>
+					<append>true</append>
+				</configuration>
 				<executions>
 					<execution>
 						<id>report</id>
