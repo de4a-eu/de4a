@@ -1,7 +1,7 @@
 FROM tomcat:9-jdk11
 
-ARG VERSION="0.1.0"
-ARG WAR_NAME=idk-${VERSION}-SNAPSHOT.war
+ARG VERSION="0.1.0-SNAPSHOT"
+ARG WAR_NAME=idk-${VERSION}.war
 
 #create tc webapp folder
 WORKDIR $CATALINA_HOME/webapps

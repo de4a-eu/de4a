@@ -20,7 +20,7 @@ pipeline {
 
         stage('Build'){
             when {
-                branch 'main'
+                branch 'master'
             }
             agent {
                 docker {
@@ -38,16 +38,16 @@ pipeline {
 
 	stage('Docker'){
 	    when {
-		branch 'main'
+		branch 'master'
 	    }
 	    agent { label 'master' }
             environment {
-                VERSION=readMavenPom().getVersion().replace("-SNAPSHOT","")
+                VERSION=readMavenPom().getVersion()
             }
             steps {
                 script{
                     def img
-                    if (env.BRANCH_NAME == 'main') {
+                    if (env.BRANCH_NAME == 'master') {
                         dir('de4a-idk') {
                             img = docker.build('de4a/mock-idk','.')
                             docker.withRegistry('','docker-hub-token') {
