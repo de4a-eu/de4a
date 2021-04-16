@@ -23,7 +23,7 @@
 		<!-- Project encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
+
 		<maven.compiler.release>11</maven.compiler.release>
 		<commons.io.version>2.6</commons.io.version>
 		<commons.fileupload.version>1.4</commons.fileupload.version>
@@ -280,6 +280,20 @@
 
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>org.ec4j.maven</groupId>
+                <artifactId>editorconfig-maven-plugin</artifactId>
+                <version>0.1.1</version>
+                <executions>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -324,7 +338,7 @@
 							<goal>report-aggregate</goal>
 						</goals>
 						<phase>test</phase>
-					</execution>					
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
