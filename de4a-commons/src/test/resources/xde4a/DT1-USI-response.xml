@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <p:ResponseTransferEvidence xmlns:cct="urn:un:unece:uncefact:data:specification:CoreComponentTypeSchemaModule:2" xmlns:clmIANAMIMEMediaType="urn:un:unece:uncefact:codelist:specification:IANAMIMEMediaType:2003" xmlns:isoc="http://www.de4a.eu/2020/commons/country/iso3166-1" xmlns:p="http://www.de4a.eu/2020/data/transferor/pattern/usi" xmlns:p1="http://www.de4a.eu/2020/commons/type" xmlns:p2="http://www.de4a.eu/2020/commons/identity/type" xmlns:p3="http://eidas.europa.eu/attributes/naturalperson" xmlns:p4="http://eidas.europa.eu/attributes/legalperson" xmlns:p5="https://data.europe.eu/semanticassets/ns/cv/common/cbc_v2.0.0#" xmlns:p6="https://data.europe.eu/semanticassets/ns/cv/common/dataTypes-2.0.0#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.de4a.eu/2020/data/transferor/pattern/usi ../XSD/DT1-USI.xsd ">
-  <p1:Ack>OK</p1:Ack>
-  <p1:ErrorList>
-    <p1:Error>
-      <p1:Code>p1:Code</p1:Code>
-      <p1:Text>p1:Text</p1:Text>
-    </p1:Error>
-  </p1:ErrorList>
+    <p1:Ack>OK</p1:Ack>
+    <p1:ErrorList>
+        <p1:Error>
+            <p1:Code>p1:Code</p1:Code>
+            <p1:Text>p1:Text</p1:Text>
+        </p1:Error>
+    </p1:ErrorList>
 </p:ResponseTransferEvidence>

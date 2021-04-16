@@ -21,13 +21,13 @@ public interface ResponseApi {
 	consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "request", required = true,
-		    dataType = "eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType", 
+		    dataType = "eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType",
 		    paramType = "body")
 	})
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "OK", 
+			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
 	public @ResponseBody String requestForwardEvidence(@RequestBody @ApiParam(hidden = true) String requestForward);
-	
+
 }

@@ -3,7 +3,7 @@ package eu.de4a.conn.owner.model;
 public class PreviewRequest {
 	private String idRequest;
 	private String returnUrl;
-	
+
 	public String getIdRequest() {
 		return idRequest;
 	}
@@ -16,6 +16,6 @@ public class PreviewRequest {
 	public void setReturnUrl(String returnUrl) {
 		this.returnUrl = returnUrl;
 	}
-	
-	
+
+
 }

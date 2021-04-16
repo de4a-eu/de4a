@@ -99,27 +99,27 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class Conf implements WebMvcConfigurer {
 	private static final Logger LOG = LoggerFactory.getLogger(Conf.class);
-	
+
 	private DataSourceConf dataSourceConf = new DataSourceConf();
-		
+
 	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
 	private String h2ConsolePort;
-	
+
 	@Value("${ssl.context.enabled}")
 	private String sslContextEnabled;
-	
-	@Value("${ssl.keystore.path}") 
+
+	@Value("${ssl.keystore.path}")
 	private String keystore;
-	@Value("${ssl.keystore.password}") 
+	@Value("${ssl.keystore.password}")
 	private String keyStorePassword;
-	@Value("${ssl.truststore.path}") 
+	@Value("${ssl.truststore.path}")
 	private String trustStore;
 	@Value("${ssl.truststore.password}")
 	private String trustStorePassword;
-	@Value("${ssl.keystore.type}") 
+	@Value("${ssl.keystore.type}")
 	private String type;
-	
-	
+
+
 	@Bean
 	public Docket api() {
 		TypeResolver typeResolver = new TypeResolver();
@@ -127,7 +127,7 @@ public class Conf implements WebMvcConfigurer {
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("eu"))
 				.paths(PathSelectors.any()).build()
-				.additionalModels(typeResolver.resolve(RequestTransferEvidenceUSIIMDRType.class), 
+				.additionalModels(typeResolver.resolve(RequestTransferEvidenceUSIIMDRType.class),
 						typeResolver.resolve(ResponseTransferEvidenceType.class),
 						typeResolver.resolve(ResponseErrorType.class),
 						typeResolver.resolve(RequestForwardEvidenceType.class),
@@ -135,7 +135,7 @@ public class Conf implements WebMvcConfigurer {
 						typeResolver.resolve(ResponseLookupRoutingInformationType.class))
 				.apiInfo(apiInfo());
 	}
-	
+
 	private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
             .title("DE4A - Connector")
@@ -146,7 +146,7 @@ public class Conf implements WebMvcConfigurer {
             .license("APACHE2")
             .build();
     }
-	
+
 	@Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.
@@ -154,10 +154,10 @@ public class Conf implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
                 .resourceChain(false);
     }
-	
+
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
-		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers", 
+		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers",
 				"-ifNotExists", "-webDaemon", "-webPort", h2ConsolePort);
 	}
 
@@ -198,8 +198,8 @@ public class Conf implements WebMvcConfigurer {
 		return new RestTemplate(httpComponentsClientHttpRequestFactory);
 	}
 
-	public HttpClient httpClient() {		
-		try {			
+	public HttpClient httpClient() {
+		try {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
 			if(Boolean.TRUE.toString().equals(sslContextEnabled)) {
 				SSLConnectionSocketFactory factory = sslConnectionSocketFactory();
@@ -312,7 +312,7 @@ public class Conf implements WebMvcConfigurer {
 		dataSourceConfig.setJdbcUrl(dataSourceConf.getUrl());
 		dataSourceConfig.setUsername(dataSourceConf.getUsername());
 		dataSourceConfig.setPassword(dataSourceConf.getPassword());
-		
+
 		try {
 			return new HikariDataSource(dataSourceConfig);
 		} catch (Exception e) {
@@ -362,7 +362,7 @@ public class Conf implements WebMvcConfigurer {
 		transactionManager.setEntityManagerFactory(entityManagerFactory);
 		return transactionManager;
 	}
-	
+
 	public DataSourceConf getDataSourceConf() {
 		return dataSourceConf;
 	}

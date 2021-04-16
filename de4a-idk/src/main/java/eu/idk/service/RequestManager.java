@@ -55,7 +55,7 @@ public class RequestManager {
 			}
 		});
 	}
-	
+
 	private void extractProvision(ProvisionType provision, ProvisionItemType provisionItemDst, ProvisionItem provisionItemOrg) {
 		if(provisionItemOrg.getProvision() != null) {
 			provision.setRedirectURL(provisionItemOrg.getProvision().getRedirectURL());

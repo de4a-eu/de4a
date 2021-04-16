@@ -30,7 +30,7 @@ idk/src/main/java/eu/idk/model
 ```
 
 ### INSTALL
-Project is packaged as a WAR to be deployed on an applications server. Run the following command to build it: 
+Project is packaged as a WAR to be deployed on an applications server. Run the following command to build it:
 ```
 mvn clean install
 ```

@@ -22,21 +22,21 @@ import eu.de4a.connector.api.manager.EvidenceRequestorManager;
 import eu.de4a.connector.service.spring.Conf;
 
 @SpringBootTest(classes={Conf.class})
-  
-@RunWith(SpringRunner.class) 
-public class TestRequestor { 
+
+@RunWith(SpringRunner.class)
+public class TestRequestor {
 	@Autowired
 	private EvidenceRequestorManager evidenceRequestorManager;
-	 
+
 	@Test
 	@Ignore("until test are defined and compilant")
-	public void sendTestEvidenceRequest() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException { 
+	public void sendTestEvidenceRequest() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = factory.newDocumentBuilder();
         Document doc = dBuilder.parse(this.getClass().getClassLoader()  .getResourceAsStream( "edm/request.xml"));
 
 
-		
+
 		assertTrue(evidenceRequestorManager.sendRequestMessage("9914:tc-ng-test-sender", "urn:eu:toop:ns:dataexchange-1p40::Response##urn:eu.toop.response.registeredorganization::1.40",
 				 doc.getDocumentElement(), null));
 	}

@@ -23,21 +23,21 @@
     xmlns:query="urn:oasis:names:tc:ebxml-regrep:xsd:query:4.0"
     requestId="c4369c4d-740e-4b64-80f0-7b209a66d629"
     status="urn:oasis:names:tc:ebxml-regrep:ResponseStatusType:Success">
-   
+
     <!-- SPECIFICATION IDENTIFIER -->
     <rim:Slot name="SpecificationIdentifier">
         <rim:SlotValue xsi:type="rim:StringValueType">
             <rim:Value>toop-edm:v2.1</rim:Value>
         </rim:SlotValue>
     </rim:Slot>
-   
+
     <!-- ISSUE DATE / TIME  -->
     <rim:Slot name="IssueDateTime">
         <rim:SlotValue xsi:type="rim:DateTimeValueType">
             <rim:Value>2020-02-14T19:20:30+01:00</rim:Value>
         </rim:SlotValue>
     </rim:Slot>
-    
+
     <!--   Data Provider Metadata  -->
     <rim:Slot name="DataProvider">
         <rim:SlotValue xsi:type="rim:AnyValueType">
@@ -47,10 +47,10 @@
                 xmlns:locn="http://www.w3.org/ns/locn#">
                 <cbc:id schemeID="VAT">12345678</cbc:id>
                 <cbc:name>DPName</cbc:name>
-            </cagv:Agent>  
+            </cagv:Agent>
         </rim:SlotValue>
     </rim:Slot>
-    
+
     <rim:RegistryObjectList>
         <rim:RegistryObject id="341341341-740e-4b64-80f0-3153513529">
             <rim:Slot name="ConceptValues">
@@ -60,7 +60,7 @@
                         <cccev:concept xmlns:cccev = "https://semic.org/sa/cv/cccev-2.0.0#"
                             xmlns:cbc="https://semic.org/sa/cv/common/cbc-2.0.0#"
                             xmlns:toop="http://toop.eu/registered-organization"
-                            xsi:schemaLocation="https://semic.org/sa/cv/cccev-2.0.0# ../../../../xsd/cccev/2.0.0/xml/xsd/cccev-2.0.0.xsd">  
+                            xsi:schemaLocation="https://semic.org/sa/cv/cccev-2.0.0# ../../../../xsd/cccev/2.0.0/xml/xsd/cccev-2.0.0.xsd">
                             <cbc:id>ConceptID-1</cbc:id>
                             <cbc:QName>toop:CompanyData</cbc:QName>
                             <cccev:concept>
@@ -72,7 +72,7 @@
                             </cccev:concept>
                             <cccev:concept>
                                 <cbc:id>ConceptID-3</cbc:id>
-                                    <cbc:QName>toop:Concept-Name-3</cbc:QName>
+                                <cbc:QName>toop:Concept-Name-3</cbc:QName>
                                 <cccev:value>
                                     <cccev:textValue>ConceptID-3 Value</cccev:textValue>
                                 </cccev:value>
@@ -95,10 +95,10 @@
                                 <cbc:id>ConceptID-6</cbc:id>
                                 <cbc:QName>toop:Concept-Name-6</cbc:QName>
                                 <cccev:value>
-                                   <cccev:periodValue>
-                                       <cbc:startDate>2020-01-02</cbc:startDate>
-                                       <cbc:endDate>2022-05-05</cbc:endDate>
-                                   </cccev:periodValue>
+                                    <cccev:periodValue>
+                                        <cbc:startDate>2020-01-02</cbc:startDate>
+                                        <cbc:endDate>2022-05-05</cbc:endDate>
+                                    </cccev:periodValue>
                                 </cccev:value>
                             </cccev:concept>
                             <cccev:concept>

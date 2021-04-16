@@ -12,7 +12,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-adoptopenjdk-11'
-                        args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
+                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                 }
             }
             steps {
@@ -27,7 +27,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-adoptopenjdk-11'
-                        args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
+                    args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                 }
             }
             steps {

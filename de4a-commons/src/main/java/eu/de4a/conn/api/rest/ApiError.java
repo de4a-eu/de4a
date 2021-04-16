@@ -11,16 +11,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.springframework.http.HttpStatus;
 /**
  * Modeling of exceptions due to non-compliance of the REST service API.
- * 
+ *
  * */
 @XmlRootElement(name="ApiError")
-@XmlAccessorType(XmlAccessType.PUBLIC_MEMBER) 
+@XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
 public class ApiError {
 	private HttpStatus status;
-    private String message; 
+    private String message;
     private String code;
     public ApiError() {
-    	
+
     }
     public ApiError(HttpStatus status, String message, String code) {
         super();
@@ -28,7 +28,7 @@ public class ApiError {
         this.message = message;
         this.code = code;
     }
- 
+
 
 	@XmlElement(name = "status", required = true)
 	public HttpStatus getStatus() {
@@ -55,6 +55,6 @@ public class ApiError {
 		this.code = code;
 	}
 
-	 
-    
+
+
 }
