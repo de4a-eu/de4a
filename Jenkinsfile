@@ -4,7 +4,7 @@ pipeline {
         stage('Test') {
             when {
                 anyOf {
-                    branch 'developer-tmp'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
+                    branch 'master'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
                 }
             }
             agent {
@@ -20,7 +20,7 @@ pipeline {
 
         stage('Build'){
             when {
-                branch 'main'
+                branch 'master'
             }
             agent {
                 docker {
@@ -38,7 +38,7 @@ pipeline {
 
 	stage('Docker'){
 	    when {
-		branch 'main'
+		branch 'master'
 	    }
 	    agent { label 'master' }
             environment {
@@ -47,7 +47,7 @@ pipeline {
             steps {
                 script{
                     def img
-                    if (env.BRANCH_NAME == 'main') {
+                    if (env.BRANCH_NAME == 'master') {
                         dir('de4a-idk') {
                             img = docker.build('de4a/mock-idk','.')
                             docker.withRegistry('','docker-hub-token') {
