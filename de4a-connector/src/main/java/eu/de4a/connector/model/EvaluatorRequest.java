@@ -12,7 +12,7 @@ public class EvaluatorRequest {
 	@Id
 	private String idrequest;
 	private String urlreturn;
-	private String idevaluator; 
+	private String idevaluator;
 	private boolean usi;
 	private boolean done;
 	public String getIdrequest() {
@@ -45,6 +45,6 @@ public class EvaluatorRequest {
 	public void setUsi(boolean usi) {
 		this.usi = usi;
 	}
-	 
-	
+
+
 }

@@ -79,7 +79,7 @@ public final class XDE4AMarshallerTest
     // Response
     _testReadWrite (XDE4AMarshaller.deUsiResponseMarshaller (), new File (BASE_PATH + "xde4a/DE1-USI-response.xml"));
   }
-  
+
   @Test
   public void testDE_USI_1 ()
   {

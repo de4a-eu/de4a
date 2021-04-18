@@ -60,7 +60,7 @@ public class ResponseManager {
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
-			List<EvaluatorRequestData> responseData = saveData(response, evaluatorinfo);			
+			List<EvaluatorRequestData> responseData = saveData(response, evaluatorinfo);
 			if (evaluatorinfo.isUsi()) {
 				// Send RequestForwardEvidence to evaluator - USI pattern
 				logger.debug("Pushing data to {}", evaluatorinfo.getUrlreturn());
@@ -82,7 +82,7 @@ public class ResponseManager {
 				dataresponse.setMimetype(part.getContentType());
 				dataresponse.setIddata(part.getOriginalFilename());
 				datas.add(dataresponse);
-				
+
 				dataresponse.setRequest(evaluatorRequest);
 				evaluatorRequestDataRepository.save(dataresponse);
 			}
@@ -92,17 +92,17 @@ public class ResponseManager {
 			return new ArrayList<>();
 		}
 	}
-	
+
 	@Transactional(isolation = Isolation.SERIALIZABLE)
 	public boolean isDone(String id) {
 		entityManager.clear();
-		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);		
+		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);
 		return evaluator != null && evaluator.isDone();
 	}
 
 	public ResponseTransferEvidenceType getResponse(String id) throws MessageException {
 		logger.debug("Processing ResponseTransferEvidence with id {}", id);
-		
+
 		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);
 		EvaluatorRequestData data = new EvaluatorRequestData();
 		data.setRequest(evaluator);
@@ -110,14 +110,14 @@ public class ResponseManager {
 		List<EvaluatorRequestData> filesAttached = evaluatorRequestDataRepository.findAll(example);
 		if(!CollectionUtils.isEmpty(filesAttached)) {
 			Document doc = getDocumentFromAttached(filesAttached, DE4AConstants.TAG_EVIDENCE_RESPONSE);
-			if(doc != null) {			
+			if(doc != null) {
 				return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 						.read(doc);
 			}
 		}
 		throw new MessageException("Not exists a ResponseTransferEvidence for ID:" + id);
 	}
-	
+
 	private Document getDocumentFromAttached(List<EvaluatorRequestData> filesAttached,
 			String tagIdData) {
 		EvaluatorRequestData data = filesAttached.stream().filter(p -> p.getIddata()

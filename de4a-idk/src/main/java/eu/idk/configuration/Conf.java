@@ -28,21 +28,21 @@ import com.zaxxer.hikari.HikariDataSource;
 @ConfigurationProperties(prefix = "database")
 @EnableTransactionManagement
 public class Conf {
-	 
+
 	private DataSourceConf dataSourceConf = new DataSourceConf();
-	
+
 	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
 	private String h2ConsolePort;
-	
+
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
-		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers", 
+		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers",
 				"-ifNotExists", "-webDaemon", "-webPort", h2ConsolePort);
 	}
-	
-	@Bean(destroyMethod = "close")	
-	public DataSource dataSource() {		
-		
+
+	@Bean(destroyMethod = "close")
+	public DataSource dataSource() {
+
 		HikariConfig dataSourceConfig = new HikariConfig();
 		dataSourceConfig.setDriverClassName(dataSourceConf.getDriverClassName());
 		dataSourceConfig.setJdbcUrl(dataSourceConf.getUrl());

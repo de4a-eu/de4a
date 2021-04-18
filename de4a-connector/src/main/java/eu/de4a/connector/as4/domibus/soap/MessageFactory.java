@@ -1,5 +1,5 @@
 package eu.de4a.connector.as4.domibus.soap;
- 
+
 import java.util.List;
 
 import eu.de4a.connector.as4.domibus.soap.auto.CollaborationInfo;
@@ -27,27 +27,27 @@ public class MessageFactory {
 	private static final String MESSAGE_PRO_VALUE_SENDER_DEFAULT="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 	private static final String MESSAGE_PRO_NAME_RECIPIENT="finalRecipient";
 	private static final String MESSAGE_PRO_VALUE_RECIPIENT_DEFAULT="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
-	
+
 	private MessageFactory() {
 		//Empty constructor
 	}
-	
+
 	public static Messaging makeMessage(String domibusMeId,String domibusOtherId,String conversationId,  String evidenceService,List<PartInfo> attacheds) {
-		Messaging messaging = new Messaging(); 
+		Messaging messaging = new Messaging();
 		UserMessage userMessage=new UserMessage();
 		messaging.setUserMessage(userMessage);
-		 
+
     	PartyInfo partyInfo=new PartyInfo();
     	From from = new From();
-    	from.setRole(ROLE_FROM); 
+    	from.setRole(ROLE_FROM);
     	from.setPartyId(getPartyId(domibusMeId));
     	To to = new To();
-    	to.setRole(ROLE_TO); 
+    	to.setRole(ROLE_TO);
     	to.setPartyId(getPartyId(domibusOtherId));
-    	partyInfo.setTo(to); 
+    	partyInfo.setTo(to);
     	partyInfo.setFrom(from);
     	userMessage.setPartyInfo(partyInfo);
-    	
+
     	userMessage.setCollaborationInfo(getCollaborationInfo(conversationId,evidenceService));
     	MessageProperties messagesProperties=new MessageProperties();
     	Property pro1=new Property();
@@ -59,21 +59,21 @@ public class MessageFactory {
     	pro2.setValue(MESSAGE_PRO_VALUE_RECIPIENT_DEFAULT);
     	messagesProperties.getProperty().add(pro2);
     	userMessage.setMessageProperties(messagesProperties);
-    	PayloadInfo payloadInfo=new  PayloadInfo(); 
+    	PayloadInfo payloadInfo=new  PayloadInfo();
     	payloadInfo.getPartInfo().addAll(attacheds);
-    	userMessage.setPayloadInfo(payloadInfo); 
+    	userMessage.setPayloadInfo(payloadInfo);
     	messaging.setUserMessage(userMessage);
 		return messaging;
 	}
 	private static CollaborationInfo getCollaborationInfo(String conversationId,String evidenceService) {
-		CollaborationInfo col=new CollaborationInfo(); 
+		CollaborationInfo col=new CollaborationInfo();
 		Service service=new Service();
 		service.setType(SERVICE_TYPE_DEFAULT);
 		service.setValue(SERVICE_VALUE_DEFAULT);
 		col.setService(service);
 		String action=evidenceService.startsWith(ACTION_VALUE_DEFAULT)?evidenceService:ACTION_VALUE_DEFAULT+evidenceService;
 		col.setAction(action);
-		col.setConversationId(conversationId); 
+		col.setConversationId(conversationId);
 		return col;
 	}
 

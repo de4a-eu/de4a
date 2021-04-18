@@ -10,7 +10,7 @@ public class ResponseAndHeader {
 		this.info=info;
 		this.message=message;
 	}
-	 
+
 	public Messaging getInfo() {
 		return info;
 	}
@@ -25,5 +25,5 @@ public class ResponseAndHeader {
 	public void setMessage(RetrieveMessageResponse message) {
 		this.message = message;
 	}
-	
+
 }

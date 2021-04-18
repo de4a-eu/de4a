@@ -22,14 +22,14 @@ import eu.de4a.util.DOMUtils;
 @Validated
 public class ResponseController implements ResponseApi {
 	private static final Logger logger = LoggerFactory.getLogger(ResponseController.class);
-	
+
 	@Autowired
 	private ApplicationEventMulticaster applicationEventMulticaster;
 	@Autowired
 	private ApplicationContext context;
 
 
-	public String requestForwardEvidence(String requestForward) { 
+	public String requestForwardEvidence(String requestForward) {
 		boolean success;
 		try {
 			Document doc = DOMUtils.stringToDocument(requestForward);
@@ -39,7 +39,7 @@ public class ResponseController implements ResponseApi {
 			responseUSI.setId(id);
 			responseUSI.setMessage(doc.getDocumentElement());
 			applicationEventMulticaster.multicastEvent(responseUSI);
-			
+
 			success = true;
 		} catch (Exception | MessageException e) {
 			logger.error("There was a problem processing owner USI response");

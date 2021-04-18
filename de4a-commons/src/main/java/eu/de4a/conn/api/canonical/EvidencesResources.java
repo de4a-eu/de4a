@@ -29,7 +29,7 @@ public enum EvidencesResources {
 		a.add(this.classPathResource);
 		return a;
 	}
-	
+
 	public static final Class <?> [] aClasses = new Class <?> [] { com.helger.xsds.ccts.cct.schemamodule.ObjectFactory.class,
         com.helger.xsds.xlink.ObjectFactory.class,
         eu.de4a.iem.jaxb.common.idtypes.ObjectFactory.class,

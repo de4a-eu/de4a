@@ -30,15 +30,15 @@ import com.helger.commons.string.ToStringGenerator;
 @CodingStyleguideUnaware
 @Entity
 public class Param {
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_provision", nullable = false)
 	private Provision provision;
-	
+
 	@XmlElement(name = "Title", required = true)
 	@Column
 	private String title;

@@ -1,5 +1,5 @@
 package eu.de4a.connector.mem.phase4.servlet;
- 
+
 
 import java.io.InputStream;
 
@@ -59,21 +59,21 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-@IsSPIImplementation 
-public class AS4MessageProcessorSPICustom implements IAS4ServletMessageProcessorSPI 
+@IsSPIImplementation
+public class AS4MessageProcessorSPICustom implements IAS4ServletMessageProcessorSPI
 {
   private static final long serialVersionUID = 1L;
   public static final String ACTION_FAILURE = "Failure";
   private static final Logger LOGGER = LoggerFactory.getLogger (AS4MessageProcessorSPICustom.class);
 
-  private static IMEIncomingHandler s_aIncomingHandler; 
+  private static IMEIncomingHandler s_aIncomingHandler;
   private transient IncomingAS4PKHandler meHandler;
   public static void setIncomingHandler (@Nonnull final IMEIncomingHandler aIncomingHandler)
   {
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
     ValueEnforcer.isNull (s_aIncomingHandler, "s_aIncomingHandler");
     s_aIncomingHandler = aIncomingHandler;
-    
+
   }
 
   @Nullable

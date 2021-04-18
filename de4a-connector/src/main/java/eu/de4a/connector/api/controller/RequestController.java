@@ -34,12 +34,12 @@ public class RequestController implements RequestApi {
 	private MessageSource messageSource;
 
 	public String lookupRoutingInformation(RequestLookupRoutingInformationType request) {
-		
+
 		ResponseLookupRoutingInformationType response = evidenceRequestorManager.manageRequest(request);
 		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
 		return respMarshaller.formatted().getAsString(response);
 	}
-	
+
 	public String sendRequestUSI(String request) {
 		//String message;
 		RequestTransferEvidenceUSIIMDRType reqObj = DE4AMarshaller.drUsiRequestMarshaller().read(request);
@@ -57,11 +57,11 @@ public class RequestController implements RequestApi {
 		logger.debug("Saving evaluator request - evaluator:{},request:{},urlreturn:{}",
 				reqObj.getDataEvaluator().getAgentNameValue(), reqObj.getRequestId(), reqObj.getDataEvaluator().getRedirectURL());
 		evaluatorRequestRepository.save(entity);
-		
+
 		boolean ok = evidenceRequestorManager.manageRequestUSI(reqObj);
 		return generateResponse(ok);
 	}
-	
+
 	public String sendRequestIM(String request) {
 //		String msgKey, message;
 		ResponseTransferEvidenceType response = null;
@@ -81,7 +81,7 @@ public class RequestController implements RequestApi {
 			entity.setUsi(false);
 			evaluatorRequestRepository.save(entity);
 			logger.debug("Saving evaluator request evaluator:{},request:{},urlreturn:{}",
-					reqObj.getDataEvaluator().getAgentNameValue(), reqObj.getRequestId(), 
+					reqObj.getDataEvaluator().getAgentNameValue(), reqObj.getRequestId(),
 					reqObj.getDataEvaluator().getRedirectURL());
 			response = evidenceRequestorManager.manageRequestIM(reqObj);
 
@@ -92,14 +92,14 @@ public class RequestController implements RequestApi {
 
 	private String generateResponse(boolean success) {
 		ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(success);
-		
+
 		if(!success) {
 			String msgKey = "error.rest.usi.err";
 			String message = messageSource.getMessage(msgKey, null, LocaleContextHolder.getLocale());
 			ErrorListType errorList = new ErrorListType();
 			errorList.getError().add(DE4AResponseDocumentHelper.createError("501", message));
 			response.setErrorList(errorList);
-		}		
+		}
 		return DE4AMarshaller.drUsiResponseMarshaller().getAsString(response);
 	}
 }

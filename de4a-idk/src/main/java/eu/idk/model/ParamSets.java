@@ -23,19 +23,19 @@ import com.helger.commons.string.ToStringGenerator;
 @CodingStyleguideUnaware
 @Entity
 public class ParamSets {
-	
+
 	@Id
 	private Long id;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_param", nullable = false)
 	private Param param;
-	
+
 	@XmlElement(name = "paramValue", required = true)
 	@Column
 	private String paramValue;
 
-	
+
 	public Long getId() {
 		return id;
 	}

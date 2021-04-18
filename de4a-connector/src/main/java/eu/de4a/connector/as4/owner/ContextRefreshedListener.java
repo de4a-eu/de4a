@@ -13,36 +13,36 @@ import org.springframework.stereotype.Component;
 import eu.de4a.connector.api.manager.EvidenceTransferorManager;
 
 /**
- * Asynchronous listener from spring events for manage requests 
+ * Asynchronous listener from spring events for manage requests
  * to external monitored service
- * 
+ *
  */
 @Component
 public class ContextRefreshedListener implements ApplicationListener<ContextRefreshedEvent> {
-	
+
 	private static final Log LOG = LogFactory.getLog(ContextRefreshedListener.class);
 	@Autowired
 	private EvidenceTransferorManager evidenceTransferorManager;
-	
-	enum EventMessages {		
+
+	enum EventMessages {
 		MESSAGE_OWNER("MessageOwner"), MESSAGE_RESPONSE_OWNER("MessageResponseOwner"), CONTEXT_REFRESHED_EVENT("ContextRefreshedEvent");
 		private String name;
 		private static Map<String, EventMessages> lookup = new HashMap<>();
-		
+
 		static {
 			for (EventMessages obj : EventMessages.values()) {
 	            lookup.put(obj.getName(), obj);
 	        }
 		}
-		
+
 		EventMessages(String messageName) {
 			name = messageName;
 		}
-		
+
 		public String getName() {
 			return name;
 		}
-		
+
 		public static EventMessages fromValue(String v) {
 	        return lookup.get(v);
 	    }

@@ -49,5 +49,5 @@ public class TestDOMUtils {
 		Node node1 = DOMUtils.changeNodo(doc4, "//*[local-name()='test']", "Bye world");
 		assertNotNull(node1);
 	}
-	
+
 }
