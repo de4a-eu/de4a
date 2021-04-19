@@ -13,7 +13,7 @@ public class OwnerLocator {
 	private OwnerAddressesRepository evidenceEntityRepository;
 
 	public OwnerAddresses lookupOwnerAddress(String dataOwnerId) throws MessageException {
-		OwnerAddresses evidence = evidenceEntityRepository.findById(dataOwnerId).orElse(null);
+		OwnerAddresses evidence = evidenceEntityRepository.findById(dataOwnerId.toLowerCase()).orElse(null);
 		if (evidence == null) {
 			throw new MessageException(String.format("Does not exists information for Owner id {}", dataOwnerId));
 		}

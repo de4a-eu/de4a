@@ -9,6 +9,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,9 +22,12 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -201,22 +205,30 @@ public class Conf implements WebMvcConfigurer {
 	public HttpClient httpClient() {
 		try {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
+			SSLConnectionSocketFactory factory;
 			if(Boolean.TRUE.toString().equals(sslContextEnabled)) {
-				SSLConnectionSocketFactory factory = sslConnectionSocketFactory();
-				return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
+				factory = new SSLConnectionSocketFactory(sslContext());
+				
 			} else {
-				return HttpClientBuilder.create().build();
+				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
 			}
+			return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
 		} catch (Exception e) {
 			LOG.error("Unable to create SSL factory", e);
 		}
 		return HttpClientBuilder.create().build();
 
 	}
-
-	public SSLConnectionSocketFactory sslConnectionSocketFactory() {
-		SSLContext context = sslContext();
-		return new SSLConnectionSocketFactory(context);
+	
+	public SSLContext sslContextTrustAll() {
+		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+		try {
+			return SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy)
+				.build();
+		} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+			LOG.error("There was a problem creating sslContextTrustAll", e);
+			return null;
+		}
 	}
 
 	public SSLContext sslContext() {
@@ -234,8 +246,7 @@ public class Conf implements WebMvcConfigurer {
 					.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray()).build();
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
-			String msg = "Cannot load certificate";
-			LOG.error(msg, e);
+			LOG.error("There was a problem creating sslContext", e);
 			return null;
 		}
 	}
