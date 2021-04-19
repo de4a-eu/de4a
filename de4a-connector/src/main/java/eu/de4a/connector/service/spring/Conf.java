@@ -22,7 +22,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -110,7 +109,7 @@ public class Conf implements WebMvcConfigurer {
 	private String h2ConsolePort;
 
 	@Value("${ssl.context.enabled}")
-	private String sslContextEnabled;
+	private boolean sslContextEnabled;
 
 	@Value("${ssl.keystore.path}")
 	private String keystore;
@@ -206,9 +205,8 @@ public class Conf implements WebMvcConfigurer {
 		try {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
 			SSLConnectionSocketFactory factory;
-			if(Boolean.TRUE.toString().equals(sslContextEnabled)) {
-				factory = new SSLConnectionSocketFactory(sslContext());
-				
+			if(Boolean.TRUE.equals(sslContextEnabled)) {
+				factory = new SSLConnectionSocketFactory(sslContext());				
 			} else {
 				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
 			}
@@ -227,7 +225,7 @@ public class Conf implements WebMvcConfigurer {
 				.build();
 		} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
 			LOG.error("There was a problem creating sslContextTrustAll", e);
-			return null;
+			throw new IllegalStateException();
 		}
 	}
 
@@ -235,7 +233,7 @@ public class Conf implements WebMvcConfigurer {
 		if (keystore == null || keyStorePassword == null || trustStore == null || trustStorePassword == null
 				|| type == null) {
 			LOG.error("SSL connection will not stablished, some parameters are not setted");
-			return null;
+			throw new IllegalStateException();
 		}
 		try (FileInputStream fis = new FileInputStream(new File(keystore))) {
 			KeyStore keyStore = KeyStore.getInstance(type.toUpperCase());
@@ -247,7 +245,7 @@ public class Conf implements WebMvcConfigurer {
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
 			LOG.error("There was a problem creating sslContext", e);
-			return null;
+			throw new IllegalStateException();
 		}
 	}
 
