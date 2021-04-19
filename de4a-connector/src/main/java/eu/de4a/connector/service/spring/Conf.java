@@ -205,8 +205,8 @@ public class Conf implements WebMvcConfigurer {
 		try {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
 			SSLConnectionSocketFactory factory;
-			if(Boolean.TRUE.equals(sslContextEnabled)) {
-				factory = new SSLConnectionSocketFactory(sslContext());
+			if(sslContextEnabled) {
+				factory = new SSLConnectionSocketFactory(sslContext());				
 			} else {
 				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
 			}
@@ -225,7 +225,7 @@ public class Conf implements WebMvcConfigurer {
 				.build();
 		} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
 			LOG.error("There was a problem creating sslContextTrustAll", e);
-			throw new IllegalStateException();
+			throw new IllegalStateException("There was a problem creating sslContextTrustAll", e);
 		}
 	}
 
@@ -233,7 +233,7 @@ public class Conf implements WebMvcConfigurer {
 		if (keystore == null || keyStorePassword == null || trustStore == null || trustStorePassword == null
 				|| type == null) {
 			LOG.error("SSL connection will not stablished, some parameters are not setted");
-			throw new IllegalStateException();
+			throw new IllegalStateException("SSL connection will not stablished, some parameters are not setted");
 		}
 		try (FileInputStream fis = new FileInputStream(new File(keystore))) {
 			KeyStore keyStore = KeyStore.getInstance(type.toUpperCase());
@@ -245,7 +245,7 @@ public class Conf implements WebMvcConfigurer {
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
 			LOG.error("There was a problem creating sslContext", e);
-			throw new IllegalStateException();
+			throw new IllegalStateException("There was a problem creating sslContext", e);
 		}
 	}
 
