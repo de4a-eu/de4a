@@ -6,7 +6,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'developer-tmp'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
-					branch 'master'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
+                    branch 'master'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
                 }
             }
             agent {
