@@ -82,7 +82,6 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	public ResponseTransferEvidenceType manageRequestIM(RequestTransferEvidenceUSIIMDRType request) {
 		Document doc = DE4AMarshaller.drImRequestMarshaller().getAsDocument(request);
 		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
-			//TODO assertion is assured by required fields
 			return null;
 		}
 		return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),

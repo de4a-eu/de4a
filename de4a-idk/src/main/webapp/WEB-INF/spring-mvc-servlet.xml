@@ -13,17 +13,17 @@
         http://www.springframework.org/schema/data/jpa
     	http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
-	<mvc:annotation-driven />
+    <mvc:annotation-driven />
 
-	<util:properties id="appProperties" location="classpath:application.properties" /> 
-	<context:component-scan base-package="eu" />
-	<jpa:repositories base-package="eu.idk.presistence" />
+    <util:properties id="appProperties" location="classpath:application.properties" />
+    <context:component-scan base-package="eu" />
+    <jpa:repositories base-package="eu.idk.presistence" />
 
-	<!-- <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"> 
-		<property name="mediaTypes"> <map> <entry key="html" value="text/html"/> 
-		<entry key="json" value="application/json"/> <entry key="xml" value="application/xml"/> 
-		</map> </property> <property name="viewResolvers"> <list> <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver"> 
-		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/> 
-		<property name="prefix" value="/WEB-INF/jsp/"/> <property name="suffix" value=".jsp"/> 
+	<!-- <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="mediaTypes"> <map> <entry key="html" value="text/html"/>
+		<entry key="json" value="application/json"/> <entry key="xml" value="application/xml"/>
+		</map> </property> <property name="viewResolvers"> <list> <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+		<property name="prefix" value="/WEB-INF/jsp/"/> <property name="suffix" value=".jsp"/>
 		</bean> </list> </property> </bean> -->
 </beans>

@@ -57,7 +57,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 	private OwnerMessageEventPublisher publisher;
 	@Autowired
 	private DomibusRequestRepository domibusRequestRepository;
-	
+
 	@Value("${as4.gateway.implementation.bean}")
 	private String nameAs4Gateway;
 	@Value("#{'${domibus.endpoint.jvm:${domibus.endpoint:}}'}")

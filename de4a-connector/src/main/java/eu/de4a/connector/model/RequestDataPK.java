@@ -2,17 +2,17 @@ package eu.de4a.connector.model;
 
 import java.io.Serializable;
 
-public class RequestDataPK implements Serializable{ 
+public class RequestDataPK implements Serializable{
 	private static final long serialVersionUID = 1L;
-	private String idrequest; 
-	private String iddata; 
+	private String idrequest;
+	private String iddata;
 
 	@Override
-	public int hashCode() { 
+	public int hashCode() {
 		return idrequest.hashCode()+iddata.hashCode();
 	}
- 
-	 
+
+
 
 	public String getIddata() {
 		return iddata;
@@ -42,7 +42,7 @@ public class RequestDataPK implements Serializable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RequestDataPK other = (RequestDataPK) obj; 
+		RequestDataPK other = (RequestDataPK) obj;
 		return idrequest.equals(other.getIdrequest()) && iddata.equals(other.getIddata());
 	}
 }
