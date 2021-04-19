@@ -1,6 +1,6 @@
 package eu.de4a.exception;
 
-public class MessageException extends Throwable{ 
+public class MessageException extends Throwable{
 	private static final long serialVersionUID = 1L;
 	private String code;
 	private String message;
@@ -27,5 +27,5 @@ public class MessageException extends Throwable{
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
+
 }

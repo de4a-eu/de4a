@@ -49,7 +49,7 @@
                 xmlns:locn="http://www.w3.org/ns/locn#">
                 <cbc:id schemeID="VAT">12345678</cbc:id>
                 <cbc:name>DPName</cbc:name>
-            </cagv:Agent>  
+            </cagv:Agent>
         </rim:SlotValue>
     </rim:Slot>
 
@@ -87,7 +87,7 @@
                                 <!-- WARNING: edited locn.xsd made fullAddress element optional
                                     AgentHasAddress: Only PostName needed according to EDM model BUT fullAddress is mandatory.-->
                                 <locn:address xmlns:locn="http://www.w3.org/ns/locn#">
-                                    <locn:postName>postname</locn:postName>   
+                                    <locn:postName>postname</locn:postName>
                                 </locn:address>
                             </cagv:location>
                         </creator>
@@ -96,7 +96,7 @@
                         <identifier xmlns="http://purl.org/dc/terms/">DOC-555</identifier>
                         <!-- Release date -->
                         <issued xmlns="http://purl.org/dc/terms/">2019-05-15T10:20:15</issued>
-                        <language xmlns="http://purl.org/dc/terms/">DE</language>                      
+                        <language xmlns="http://purl.org/dc/terms/">DE</language>
                         <modified xmlns="http://purl.org/dc/terms/">2020-05-15T10:20:15</modified>
                         <!-- PeriodofTime is now temporal-->
                         <temporal xmlns="http://purl.org/dc/terms/">
@@ -110,7 +110,7 @@
                                 <title>Name</title>
                                 <identifier>RE238918378</identifier>
                             </relation>
-                        </dcat:qualifiedRelation> 
+                        </dcat:qualifiedRelation>
                     </dcat:Dataset>
                 </rim:SlotValue>
             </rim:Slot>

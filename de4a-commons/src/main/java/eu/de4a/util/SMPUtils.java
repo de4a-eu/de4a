@@ -3,8 +3,8 @@ package eu.de4a.util;
 import java.util.Arrays;
 import java.util.List;
 
-public class SMPUtils {	
-	
+public class SMPUtils {
+
 	SMPUtils() {
 		//empty constructor
 	}
@@ -13,7 +13,7 @@ public class SMPUtils {
 	 * Retrieve SMP uri for passed AgentUrn
 	 * Eg. urn:de4a-eu:provision::9920:ESS2833002E
 	 * Eg. iso6523-actorid-upis::9991:SI990000105
-	 * 
+	 *
 	 * @param smpEndpoint
 	 * @param participantId
 	 * @param canonicalEvidenceTypeId

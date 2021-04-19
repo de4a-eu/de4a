@@ -34,11 +34,11 @@ public class Provision {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
-	
+
 	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_provisionItem", nullable = false)
 	private ProvisionItem provisionItem;
-	
+
 	@XmlElement(name = "provisionType", required = true)
 	@XmlSchemaType(name = "string")
 	@Column
@@ -52,11 +52,11 @@ public class Provision {
 	@XmlElement(name = "Param")
 	@OneToMany(mappedBy = "provision", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<Param> params = null;
-	
+
 	public Provision() {
 		//empty constructor
 	}
-	
+
 	public Provision(Provision prov) {
 		this.id = prov.getId();
 		this.params = prov.getParams();

@@ -41,7 +41,7 @@ import eu.de4a.connector.as4.domibus.soap.auto.SubmitRequest;
 import eu.de4a.connector.as4.domibus.soap.auto.SubmitResponse;
 
 public class DomibusClientWS extends WebServiceGatewaySupport {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(DomibusClientWS.class);
 
 	public DomibusClientWS(AxiomSoapMessageFactory messageFactory) {

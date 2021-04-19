@@ -76,7 +76,7 @@ public class RegRepTransformer {
 			factoryDom.setNamespaceAware(true);
 			DocumentBuilder builder = factoryDom.newDocumentBuilder();
 			Document docFinal = builder.parse(new InputSource(new StringReader(xmlespecificos)));
-			
+
 			return docFinal.getDocumentElement();
 		} catch (Exception e) {
 			String error = "Error building wrapping message";

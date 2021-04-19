@@ -44,12 +44,12 @@ import eu.de4a.connector.service.spring.Conf;
 public class TestClientDomibus {
 	@Autowired
 	private DomibusClientWS clienteWS;
-	
+
 	/**
 	 *  https://eu-domibus-client.redsara.es/domibus/services/backend
 	 *	https://eu-domibus-server.redsara.es/domibus/services/backend
-	 * 
-	 **/	
+	 *
+	 **/
 	private static final String ENDPOINT_SERVER_TEST_DOMIBUS = "https://eu-domibus-server.redsara.es/domibus/services/backend";
 
 	// @Test

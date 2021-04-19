@@ -16,11 +16,11 @@ import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.connector.service.spring.Conf;
 
 @SpringBootTest(classes={Conf.class})
-  
-@RunWith(SpringRunner.class) 
-public class TestSMPClient {	
+
+@RunWith(SpringRunner.class)
+public class TestSMPClient {
 	@Autowired
-	private ConfigurableEnvironment env; 
+	private ConfigurableEnvironment env;
 	@Autowired
 	private Client client;
 	@Test

@@ -14,14 +14,14 @@
     limitations under the License.
 
 -->
-<bindings version="2.1" 
+<bindings version="2.1"
           xmlns="http://java.sun.com/xml/ns/jaxb"
-          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" 
+          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <bindings schemaLocation="../resources/domibus/domibus.wsdl">
     <schemaBindings>
       <package name="eu.de4a.connector.as4.domibus.soap.auto" />
     </schemaBindings>
   </bindings>
-  
+
 </bindings>
