@@ -24,7 +24,7 @@ public class SMPUtils {
 		String participantId = identifierParams.get(1);
 
 		StringBuilder uri;
-		if(smpEndpoint.lastIndexOf("/") == (smpEndpoint.length() -1)) {
+		if(smpEndpoint.endsWith("/")) {
 			uri = new StringBuilder(smpEndpoint);
 		} else {
 			uri = new StringBuilder(smpEndpoint).append("/");
