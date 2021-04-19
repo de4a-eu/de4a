@@ -46,9 +46,9 @@ import eu.de4a.exception.MessageException;
 
 public class DOMUtils {
 	private static final Logger logger = LogManager.getLogger(DOMUtils.class);
-	
+
 	private static final String XML_TRANSFORMER_IMPL = "net.sf.saxon.TransformerFactoryImpl";
-	
+
 	private DOMUtils() {
 		//empty private constructor
 	}
@@ -104,7 +104,7 @@ public class DOMUtils {
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 				transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-	
+
 				StringWriter writer = new StringWriter();
 				Result result = new StreamResult(writer);
 				DOMSource source = new DOMSource(document);
@@ -127,7 +127,7 @@ public class DOMUtils {
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setNamespaceAware(true);
 			DocumentBuilder builder;
-		
+
 			builder = factory.newDocumentBuilder();
 			return builder.parse(new ByteArrayInputStream(documentoXml));
 		} catch (ParserConfigurationException | SAXException | IOException e) {
@@ -150,7 +150,7 @@ public class DOMUtils {
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setNamespaceAware(true);
 			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {			
+		} catch (ParserConfigurationException e) {
 			logger.error(err, e);
 			return null;
 		}
@@ -191,7 +191,7 @@ public class DOMUtils {
 				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 				transformer.transform(xmlInput, xmlOutput);
-				return xmlOutput.getWriter().toString();			
+				return xmlOutput.getWriter().toString();
 			}
 		} catch (Exception e) {
 			logger.error("Error doc -> Formatted string", e);
@@ -216,13 +216,13 @@ public class DOMUtils {
 
 	public static Document stringToDocument(String xml) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		
+
 		try {
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			DocumentBuilder builder;
-		
+
 			factory.setNamespaceAware(true);
 			builder = factory.newDocumentBuilder();
 			return builder.parse(new InputSource(new StringReader(xml)));
@@ -236,7 +236,7 @@ public class DOMUtils {
 	public static byte[] encodeCompressed(Document doc) {
 		try {
 			String docStr = DOMUtils.documentToString(doc);
-			byte[] input = new byte[0];			
+			byte[] input = new byte[0];
 			if(!ObjectUtils.isEmpty(docStr)) {
 				input = docStr.getBytes();
 			}
@@ -261,7 +261,7 @@ public class DOMUtils {
 			return null;
 		}
 	}
-	
+
 	public static Transformer getXXESecureTransformer(String impl) {
 		TransformerFactory factory;
 		factory = TransformerFactory.newInstance(impl, null);

@@ -6,8 +6,8 @@ public class PreviewResponse {
 	private Document requestForward;
 	private String requestId;
 	private String returnUrl;
-	
-	
+
+
 	public Document getResponse() {
 		return requestForward;
 	}

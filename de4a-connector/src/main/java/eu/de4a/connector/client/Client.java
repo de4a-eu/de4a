@@ -57,7 +57,7 @@ public class Client {
 	 * scheme : service :: participantId : EvicendeTypeId</br>
 	 * eg.: iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate
 	 * </p>
-	 * 
+	 *
 	 * @param uri             Url to retrieve service metadata from SMP
 	 * @param isReturnService Determine if the process looked for it is a
 	 *                        response or request

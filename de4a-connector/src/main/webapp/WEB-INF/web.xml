@@ -22,32 +22,32 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          metadata-complete="false">
 
-  <display-name>de4a-connector</display-name>
+    <display-name>de4a-connector</display-name>
 
-   
-  <servlet>
-		<servlet-name>spring-mvc</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup> 
-		<init-param> 
-	        <param-name>throwExceptionIfNoHandlerFound</param-name>
-	        <param-value>true</param-value>
-	    </init-param>
-	</servlet>
- 
-	<servlet-mapping>
-		<servlet-name>spring-mvc</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
- 
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/applicationContext.xml</param-value>
-	</context-param> 
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener> 
-     <listener>
-	    <listener-class>eu.de4a.connector.as4.servlet.TCWebAppListener</listener-class>
-	  </listener>
+
+    <servlet>
+        <servlet-name>spring-mvc</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+        <init-param>
+            <param-name>throwExceptionIfNoHandlerFound</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>spring-mvc</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/applicationContext.xml</param-value>
+    </context-param>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>eu.de4a.connector.as4.servlet.TCWebAppListener</listener-class>
+    </listener>
 </web-app>

@@ -4,13 +4,13 @@ package eu.idk.configuration;
 public class DataSourceConf {
 	private String url;
 	private String driverClassName;
-	
+
 	private String username;
 	private String password;
 	private String initializationMode;
-	
+
 	private JpaHibernate jpaHibernate = new JpaHibernate();
-	
+
 	@SuppressWarnings("unused")
 	public static class JpaHibernate {
 		private String dialectPlatform;
@@ -19,7 +19,7 @@ public class DataSourceConf {
 		private String namingStrategy;
 		private String showSql;
 		private String formatSql;
-		
+
 		public String getDialectPlatform() {
 			return dialectPlatform;
 		}
@@ -56,7 +56,7 @@ public class DataSourceConf {
 		public void setFormatSql(String formatSql) {
 			this.formatSql = formatSql;
 		}
-		
+
 	}
 
 	public String getUrl() {

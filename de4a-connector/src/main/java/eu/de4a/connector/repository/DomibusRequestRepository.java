@@ -6,5 +6,5 @@ import eu.de4a.connector.model.DomibusRequest;
 
 @Repository
 public   interface DomibusRequestRepository extends JpaRepository<DomibusRequest,String> {
-	
+
 }

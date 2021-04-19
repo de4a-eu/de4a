@@ -21,7 +21,7 @@ public class ResponseWrapper {
 	public void setId(String id) {
 		this.id = id;
 	}
-	 
+
 	public Document getResponseDocument() {
 		return responseDocument;
 	}

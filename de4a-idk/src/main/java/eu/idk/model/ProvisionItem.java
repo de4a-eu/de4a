@@ -33,11 +33,11 @@ public class ProvisionItem {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_source", nullable = false)
 	private Source source;
-	
+
 	@XmlElement(name = "AtuCode")
 	@Column
 	private String atuCode;
@@ -59,7 +59,7 @@ public class ProvisionItem {
 	@OneToOne(mappedBy = "provisionItem", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "id_provisionItem", nullable = false)
 	private Provision provision;
-	
+
 
 	public Long getId() {
 		return id;

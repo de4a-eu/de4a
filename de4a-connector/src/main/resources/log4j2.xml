@@ -1,48 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Configuration status="debug" strict="true">
-	<Appenders>
-		<Console name="STDOUT" target="SYSTEM_OUT">
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
 			<!-- Location may be an issue when async logging is used! -->
-			<PatternLayout
+            <PatternLayout
 				pattern="[DE4A CONNECTOR][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
-		</Console>
-		<File name="File"
-			fileName="${sys:catalina.base}\logs\connector.log">
-			<PatternLayout>
-				<pattern>%d %p %C{1.} [%t] %m%n</pattern>
-			</PatternLayout>
-		</File>
-		<RollingFile name="rollingFile"
-			fileName="${sys:catalina.base}\logs\history\connector.log"
-			filePattern="${sys:catalina.base}\logs\history\connector.%d{dd-MMM}.log.gz"
+        </Console>
+        <File name="File"
+			fileName="${sys:catalina.base}/logs/connector.log">
+            <PatternLayout>
+                <pattern>%d %p %C{1.} [%t] %m%n</pattern>
+            </PatternLayout>
+        </File>
+        <RollingFile name="rollingFile"
+			fileName="${sys:catalina.base}/logs/history/connector.log"
+			filePattern="${sys:catalina.base}/logs/history/connector.%d{dd-MMM}.log.gz"
 			ignoreExceptions="false">
-			<PatternLayout>
-				<Pattern>%date{ISO8601} %-5p %m%n</Pattern>
-			</PatternLayout>
-			<Policies>
-				<OnStartupTriggeringPolicy />
-				<SizeBasedTriggeringPolicy size="30 MB" />
-				<TimeBasedTriggeringPolicy />
-			</Policies>
-			<DefaultRolloverStrategy max="5" />
-		</RollingFile>
-	</Appenders>
+            <PatternLayout>
+                <Pattern>%date{ISO8601} %-5p %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="30 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+    </Appenders>
 
 
-	<Loggers>
-		<Logger name="org.apache.http" level="DEBUG" additivity="false">
-			<AppenderRef ref="STDOUT" />
-			<AppenderRef ref="File" />
-		</Logger>
+    <Loggers>
+        <Logger name="org.apache.http" level="DEBUG" additivity="false">
+            <AppenderRef ref="STDOUT" />
+            <AppenderRef ref="File" />
+        </Logger>
 
-		<Logger name="eu" level="DEBUG" additivity="false">
-			<AppenderRef ref="STDOUT" />
-			<AppenderRef ref="File" />
-		</Logger>
-		<Root level="INFO">
-			<AppenderRef ref="STDOUT" />
-			<AppenderRef ref="File" />
-		</Root>
-	</Loggers>
+        <Logger name="eu" level="DEBUG" additivity="false">
+            <AppenderRef ref="STDOUT" />
+            <AppenderRef ref="File" />
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="STDOUT" />
+            <AppenderRef ref="File" />
+        </Root>
+    </Loggers>
 </Configuration>

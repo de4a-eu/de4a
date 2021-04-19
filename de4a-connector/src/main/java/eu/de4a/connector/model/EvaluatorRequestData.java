@@ -10,15 +10,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="evaluator_request_data") 
+@Table(name="evaluator_request_data")
 @IdClass(value = RequestDataPK.class)
 public class EvaluatorRequestData {
 	@Id
 	private String idrequest;
-	@ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL) 
+	@ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
 	private EvaluatorRequest request;
-	@Id 
-	private String iddata; 
+	@Id
+	private String iddata;
 	@Lob
 	@Column(name = "photo", columnDefinition="BLOB")
 	private byte[] data;
@@ -48,5 +48,5 @@ public class EvaluatorRequestData {
 	public void setIddata(String iddata) {
 		this.iddata = iddata;
 	}
-	
+
 }

@@ -1,7 +1,7 @@
 package eu.de4a.exception;
 
 public enum ExceptionMapping {
-  
+
     UNDEFINED("9999","Undefined error");
 
     private final String message;
@@ -19,5 +19,5 @@ public enum ExceptionMapping {
 	public String getCode() {
 		return code;
 	}
- 
+
 }
