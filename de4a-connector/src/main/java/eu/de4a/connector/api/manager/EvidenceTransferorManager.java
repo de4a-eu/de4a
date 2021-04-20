@@ -57,7 +57,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			ownerAddress = ownerLocator.lookupOwnerAddress(request.getEvidenceService());
 
 		} catch (MessageException e) {
-			logger.error("No evidence with name {}", request.getEvidenceService());
+			logger.error("Owner endpoint not found with participantID: {}", request.getEvidenceService());
 			// TODO error handling
 		}
 		RequestorRequest requestorReq = new RequestorRequest();
@@ -133,8 +133,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			payload.setValue(DOMUtils.documentToByte(message.getOwnerDocument()));
 			payload.setMimeType("application/xml");
 			payloads.add(payload);
-			Element requestSillyWrapper = new RegRepTransformer().wrapMessage(message, false);
-			as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestSillyWrapper, payloads, false);
+			Element requestWrapper = new RegRepTransformer().wrapMessage(message, false);
+			as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestWrapper, payloads, false);
 			return true;
 		} catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications", e);
