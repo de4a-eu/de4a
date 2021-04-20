@@ -66,9 +66,6 @@ pipeline {
                         }
                     }
                 }
-            }
-
-            steps {
                 sh 'docker system prune -f'
             }
         }
