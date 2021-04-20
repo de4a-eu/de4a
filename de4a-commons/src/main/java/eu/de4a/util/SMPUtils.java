@@ -24,11 +24,11 @@ public class SMPUtils {
 		String participantId = identifierParams.get(1);
 
 		StringBuilder uri;
-		if(smpEndpoint.lastIndexOf("/") == (smpEndpoint.length() -1)) {
-		    uri = new StringBuilder(smpEndpoint);
-        } else {
-            uri = new StringBuilder(smpEndpoint).append("/");
-        }
+		if(smpEndpoint.endsWith("/")) {
+			uri = new StringBuilder(smpEndpoint);
+		} else {
+			uri = new StringBuilder(smpEndpoint).append("/");
+		}
 		uri.append(participantScheme).append(DE4AConstants.DOUBLE_SEPARATOR).append(participantId)
 				.append(DE4AConstants.SERVICES_PATH)
 				.append(canonicalEvidenceTypeId);
