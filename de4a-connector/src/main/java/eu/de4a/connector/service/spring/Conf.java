@@ -9,6 +9,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,8 +23,10 @@ import javax.sql.DataSource;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,7 +109,7 @@ public class Conf implements WebMvcConfigurer {
 	private String h2ConsolePort;
 
 	@Value("${ssl.context.enabled}")
-	private String sslContextEnabled;
+	private boolean sslContextEnabled;
 
 	@Value("${ssl.keystore.path}")
 	private String keystore;
@@ -201,29 +204,36 @@ public class Conf implements WebMvcConfigurer {
 	public HttpClient httpClient() {
 		try {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
-			if(Boolean.TRUE.toString().equals(sslContextEnabled)) {
-				SSLConnectionSocketFactory factory = sslConnectionSocketFactory();
-				return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
+			SSLConnectionSocketFactory factory;
+			if(sslContextEnabled) {
+				factory = new SSLConnectionSocketFactory(sslContext());				
 			} else {
-				return HttpClientBuilder.create().build();
+				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
 			}
+			return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
 		} catch (Exception e) {
 			LOG.error("Unable to create SSL factory", e);
 		}
 		return HttpClientBuilder.create().build();
 
 	}
-
-	public SSLConnectionSocketFactory sslConnectionSocketFactory() {
-		SSLContext context = sslContext();
-		return new SSLConnectionSocketFactory(context);
+	
+	public SSLContext sslContextTrustAll() {
+		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+		try {
+			return SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy)
+				.build();
+		} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+			LOG.error("There was a problem creating sslContextTrustAll", e);
+			throw new IllegalStateException("There was a problem creating sslContextTrustAll", e);
+		}
 	}
 
 	public SSLContext sslContext() {
 		if (keystore == null || keyStorePassword == null || trustStore == null || trustStorePassword == null
 				|| type == null) {
 			LOG.error("SSL connection will not stablished, some parameters are not setted");
-			return null;
+			throw new IllegalStateException("SSL connection will not stablished, some parameters are not setted");
 		}
 		try (FileInputStream fis = new FileInputStream(new File(keystore))) {
 			KeyStore keyStore = KeyStore.getInstance(type.toUpperCase());
@@ -234,9 +244,8 @@ public class Conf implements WebMvcConfigurer {
 					.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray()).build();
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
-			String msg = "Cannot load certificate";
-			LOG.error(msg, e);
-			return null;
+			LOG.error("There was a problem creating sslContext", e);
+			throw new IllegalStateException("There was a problem creating sslContext", e);
 		}
 	}
 
