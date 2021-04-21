@@ -91,9 +91,7 @@
                             <sources>
                                 <source>${project.basedir}/src/main/resources/xsds/canonicalEvidences/BirthCertificate.xsd</source>
                             </sources>
-                            <removeOldOutput>false</removeOldOutput>
                             <packageName>eu.de4a.conn.api.canonical</packageName>
-                            <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
                             <clearOutputDir>false</clearOutputDir>
                             <noGeneratedHeaderComments>true</noGeneratedHeaderComments>
                         </configuration>
