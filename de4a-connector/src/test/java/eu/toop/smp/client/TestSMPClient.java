@@ -15,8 +15,7 @@ import eu.de4a.connector.client.Client;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.connector.service.spring.Conf;
 
-@SpringBootTest(classes={Conf.class})
-
+@SpringBootTest(classes={Conf.class}, properties = {"smp.endpoint=https://de4a-smp.egovlab.eu/"})
 @RunWith(SpringRunner.class)
 public class TestSMPClient {
 	@Autowired
