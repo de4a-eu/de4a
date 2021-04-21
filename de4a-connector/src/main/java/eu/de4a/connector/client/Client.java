@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -167,8 +170,12 @@ public class Client {
 
 		String urlRequest = endpoint + "/requestForwardEvidence";
 		String request = DOMUtils.documentToString(requestForwardDoc);
-
-		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, request, String.class);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_XML);
+		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, 
+				new HttpEntity<>(request, headers), String.class);
+		
 		ResponseErrorType responseObj = null;
 		if (!ObjectUtils.isEmpty(response.getBody()) && HttpStatus.ACCEPTED.equals(response.getStatusCode())) {
 			responseObj = DE4AMarshaller.deUsiResponseMarshaller().read(String.valueOf(response.getBody()));
@@ -185,16 +192,18 @@ public class Client {
 			logger.debug("Request: {}", evidenceRequest.getRequestId());
 		}
 		String urlRequest = endpoint + (isUsi ? "USI" : "IM");
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_XML);
 
 		try {
 			if (!isUsi) {
 				RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
 						.transformRequestToOwnerIM(evidenceRequest);
 				String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
-				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, reqXML, String.class);
-
-				// Transform ResponseExtractEvidence into ResponseTransferEvidence
-				// TODO move to utils class
+				
+				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, 
+						new HttpEntity<>(reqXML, headers), String.class);
+				
 				ResponseExtractEvidenceType responseExtractEvidenceType = DE4AMarshaller
 						.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 						.read(String.valueOf(response.getBody()));
@@ -202,8 +211,9 @@ public class Client {
 			} else {
 				RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
 						.transformRequestToOwnerUSI(evidenceRequest);
-				String request = DE4AMarshaller.doUsiRequestMarshaller().getAsString(requestExtractEvidence);
-				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, request, String.class);
+				String reqXML = DE4AMarshaller.doUsiRequestMarshaller().getAsString(requestExtractEvidence);
+				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, 
+						new HttpEntity<>(reqXML, headers), String.class);
 				if (ObjectUtils.isEmpty(response.getBody())) {
 					return DE4AResponseDocumentHelper.createResponseError(false);
 				}
