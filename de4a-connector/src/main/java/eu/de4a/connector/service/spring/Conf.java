@@ -206,7 +206,7 @@ public class Conf implements WebMvcConfigurer {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
 			SSLConnectionSocketFactory factory;
 			if(sslContextEnabled) {
-				factory = new SSLConnectionSocketFactory(sslContext());				
+				factory = new SSLConnectionSocketFactory(sslContext());
 			} else {
 				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
 			}
@@ -217,7 +217,7 @@ public class Conf implements WebMvcConfigurer {
 		return HttpClientBuilder.create().build();
 
 	}
-	
+
 	public SSLContext sslContextTrustAll() {
 		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
 		try {
