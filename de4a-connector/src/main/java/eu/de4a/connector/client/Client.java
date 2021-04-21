@@ -1,7 +1,5 @@
 package eu.de4a.connector.client;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
@@ -17,7 +14,6 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ISMLInfo;
 import com.helger.peppol.sml.SMLInfo;
@@ -26,14 +22,11 @@ import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
-import com.helger.peppolid.simple.process.SimpleProcessIdentifier;
 import com.helger.smpclient.bdxr1.BDXRClientReadOnly;
 import com.helger.smpclient.exception.SMPClientException;
 import com.helger.smpclient.url.BDXLURLProvider;
 import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
-import com.helger.xsds.bdxr.smp1.ProcessType;
-import com.helger.xsds.bdxr.smp1.ServiceMetadataType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
 import eu.de4a.connector.model.smp.NodeInfo;
@@ -194,7 +187,7 @@ public class Client {
 			if (!isUsi) {
 				RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
 						.transformRequestToOwnerIM(evidenceRequest);
-				NonBlockingByteArrayInputStream reqXML = DE4AMarshaller.doImRequestMarshaller().getAsInputStream(requestExtractEvidence);
+				String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
 				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, reqXML, String.class);
 
 				// Transform ResponseExtractEvidence into ResponseTransferEvidence

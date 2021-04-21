@@ -5,7 +5,7 @@ package eu.de4a.connector.as4.client;
  * */
 public class RequestWrapper {
 	private String id;
-	private String evidenceServiceUri;
+	private String receiverId;
 	private String returnServiceUri;
 	private String senderId;
 	private Object request;
@@ -21,11 +21,11 @@ public class RequestWrapper {
 	public void setRequest(Object request) {
 		this.request = request;
 	}
-	public String getEvidenceServiceUri() {
-		return evidenceServiceUri;
+	public String getReceiverId() {
+		return receiverId;
 	}
-	public void setEvidenceServiceUri(String evidenceServiceUri) {
-		this.evidenceServiceUri = evidenceServiceUri;
+	public void setReceiverId(String receiverId) {
+		this.receiverId = receiverId;
 	}
 	public String getReturnServiceUri() {
 		return returnServiceUri;
