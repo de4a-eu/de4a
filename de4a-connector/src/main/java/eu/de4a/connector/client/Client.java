@@ -1,6 +1,5 @@
 package eu.de4a.connector.client;
 
-import java.io.InputStream;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -12,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
@@ -21,7 +18,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
-import com.helger.smpclient.bdxr1.marshal.BDXR1MarshallerSignedServiceMetadataType;
+import com.helger.commons.url.URLHelper;
+import com.helger.peppol.sml.ISMLInfo;
+import com.helger.peppol.sml.SMLInfo;
+import com.helger.peppol.smp.ESMPTransportProfile;
+import com.helger.peppolid.IDocumentTypeIdentifier;
+import com.helger.peppolid.IParticipantIdentifier;
+import com.helger.peppolid.IProcessIdentifier;
+import com.helger.peppolid.factory.SimpleIdentifierFactory;
+import com.helger.peppolid.simple.process.SimpleProcessIdentifier;
+import com.helger.smpclient.bdxr1.BDXRClientReadOnly;
+import com.helger.smpclient.exception.SMPClientException;
+import com.helger.smpclient.url.BDXLURLProvider;
+import com.helger.smpclient.url.SMPDNSResolutionException;
+import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.ProcessType;
 import com.helger.xsds.bdxr.smp1.ServiceMetadataType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
@@ -51,7 +61,11 @@ public class Client {
 	private RestTemplate restTemplate;
 	@Value("#{'${idk.endpoint.jvm:${idk.endpoint:}}'}")
 	private String idkEndpoint;
+  @Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
+  private String smpEndpoint;
 	private static final Logger logger = LoggerFactory.getLogger(Client.class);
+
+  private static final ISMLInfo SML_DE4A = new SMLInfo ("de4a", "SMK [DE4A]", "de4a.acc.edelivery.tech.ec.europa.eu.", "https://acc.edelivery.tech.ec.europa.eu/edelivery-sml", true);
 
 	/**
 	 * Obtain service metadata info from SMP by participantId and envidenceTypeId
@@ -60,54 +74,42 @@ public class Client {
 	 * eg.: iso6523-actorid-upis:service::9921:ESS2833002E:BirthCertificate
 	 * </p>
 	 *
-	 * @param uri             Url to retrieve service metadata from SMP
+	 * @param participantId             participant ID
+	 * @param documentTypeId document type ID
 	 * @param isReturnService Determine if the process looked for it is a
 	 *                        response or request
 	 * @return NodeInfo Service metadata
 	 */
-	public NodeInfo getNodeInfo(String uri, boolean isReturnService) {
-		logger.debug("Request SMP {}", uri);
-		final String serviceProc = "request";
-		final String returnServiceProc = "response";
+	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService) {
+		logger.debug("Request SMP {}, {}", participantId, documentTypeId);
 
 		NodeInfo nodeInfo = new NodeInfo();
 		try {
-			String signedServiceMetadataXML = restTemplate.getForObject(uri, String.class);
-			SignedServiceMetadataType signedServiceMetadata = null;
-			if(!ObjectUtils.isEmpty(signedServiceMetadataXML)) {
-				signedServiceMetadata = new BDXR1MarshallerSignedServiceMetadataType(true)
-						.read(signedServiceMetadataXML);
-			} else {
+		  // Requires the form iso6523-actorid-upis::9915:demo
+		  final IParticipantIdentifier aPI = SimpleIdentifierFactory.INSTANCE.parseParticipantIdentifier (participantId);
+      // Requires the form urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration
+		  final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE.parseDocumentTypeIdentifier (documentTypeId);
+		  // Use explicit SMP or use DNS to resolve
+		  final BDXRClientReadOnly aSMPClient = smpEndpoint == null ? new BDXRClientReadOnly (BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
+		                                                            : new BDXRClientReadOnly (URLHelper.getAsURI (smpEndpoint));
+		  final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull (aPI, aDTI);
+		  
+			if (signedServiceMetadata == null)
 				return nodeInfo;
-			}
-			ServiceMetadataType serviceMetadata = signedServiceMetadata.getServiceMetadata();
 
-			nodeInfo.setParticipantIdentifier(
-					serviceMetadata.getServiceInformation().getParticipantIdentifier().getValue());
-			nodeInfo.setDocumentIdentifier(serviceMetadata.getServiceInformation().getDocumentIdentifier().getValue());
-
-			if (!CollectionUtils.isEmpty(serviceMetadata.getServiceInformation().getProcessList().getProcess())) {
-				List<ProcessType> processes = serviceMetadata.getServiceInformation().getProcessList().getProcess();
-				processes.stream().forEach(elem -> {
-					String processId = elem.getProcessIdentifier().getValue();
-					if (returnServiceProc.equals(processId) && isReturnService
-							|| serviceProc.equals(processId) && !isReturnService) {
-						nodeInfo.setEndpointURI(elem.getServiceEndpointList().getEndpointAtIndex(0).getEndpointURI());
-						nodeInfo.setCertificate(elem.getServiceEndpointList().getEndpointAtIndex(0).getCertificate());
-						nodeInfo.setProcessIdentifier(processId);
-					}
-				});
-
+	    final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE.createProcessIdentifier ("urn:de4a-eu:MessageType", isReturnService ? "response" : "request");
+	    final EndpointType endpoint = BDXRClientReadOnly.getEndpoint (signedServiceMetadata, aProcID, ESMPTransportProfile.TRANSPORT_PROFILE_BDXR_AS4);
+      if (endpoint != null)
+      {
+			  nodeInfo.setEndpointURI(endpoint.getEndpointURI());
+				nodeInfo.setCertificate(endpoint.getCertificate());
+				nodeInfo.setProcessIdentifier(aProcID.getURIEncoded ());
 			}
 			// TODO error handling
-		} catch (NullPointerException nPe) {
-			logger.error("Error parsing response from SMP", nPe);
-			return new NodeInfo();
-		} catch (HttpClientErrorException | HttpServerErrorException httpClientOrServerExc) {
-			logger.error("Service metadata not found on SMP");
+		} catch (final SMPClientException | SMPDNSResolutionException ex) {
+			logger.error("Service metadata not found on SMP", ex);
 			return new NodeInfo();
 		}
-
 		return nodeInfo;
 	}
 

@@ -16,18 +16,17 @@ import eu.de4a.connector.as4.owner.MessageOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
 import eu.de4a.connector.as4.owner.OwnerLocator;
 import eu.de4a.connector.client.Client;
+import eu.de4a.connector.model.OwnerAddresses;
+import eu.de4a.connector.model.RequestorRequest;
+import eu.de4a.connector.model.smp.NodeInfo;
+import eu.de4a.connector.repository.RequestorRequestRepository;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.connector.model.OwnerAddresses;
-import eu.de4a.connector.model.RequestorRequest;
-import eu.de4a.connector.model.smp.NodeInfo;
-import eu.de4a.connector.repository.RequestorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.de4a.util.SMPUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
@@ -36,8 +35,6 @@ import eu.toop.connector.api.rest.TCPayload;
 public class EvidenceTransferorManager extends EvidenceManager {
 	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class);
 
-	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
-	private String smpEndpoint;
 	@Autowired
 	private Client client;
 	@Autowired
@@ -66,8 +63,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			if (req != null) {
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
-				requestorReq.setReturnServiceUri(SMPUtils.getSmpUri(smpEndpoint, request.getSenderId(),
-						req.getCanonicalEvidenceTypeId()));
+				requestorReq.setReturnServiceUri("unused");
 				try {
 					responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(
 							req, ownerAddress.getEndpoint(), false);
@@ -84,8 +80,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				req = DE4AMarshaller.drUsiRequestMarshaller().read(request.getMessage());
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
-				requestorReq.setReturnServiceUri(SMPUtils.getSmpUri(smpEndpoint, request.getSenderId(),
-						req.getCanonicalEvidenceTypeId()));
+				requestorReq.setReturnServiceUri("unused");
 				try {
 					client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
 				} catch (MessageException e) {
@@ -111,13 +106,13 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		if (usirequest == null) {
 			logger.error("Does not exists any request with ID {}", response.getId());
 		} else {
-			sendResponseMessage(usirequest.getSenderId(), usirequest.getReturnServiceUri(), response.getMessage(),
+			sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
 					DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);
 		}
 	}
 
-	public boolean sendResponseMessage(String sender, String uriSmp, Element message, String tagContentId) {
-		NodeInfo nodeInfo = client.getNodeInfo(uriSmp, true);
+	public boolean sendResponseMessage(String sender, String docTypeID, Element message, String tagContentId) {
+		NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true);
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
 
