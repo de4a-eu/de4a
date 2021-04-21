@@ -9,7 +9,7 @@ public class MessageOwner extends ContextRefreshedEvent {
 	private transient Element message;
 	private String id;
 	private String senderId;
-	private String evidenceService;
+	private String receiverId;
 	private String returnService;
 	public MessageOwner(ApplicationContext context) {
 	        super(context);
@@ -31,12 +31,12 @@ public class MessageOwner extends ContextRefreshedEvent {
 		this.id = id;
 	}
 
-	public String getEvidenceService() {
-		return evidenceService;
+	public String getReceiverId() {
+		return receiverId;
 	}
 
-	public void setEvidenceService(String evidenceService) {
-		this.evidenceService = evidenceService;
+	public void setReceiverId(String receiverId) {
+		this.receiverId = receiverId;
 	}
 
 	public String getReturnService() {

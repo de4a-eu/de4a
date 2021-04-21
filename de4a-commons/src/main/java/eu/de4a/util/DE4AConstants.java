@@ -51,8 +51,9 @@ public class DE4AConstants {
 
 	public static final String SERVICES_PATH = "/services/";
 
-	// URN Scheme for SMP identifiers
-	public static final String URN_SCHEME = "urn:de4a-eu:";
+	// DE4A Schemes
+	public static final String DOCTYPE_SCHEME = "urn:de4a-eu:CanonicalEvidenceType";
+	public static final String PROCESS_SCHEME = "urn:de4a-eu:MessageType";
 
 	public static final String CANONICAL_EVIDENCE_TYPE = "CanonicalEvidenceType";
 
