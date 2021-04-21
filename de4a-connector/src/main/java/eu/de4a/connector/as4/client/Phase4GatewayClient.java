@@ -56,8 +56,8 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 			aMetadata.setSenderID(TCRestJAXB.createTCID(TCIdentifierFactory.PARTICIPANT_SCHEME, sender));
 			aMetadata.setReceiverID(
 					TCRestJAXB.createTCID(TCIdentifierFactory.PARTICIPANT_SCHEME, receiver.getParticipantIdentifier()));
-			aMetadata.setDocTypeID(TCRestJAXB.createTCID(TCIdentifierFactory.DOCTYPE_SCHEME, dataOwnerId));
-			aMetadata.setProcessID(TCRestJAXB.createTCID(TCIdentifierFactory.PROCESS_SCHEME, "bdx:noprocess"));
+			aMetadata.setDocTypeID(TCRestJAXB.createTCID(DE4AConstants.DOCTYPE_SCHEME, receiver.getDocumentIdentifier()));
+			aMetadata.setProcessID(TCRestJAXB.createTCID(DE4AConstants.PROCESS_SCHEME, receiver.getProcessIdentifier()));
 			aMetadata.setTransportProtocol(EMEProtocol.AS4.getTransportProfileID());
 			aMetadata.setEndpointURL(receiver.getEndpointURI());
 			aMetadata.setReceiverCertificate(receiver.getCertificate());

@@ -142,14 +142,14 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		}
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
-			Element requestSillyWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
+			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload p = new TCPayload();
 			p.setContentID(DE4AConstants.TAG_EVIDENCE_REQUEST);
 			p.setMimeType(CMimeType.APPLICATION_XML.getAsString());
 			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			payloads.add(p);
-			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestSillyWrapper, payloads, false);
+			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestWrapper, payloads, false);
 			return true;
 		} catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications", e);

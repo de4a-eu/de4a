@@ -1,5 +1,6 @@
 package eu.de4a.connector.client;
 
+import java.io.InputStream;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.smpclient.bdxr1.marshal.BDXR1MarshallerSignedServiceMetadataType;
 import com.helger.xsds.bdxr.smp1.ProcessType;
 import com.helger.xsds.bdxr.smp1.ServiceMetadataType;
@@ -190,7 +192,7 @@ public class Client {
 			if (!isUsi) {
 				RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
 						.transformRequestToOwnerIM(evidenceRequest);
-				String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
+				NonBlockingByteArrayInputStream reqXML = DE4AMarshaller.doImRequestMarshaller().getAsInputStream(requestExtractEvidence);
 				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, reqXML, String.class);
 
 				// Transform ResponseExtractEvidence into ResponseTransferEvidence
