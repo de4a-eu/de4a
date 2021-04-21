@@ -107,7 +107,7 @@ public class Conf implements WebMvcConfigurer {
 
 	private DataSourceConf dataSourceConf = new DataSourceConf();
 
-	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
+	@Value("#{'${${h2.console.port.jvm:${h2.console.port}}:21080}'}")
 	private String h2ConsolePort;
 
 	@Value("${ssl.context.enabled}")
