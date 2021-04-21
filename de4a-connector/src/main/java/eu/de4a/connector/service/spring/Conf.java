@@ -3,6 +3,7 @@ package eu.de4a.connector.service.spring;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -55,6 +56,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.servlet.LocaleResolver;
@@ -282,12 +284,20 @@ public class Conf implements WebMvcConfigurer {
 			slr.setDefaultLocale(Locale.ENGLISH);
 		return slr;
 	}
+	
+	@Bean
+	CharacterEncodingFilter characterEncodingFilter() {
+		CharacterEncodingFilter filter = new CharacterEncodingFilter();
+		filter.setEncoding(StandardCharsets.UTF_8.name());
+		filter.setForceEncoding(true);
+		return filter;
+	}
 
 	@Bean
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:messages/messages");
-		messageSource.setDefaultEncoding("UTF-8");
+		messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
 		return messageSource;
 	}
 
@@ -302,7 +312,7 @@ public class Conf implements WebMvcConfigurer {
 	@Bean(name = "multipartResolver")
 	public CommonsMultipartResolver createMultipartResolver() {
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver();
-		resolver.setDefaultEncoding("UTF-8");
+		resolver.setDefaultEncoding(StandardCharsets.UTF_8.name());
 		return resolver;
 	}
 
