@@ -49,7 +49,7 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
 					evidenceRequest.getDocumentElement());
 			wrapper.setId(id);
 			wrapper.setSenderId(aRequest.getMetadata().getSenderID().getURIEncoded());
-			wrapper.setEvidenceServiceUri(aRequest.getMetadata().getDocumentTypeID().getValue());
+			wrapper.setReceiverId(aRequest.getMetadata().getReceiverID().getURIEncoded());
 			wrapper.setReturnServiceUri(DOMUtils.getValueFromXpath(DE4AConstants.XPATH_RETURN_SERVICE_ID,
 					evidenceRequest.getDocumentElement()));
 			if(logger.isDebugEnabled())logger.debug("Request with id {} received",id);
