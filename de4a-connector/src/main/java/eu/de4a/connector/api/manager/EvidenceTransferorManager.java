@@ -54,11 +54,9 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
 		}
 		try {
-		    //TODO change request object to keep receiver participantID
-			ownerAddress = ownerLocator.lookupOwnerAddress(request.getEvidenceService());
-
+			ownerAddress = ownerLocator.lookupOwnerAddress(request.getReceiverId());
 		} catch (MessageException e) {
-			logger.error("Owner endpoint not found with participantID: {}", request.getEvidenceService());
+			logger.error("Owner endpoint not found with participantID: {}", request.getReceiverId());
 			// TODO error handling
 		}
 		RequestorRequest requestorReq = new RequestorRequest();
@@ -96,7 +94,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			}
 			// Save request information
 			requestorReq.setIdrequest(request.getId());
-			requestorReq.setEvidenceServiceUri(request.getEvidenceService());
+			requestorReq.setEvidenceServiceUri(request.getReceiverId());
 			requestorReq.setSenderId(request.getSenderId());
 			requestorReq.setDone(false);
 			requestorRequestRepository.save(requestorReq);

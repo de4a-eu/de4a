@@ -111,7 +111,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 										LOGGER.error(DOMUtils.documentToString(doc));
 									} else {
 										request.setId(idrequest);
-										request.setEvidenceServiceUri(
+										request.setReceiverId(
 												response.getInfo().getUserMessage().getCollaborationInfo().getAction());
 										publisher.publishCustomEvent(request);
 									}
