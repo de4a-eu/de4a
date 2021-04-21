@@ -54,6 +54,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
 		}
 		try {
+		    //TODO change request object to keep receiver participantID
 			ownerAddress = ownerLocator.lookupOwnerAddress(request.getEvidenceService());
 
 		} catch (MessageException e) {
