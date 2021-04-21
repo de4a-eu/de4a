@@ -88,8 +88,7 @@ public class RequestBuilder {
 		request.setRequestGrounds(grounds);
 		request.setRequestId(requestId);
 		request.setTimeStamp(gimmeLocalDateTime(Calendar.getInstance().getTime()));
-		StringBuilder canonicalEvidenceId = new StringBuilder(DE4AConstants.URN_SCHEME)
-		        .append(DE4AConstants.CANONICAL_EVIDENCE_TYPE)
+		StringBuilder canonicalEvidenceId = new StringBuilder(DE4AConstants.DOCTYPE_SCHEME)
 		        .append(DE4AConstants.DOUBLE_SEPARATOR)
 		        .append(canonicalEvidenceTypeId);
 		request.setCanonicalEvidenceTypeId(canonicalEvidenceId.toString());
