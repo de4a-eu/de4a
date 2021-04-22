@@ -203,7 +203,7 @@ public class Conf implements WebMvcConfigurer {
 			factory = sslConnectionSocketFactory();
 			return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
 		} catch (Exception e) {
-			LOG.error("No se puede crear la factorya ssl", e);
+			LOG.error("Error building SSL Factory", e);
 		}
 		return HttpClientBuilder.create().build();
 
@@ -217,7 +217,7 @@ public class Conf implements WebMvcConfigurer {
 			try {
 				factory = sslConnectionSocketFactory();
 			} catch (Exception e) {
-				LOG.error("No se puede crear la factorya ssl", e);
+				LOG.error("Error building SSL Factory", e);
 				factory=SSLConnectionSocketFactory.getSocketFactory();
 			}	
 	        HttpClient httpClient = HttpClientBuilder.create()
