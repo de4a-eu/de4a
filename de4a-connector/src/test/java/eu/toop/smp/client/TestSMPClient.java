@@ -15,7 +15,10 @@ import eu.de4a.connector.client.Client;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.connector.service.spring.Conf;
 
-@SpringBootTest(classes={Conf.class}, properties = {"smp.endpoint=https://de4a-smp.egovlab.eu/"})
+@SpringBootTest(classes={Conf.class}, properties = {"smp.endpoint=https://de4a-smp.egovlab.eu/",
+		"truststore.type = JKS",
+		"truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks",
+		"truststore.password = de4a"})
 @RunWith(SpringRunner.class)
 public class TestSMPClient {
 	@Autowired
