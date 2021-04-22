@@ -12,20 +12,23 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
@@ -45,10 +48,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -129,6 +129,16 @@ public class Conf implements WebMvcConfigurer {
 	private String type;
 
 
+	@Value("#{'${proxy.host: }'}")
+	private String proxyHost;
+	@Value("#{'${proxy.port:0 }'}")
+	private int proxyPort;
+	@Value("#{'${proxy.user: }'}")
+	private String proxyUser;
+	@Value("#{'${proxy.password: }'}")
+	private String proxyPassword;
+	@Value("#{'${proxy.non.hosts: }'}")
+	private String proxyNonHosts;
 	@Bean
 	public Docket api() {
 		TypeResolver typeResolver = new TypeResolver();
@@ -198,16 +208,10 @@ public class Conf implements WebMvcConfigurer {
 	@Bean
 	public RestTemplate restTemplate() {
 		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-				httpClient());
-		RestTemplate template = new RestTemplate(httpComponentsClientHttpRequestFactory);
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-		MappingJackson2XmlHttpMessageConverter converter = new MappingJackson2XmlHttpMessageConverter();
-		converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
-		messageConverters.add(converter);
-		template.setMessageConverters(messageConverters);
+				httpClient()); 
 		return new RestTemplate(httpComponentsClientHttpRequestFactory);
+	
 	}
-
 	public HttpClient httpClient() {
 		try {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
@@ -217,7 +221,26 @@ public class Conf implements WebMvcConfigurer {
 			} else {
 				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
 			}
-			return HttpClientBuilder.create().setSSLSocketFactory(factory).build();
+			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+			return HttpClientBuilder.create().setSSLSocketFactory(factory).setRoutePlanner(new DefaultProxyRoutePlanner(proxy) {
+                @Override
+                public HttpHost determineProxy(HttpHost target, HttpRequest request, HttpContext context) throws HttpException {
+                	if (skipProxy(target.getHostName())) {
+                		return null;
+                	}
+                    return super.determineProxy(target, request, context);
+                }
+                private boolean skipProxy(String host) {
+        	    	if(proxyHost.isEmpty())return false;
+        	    	StringTokenizer st=new StringTokenizer(proxyNonHosts,";");
+        	    	while(st.hasMoreTokens()) {
+        	    		String pattern=st.nextToken();
+        	    		pattern=pattern.replaceAll("\\*","");
+        	    		if(host.contains(pattern))return true;
+        	    	}
+        	    	return false;
+        	    }
+            }).build();
 		} catch (Exception e) {
 			LOG.error("Unable to create SSL factory", e);
 		}
