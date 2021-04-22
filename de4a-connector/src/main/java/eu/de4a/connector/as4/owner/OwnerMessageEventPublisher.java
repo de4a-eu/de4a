@@ -10,21 +10,21 @@ import org.w3c.dom.Element;
 
 import eu.de4a.connector.as4.client.RequestWrapper;
 
- 
+
 @Component
 public class OwnerMessageEventPublisher {
-	  private static final Log LOG = LogFactory.getLog(OwnerMessageEventPublisher.class); 
+	  private static final Log LOG = LogFactory.getLog(OwnerMessageEventPublisher.class);
 	    @Autowired
 	    private ApplicationEventMulticaster applicationEventMulticaster;
 	    @Autowired
-	    private ApplicationContext context; 
+	    private ApplicationContext context;
 	    public void publishCustomEvent(RequestWrapper request) {
 	    	LOG.debug("Publishing as4 request");
 	    	MessageOwner customSpringEvent = new MessageOwner(context);
-	    	customSpringEvent.setMessage((Element)request.getRequest()); 
+	    	customSpringEvent.setMessage((Element)request.getRequest());
 	    	customSpringEvent.setId(request.getId());
 	    	customSpringEvent.setSenderId(request.getSenderId());
-	    	customSpringEvent.setEvidenceService(request.getEvidenceServiceUri());
+	    	customSpringEvent.setReceiverId(request.getReceiverId());
 	    	customSpringEvent.setReturnService(request.getReturnServiceUri());
 	    	applicationEventMulticaster.multicastEvent( customSpringEvent);
 	    }

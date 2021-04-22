@@ -4,15 +4,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.w3c.dom.Element;
 
-public class MessageResponseOwner extends ContextRefreshedEvent { 
+public class MessageResponseOwner extends ContextRefreshedEvent {
 	private static final long serialVersionUID = 1L;
 	private transient Element message;
-	private String id; 
+	private String id;
 	private String requestorId;
 	public MessageResponseOwner(ApplicationContext context) {
-	        super(context); 
-	} 
-    
+	        super(context);
+	}
+
 	public Element getMessage() {
 		return message;
 	}
@@ -37,5 +37,5 @@ public class MessageResponseOwner extends ContextRefreshedEvent {
 		this.requestorId = evaluatorId;
 	}
 
- 
+
 }

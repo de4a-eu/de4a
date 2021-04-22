@@ -34,7 +34,9 @@ public class RequestManager {
 			provisionsItem.setProvisionItem(new ArrayList<>());
 			extractProvisionItems(source, provisionsItem, dataOwnerId);
 			sourceType.setProvisionItems(provisionsItem);
-			availableSources.addSource(sourceType);
+			if(!provisionsItem.getProvisionItem().isEmpty()) {
+				availableSources.addSource(sourceType);
+			}
 		});
 	}
 
@@ -53,7 +55,7 @@ public class RequestManager {
 			}
 		});
 	}
-	
+
 	private void extractProvision(ProvisionType provision, ProvisionItemType provisionItemDst, ProvisionItem provisionItemOrg) {
 		if(provisionItemOrg.getProvision() != null) {
 			provision.setRedirectURL(provisionItemOrg.getProvision().getRedirectURL());

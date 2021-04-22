@@ -28,7 +28,6 @@ import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.de4a.util.SMPUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
@@ -82,7 +81,6 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	public ResponseTransferEvidenceType manageRequestIM(RequestTransferEvidenceUSIIMDRType request) {
 		Document doc = DE4AMarshaller.drImRequestMarshaller().getAsDocument(request);
 		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
-			//TODO assertion is assured by required fields
 			return null;
 		}
 		return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
@@ -135,22 +133,21 @@ public class EvidenceRequestorManager extends EvidenceManager {
 
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
 			String canonicalEvidenceTypeId) {
-		String uriSmp = SMPUtils.getSmpUri(smpEndpoint, dataOwnerId, canonicalEvidenceTypeId);
 		String senderId = sender;
-		NodeInfo nodeInfo = client.getNodeInfo(uriSmp, false);
+		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false);
 		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
 			senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
 		}
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
-			Element requestSillyWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
+			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload p = new TCPayload();
 			p.setContentID(DE4AConstants.TAG_EVIDENCE_REQUEST);
 			p.setMimeType(CMimeType.APPLICATION_XML.getAsString());
 			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			payloads.add(p);
-			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestSillyWrapper, payloads, false);
+			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestWrapper, payloads, false);
 			return true;
 		} catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications", e);

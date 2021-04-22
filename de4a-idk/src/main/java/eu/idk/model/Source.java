@@ -30,15 +30,15 @@ import com.helger.commons.string.ToStringGenerator;
 @Entity
 @Table(name = "Source")
 public class Source {
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
-	
+
 	@XmlElement(name = "canonicalEvidenceTypeId")
 	@Column
 	private String canonicalEvidenceTypeId;
-	
+
 	@XmlElement(name = "CountryCode")
 	@Column
 	private String countryCode;
@@ -61,7 +61,7 @@ public class Source {
 	@OneToMany(mappedBy = "source", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ProvisionItem> provisionItems;
 
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -69,7 +69,7 @@ public class Source {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
 	@Nonnull
 	public String getCanonicalEvidenceTypeId() {
 		return this.canonicalEvidenceTypeId;

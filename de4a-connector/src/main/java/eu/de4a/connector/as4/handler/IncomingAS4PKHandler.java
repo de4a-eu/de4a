@@ -19,22 +19,22 @@ import eu.toop.connector.api.me.incoming.IMEIncomingHandler;
 import eu.toop.connector.api.me.incoming.IncomingEDMErrorResponse;
 import eu.toop.connector.api.me.incoming.IncomingEDMRequest;
 import eu.toop.connector.api.me.incoming.IncomingEDMResponse;
-import eu.toop.connector.api.me.incoming.MEIncomingException; 
+import eu.toop.connector.api.me.incoming.MEIncomingException;
 
 
 @Component
 public class IncomingAS4PKHandler implements IMEIncomingHandler{
 	private static final Logger logger = LoggerFactory.getLogger (IncomingAS4PKHandler.class);
 	@Autowired
-	private OwnerMessageEventPublisher publisher; 
+	private OwnerMessageEventPublisher publisher;
 	@Autowired
-	private Phase4GatewayClient phase4GatewayClient; 
+	private Phase4GatewayClient phase4GatewayClient;
 
 	@Override
 	public void handleIncomingRequest(IncomingEDMRequest aRequest) throws MEIncomingException {
 		logger.debug("Incoming request...");
 		EdmRequestWrapper edmwrapper=(EdmRequestWrapper)aRequest;
-		RequestWrapper wrapper=new  RequestWrapper(); 
+		RequestWrapper wrapper=new  RequestWrapper();
 		WSS4JAttachment attachao=edmwrapper.getAttacheds().stream().filter(e->e.getId().equals(DE4AConstants.TAG_EVIDENCE_REQUEST)).findFirst().orElse(null);
 		if(attachao==null) {
 			String err="EvidenceRequest not found!";
@@ -49,8 +49,8 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
 					evidenceRequest.getDocumentElement());
 			wrapper.setId(id);
 			wrapper.setSenderId(aRequest.getMetadata().getSenderID().getURIEncoded());
-			wrapper.setEvidenceServiceUri(aRequest.getMetadata().getDocumentTypeID().getValue());
-			wrapper.setReturnServiceUri(DOMUtils.getValueFromXpath(DE4AConstants.XPATH_RETURN_SERVICE_ID, 
+			wrapper.setReceiverId(aRequest.getMetadata().getReceiverID().getURIEncoded());
+			wrapper.setReturnServiceUri(DOMUtils.getValueFromXpath(DE4AConstants.XPATH_RETURN_SERVICE_ID,
 					evidenceRequest.getDocumentElement()));
 			if(logger.isDebugEnabled())logger.debug("Request with id {} received",id);
 		} catch (MessageException e) {
@@ -61,14 +61,14 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
 
 	@Override
 	public void handleIncomingResponse(IncomingEDMResponse aResponse) throws MEIncomingException {
-		logger.debug("Incoming response..."); 
-		phase4GatewayClient.processResponseAs4(aResponse); 
+		logger.debug("Incoming response...");
+		phase4GatewayClient.processResponseAs4(aResponse);
 	}
 
 	@Override
 	public void handleIncomingErrorResponse(IncomingEDMErrorResponse aErrorResponse) throws MEIncomingException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

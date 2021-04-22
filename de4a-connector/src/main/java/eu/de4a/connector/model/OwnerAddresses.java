@@ -21,6 +21,6 @@ public class OwnerAddresses {
 	}
 	public void setEndpoint(String endpoint) {
 		this.endpoint = endpoint;
-	} 
-	
+	}
+
 }

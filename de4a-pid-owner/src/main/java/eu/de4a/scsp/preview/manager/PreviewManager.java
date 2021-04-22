@@ -239,7 +239,7 @@ public class PreviewManager {
 		
 		byte[] data;
 		try {
-			data = FileUtils.empaquetarZip(tempdir);
+			data = FileUtils.packageZip(tempdir);
 		} catch (IOException e) {
 			logger.error("Error", e);
 			return returnErrorResource();

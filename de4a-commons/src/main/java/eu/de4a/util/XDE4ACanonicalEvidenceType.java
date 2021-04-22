@@ -9,7 +9,7 @@ import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.conn.api.canonical.EvidencesResources;
 
 public enum XDE4ACanonicalEvidenceType implements IDE4ACanonicalEvidenceType {
-	
+
 	BIRTH_CERTIFICATE ("Birth certificate", EvidencesResources.BIRTH_CERTIFICATE.getXSDs());
 
 	private final String m_sDisplayName;

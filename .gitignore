@@ -1,2 +1,11 @@
-/.project
-/.settings/
+.project
+.classpath
+.settings/
+target/
+
+#Ignore out of scope project modules
+de4a-evaluator/
+de4a-pid-owner/
+/.idea/
+**/*.iml
+**/*.log

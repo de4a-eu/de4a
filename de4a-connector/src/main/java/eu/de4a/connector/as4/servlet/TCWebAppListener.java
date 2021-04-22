@@ -1,4 +1,4 @@
-package eu.de4a.connector.as4.servlet; 
+package eu.de4a.connector.as4.servlet;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
@@ -13,7 +13,7 @@ import com.helger.photon.security.login.LoggedInUserManager;
 import eu.de4a.connector.as4.handler.NothingIncomingAS4PKHandler;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.app.TCInit;
-import eu.toop.connector.webapi.TCAPIInit; 
+import eu.toop.connector.webapi.TCAPIInit;
 
 /**
  * Global startup etc. listener.
@@ -51,14 +51,14 @@ public class TCWebAppListener extends WebAppListener
       // E.g. "Unpack WAR files" in Tomcat is disabled
       return getDataPath (aSC);
     }
-  } 
+  }
 
   @Override
   protected void afterContextInitialized (final ServletContext aSC)
-  { 
-    // Use default handler 
+  {
+    // Use default handler
 	  NothingIncomingAS4PKHandler handler= WebApplicationContextUtils.getRequiredWebApplicationContext(aSC)
-			  .getBean(NothingIncomingAS4PKHandler.class);      
+			  .getBean(NothingIncomingAS4PKHandler.class);
 
     // Don't write audit logs
     AuditHelper.setAuditor (new DoNothingAuditor (LoggedInUserManager.getInstance ()));

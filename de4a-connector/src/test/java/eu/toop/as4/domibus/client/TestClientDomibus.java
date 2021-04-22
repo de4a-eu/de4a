@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import eu.de4a.connector.as4.domibus.soap.ClienteWS;
+import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.connector.as4.domibus.soap.DomibusException;
 import eu.de4a.connector.as4.domibus.soap.MessageFactory;
 import eu.de4a.connector.as4.domibus.soap.ResponseAndHeader;
@@ -43,13 +43,20 @@ import eu.de4a.connector.service.spring.Conf;
 @RunWith(SpringRunner.class)
 public class TestClientDomibus {
 	@Autowired
-	private ClienteWS clienteWS;
+	private DomibusClientWS clienteWS;
+
+	/**
+	 *  https://eu-domibus-client.redsara.es/domibus/services/backend
+	 *	https://eu-domibus-server.redsara.es/domibus/services/backend
+	 *
+	 **/
+	private static final String ENDPOINT_SERVER_TEST_DOMIBUS = "https://eu-domibus-server.redsara.es/domibus/services/backend";
 
 	// @Test
 	public void getMessageID()
 			throws FileNotFoundException, SAXException, IOException, ParserConfigurationException, DomibusException {
 		String id = "d6cddccf-288f-44b9-839c-f3e1e5630770@domibus.eu";
-		ResponseAndHeader message = clienteWS.getMessageWithHeader(id);
+		ResponseAndHeader message = clienteWS.getMessageWithHeader(id, ENDPOINT_SERVER_TEST_DOMIBUS);
 
 		byte[] targetArray = IOUtils
 				.toByteArray(message.getMessage().getPayload().get(0).getValue().getDataSource().getInputStream());
@@ -100,7 +107,7 @@ public class TestClientDomibus {
 
 		payload2.setValue(new DataHandler(source2));
 		bodies.add(payload2);
-		assertNotNull(clienteWS.submitMessage(messageHeader, bodies), "Test complete");
+		assertNotNull(clienteWS.submitMessage(messageHeader, bodies, ENDPOINT_SERVER_TEST_DOMIBUS), "Test complete");
 	}
 
 	private byte[] documentToByte(Document document) {

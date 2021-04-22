@@ -39,6 +39,6 @@ public class EvidenceManager {
 			logger.error(err);
 			throw new ApplicationContextException(err);
 		}
-		
+
 	}
 }

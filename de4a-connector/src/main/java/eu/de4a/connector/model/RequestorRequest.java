@@ -41,7 +41,7 @@ public class RequestorRequest {
 	public void setReturnServiceUri(String returnServiceUri) {
 		this.returnServiceUri = returnServiceUri;
 	}
-	
+
 	public String getDataOwnerId() {
 		return dataOwnerId;
 	}

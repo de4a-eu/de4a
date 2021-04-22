@@ -16,9 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 public class FileUtils {
-	
+
 	private static final String DE4A_PREFIX = "de4a-";
-	
+
 	FileUtils() {
 		//empty constructor
 	}
@@ -27,7 +27,7 @@ public class FileUtils {
 		File convFile = null;
 		convFile = File.createTempFile(DE4A_PREFIX, ".xml", tempdir);
 		try(FileOutputStream fos = new FileOutputStream(convFile)) {
-			fos.write(file.getBytes());	
+			fos.write(file.getBytes());
 			return convFile;
 		}
 	}
@@ -44,8 +44,8 @@ public class FileUtils {
 		out.close();
 		return new CommonsMultipartFile(item);
 	}
-	
-	public static byte[] empaquetarZip(File tempDir) throws IOException {
+
+	public static byte[] packageZip(File tempDir) throws IOException {
 		String fileSeparator = System.getProperty("file.separator");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(baos);

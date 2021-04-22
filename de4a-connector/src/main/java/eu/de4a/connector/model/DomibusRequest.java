@@ -16,7 +16,7 @@ public class DomibusRequest {
 
 	public void setIdrequest(String idrequest) {
 		this.idrequest = idrequest;
-	} 
-	 
-	
+	}
+
+
 }

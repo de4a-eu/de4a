@@ -88,7 +88,10 @@ public class RequestBuilder {
 		request.setRequestGrounds(grounds);
 		request.setRequestId(requestId);
 		request.setTimeStamp(gimmeLocalDateTime(Calendar.getInstance().getTime()));
-		request.setCanonicalEvidenceTypeId(canonicalEvidenceTypeId);
+		StringBuilder canonicalEvidenceId = new StringBuilder(DE4AConstants.DOCTYPE_SCHEME)
+		        .append(DE4AConstants.DOUBLE_SEPARATOR)
+		        .append(canonicalEvidenceTypeId);
+		request.setCanonicalEvidenceTypeId(canonicalEvidenceId.toString());
 		if (ap1 != null) {
 			request.setDataRequestSubject(buildSubject(eidasId, birthDate, name, ap1, fullName));
 		} else {

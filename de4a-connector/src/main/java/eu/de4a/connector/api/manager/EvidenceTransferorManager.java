@@ -16,36 +16,33 @@ import eu.de4a.connector.as4.owner.MessageOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
 import eu.de4a.connector.as4.owner.OwnerLocator;
 import eu.de4a.connector.client.Client;
+import eu.de4a.connector.model.OwnerAddresses;
+import eu.de4a.connector.model.RequestorRequest;
+import eu.de4a.connector.model.smp.NodeInfo;
+import eu.de4a.connector.repository.RequestorRequestRepository;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.connector.model.OwnerAddresses;
-import eu.de4a.connector.model.RequestorRequest;
-import eu.de4a.connector.model.smp.NodeInfo;
-import eu.de4a.connector.repository.RequestorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.de4a.util.SMPUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 
-@Component 
+@Component
 public class EvidenceTransferorManager extends EvidenceManager {
-	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class);	
- 
-	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
-	private String smpEndpoint;
+	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class);
+
 	@Autowired
 	private Client client;
 	@Autowired
 	private OwnerLocator ownerLocator;
 	@Autowired
 	private RequestorRequestRepository requestorRequestRepository;
-	
-	
+
+
 	public void queueMessage(MessageOwner request) {
 		ResponseTransferEvidenceType responseTransferEvidenceType = null;
 		OwnerAddresses ownerAddress = null;
@@ -54,10 +51,9 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
 		}
 		try {
-			ownerAddress = ownerLocator.lookupOwnerAddress(request.getEvidenceService());
-
+			ownerAddress = ownerLocator.lookupOwnerAddress(request.getReceiverId());
 		} catch (MessageException e) {
-			logger.error("No evidence with name {}", request.getEvidenceService());
+			logger.error("Owner endpoint not found with participantID: {}", request.getReceiverId());
 			// TODO error handling
 		}
 		RequestorRequest requestorReq = new RequestorRequest();
@@ -66,8 +62,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			if (req != null) {
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
-				requestorReq.setReturnServiceUri(SMPUtils.getSmpUri(smpEndpoint, request.getSenderId(), 
-						req.getCanonicalEvidenceTypeId()));
+				requestorReq.setReturnServiceUri("unused");
 				try {
 					responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(
 							req, ownerAddress.getEndpoint(), false);
@@ -76,7 +71,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 					// TODO error handling
 				}
 				if(responseTransferEvidenceType != null) {
-					sendResponseMessage(req.getDataEvaluator().getAgentUrn(), requestorReq.getReturnServiceUri(), 
+					sendResponseMessage(req.getDataEvaluator().getAgentUrn(), requestorReq.getReturnServiceUri(),
 							DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 							.getAsDocument(responseTransferEvidenceType).getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
 				}
@@ -84,24 +79,23 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				req = DE4AMarshaller.drUsiRequestMarshaller().read(request.getMessage());
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
-				requestorReq.setReturnServiceUri(SMPUtils.getSmpUri(smpEndpoint, request.getSenderId(), 
-						req.getCanonicalEvidenceTypeId()));
+				requestorReq.setReturnServiceUri("unused");
 				try {
 					client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
 				} catch (MessageException e) {
 					logger.error("Fail...",e);
-					//TODO error handling 
+					//TODO error handling
 				}
 			}
-			// Save request information			
-			requestorReq.setIdrequest(request.getId());			
-			requestorReq.setEvidenceServiceUri(request.getEvidenceService());			
+			// Save request information
+			requestorReq.setIdrequest(request.getId());
+			requestorReq.setEvidenceServiceUri(request.getReceiverId());
 			requestorReq.setSenderId(request.getSenderId());
 			requestorReq.setDone(false);
 			requestorRequestRepository.save(requestorReq);
 		}
 	}
-	
+
 	public void queueMessageResponse(MessageResponseOwner response) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Queued response from owner USI-Pattern:");
@@ -111,13 +105,13 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		if (usirequest == null) {
 			logger.error("Does not exists any request with ID {}", response.getId());
 		} else {
-			sendResponseMessage(usirequest.getSenderId(), usirequest.getReturnServiceUri(), response.getMessage(), 
+			sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
 					DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);
 		}
-	}	
-	
-	public boolean sendResponseMessage(String sender, String uriSmp, Element message, String tagContentId) {
-		NodeInfo nodeInfo = client.getNodeInfo(uriSmp, true);
+	}
+
+	public boolean sendResponseMessage(String sender, String docTypeID, Element message, String tagContentId) {
+		NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true);
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
 
@@ -125,7 +119,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
 				senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
 			}
-			
+
 			// TODO update as4 client, it is not handling payloads list anymore
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload payload = new TCPayload();
@@ -133,8 +127,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			payload.setValue(DOMUtils.documentToByte(message.getOwnerDocument()));
 			payload.setMimeType("application/xml");
 			payloads.add(payload);
-			Element requestSillyWrapper = new RegRepTransformer().wrapMessage(message, false);
-			as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestSillyWrapper, payloads, false);
+			Element requestWrapper = new RegRepTransformer().wrapMessage(message, false);
+			as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestWrapper, payloads, false);
 			return true;
 		} catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications", e);
@@ -143,5 +137,5 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		}
 		return false;
 	}
-	
+
 }
