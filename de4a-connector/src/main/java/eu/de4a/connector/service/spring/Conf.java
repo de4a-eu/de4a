@@ -24,6 +24,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.HttpClient;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -217,37 +218,40 @@ public class Conf implements WebMvcConfigurer {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
 			SSLConnectionSocketFactory factory;
 			if(sslContextEnabled) {
-				factory = new SSLConnectionSocketFactory(sslContext());
+				factory = new SSLConnectionSocketFactory(sslContext());				
 			} else {
 				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
-			}
-			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
-			return HttpClientBuilder.create().setSSLSocketFactory(factory).setRoutePlanner(new DefaultProxyRoutePlanner(proxy) {
-                @Override
-                public HttpHost determineProxy(HttpHost target, HttpRequest request, HttpContext context) throws HttpException {
-                	if (skipProxy(target.getHostName())) {
-                		return null;
-                	}
-                    return super.determineProxy(target, request, context);
-                }
-                private boolean skipProxy(String host) {
-        	    	if(proxyHost.isEmpty())return false;
-        	    	StringTokenizer st=new StringTokenizer(proxyNonHosts,";");
-        	    	while(st.hasMoreTokens()) {
-        	    		String pattern=st.nextToken();
-        	    		pattern=pattern.replaceAll("\\*","");
-        	    		if(host.contains(pattern))return true;
-        	    	}
-        	    	return false;
-        	    }
-            }).build();
+			} 
+			return HttpClientBuilder.create().setSSLSocketFactory(factory).setRoutePlanner(buildRoutePlanner()).build();
 		} catch (Exception e) {
 			LOG.error("Unable to create SSL factory", e);
 		}
 		return HttpClientBuilder.create().build();
 
 	}
-
+	private HttpRoutePlanner buildRoutePlanner() {
+		if(proxyHost.isEmpty())return null;
+		HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+		return new DefaultProxyRoutePlanner(proxy) {
+            @Override
+            public HttpHost determineProxy(HttpHost target, HttpRequest request, HttpContext context) throws HttpException {
+            	if (skipProxy(target.getHostName())) {
+            		return null;
+            	}
+                return super.determineProxy(target, request, context);
+            }
+            private boolean skipProxy(String host) {
+    	    	if(proxyHost.isEmpty())return false;
+    	    	StringTokenizer st=new StringTokenizer(proxyNonHosts,";");
+    	    	while(st.hasMoreTokens()) {
+    	    		String pattern=st.nextToken();
+    	    		pattern=pattern.replaceAll("\\*","");
+    	    		if(host.contains(pattern))return true;
+    	    	}
+    	    	return false;
+    	    }
+        };
+	}
 	public SSLContext sslContextTrustAll() {
 		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
 		try {
