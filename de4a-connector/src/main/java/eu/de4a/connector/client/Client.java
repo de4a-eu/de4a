@@ -98,6 +98,11 @@ public class Client {
 			if (signedServiceMetadata == null)
 				return nodeInfo;
 
+			nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata()
+			        .getServiceInformation().getParticipantIdentifierValue());
+            nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
+                    .getServiceInformation().getDocumentIdentifierValue());
+            
 			final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE
 					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ? 
 							DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);

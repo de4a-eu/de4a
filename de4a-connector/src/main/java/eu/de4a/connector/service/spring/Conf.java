@@ -55,6 +55,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
@@ -107,7 +108,10 @@ public class Conf implements WebMvcConfigurer {
 
 	private DataSourceConf dataSourceConf = new DataSourceConf();
 
-	@Value("#{'${${h2.console.port.jvm:${h2.console.port}}:21080}'}")
+	@Value("${h2.console.port.jvm:#{null}}")
+	private String h2ConsoleJvmPort;
+	
+	@Value("#{ '${h2.console.port}' == '' ? '21080' : '${h2.console.port}' }")
 	private String h2ConsolePort;
 
 	@Value("${ssl.context.enabled}")
@@ -162,8 +166,9 @@ public class Conf implements WebMvcConfigurer {
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
+		String port = ObjectUtils.isEmpty(h2ConsoleJvmPort) ? h2ConsolePort : h2ConsoleJvmPort;
 		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers",
-				"-ifNotExists", "-webDaemon", "-webPort", h2ConsolePort);
+				"-ifNotExists", "-webDaemon", "-webPort", port);
 	}
 
 	@Bean
