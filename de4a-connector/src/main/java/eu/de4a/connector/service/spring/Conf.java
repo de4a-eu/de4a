@@ -129,17 +129,17 @@ public class Conf implements WebMvcConfigurer {
 	@Value("${ssl.keystore.type}")
 	private String type;
 
-
-	@Value("#{'${proxy.host: }'}")
+	@Value("#{'${proxy.host:}'}")
 	private String proxyHost;
-	@Value("#{'${proxy.port:0 }'}")
+	@Value("#{'${proxy.port:0}'}")
 	private int proxyPort;
-	@Value("#{'${proxy.user: }'}")
+	@Value("#{'${proxy.user:}'}")
 	private String proxyUser;
-	@Value("#{'${proxy.password: }'}")
+	@Value("#{'${proxy.password:}'}")
 	private String proxyPassword;
-	@Value("#{'${proxy.non.hosts: }'}")
+	@Value("#{'${proxy.non.hosts:}'}")
 	private String proxyNonHosts;
+	
 	@Bean
 	public Docket api() {
 		TypeResolver typeResolver = new TypeResolver();
@@ -157,23 +157,23 @@ public class Conf implements WebMvcConfigurer {
 	}
 
 	private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-            .title("DE4A - Connector")
-            .description("DE4A Connector component - eDelivery Exchange")
-            .version("0.1.0")
-            .termsOfServiceUrl("http://www.de4a.eu")
-            .licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
-            .license("APACHE2")
-            .build();
-    }
+		return new ApiInfoBuilder()
+			.title("DE4A - Connector")
+			.description("DE4A Connector component - eDelivery Exchange")
+			.version("0.1.0")
+			.termsOfServiceUrl("http://www.de4a.eu")
+			.licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
+			.license("APACHE2")
+			.build();
+	}
 
 	@Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.
-            addResourceHandler("/swagger-ui/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
-                .resourceChain(false);
-    }
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.
+			addResourceHandler("/swagger-ui/**")
+				.addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
+				.resourceChain(false);
+	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
@@ -213,45 +213,54 @@ public class Conf implements WebMvcConfigurer {
 		return new RestTemplate(httpComponentsClientHttpRequestFactory);
 	
 	}
+
 	public HttpClient httpClient() {
 		try {
 			LOG.debug("SSL context setted to: {}", sslContextEnabled);
 			SSLConnectionSocketFactory factory;
-			if(sslContextEnabled) {
-				factory = new SSLConnectionSocketFactory(sslContext());				
+			if (sslContextEnabled) {
+				factory = new SSLConnectionSocketFactory(sslContext());
 			} else {
 				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
-			} 
-			return HttpClientBuilder.create().setSSLSocketFactory(factory).setRoutePlanner(buildRoutePlanner()).build();
+			}
+			return HttpClientBuilder.create().setSSLSocketFactory(factory)
+					.setRoutePlanner(buildRoutePlanner()).build();
 		} catch (Exception e) {
 			LOG.error("Unable to create SSL factory", e);
 		}
 		return HttpClientBuilder.create().build();
 
 	}
+
 	private HttpRoutePlanner buildRoutePlanner() {
-		if(proxyHost.isEmpty())return null;
+		if (proxyHost.isEmpty())
+			return null;
 		HttpHost proxy = new HttpHost(proxyHost, proxyPort);
 		return new DefaultProxyRoutePlanner(proxy) {
-            @Override
-            public HttpHost determineProxy(HttpHost target, HttpRequest request, HttpContext context) throws HttpException {
-            	if (skipProxy(target.getHostName())) {
-            		return null;
-            	}
-                return super.determineProxy(target, request, context);
-            }
-            private boolean skipProxy(String host) {
-    	    	if(proxyHost.isEmpty())return false;
-    	    	StringTokenizer st=new StringTokenizer(proxyNonHosts,";");
-    	    	while(st.hasMoreTokens()) {
-    	    		String pattern=st.nextToken();
-    	    		pattern=pattern.replaceAll("\\*","");
-    	    		if(host.contains(pattern))return true;
-    	    	}
-    	    	return false;
-    	    }
-        };
+			@Override
+			public HttpHost determineProxy(HttpHost target, HttpRequest request, HttpContext context)
+					throws HttpException {
+				if (skipProxy(target.getHostName())) {
+					return null;
+				}
+				return super.determineProxy(target, request, context);
+			}
+
+			private boolean skipProxy(String host) {
+				if (proxyHost.isEmpty())
+					return false;
+				StringTokenizer st = new StringTokenizer(proxyNonHosts, ";");
+				while (st.hasMoreTokens()) {
+					String pattern = st.nextToken();
+					pattern = pattern.replace("\\*", "");
+					if (host.contains(pattern))
+						return true;
+				}
+				return false;
+			}
+		};
 	}
+
 	public SSLContext sslContextTrustAll() {
 		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
 		try {
@@ -274,8 +283,8 @@ public class Conf implements WebMvcConfigurer {
 			keyStore.load(fis, keyStorePassword.toCharArray());
 
 			return SSLContextBuilder.create().loadKeyMaterial(keyStore, keyStorePassword.toCharArray())
-					.setProtocol("TLSv1.2")
-					.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray()).build();
+					.setProtocol("TLSv1.2").loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray())
+					.build();
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
 			LOG.error("There was a problem creating sslContext", e);
