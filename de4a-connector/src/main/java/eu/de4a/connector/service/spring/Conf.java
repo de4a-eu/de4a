@@ -10,25 +10,30 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -41,10 +46,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -105,7 +107,17 @@ public class Conf implements WebMvcConfigurer {
 		
 	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
 	private String h2ConsolePort;
-	
+
+	@Value("#{'${proxy.host: }'}")
+	private String proxyHost;
+	@Value("#{'${proxy.port:0 }'}")
+	private int proxyPort;
+	@Value("#{'${proxy.user: }'}")
+	private String proxyUser;
+	@Value("#{'${proxy.password: }'}")
+	private String proxyPassword;
+	@Value("#{'${proxy.non.hosts: }'}")
+	private String proxyNonHosts;
 	
 	@Bean
 	public Docket api() {
@@ -175,17 +187,16 @@ public class Conf implements WebMvcConfigurer {
 
 	@Bean
 	public RestTemplate restTemplate() {
-		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-				httpClient());
-		RestTemplate template = new RestTemplate(httpComponentsClientHttpRequestFactory);
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-		MappingJackson2XmlHttpMessageConverter converter = new MappingJackson2XmlHttpMessageConverter();
-		converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
-		messageConverters.add(converter);
-		template.setMessageConverters(messageConverters);
-		return new RestTemplate(httpComponentsClientHttpRequestFactory);
-	}
-
+		RestTemplate template;
+		if(!proxyHost.isEmpty()) {
+			template=   new RestTemplateBuilder(new ProxyCustomizer()).build();
+		}else {
+			HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClient());
+			template=  new RestTemplate(httpComponentsClientHttpRequestFactory);
+		} 
+		 
+		return  template;
+	} 
 	public HttpClient httpClient() {
 		SSLConnectionSocketFactory factory;
 		try {
@@ -197,7 +208,42 @@ public class Conf implements WebMvcConfigurer {
 		return HttpClientBuilder.create().build();
 
 	}
+	class ProxyCustomizer implements RestTemplateCustomizer {
 
+	    @Override
+	    public void customize(RestTemplate restTemplate) {
+	        HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+	        SSLConnectionSocketFactory factory;
+			try {
+				factory = sslConnectionSocketFactory();
+			} catch (Exception e) {
+				LOG.error("No se puede crear la factorya ssl", e);
+				factory=SSLConnectionSocketFactory.getSocketFactory();
+			}	
+	        HttpClient httpClient = HttpClientBuilder.create()
+	            .setRoutePlanner(new DefaultProxyRoutePlanner(proxy) {
+	                @Override
+	                public HttpHost determineProxy(HttpHost target, HttpRequest request, HttpContext context) throws HttpException {
+	                	if (skipProxy(target.getHostName())) {
+	                		return null;
+	                	}
+	                    return super.determineProxy(target, request, context);
+	                }
+	            }).setSSLSocketFactory(factory)
+	            .build();
+	        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+	    }
+	    private boolean skipProxy(String host) {
+	    	if(proxyHost.isEmpty())return false;
+	    	StringTokenizer st=new StringTokenizer(proxyNonHosts,";");
+	    	while(st.hasMoreTokens()) {
+	    		String pattern=st.nextToken();
+	    		pattern=pattern.replaceAll("\\*","");
+	    		if(host.contains(pattern))return true;
+	    	}
+	    	return false;
+	    }
+	}
 	public SSLConnectionSocketFactory sslConnectionSocketFactory() {
 		SSLContext context = sslContext();
 		return new SSLConnectionSocketFactory(context);
