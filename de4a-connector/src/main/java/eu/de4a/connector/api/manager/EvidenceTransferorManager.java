@@ -71,7 +71,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 					// TODO error handling
 				}
 				if(responseTransferEvidenceType != null) {
-					sendResponseMessage(req.getDataEvaluator().getAgentUrn(), requestorReq.getReturnServiceUri(),
+					sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),
 							DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 							.getAsDocument(responseTransferEvidenceType).getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
 				}
