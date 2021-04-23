@@ -26,6 +26,7 @@ import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
 import com.helger.smpclient.bdxr1.BDXRClientReadOnly;
+import com.helger.smpclient.config.SMPClientConfiguration;
 import com.helger.smpclient.exception.SMPClientException;
 import com.helger.smpclient.url.BDXLURLProvider;
 import com.helger.smpclient.url.SMPDNSResolutionException;
@@ -89,6 +90,11 @@ public class Client {
 			// Requires the form urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration
 			final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
 					.parseDocumentTypeIdentifier(documentTypeId);
+			
+      logger.info ("Configured SMP type: '"+SMPClientConfiguration.getTrustStoreType()+"'");
+      logger.info ("Configured SMP truststore: '"+SMPClientConfiguration.getTrustStorePath()+"'");
+      logger.info ("Configured SMP password: '"+SMPClientConfiguration.getTrustStorePassword()+"'");
+			
 			// Use explicit SMP or use DNS to resolve
 			final BDXRClientReadOnly aSMPClient = smpEndpoint == null
 					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
