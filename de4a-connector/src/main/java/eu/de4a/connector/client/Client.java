@@ -26,6 +26,7 @@ import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
 import com.helger.smpclient.bdxr1.BDXRClientReadOnly;
+import com.helger.smpclient.config.SMPClientConfiguration;
 import com.helger.smpclient.exception.SMPClientException;
 import com.helger.smpclient.url.BDXLURLProvider;
 import com.helger.smpclient.url.SMPDNSResolutionException;
@@ -93,16 +94,21 @@ public class Client {
 			final BDXRClientReadOnly aSMPClient = smpEndpoint == null
 					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
 					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
+					
+		    logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());
+            logger.info("Configured SMP truststore: '{}'", SMPClientConfiguration.getTrustStorePath());
+            logger.info("Configured SMP password: '{}'", SMPClientConfiguration.getTrustStorePassword());
+			
 			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
 
 			if (signedServiceMetadata == null)
 				return nodeInfo;
 
 			nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata()
-					.getServiceInformation().getParticipantIdentifierValue());
-			nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
-					.getServiceInformation().getDocumentIdentifierValue());
-
+			        .getServiceInformation().getParticipantIdentifierValue());
+            nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
+                    .getServiceInformation().getDocumentIdentifierValue());
+            
 			final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE
 					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ? 
 							DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
