@@ -90,25 +90,25 @@ public class Client {
 			// Requires the form urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration
 			final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
 					.parseDocumentTypeIdentifier(documentTypeId);
-			
-      logger.info ("Configured SMP type: '"+SMPClientConfiguration.getTrustStoreType()+"'");
-      logger.info ("Configured SMP truststore: '"+SMPClientConfiguration.getTrustStorePath()+"'");
-      logger.info ("Configured SMP password: '"+SMPClientConfiguration.getTrustStorePassword()+"'");
-			
 			// Use explicit SMP or use DNS to resolve
 			final BDXRClientReadOnly aSMPClient = smpEndpoint == null
 					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
 					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
+					
+		    logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());
+            logger.info("Configured SMP truststore: '{}'", SMPClientConfiguration.getTrustStorePath());
+            logger.info("Configured SMP password: '{}'", SMPClientConfiguration.getTrustStorePassword());
+			
 			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
 
 			if (signedServiceMetadata == null)
 				return nodeInfo;
 
 			nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata()
-					.getServiceInformation().getParticipantIdentifierValue());
-			nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
-					.getServiceInformation().getDocumentIdentifierValue());
-
+			        .getServiceInformation().getParticipantIdentifierValue());
+            nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
+                    .getServiceInformation().getDocumentIdentifierValue());
+            
 			final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE
 					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ? 
 							DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);

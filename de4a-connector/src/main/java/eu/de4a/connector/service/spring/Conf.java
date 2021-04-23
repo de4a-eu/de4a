@@ -129,15 +129,17 @@ public class Conf implements WebMvcConfigurer {
 	@Value("${ssl.keystore.type}")
 	private String type;
 
-	@Value("#{'${proxy.host:}'}")
+	@Value("#{'${http.proxy.enabled:false}'}")
+	private boolean proxyEnabled;
+	@Value("#{'${http.proxy.address:}'}")
 	private String proxyHost;
-	@Value("#{'${proxy.port:0}'}")
+	@Value("#{'${http.proxy.port:0}'}")
 	private int proxyPort;
-	@Value("#{'${proxy.user:}'}")
+	@Value("#{'${http.proxyUsername:}'}")
 	private String proxyUser;
-	@Value("#{'${proxy.password:}'}")
+	@Value("#{'${http.proxyPassword:}'}")
 	private String proxyPassword;
-	@Value("#{'${proxy.non.hosts:}'}")
+	@Value("#{'${http.proxy.non-proxy:}'}")
 	private String proxyNonHosts;
 	
 	@Bean
@@ -233,7 +235,7 @@ public class Conf implements WebMvcConfigurer {
 	}
 
 	private HttpRoutePlanner buildRoutePlanner() {
-		if (proxyHost.isEmpty())
+		if (proxyEnabled)
 			return null;
 		HttpHost proxy = new HttpHost(proxyHost, proxyPort);
 		return new DefaultProxyRoutePlanner(proxy) {
