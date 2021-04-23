@@ -235,7 +235,7 @@ public class Conf implements WebMvcConfigurer {
 	}
 
 	private HttpRoutePlanner buildRoutePlanner() {
-		if (proxyEnabled)
+		if (!proxyEnabled)
 			return null;
 		HttpHost proxy = new HttpHost(proxyHost, proxyPort);
 		return new DefaultProxyRoutePlanner(proxy) {
