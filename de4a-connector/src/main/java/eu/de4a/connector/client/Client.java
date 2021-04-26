@@ -1,5 +1,7 @@
 package eu.de4a.connector.client;
 
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +88,7 @@ public class Client {
 		try {
 			// Requires the form iso6523-actorid-upis::9915:demo
 			final IParticipantIdentifier aPI = SimpleIdentifierFactory.INSTANCE
-					.parseParticipantIdentifier(participantId);
+					.parseParticipantIdentifier(participantId.toLowerCase(Locale.getDefault()));
 			// Requires the form urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration
 			final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
 					.parseDocumentTypeIdentifier(documentTypeId);
