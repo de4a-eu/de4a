@@ -88,7 +88,7 @@ public class Client {
 		try {
 			// Requires the form iso6523-actorid-upis::9915:demo
 			final IParticipantIdentifier aPI = SimpleIdentifierFactory.INSTANCE
-					.parseParticipantIdentifier(participantId.toLowerCase(Locale.getDefault()));
+					.parseParticipantIdentifier(participantId.toLowerCase(Locale.ROOT));
 			// Requires the form urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration
 			final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
 					.parseDocumentTypeIdentifier(documentTypeId);
