@@ -5,7 +5,7 @@
         <Console name="STDOUT" target="SYSTEM_OUT">
 			<!-- Location may be an issue when async logging is used! -->
             <PatternLayout
-				pattern="[DE4A CONNECTOR][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
+				pattern="[DE4A-CONNECTOR][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
         </Console>
         <File name="File"
 			fileName="${sys:catalina.base}\logs\connector.log">
@@ -13,6 +13,10 @@
                 <pattern>%d %p %C{1.} [%t] %m%n</pattern>
             </PatternLayout>
         </File>
+        <Kafka name="Kafka" topic="${bundle:application:de4a.kafka.topic}">
+            <PatternLayout pattern="[%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
+            <Property name="bootstrap.servers">${bundle:application:de4a.kafka.url}</Property>
+        </Kafka>
         <RollingFile name="rollingFile"
 			fileName="${sys:catalina.base}\logs\history\connector.log"
 			filePattern="${sys:catalina.base}\logs\history\connector.%d{dd-MMM}.log.gz"
@@ -27,22 +31,35 @@
             </Policies>
             <DefaultRolloverStrategy max="5" />
         </RollingFile>
+        
+        <Routing name="RouterKafka">
+            <Routes pattern="$${bundle:application:de4a.kafka.enabled:-false}">
+                <Route ref="Kafka" key="true" />
+                <Route ref="none" key="false" />
+            </Routes>
+        </Routing>
     </Appenders>
-
 
     <Loggers>
         <Logger name="org.apache.http" level="DEBUG" additivity="false">
             <AppenderRef ref="STDOUT" />
             <AppenderRef ref="File" />
+            <AppenderRef ref="RouterKafka" />
         </Logger>
-
+        <Logger name="org.springframework" level="ERROR" additivity="false">
+            <AppenderRef ref="STDOUT" />
+            <AppenderRef ref="File" />
+            <AppenderRef ref="RouterKafka" />
+        </Logger>
         <Logger name="eu" level="DEBUG" additivity="false">
             <AppenderRef ref="STDOUT" />
             <AppenderRef ref="File" />
+            <AppenderRef ref="RouterKafka" />
         </Logger>
         <Root level="INFO">
             <AppenderRef ref="STDOUT" />
             <AppenderRef ref="File" />
+            <AppenderRef ref="RouterKafka"/>
         </Root>
     </Loggers>
 </Configuration>
