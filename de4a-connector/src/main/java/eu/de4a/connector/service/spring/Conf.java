@@ -108,6 +108,7 @@ public class Conf implements WebMvcConfigurer {
 	private static final Logger LOG = LoggerFactory.getLogger(Conf.class);
 
 	private DataSourceConf dataSourceConf = new DataSourceConf();
+	private HttpClient httpClient;
 
 	@Value("${h2.console.port.jvm:#{null}}")
 	private String h2ConsoleJvmPort;
@@ -217,21 +218,23 @@ public class Conf implements WebMvcConfigurer {
 	}
 
 	public HttpClient httpClient() {
-		try {
-			LOG.debug("SSL context setted to: {}", sslContextEnabled);
-			SSLConnectionSocketFactory factory;
-			if (sslContextEnabled) {
-				factory = new SSLConnectionSocketFactory(sslContext());
-			} else {
-				factory = new SSLConnectionSocketFactory(sslContextTrustAll());
+		if(this.httpClient == null) {
+			try {
+				LOG.debug("SSL context setted to: {}", sslContextEnabled);
+				SSLConnectionSocketFactory factory;
+				if (sslContextEnabled) {
+					factory = new SSLConnectionSocketFactory(sslContext());
+				} else {
+					factory = new SSLConnectionSocketFactory(sslContextTrustAll());
+				}
+				this.httpClient = HttpClientBuilder.create().setSSLSocketFactory(factory)
+						.setRoutePlanner(buildRoutePlanner()).build();
+			} catch (Exception e) {
+				LOG.error("Unable to create SSL factory", e);
 			}
-			return HttpClientBuilder.create().setSSLSocketFactory(factory)
-					.setRoutePlanner(buildRoutePlanner()).build();
-		} catch (Exception e) {
-			LOG.error("Unable to create SSL factory", e);
+			this.httpClient = HttpClientBuilder.create().build();
 		}
-		return HttpClientBuilder.create().build();
-
+		return this.httpClient;
 	}
 
 	private HttpRoutePlanner buildRoutePlanner() {
