@@ -8,7 +8,7 @@ Concived as a library that maintains:
 - Common classes
 
 ## de4a-idk
-IDK entity mock based on [API definition](https://app.swaggerhub.com/apis/danieldecastrop/swagger-idk_de_4_a_information_desk/2.0.1#/). Maintains provided information on in-memory DB tables. Mock is able to provide repsonse to the interfaces:
+IDK entity mock based on [API definition](https://app.swaggerhub.com/apis/danieldecastrop/swagger-idk_de_4_a_information_desk/2.0.1#/). Maintains provided information on in-memory DB tables. Mock is able to process requests through the interfaces:
 - /idk/ial/{canonicalEvidenceTypeId}
 - /idk/ial/{canonicalEvidenceTypeId}/{countryCode}
 - /idk/provision
@@ -32,7 +32,7 @@ idk/src/main/eu/idk/configuration/Conf.java
 ## de4a-connector
 Checkout technical documentation [DE4A Connector - Installation and configuration](https://newrepository.atosresearch.eu/index.php/f/1059081)
 ### API doc
-Once you deploy a Connector instace it be able to access to Swagger UI browsing:
+Once you deploy a Connector instance it be able to access to Swagger UI browsing:
 ```sh
 http://connector-endpoint:port/swagger-ui/
 ```
@@ -61,9 +61,9 @@ You should be able to compile hole packages from parent POM file:
 ```sh
 mvn clean install
 ```
-Also it is possible to compile each package separately browsing into the folder and running the command above.
+Also, it is possible to compile each package separately browsing into the folder and running the command above.
 #### Package
-Compilation process will pack the project into a `.war` file located on `/target/` path, which should be able to deploy on any applications server. If you compiles parent pom, IDK and Connector target paths, with both `war` files, will be created.
+Compilation process will pack the project into a `.war` file located on `/target/` path, which should be able to deploy on any applications server. If you compile parent pom, IDK and Connector target paths, with both `war` files, will be created.
 
 #### de4a-commons `v0.1.1`
 [de4a-commons](https://github.com/de4a-wp5/de4a-commons) project is now on maven central [OSS Sonatype repository - v0.1.1](https://search.maven.org/search?q=g:eu.de4a)
@@ -220,7 +220,7 @@ truststore.password = de4a
 # External endpoints
 smp.endpoint=https://de4a-smp.egovlab.eu/
 ```
-You can define in there your SMP endpoing and truststore which will be used to validate the signature of the responses. - **Do not touch, all consorcium SMPs should be validated with the default truststore**.
+You can define in there your SMP endpoint and truststore which will be used to validate the signature of the responses. - **Do not touch, all consortium SMPs should be validated with the default truststore**.
 
 #### AS4 - TOOP properties `application.properties`
 ```properties
@@ -234,7 +234,7 @@ as4.gateway.implementation.bean=phase4GatewayClient
 # domibus.endpoint=
 ```
 #### Proxy properties
-Some envirorments could require perform connections via proxy due to security policies or environment limitations, that is why the Connector allow to stablish HTTP connections over a proxy.
+Some environments could require perform connections via proxy due to security policies or environment limitations, that is why the Connector allow to establish HTTP connections over a proxy.
 ```properties
 # Properties to create the http client connection through a proxy (optional)
 #http.proxy.enabled=
@@ -249,7 +249,7 @@ Some envirorments could require perform connections via proxy due to security po
 #http.proxyPort=${http.proxy.port}
 #http.nonProxyHosts=${http.proxy.non-proxy}
 ```
-In order to disable proxy configuration you can either comment the properties or set up `enabled` property to false.
+In order to disable proxy configuration, you can either comment the properties or set up `enabled` property to false.
  ```properties
 http.proxy.enabled=false
 ````
@@ -270,9 +270,9 @@ phase4.dump.incoming.path=
 phase4.dump.outgoing.path=
 # (string) (since v2.0.0-rc3) - the from party ID to be used for outgoing messages. Previous versions need to use toop.mem.as4.tc.partyid - starting from RC3 this property is still used as a fallback)
 phase4.send.fromparty.id=egovlab
-# (string) (since 2.0.2) - the AS4 To/PartyId/@type value. This is for Domibus compatibility only. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
+# (string) (since 2.0.2) - the AS4 To/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
 phase4.send.toparty.id.type=urn:oasis:names:tc:ebcore:partyid-type:unregistered
-# (string) (since 2.0.2) - the AS4 From/PartyId/@type value. This is for Domibus compatibility only. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
+# (string) (since 2.0.2) - the AS4 From/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
 phase4.send.fromparty.id.type=urn:oasis:names:tc:ebcore:partyid-type:unregistered
 # (string) - an optional folder, where sent responses should be stored. If this property is not provided, they are not stored
 phase4.send.response.folder=
@@ -294,7 +294,7 @@ phase4.truststore.path=
 phase4.truststore.password=
 ```
 #### Logging configuration `log4j2.xml`
-Configuration file bellow maintains loggin configuration where you can establish the level of each appender, set up log file path, or even include more appenders or configuration.
+Configuration file bellow maintains logging configuration where you can establish the level of each appender, set up log file path, or even include more appenders or configuration.
 **Important** - to set up correctly the path of log file. By default it is a relative path to catalina.base (Tomcat server) `${sys:catalina.base}/logs/connector.log`
 ```xml
 <File name="File" fileName="${sys:catalina.base}/logs/connector.log">
@@ -305,7 +305,7 @@ Configuration file bellow maintains loggin configuration where you can establish
 ```
 ## Starting up Connector
 Once you have all configuration parameters well configured (if not, review the logs to find out the problem), it is time to deploy the component into an applications server.
-Once you have deploy the `war` file, there are several **checks to ensure that the deployment was successful**:
+Once you have deployed the `war` file, there are several **checks to ensure that the deployment was successful**:
 - Open Swagger UI browsing: `http://host:port/swagger-ui/`
 	- Eg.: [eGovLab Connector](https://de4a-dev-connector.egovlab.eu/swagger-ui/)
 - Toop index page will be at root path: `http://host:port/`
