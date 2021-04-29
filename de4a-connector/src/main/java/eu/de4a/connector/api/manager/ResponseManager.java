@@ -1,6 +1,7 @@
 package eu.de4a.connector.api.manager;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 
+import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
+import eu.de4a.connector.api.controller.error.ExternalModuleError;
+import eu.de4a.connector.api.controller.error.FamilyErrorType;
+import eu.de4a.connector.api.controller.error.LayerError;
+import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
 import eu.de4a.connector.as4.client.ResponseWrapper;
 import eu.de4a.connector.client.Client;
 import eu.de4a.exception.MessageException;
@@ -100,7 +107,7 @@ public class ResponseManager {
 		return evaluator != null && evaluator.isDone();
 	}
 
-	public ResponseTransferEvidenceType getResponse(String id) throws MessageException {
+	public ResponseTransferEvidenceType getResponse(String id) {
 		logger.debug("Processing ResponseTransferEvidence with id {}", id);
 
 		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);
@@ -111,11 +118,16 @@ public class ResponseManager {
 		if(!CollectionUtils.isEmpty(filesAttached)) {
 			Document doc = getDocumentFromAttached(filesAttached, DE4AConstants.TAG_EVIDENCE_RESPONSE);
 			if(doc != null) {
-				return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-						.read(doc);
+			    return (ResponseTransferEvidenceType) ErrorHandlerUtils.conversionDocWithCatching(
+			            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), doc, false, 
+			            LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseTransferEvidenceException());
 			}
 		}
-		throw new MessageException("Not exists a ResponseTransferEvidence for ID:" + id);
+		throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+		    .withFamily(FamilyErrorType.SAVING_DATA_ERROR)
+		    .withModule(ExternalModuleError.NONE)
+		    .withMessageArg(MessageFormat.format("Response {0} not found on database", id))
+		    .withHttpStatus(HttpStatus.OK);
 	}
 
 	private Document getDocumentFromAttached(List<EvaluatorRequestData> filesAttached,
