@@ -37,10 +37,13 @@ import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
+import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
 import eu.de4a.connector.api.controller.error.ExternalModuleError;
 import eu.de4a.connector.api.controller.error.FamilyErrorType;
 import eu.de4a.connector.api.controller.error.LayerError;
+import eu.de4a.connector.api.controller.error.ResponseErrorException;
 import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationException;
+import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
 import eu.de4a.connector.api.controller.error.SMPLookingMetadataInformationException;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
@@ -53,6 +56,7 @@ import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
+import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
@@ -127,10 +131,14 @@ public class Client {
 				nodeInfo.setProcessIdentifier(aProcID.getURIEncoded());
 			} 
 		} catch (final SMPClientException | SMPDNSResolutionException ex) {
-			logger.error("Service metadata not found on SMP", ex); 
-			throw new  SMPLookingMetadataInformationException( ).withUserMessage(userMessage).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
-	 			.withModule(ExternalModuleError.SMP).withMessageArg(ex.getMessage()).withHttpStatus(HttpStatus.OK);
-		}
+            logger.error("Service metadata not found on SMP", ex); 
+            throw new SMPLookingMetadataInformationException( )
+                        .withUserMessage(userMessage)
+                        .withLayer(LayerError.COMMUNICATIONS)
+                        .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                        .withModule(ExternalModuleError.SMP)
+                        .withMessageArg(ex.getMessage()).withHttpStatus(HttpStatus.OK);
+        }
 		return nodeInfo;
 	}
 
@@ -145,21 +153,24 @@ public class Client {
 		String response = null;
 		try { 
 			response = restTemplate.getForObject(uri.toString(), String.class);
-		}catch(RestClientException e) { 
-			logger.error("Error sending message to IDK server",e);
-			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
-	 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
-		}
-		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
-		try {
-			AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
-			responseLookup.setAvailableSources(availableSources);
-		} catch (JsonProcessingException e) {
-			logger.error("Error processing idk  response",e);
-			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
- 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
-		}
+		} catch(RestClientException e) { 
+            logger.error("Error sending message to IDK server",e);
+            throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                .withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+        }
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
+        try {
+            AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
+            responseLookup.setAvailableSources(availableSources);
+        } catch (JsonProcessingException e) {
+            logger.error("Error processing idk  response",e);
+            throw new ResponseLookupRoutingInformationException()
+                    .withLayer(LayerError.COMMUNICATIONS)
+                    .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
+                    .withModule(ExternalModuleError.IDK)
+                    .withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+        }
 		return responseLookup;
 	}
 
@@ -173,24 +184,30 @@ public class Client {
 		uri.append("=").append(request.getDataOwnerId());
 
 		String response = null;
-		try { 
-			response = restTemplate.getForObject(uri.toString(), String.class);
-		}catch(RestClientException e) { 
-			logger.error("Error sending message to IDK server",e);
-			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
-			 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
-		}
-		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
-		try {
-			AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
-			responseLookup.setAvailableSources(availableSources);
-		} catch (JsonProcessingException e) {
-			logger.error("Error processing idk  response",e);
-			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
- 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
-		}
-		return responseLookup;
+        try { 
+            response = restTemplate.getForObject(uri.toString(), String.class);
+        }catch(RestClientException e) { 
+            logger.error("Error sending message to IDK server",e);
+            throw new ResponseLookupRoutingInformationException()
+                        .withLayer(LayerError.COMMUNICATIONS)
+                        .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                        .withModule(ExternalModuleError.IDK)
+                        .withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+        }
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
+        try {
+            AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
+            responseLookup.setAvailableSources(availableSources);
+        } catch (JsonProcessingException e) {
+            logger.error("Error processing idk  response",e);
+            throw new ResponseLookupRoutingInformationException()
+                    .withLayer(LayerError.COMMUNICATIONS)
+                    .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
+                    .withModule(ExternalModuleError.IDK)
+                    .withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+        }
+        return responseLookup;
 	}
 
 	public boolean pushEvidence(String endpoint, Document requestForwardDoc) {
@@ -215,40 +232,37 @@ public class Client {
 	}
 
 	public Object sendEvidenceRequest(RequestTransferEvidenceUSIIMDRType evidenceRequest, String endpoint,
-			boolean isUsi) throws MessageException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Request: {}", evidenceRequest.getRequestId());
-		}
-		String urlRequest = endpoint + (isUsi ? "USI" : "IM");
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_XML);
-
-		try {
-			if (!isUsi) {
-				RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
-						.transformRequestToOwnerIM(evidenceRequest);
-				String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
-
-				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest,
-						new HttpEntity<>(reqXML, headers), String.class);
-
-				ResponseExtractEvidenceType responseExtractEvidenceType = DE4AMarshaller
-						.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-						.read(String.valueOf(response.getBody()));
-				return MessagesUtils.transformResponseTransferEvidenceUSI(responseExtractEvidenceType, evidenceRequest);
-			} else {
-				RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
-						.transformRequestToOwnerUSI(evidenceRequest);
-				String reqXML = DE4AMarshaller.doUsiRequestMarshaller().getAsString(requestExtractEvidence);
-				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest,
-						new HttpEntity<>(reqXML, headers), String.class);
-				if (ObjectUtils.isEmpty(response.getBody())) {
-					return DE4AResponseDocumentHelper.createResponseError(false);
-				}
-				return DE4AMarshaller.doUsiResponseMarshaller().read(String.valueOf(response.getBody()));
-			}
-		} catch (NullPointerException e) {
-			throw new MessageException("Error processing response from Owner:" + e.getMessage());
-		}
-	}
+            boolean isUsi) throws MessageException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Sending request to owner - request ID: {}", evidenceRequest.getRequestId());
+        }
+        String urlRequest = endpoint + (isUsi ? "USI" : "IM");
+        
+        if (!isUsi) {
+            RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
+                    .transformRequestToOwnerIM(evidenceRequest);
+            String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
+            String response = ErrorHandlerUtils.postRestObjectWithCatching(urlRequest, reqXML, 
+                    ExternalModuleError.DATA_OWNER, new ResponseTransferEvidenceException(), this.restTemplate);
+            
+            ResponseTransferEvidenceType responseTransferEvidence;
+            ResponseExtractEvidenceType responseExtractEvidenceType = 
+                    (ResponseExtractEvidenceType) ErrorHandlerUtils.conversionWithCatching(
+                    DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+                    String.valueOf(response), false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
+                    new ResponseTransferEvidenceException());
+            responseTransferEvidence = MessagesUtils.transformResponseTransferEvidence(responseExtractEvidenceType, 
+                    evidenceRequest);
+            return responseTransferEvidence;
+        } else {
+            RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
+                    .transformRequestToOwnerUSI(evidenceRequest);
+            String reqXML = (String) ErrorHandlerUtils.conversionWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
+                    requestExtractEvidence, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
+                    new ResponseTransferEvidenceException());
+            String response = ErrorHandlerUtils.postRestObjectWithCatching(urlRequest, reqXML, 
+                    ExternalModuleError.DATA_OWNER, new ResponseErrorException(), this.restTemplate);
+            return DE4AMarshaller.doUsiResponseMarshaller().read(String.valueOf(response));
+        }
+    }
 }
