@@ -1,5 +1,6 @@
 package eu.de4a.connector.api.manager;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
@@ -15,6 +17,10 @@ import org.w3c.dom.Element;
 
 import com.helger.commons.mime.CMimeType;
 
+import eu.de4a.connector.api.controller.error.ExternalModuleError;
+import eu.de4a.connector.api.controller.error.FamilyErrorType;
+import eu.de4a.connector.api.controller.error.LayerError;
+import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.model.smp.NodeInfo;
@@ -90,32 +96,26 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	private ResponseTransferEvidenceType handleRequestTransferEvidence(String from, String dataOwnerId,
 			Element documentElement, String requestId, String canonicalEvidenceTypeId) {
 		boolean ok = false;
-		//try {
-			ok = sendRequestMessage(from, dataOwnerId, documentElement, canonicalEvidenceTypeId);
-//		} catch (Exception e) {
-//			MessageException me = new MessageException(e.getMessage());
-//			return responseManager.getErrorResponse(me);
-//		}
-		if (!ok) {
-			return null;
-		}
+		sendRequestMessage(from, dataOwnerId, documentElement, canonicalEvidenceTypeId);
 		try {
 			ok = waitResponse(requestId);
-
 		} catch (InterruptedException e) {
 			logger.error("Error waiting for response", e);
-			Thread.currentThread().interrupt();
-			return null;
+			throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+                .withFamily(FamilyErrorType.ERROR_RESPONSE)
+                .withModule(ExternalModuleError.NONE)
+                .withMessageArg("Error waiting for response")
+                .withHttpStatus(HttpStatus.OK);
 		}
 		if (!ok) {
 			logger.error("No response before timeout");
-			return null;
+			throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+                .withFamily(FamilyErrorType.ERROR_RESPONSE)
+                .withModule(ExternalModuleError.NONE)
+                .withMessageArg("No response before timeout")
+                .withHttpStatus(HttpStatus.OK);
 		}
-		try {
-			return responseManager.getResponse(requestId);
-		} catch (MessageException e) {
-			return responseManager.getErrorResponse(e);
-		}
+		return responseManager.getResponse(requestId);		
 	}
 
 	private boolean waitResponse(String id) throws InterruptedException {
@@ -148,13 +148,23 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			payloads.add(p);
 			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestWrapper, payloads, false);
+			
 			return true;
 		} catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications", e);
+			throw new ResponseTransferEvidenceException().withLayer(LayerError.COMMUNICATIONS)
+                .withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
+                .withModule(ExternalModuleError.CONNECTOR)
+                .withMessageArg(e.getMessage())
+                .withHttpStatus(HttpStatus.OK);
 		} catch (MessageException e) {
 			logger.error("Error building regrep message", e);
+			throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+                .withFamily(FamilyErrorType.CONVERSION_ERROR)
+                .withModule(ExternalModuleError.NONE)
+                .withMessageArg(e.getMessage())
+                .withHttpStatus(HttpStatus.OK);
 		}
-		return false;
 	}
 
 }
