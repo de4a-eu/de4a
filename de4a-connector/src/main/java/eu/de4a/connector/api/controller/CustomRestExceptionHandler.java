@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.xml.bind.UnmarshalException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -22,15 +24,21 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import eu.de4a.conn.api.rest.ApiError;
 import eu.de4a.connector.api.controller.error.ConnectorException;
+import eu.de4a.connector.api.controller.error.ExternalModuleError;
+import eu.de4a.connector.api.controller.error.FamilyErrorType;
+import eu.de4a.connector.api.controller.error.LayerError;
 import eu.de4a.connector.api.controller.error.ResponseErrorFactory;
+import eu.de4a.iem.jaxb.common.types.ErrorListType;
+import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
+import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 /**
  * Controller for handling BAD_REQUEST type errors for more concise messages
  *
  */
 @ControllerAdvice
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
+	private static final Logger logger = LoggerFactory.getLogger(CustomRestExceptionHandler.class);
 	@Autowired
 	private MessageSource messageSource;
 	@Override
@@ -38,8 +46,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 	  MissingServletRequestParameterException ex, HttpHeaders headers,
 	  HttpStatus status, WebRequest request) {
 	  String error = ex.getParameterName() + " parameter is missing";
-	  ApiError apiError =  new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), error);
-	  return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
+	  return buildBadRequestError(error);
 	}
 	@ExceptionHandler(value = { ConnectorException.class })
 	protected ResponseEntity<Object> handleConnectorException(ConnectorException ex, WebRequest request) {  
@@ -51,8 +58,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 	@Override
 	protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
-			HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-
+			HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) { 
 		List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			headers.setAccept(mediaTypes);
@@ -60,9 +66,8 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 		List<String> args = new ArrayList<>();
 		args.add(String.valueOf(ex.getContentType()));
 		args.add(mediaTypes.toString());
-		String err= messageSource.getMessage("error.400.mimetype", args.toArray(),LocaleContextHolder.getLocale());
-		ApiError apiError =  new ApiError(HttpStatus.BAD_REQUEST, err,""+HttpStatus.BAD_REQUEST.value());
-		return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
+		String err= messageSource.getMessage("error.400.mimetype", args.toArray(),LocaleContextHolder.getLocale()); 
+		return buildBadRequestError(err);
 	}
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotReadable( HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -73,18 +78,27 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 		  }else {
 			  error=messageSource.getMessage("error.400.args.required", null,LocaleContextHolder.getLocale());
 		  }
-		  ApiError apiError =  new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage(), error);
-		  HttpHeaders httpheader=new HttpHeaders();
-		  httpheader.setContentType(   org.springframework.http.MediaType.APPLICATION_XML );
-		  return new ResponseEntity<>(apiError, httpheader, apiError.getStatus());
+		  return buildBadRequestError(error); 
 	}
 	@Override
 	protected ResponseEntity<Object> handleNoHandlerFoundException(
 			NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		 	String err= messageSource.getMessage("error.404", null,LocaleContextHolder.getLocale());
-		 	ApiError apiError =  new ApiError(HttpStatus.NOT_FOUND, err,""+HttpStatus.NOT_FOUND.value());
-			HttpHeaders httpheader=new HttpHeaders();
-			httpheader.setContentType(   org.springframework.http.MediaType.APPLICATION_XML );
-			return new ResponseEntity<>(apiError, httpheader, apiError.getStatus());
+			logger.warn("REST Client request not found service");
+		 	String err= messageSource.getMessage("error.404", null,LocaleContextHolder.getLocale());  
+			ResponseErrorType responseError=DE4AResponseDocumentHelper.createResponseError(false);
+			responseError.setErrorList(new ErrorListType()); 
+			//TODO same code for not found vs missing parameters?
+			String code= LayerError.COMMUNICATIONS.ordinal()+""+ExternalModuleError.NONE.getId()+""+FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID() ;
+			responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));  
+			return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.NOT_FOUND);
+			
+	}
+	private ResponseEntity<Object> buildBadRequestError(String err) {
+		logger.warn("REST Client BAD REQUEST-> {}",err);
+		ResponseErrorType responseError=DE4AResponseDocumentHelper.createResponseError(false);
+		responseError.setErrorList(new ErrorListType()); 
+		String code= LayerError.COMMUNICATIONS.ordinal()+""+ExternalModuleError.NONE.getId()+""+FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID() ;
+		responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));  
+		return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.BAD_REQUEST);
 	}
 }
