@@ -44,18 +44,12 @@ public class EvidenceTransferorManager extends EvidenceManager {
 
 
 	public void queueMessage(MessageOwner request) {
-		ResponseTransferEvidenceType responseTransferEvidenceType = null;
-		OwnerAddresses ownerAddress = null;
+		ResponseTransferEvidenceType responseTransferEvidenceType = null; 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Queued message to send to owner:");
 			logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
 		}
-		try {
-			ownerAddress = ownerLocator.lookupOwnerAddress(request.getReceiverId());
-		} catch (MessageException e) {
-			logger.error("Owner endpoint not found with participantID: {}", request.getReceiverId());
-			// TODO error handling
-		}
+		OwnerAddresses ownerAddress  = ownerLocator.lookupOwnerAddress(request.getReceiverId()); 
 		RequestorRequest requestorReq = new RequestorRequest();
 		if(ownerAddress != null) {
 			RequestTransferEvidenceUSIIMDRType req = DE4AMarshaller.drImRequestMarshaller().read(request.getMessage());
