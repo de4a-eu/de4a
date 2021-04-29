@@ -90,12 +90,12 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	private ResponseTransferEvidenceType handleRequestTransferEvidence(String from, String dataOwnerId,
 			Element documentElement, String requestId, String canonicalEvidenceTypeId) {
 		boolean ok = false;
-		try {
+		//try {
 			ok = sendRequestMessage(from, dataOwnerId, documentElement, canonicalEvidenceTypeId);
-		} catch (Exception e) {
-			MessageException me = new MessageException(e.getMessage());
-			return responseManager.getErrorResponse(me);
-		}
+//		} catch (Exception e) {
+//			MessageException me = new MessageException(e.getMessage());
+//			return responseManager.getErrorResponse(me);
+//		}
 		if (!ok) {
 			return null;
 		}
@@ -134,7 +134,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
 			String canonicalEvidenceTypeId) {
 		String senderId = sender;
-		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false);
+		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
 		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
 			senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
 		}

@@ -16,6 +16,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -40,12 +41,11 @@ import eu.de4a.connector.api.controller.error.ExternalModuleError;
 import eu.de4a.connector.api.controller.error.FamilyErrorType;
 import eu.de4a.connector.api.controller.error.LayerError;
 import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationException;
+import eu.de4a.connector.api.controller.error.SMPLookingMetadataInformationException;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.AckType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
-import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
@@ -86,7 +86,7 @@ public class Client {
 	 *                        or request
 	 * @return NodeInfo Service metadata
 	 */
-	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService) {
+	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService, Element userMessage) {
 		logger.debug("Request SMP {}, {}", participantId, documentTypeId);
 
 		NodeInfo nodeInfo = new NodeInfo();
@@ -125,11 +125,11 @@ public class Client {
 				nodeInfo.setEndpointURI(endpoint.getEndpointURI());
 				nodeInfo.setCertificate(endpoint.getCertificate());
 				nodeInfo.setProcessIdentifier(aProcID.getURIEncoded());
-			}
-			// TODO error handling
+			} 
 		} catch (final SMPClientException | SMPDNSResolutionException ex) {
-			logger.error("Service metadata not found on SMP", ex);
-			return new NodeInfo();
+			logger.error("Service metadata not found on SMP", ex); 
+			throw new  SMPLookingMetadataInformationException( ).withUserMessage(userMessage).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
+	 			.withModule(ExternalModuleError.SMP).withMessageArg(ex.getMessage()).withHttpStatus(HttpStatus.OK);
 		}
 		return nodeInfo;
 	}
@@ -146,6 +146,7 @@ public class Client {
 		try { 
 			response = restTemplate.getForObject(uri.toString(), String.class);
 		}catch(RestClientException e) { 
+			logger.error("Error sending message to IDK server",e);
 			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
 	 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
 		}
@@ -155,13 +156,9 @@ public class Client {
 			AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
 			responseLookup.setAvailableSources(availableSources);
 		} catch (JsonProcessingException e) {
-			ErrorListType errorList = new ErrorListType();
-			ErrorType error = new ErrorType();
-			// TODO error handling
-			error.setCode("501");
-			error.setText("Error converting JSON to object");
-			errorList.addError(error);
-			responseLookup.setErrorList(errorList);
+			logger.error("Error processing idk  response",e);
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
+ 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
 		}
 		return responseLookup;
 	}
@@ -175,20 +172,23 @@ public class Client {
 		uri.append("&").append("dataOwnerId");
 		uri.append("=").append(request.getDataOwnerId());
 
-		String response = restTemplate.getForObject(uri.toString(), String.class);
+		String response = null;
+		try { 
+			response = restTemplate.getForObject(uri.toString(), String.class);
+		}catch(RestClientException e) { 
+			logger.error("Error sending message to IDK server",e);
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
+			 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+		}
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
 			AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
 			responseLookup.setAvailableSources(availableSources);
 		} catch (JsonProcessingException e) {
-			ErrorListType errorList = new ErrorListType();
-			ErrorType error = new ErrorType();
-			// TODO error handling
-			error.setCode("501");
-			error.setText("Error converting JSON to object");
-			errorList.addError(error);
-			responseLookup.setErrorList(errorList);
+			logger.error("Error processing idk  response",e);
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
+ 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
 		}
 		return responseLookup;
 	}

@@ -42,8 +42,12 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 	  return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 	@ExceptionHandler(value = { ConnectorException.class })
-	protected ResponseEntity<Object> handleConflict(ConnectorException ex, WebRequest request) {  
+	protected ResponseEntity<Object> handleConnectorException(ConnectorException ex, WebRequest request) {  
 		return new ResponseEntity<>(ResponseErrorFactory.getResponseError(ex), new HttpHeaders(), ex.getStatus());
+	}
+	@ExceptionHandler(value = { Exception.class })
+	protected ResponseEntity<Object> handleExceptionUnknown(Exception ex, WebRequest request) {  
+		return new ResponseEntity<>(ResponseErrorFactory.getGenericResponseError(ex), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	@Override
 	protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
