@@ -234,7 +234,7 @@ as4.gateway.implementation.bean=phase4GatewayClient
 # domibus.endpoint=
 ```
 #### Proxy properties
-Some environments could require perform connections via proxy due to security policies or environment limitations, that is why the Connector allow to establish HTTP connections over a proxy.
+Some environments could require perform connections via proxy due to security policies or environment limitations, that is why the Connector allow to establish HTTP connections through a proxy server.
 ```properties
 # Properties to create the http client connection through a proxy (optional)
 #http.proxy.enabled=
