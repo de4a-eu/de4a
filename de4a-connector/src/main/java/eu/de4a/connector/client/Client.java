@@ -1,12 +1,7 @@
 package eu.de4a.connector.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
@@ -40,6 +36,10 @@ import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
+import eu.de4a.connector.api.controller.error.ExternalModuleError;
+import eu.de4a.connector.api.controller.error.FamilyErrorType;
+import eu.de4a.connector.api.controller.error.LayerError;
+import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationException;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.AckType;
@@ -101,11 +101,11 @@ public class Client {
 			final BDXRClientReadOnly aSMPClient = smpEndpoint == null
 					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
 					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
-
+					
 		    logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());
             logger.info("Configured SMP truststore: '{}'", SMPClientConfiguration.getTrustStorePath());
             logger.info("Configured SMP password: '{}'", SMPClientConfiguration.getTrustStorePassword());
-
+			
 			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
 
 			if (signedServiceMetadata == null)
@@ -115,9 +115,9 @@ public class Client {
 			        .getServiceInformation().getParticipantIdentifierValue());
             nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
                     .getServiceInformation().getDocumentIdentifierValue());
-
+            
 			final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE
-					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ?
+					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ? 
 							DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
 			final EndpointType endpoint = BDXRClientReadOnly.getEndpoint(signedServiceMetadata, aProcID,
 					ESMPTransportProfile.TRANSPORT_PROFILE_BDXR_AS4);
@@ -136,22 +136,19 @@ public class Client {
 
 	public ResponseLookupRoutingInformationType getSources(RequestLookupRoutingInformationType request) {
 
-	    URIBuilder uriBuilder;
-        try {
-            uriBuilder = new URIBuilder(idkEndpoint);
-        } catch (URISyntaxException e1) {
-            logger.error("There was an error creating URI from IDK endpoint");
-            return null;
-        }
-        StringBuilder path = new StringBuilder(uriBuilder.getPath());
-        path.append("ial/");
-        path.append(request.getCanonicalEvidenceTypeId());
-        if (!ObjectUtils.isEmpty(request.getCountryCode())) {
-            path.append("/");
-            path.append(request.getCountryCode());
-        }
-        uriBuilder.setPath(path.toString());
-		String response = restTemplate.getForObject(uriBuilder.toString(), String.class);
+		StringBuilder uri = new StringBuilder(idkEndpoint);
+		uri.append("/ial/");
+		uri.append(request.getCanonicalEvidenceTypeId());
+		if (!ObjectUtils.isEmpty(request.getCountryCode())) {
+			uri.append("/").append(request.getCountryCode());
+		}
+		String response = null;
+		try { 
+			response = restTemplate.getForObject(uri.toString(), String.class);
+		}catch(RestClientException e) { 
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
+	 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+		}
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
@@ -171,19 +168,14 @@ public class Client {
 
 	public ResponseLookupRoutingInformationType getProvisions(RequestLookupRoutingInformationType request) {
 
-		URIBuilder uriBuilder;
-        try {
-            uriBuilder = new URIBuilder(idkEndpoint);
-        } catch (URISyntaxException e1) {
-            logger.error("There was an error creating URI from IDK endpoint");
-            return null;
-        }
-        StringBuilder path = new StringBuilder(uriBuilder.getPath());
-		path.append("provision");
-		uriBuilder.setParameter("canonicalEvidenceTypeId", request.getCanonicalEvidenceTypeId());
-		uriBuilder.setParameter("dataOwnerId", request.getDataOwnerId());
-		uriBuilder.setPath(path.toString());
-		String response = restTemplate.getForObject(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), String.class);
+		StringBuilder uri = new StringBuilder(idkEndpoint);
+		uri.append("/provision");
+		uri.append("?").append("canonicalEvidenceTypeId");
+		uri.append("=").append(request.getCanonicalEvidenceTypeId());
+		uri.append("&").append("dataOwnerId");
+		uri.append("=").append(request.getDataOwnerId());
+
+		String response = restTemplate.getForObject(uri.toString(), String.class);
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
