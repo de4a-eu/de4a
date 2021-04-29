@@ -1,7 +1,12 @@
 package eu.de4a.connector.client;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +140,7 @@ public class Client {
 	}
 
 	public ResponseLookupRoutingInformationType getSources(RequestLookupRoutingInformationType request) {
-
+ 
 		StringBuilder uri = new StringBuilder(idkEndpoint);
 		uri.append("/ial/");
 		uri.append(request.getCanonicalEvidenceTypeId());
@@ -149,7 +154,7 @@ public class Client {
 			logger.error("Error sending message to IDK server",e);
 			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
 	 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
-		}
+		} 
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
@@ -164,7 +169,7 @@ public class Client {
 	}
 
 	public ResponseLookupRoutingInformationType getProvisions(RequestLookupRoutingInformationType request) {
-
+ 
 		StringBuilder uri = new StringBuilder(idkEndpoint);
 		uri.append("/provision");
 		uri.append("?").append("canonicalEvidenceTypeId");
@@ -179,7 +184,7 @@ public class Client {
 			logger.error("Error sending message to IDK server",e);
 			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
 			 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
-		}
+		} 
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
