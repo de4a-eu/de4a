@@ -17,11 +17,14 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import eu.de4a.conn.api.rest.ApiError;
+import eu.de4a.connector.api.controller.error.ConnectorException;
+import eu.de4a.connector.api.controller.error.ResponseErrorFactory;
 /**
  * Controller for handling BAD_REQUEST type errors for more concise messages
  *
@@ -38,7 +41,10 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 	  ApiError apiError =  new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), error);
 	  return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-
+	@ExceptionHandler(value = { ConnectorException.class })
+	protected ResponseEntity<Object> handleConflict(ConnectorException ex, WebRequest request) {  
+		return new ResponseEntity<>(ResponseErrorFactory.getResponseError(ex), new HttpHeaders(), ex.getStatus());
+	}
 	@Override
 	protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
 			HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
