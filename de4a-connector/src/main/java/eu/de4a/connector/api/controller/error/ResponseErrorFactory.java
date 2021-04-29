@@ -8,9 +8,13 @@ public class ResponseErrorFactory {
 	static{
 		handlers=new HashMap<Class<?>,ConnectorExceptionHandler>();
 		handlers.put(ResponseLookupRoutingInformationException.class , new ResponseLookupRoutingInformationExceptionHandler());
+		handlers.put(SMPLookingMetadataInformationException.class , new SMPLookingMetadataInformationExceptionHandler());
 	}
 	public static String getResponseError(ConnectorException ex) {
 		return handlers.get(ex.getClass()).getResponseError(ex);
+	}
+	public static String getGenericResponseError(Exception ex) {
+		return GenericExceptionHandler.getResponseError(ex);
 	}
 	
 }

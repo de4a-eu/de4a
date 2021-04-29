@@ -6,7 +6,7 @@ public enum FamilyErrorType {
 	ERROR_RESPONSE("4",""),
 	CONVERSION_ERROR("5",""),
 	SAVING_DATA_ERROR("6",""),
-	SCHEMA_VALIDATION_FAILED("7",""),
+	SCHEMA_VALIDATION_FAILED("7","error.schema.validation"),
 	AS4_ERROR_COMMUNICATION("8","") ;
 	private String id;
 	private String label;
