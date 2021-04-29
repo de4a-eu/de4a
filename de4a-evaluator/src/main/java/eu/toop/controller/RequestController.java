@@ -85,13 +85,21 @@ public class RequestController {
 		User u = new User();		
 		try {
 			ResponseLookupRoutingInformationType responseRouting = client.getRoutingInfo(lookupRouting);
-			Map<String, String> dataOwnerLabels = new HashMap<>();
-			responseRouting.getAvailableSources().getSource().forEach(s -> {
-				s.getProvisionItems().getProvisionItem().stream().forEach(i -> {
-					dataOwnerLabels.put(i.getDataOwnerId(), i.getDataOwnerPrefLabel());
+			if(responseRouting.getErrorList().hasErrorEntries()) {
+				logger.warn("The requestor has not been able to obtain the sources of evidence");
+				model.addAttribute("errorCode",responseRouting.getErrorList().getErrorAtIndex(0).getCode());
+				model.addAttribute("errorDescription",responseRouting.getErrorList().getErrorAtIndex(0).getText());
+				return "errorPage";
+			}else {
+				Map<String, String> dataOwnerLabels = new HashMap<>();
+				responseRouting.getAvailableSources().getSource().forEach(s -> {
+					s.getProvisionItems().getProvisionItem().stream().forEach(i -> {
+						dataOwnerLabels.put(i.getDataOwnerId(), i.getDataOwnerPrefLabel());
+					});
 				});
-			});
-			model.addAttribute("dataOwnerList", dataOwnerLabels);
+				model.addAttribute("dataOwnerList", dataOwnerLabels);
+			}
+			
 		} catch (Exception | MessageException e) {
 			logger.error("Error retrieving routing info", e);
 			model.addAttribute("errorCode", "Error retrieving routing info");
