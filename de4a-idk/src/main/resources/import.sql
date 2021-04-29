@@ -1,6 +1,6 @@
 -- ========= INITIAL DATA TO PROVIDE PILOT REQUIREMENTS ========= --
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (1, 'CompanyRegistration', 'nuts0', 'AT', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (1, 'AT', 'ÖSTERREICH', 'iso6523-actorid-upis::9991:AT000000271', 'BUNDESMINISTERIUM FUER DIGITALISIERUNG UND WIRTSCHAFTSSTANDORT (BMDW)', 1);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (1, 'AT', 'ï¿½STERREICH', 'iso6523-actorid-upis::9991:AT000000271', 'BUNDESMINISTERIUM FUER DIGITALISIERUNG UND WIRTSCHAFTSSTANDORT (BMDW)', 1);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (1, 'ip', null , 1);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (2, 'CompanyRegistration', 'nuts0', 'NL', null, null);
@@ -12,11 +12,11 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (3, 'ip', null , 3);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (4, 'CompanyRegistration', 'nuts0', 'RO', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (4, 'RO', 'ROMÂNIA', 'iso6523-actorid-upis::9991:RO000000006', 'OFICIUL NATIONAL AL REGISTRULUI COMERTULUI (ONRC)', 4);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (4, 'RO', 'ROMï¿½NIA', 'iso6523-actorid-upis::9991:RO000000006', 'OFICIUL NATIONAL AL REGISTRULUI COMERTULUI (ONRC)', 4);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (4, 'ip', null , 4);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (5, 'HigherEdCertificate', 'nuts0', 'ES', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (5, 'ES', 'España', 'iso6523-actorid-upis::9921:E05025101', 'MINISTERIO DE UNIVERSIDADES', 5);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (5, 'ES', 'Espaï¿½a', 'iso6523-actorid-upis::9921:E05025101', 'MINISTERIO DE UNIVERSIDADES', 5);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (5, 'ip', null , 5);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (6, 'HigherEdCertificate', 'nuts0', 'SI', null, null);
@@ -24,15 +24,15 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (6, 'ip', null , 6);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (7, 'HigherEdCertificate', 'nuts0', 'PT', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (7, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:PT990000101', 'Instituto Superior Técnico, Universidade de Lisboa', 7);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (7, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:PT990000101', 'Instituto Superior Tï¿½cnico, Universidade de Lisboa', 7);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (7, 'ip', null , 7);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (8, 'BirthCertificate', 'nuts0', 'ES', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (8, 'ES', 'España', 'iso6523-actorid-upis::9921:E00003901', 'Ministerio de Justicia', 8);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (8, 'ES', 'Espaï¿½a', 'iso6523-actorid-upis::9921:ess2833002e', 'Ministerio de Justicia', 8);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (8, 'ip', null , 8);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (9, 'BirthCertificate', 'nuts0', 'RO', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (9, 'RO', 'ROMÂNIA', 'iso6523-actorid-upis::9991:RO000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 9);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (9, 'RO', 'ROMï¿½NIA', 'iso6523-actorid-upis::9991:RO000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 9);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (9, 'ip', null , 9);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (10, 'BirthCertificate', 'nuts0', 'SI', null, null);
@@ -48,11 +48,11 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (12, 'ip', null , 12);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (13, 'DeathCertificate', 'nuts0', 'ES', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (13, 'ES', 'España', 'iso6523-actorid-upis::9921:E00003901', 'Ministerio de Justicia', 13);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (13, 'ES', 'Espaï¿½a', 'iso6523-actorid-upis::9921:E00003901', 'Ministerio de Justicia', 13);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (13, 'ip', null , 13);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (14, 'DeathCertificate', 'nuts0', 'RO', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (14, 'RO', 'ROMÂNIA', 'iso6523-actorid-upis::9991:RO000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 14);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (14, 'RO', 'ROMï¿½NIA', 'iso6523-actorid-upis::9991:RO000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 14);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (14, 'ip', null , 14);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (15, 'DeathCertificate', 'nuts0', 'SI', null, null);
@@ -64,11 +64,11 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (16, 'ip', null , 16);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (17, 'MarriageCertificate', 'nuts0', 'ES', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (17, 'ES', 'España', 'iso6523-actorid-upis::9921:E00003901', 'Ministerio de Justicia', 17);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (17, 'ES', 'Espaï¿½a', 'iso6523-actorid-upis::9921:E00003901', 'Ministerio de Justicia', 17);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (17, 'ip', null , 17);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (18, 'MarriageCertificate', 'nuts0', 'RO', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (18, 'RO', 'ROMÂNIA', 'iso6523-actorid-upis::9991:RO000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 18);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (18, 'RO', 'ROMï¿½NIA', 'iso6523-actorid-upis::9991:RO000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 18);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (18, 'ip', null , 18);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (19, 'MarriageCertificate', 'nuts0', 'SI', null, null);
@@ -80,11 +80,11 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (20, 'ip', null , 20);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (21, 'ResidencyProof', 'nuts0', 'ES', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (21, 'ES', 'España', 'iso6523-actorid-upis::9921:EA0042823', 'Instituto Nacional de Estadística (INE)', 21);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (21, 'ES', 'Espaï¿½a', 'iso6523-actorid-upis::9921:EA0042823', 'Instituto Nacional de Estadï¿½stica (INE)', 21);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (21, 'ip', null , 21);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (22, 'ResidencyProof', 'nuts0', 'RO', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (22, 'RO', 'ROMÂNIA', 'iso6523-actorid-upis::9991:RO000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 22);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (22, 'RO', 'ROMï¿½NIA', 'iso6523-actorid-upis::9991:RO000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 22);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (22, 'ip', null , 22);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (23, 'ResidencyProof', 'nuts0', 'SI', null, null);
