@@ -113,9 +113,17 @@ public class Client {
 			
 			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
 
-			if (signedServiceMetadata == null)
-				return nodeInfo;
-
+			if (signedServiceMetadata == null) {
+				String error="It is not possible to retrieve data from the SMP, either because of a connection problem or because it does not exist.";
+				logger.error(error);
+				throw new SMPLookingMetadataInformationException( )
+                 .withUserMessage(userMessage)
+                 .withLayer(LayerError.COMMUNICATIONS)
+                 .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                 .withModule(ExternalModuleError.SMP)
+                 .withMessageArg(error).withHttpStatus(HttpStatus.OK);
+			}
+				 
 			nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata()
 			        .getServiceInformation().getParticipantIdentifierValue());
             nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
@@ -153,6 +161,7 @@ public class Client {
             return null;
         }
         StringBuilder path = new StringBuilder(uriBuilder.getPath());
+        if(!uriBuilder.toString().endsWith("/"))path.append("/");
         path.append("ial/");
         path.append(request.getCanonicalEvidenceTypeId());
         if (!ObjectUtils.isEmpty(request.getCountryCode())) {
@@ -190,6 +199,7 @@ public class Client {
             return null;
         }
         StringBuilder path = new StringBuilder(uriBuilder.getPath());
+        if(!uriBuilder.toString().endsWith("/"))path.append("/");
         path.append("provision");
         uriBuilder.setParameter("canonicalEvidenceTypeId", request.getCanonicalEvidenceTypeId());
         uriBuilder.setParameter("dataOwnerId", request.getDataOwnerId());
