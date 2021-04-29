@@ -5,10 +5,17 @@ import java.util.Map;
 
 public class ResponseErrorFactory {
 	private static Map<Class<?>,ConnectorExceptionHandler> handlers;
+	
+	ResponseErrorFactory() {
+	    //empty constructor
+	}
+	
 	static{
-		handlers=new HashMap<Class<?>,ConnectorExceptionHandler>();
+		handlers = new HashMap<>();
 		handlers.put(ResponseLookupRoutingInformationException.class , new ResponseLookupRoutingInformationExceptionHandler());
 		handlers.put(SMPLookingMetadataInformationException.class , new SMPLookingMetadataInformationExceptionHandler());
+		handlers.put(ResponseTransferEvidenceException.class, new ResponseTransferEvidenceExceptionHandler());
+        handlers.put(ResponseErrorException.class, new ResponseErrorExceptionHandler());
 	}
 	public static String getResponseError(ConnectorException ex) {
 		return handlers.get(ex.getClass()).getResponseError(ex);

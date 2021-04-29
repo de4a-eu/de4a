@@ -49,7 +49,7 @@ public class RegRepTransformer {
 
 		try {
 			String template = request ? REQUEST_TEMPLATE : RESPONSE_TEMPLATE;
-			log.debug("wrapping canonical request");
+			log.debug("Wrapping canonical request");
 			TransformerFactory factory = TransformerFactory.newInstance();
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -79,7 +79,7 @@ public class RegRepTransformer {
 
 			return docFinal.getDocumentElement();
 		} catch (Exception e) {
-			String error = "Error building wrapping message";
+			String error = "Error building RegRep wrapped message";
 			log.error(error, e);
 			throw new MessageException(error);
 		}
