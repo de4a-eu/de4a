@@ -38,13 +38,19 @@ public class Client {
 	public ResponseLookupRoutingInformationType getRoutingInfo(RequestLookupRoutingInformationType request) throws MessageException {
 		logger.debug("Sending lookup routing information request {}", request);
 		String urlRequest = urlRequestor + "/lookupRoutingInformation";
+		ResponseEntity<String> response = null;
+		try {
+			response = restTemplate.postForEntity(urlRequest, request, 
+					String.class);
+			var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
+			ResponseLookupRoutingInformationType respObj = respMarshaller.read(response.getBody());
+			return respObj;		
+		}catch(Exception e) {
+			logger.error("Error from DR",e);
+			return null;
+		}
 		
 		
-		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, request, 
-				String.class);
-		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
-		ResponseLookupRoutingInformationType respObj = respMarshaller.read(response.getBody());
-		return respObj;		
 	}
 	
 	public boolean getEvidenceRequestIM (RequestTransferEvidenceUSIIMDRType request) throws MessageException 
