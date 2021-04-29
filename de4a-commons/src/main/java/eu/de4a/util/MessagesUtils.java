@@ -1,5 +1,6 @@
 package eu.de4a.util;
 
+import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
@@ -41,7 +42,7 @@ public class MessagesUtils {
 		return requestExtractEvidence;
 	}
 
-	public static ResponseTransferEvidenceType transformResponseTransferEvidenceUSI(
+	public static ResponseTransferEvidenceType transformResponseTransferEvidence(
 			ResponseExtractEvidenceType responseExtractEvidenceType,
 			RequestTransferEvidenceUSIIMDRType evidenceRequest) {
 		ResponseTransferEvidenceType responseTransferEvidenceType = new ResponseTransferEvidenceType();
@@ -58,6 +59,22 @@ public class MessagesUtils {
 		responseTransferEvidenceType.setDomesticEvidenceList(responseExtractEvidenceType.getDomesticEvidenceList());
 
 		return responseTransferEvidenceType;
+	}
+	
+	public static ResponseTransferEvidenceType getErrorResponseFromRequest(
+	        RequestTransferEvidenceUSIIMDRType evidenceRequest, ErrorListType errorList) {
+	    ResponseTransferEvidenceType responseTransferEvidenceType = new ResponseTransferEvidenceType();
+        responseTransferEvidenceType.setDataEvaluator(evidenceRequest.getDataEvaluator());
+        responseTransferEvidenceType.setDataOwner(evidenceRequest.getDataOwner());
+        responseTransferEvidenceType.setCanonicalEvidenceTypeId(evidenceRequest.getCanonicalEvidenceTypeId());
+        responseTransferEvidenceType.setRequestId(evidenceRequest.getRequestId());
+        responseTransferEvidenceType.setTimeStamp(evidenceRequest.getTimeStamp());
+        responseTransferEvidenceType.setProcedureId(evidenceRequest.getProcedureId());
+        responseTransferEvidenceType.setSpecificationId(evidenceRequest.getSpecificationId());
+        responseTransferEvidenceType.setErrorList(errorList);
+        responseTransferEvidenceType.setDataRequestSubject(evidenceRequest.getDataRequestSubject());
+
+        return responseTransferEvidenceType;
 	}
 
 }

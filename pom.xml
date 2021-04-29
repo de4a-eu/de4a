@@ -27,7 +27,9 @@
         <maven.compiler.release>11</maven.compiler.release>
         <commons.io.version>2.6</commons.io.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
+		<de4a.commons.version>0.1.1</de4a.commons.version>
         <toop.version>2.1.2-SNAPSHOT</toop.version>
+		<de4a-iem.version>0.1.1</de4a-iem.version>
         <helger.commons.version>10.0.0</helger.commons.version>
         <jaxb.version>2.3.0.1</jaxb.version>
         <jakarta.version>2.3.3</jakarta.version>
@@ -257,7 +259,7 @@
             <dependency>
                 <groupId>eu.de4a</groupId>
                 <artifactId>de4a-iem</artifactId>
-                <version>0.1.1</version>
+                <version>${de4a.commons.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -280,7 +282,7 @@
 
     <build>
         <plugins>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.ec4j.maven</groupId>
                 <artifactId>editorconfig-maven-plugin</artifactId>
                 <version>0.1.1</version>
@@ -293,7 +295,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

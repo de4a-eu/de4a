@@ -111,7 +111,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 	}
 
 	public boolean sendResponseMessage(String sender, String docTypeID, Element message, String tagContentId) {
-		NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true);
+		NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true,message);
 		try {
 			logger.debug("Sending  message to as4 gateway ...");
 

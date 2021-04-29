@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -38,13 +41,19 @@ public class Client {
 	public ResponseLookupRoutingInformationType getRoutingInfo(RequestLookupRoutingInformationType request) throws MessageException {
 		logger.debug("Sending lookup routing information request {}", request);
 		String urlRequest = urlRequestor + "/lookupRoutingInformation";
+		ResponseEntity<String> response = null;
+		try {
+			response = restTemplate.postForEntity(urlRequest, request, 
+					String.class);
+			var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
+			ResponseLookupRoutingInformationType respObj = respMarshaller.read(response.getBody());
+			return respObj;		
+		}catch(Exception e) {
+			logger.error("Error from DR",e);
+			return null;
+		}
 		
 		
-		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, request, 
-				String.class);
-		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
-		ResponseLookupRoutingInformationType respObj = respMarshaller.read(response.getBody());
-		return respObj;		
 	}
 	
 	public boolean getEvidenceRequestIM (RequestTransferEvidenceUSIIMDRType request) throws MessageException 
@@ -52,9 +61,11 @@ public class Client {
 		logger.debug("Sending IM request {}", request.getRequestId());
 		String urlRequest = urlRequestor + "/requestTransferEvidenceIM";
 
+		HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_XML);
 		
 		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, 
-				 DE4AMarshaller.drImRequestMarshaller().getAsString(request), String.class);
+				 new HttpEntity<>(DE4AMarshaller.drImRequestMarshaller().getAsString(request), headers), String.class);
 		ResponseTransferEvidenceType respObj = DE4AMarshaller
 				.drImResponseMarshaller(EDE4ACanonicalEvidenceType.NONE).read(response.getBody());
 		responseManager.manageResponse(respObj);

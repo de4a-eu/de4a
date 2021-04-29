@@ -1,12 +1,7 @@
 package eu.de4a.connector.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -40,12 +37,15 @@ import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
+import eu.de4a.connector.api.controller.error.ExternalModuleError;
+import eu.de4a.connector.api.controller.error.FamilyErrorType;
+import eu.de4a.connector.api.controller.error.LayerError;
+import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationException;
+import eu.de4a.connector.api.controller.error.SMPLookingMetadataInformationException;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.AckType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
-import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
@@ -86,7 +86,7 @@ public class Client {
 	 *                        or request
 	 * @return NodeInfo Service metadata
 	 */
-	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService) {
+	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService, Element userMessage) {
 		logger.debug("Request SMP {}, {}", participantId, documentTypeId);
 
 		NodeInfo nodeInfo = new NodeInfo();
@@ -125,78 +125,70 @@ public class Client {
 				nodeInfo.setEndpointURI(endpoint.getEndpointURI());
 				nodeInfo.setCertificate(endpoint.getCertificate());
 				nodeInfo.setProcessIdentifier(aProcID.getURIEncoded());
-			}
-			// TODO error handling
+			} 
 		} catch (final SMPClientException | SMPDNSResolutionException ex) {
-			logger.error("Service metadata not found on SMP", ex);
-			return new NodeInfo();
+			logger.error("Service metadata not found on SMP", ex); 
+			throw new  SMPLookingMetadataInformationException( ).withUserMessage(userMessage).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
+	 			.withModule(ExternalModuleError.SMP).withMessageArg(ex.getMessage()).withHttpStatus(HttpStatus.OK);
 		}
 		return nodeInfo;
 	}
 
 	public ResponseLookupRoutingInformationType getSources(RequestLookupRoutingInformationType request) {
 
-	    URIBuilder uriBuilder;
-        try {
-            uriBuilder = new URIBuilder(idkEndpoint);
-        } catch (URISyntaxException e1) {
-            logger.error("There was an error creating URI from IDK endpoint");
-            return null;
-        }
-        StringBuilder path = new StringBuilder(uriBuilder.getPath());
-        path.append("ial/");
-        path.append(request.getCanonicalEvidenceTypeId());
-        if (!ObjectUtils.isEmpty(request.getCountryCode())) {
-            path.append("/");
-            path.append(request.getCountryCode());
-        }
-        uriBuilder.setPath(path.toString());
-		String response = restTemplate.getForObject(uriBuilder.toString(), String.class);
+		StringBuilder uri = new StringBuilder(idkEndpoint);
+		uri.append("/ial/");
+		uri.append(request.getCanonicalEvidenceTypeId());
+		if (!ObjectUtils.isEmpty(request.getCountryCode())) {
+			uri.append("/").append(request.getCountryCode());
+		}
+		String response = null;
+		try { 
+			response = restTemplate.getForObject(uri.toString(), String.class);
+		}catch(RestClientException e) { 
+			logger.error("Error sending message to IDK server",e);
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
+	 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+		}
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
 			AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
 			responseLookup.setAvailableSources(availableSources);
 		} catch (JsonProcessingException e) {
-			ErrorListType errorList = new ErrorListType();
-			ErrorType error = new ErrorType();
-			// TODO error handling
-			error.setCode("501");
-			error.setText("Error converting JSON to object");
-			errorList.addError(error);
-			responseLookup.setErrorList(errorList);
+			logger.error("Error processing idk  response",e);
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
+ 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
 		}
 		return responseLookup;
 	}
 
 	public ResponseLookupRoutingInformationType getProvisions(RequestLookupRoutingInformationType request) {
 
-		URIBuilder uriBuilder;
-        try {
-            uriBuilder = new URIBuilder(idkEndpoint);
-        } catch (URISyntaxException e1) {
-            logger.error("There was an error creating URI from IDK endpoint");
-            return null;
-        }
-        StringBuilder path = new StringBuilder(uriBuilder.getPath());
-		path.append("provision");
-		uriBuilder.setParameter("canonicalEvidenceTypeId", request.getCanonicalEvidenceTypeId());
-		uriBuilder.setParameter("dataOwnerId", request.getDataOwnerId());
-		uriBuilder.setPath(path.toString());
-		String response = restTemplate.getForObject(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), String.class);
+		StringBuilder uri = new StringBuilder(idkEndpoint);
+		uri.append("/provision");
+		uri.append("?").append("canonicalEvidenceTypeId");
+		uri.append("=").append(request.getCanonicalEvidenceTypeId());
+		uri.append("&").append("dataOwnerId");
+		uri.append("=").append(request.getDataOwnerId());
+
+		String response = null;
+		try { 
+			response = restTemplate.getForObject(uri.toString(), String.class);
+		}catch(RestClientException e) { 
+			logger.error("Error sending message to IDK server",e);
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
+			 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+		}
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
 			AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
 			responseLookup.setAvailableSources(availableSources);
 		} catch (JsonProcessingException e) {
-			ErrorListType errorList = new ErrorListType();
-			ErrorType error = new ErrorType();
-			// TODO error handling
-			error.setCode("501");
-			error.setText("Error converting JSON to object");
-			errorList.addError(error);
-			responseLookup.setErrorList(errorList);
+			logger.error("Error processing idk  response",e);
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
+ 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
 		}
 		return responseLookup;
 	}

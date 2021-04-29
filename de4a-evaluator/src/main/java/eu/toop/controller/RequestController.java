@@ -85,7 +85,7 @@ public class RequestController {
 		User u = new User();		
 		try {
 			ResponseLookupRoutingInformationType responseRouting = client.getRoutingInfo(lookupRouting);
-			if(responseRouting.getErrorList().hasErrorEntries()) {
+			if(responseRouting.getErrorList() !=null && responseRouting.getErrorList().hasErrorEntries()) {
 				logger.warn("The requestor has not been able to obtain the sources of evidence");
 				model.addAttribute("errorCode",responseRouting.getErrorList().getErrorAtIndex(0).getCode());
 				model.addAttribute("errorDescription",responseRouting.getErrorList().getErrorAtIndex(0).getText());
