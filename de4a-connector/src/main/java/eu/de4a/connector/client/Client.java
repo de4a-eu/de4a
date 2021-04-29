@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
@@ -35,6 +36,10 @@ import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
+import eu.de4a.connector.api.controller.error.ExternalModuleError;
+import eu.de4a.connector.api.controller.error.FamilyErrorType;
+import eu.de4a.connector.api.controller.error.LayerError;
+import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationException;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.AckType;
@@ -137,7 +142,13 @@ public class Client {
 		if (!ObjectUtils.isEmpty(request.getCountryCode())) {
 			uri.append("/").append(request.getCountryCode());
 		}
-		String response = restTemplate.getForObject(uri.toString(), String.class);
+		String response = null;
+		try { 
+			response = restTemplate.getForObject(uri.toString(), String.class);
+		}catch(RestClientException e) { 
+			throw new  ResponseLookupRoutingInformationException( ).withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR) 
+	 			.withModule(ExternalModuleError.IDK).withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+		}
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
