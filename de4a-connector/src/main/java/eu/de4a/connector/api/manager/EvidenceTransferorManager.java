@@ -6,11 +6,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.NoSuchMessageException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import com.helger.peppolid.CIdentifier;
+
+import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
+import eu.de4a.connector.api.controller.error.ExternalModuleError;
+import eu.de4a.connector.api.controller.error.FamilyErrorType;
+import eu.de4a.connector.api.controller.error.LayerError;
+import eu.de4a.connector.api.controller.error.ResponseErrorException;
+import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.as4.owner.MessageOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
@@ -44,7 +50,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 
 
 	public void queueMessage(MessageOwner request) {
-		ResponseTransferEvidenceType responseTransferEvidenceType = null; 
+		ResponseTransferEvidenceType responseTransferEvidenceType = null;
 		if (logger.isDebugEnabled()) {
 			logger.debug("Queued message to send to owner:");
 			logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
@@ -52,34 +58,38 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		OwnerAddresses ownerAddress  = ownerLocator.lookupOwnerAddress(request.getReceiverId()); 
 		RequestorRequest requestorReq = new RequestorRequest();
 		if(ownerAddress != null) {
-			RequestTransferEvidenceUSIIMDRType req = DE4AMarshaller.drImRequestMarshaller().read(request.getMessage());
+		    RequestTransferEvidenceUSIIMDRType req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
+		            .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(), 
+                    request.getMessage().getOwnerDocument(), false, LayerError.INTERNAL_FAILURE, 
+                    ExternalModuleError.NONE, new ResponseTransferEvidenceException());
 			if (req != null) {
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
 				requestorReq.setReturnServiceUri("unused");
-				try {
-					responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(
-							req, ownerAddress.getEndpoint(), false);
-				} catch (NoSuchMessageException | MessageException e) {
-					logger.error("Fail...", e);
-					// TODO error handling
-				}
+				responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(
+						req, ownerAddress.getEndpoint(), false);
 				if(responseTransferEvidenceType != null) {
-					sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),
-							DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-							.getAsDocument(responseTransferEvidenceType).getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
+				    Document docResponse = (Document) ErrorHandlerUtils.conversionDocWithCatching(
+				            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+				            responseTransferEvidenceType, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, 
+				            new ResponseTransferEvidenceException());
+					sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),					        
+							docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
+				} else {
+				    throw new ResponseTransferEvidenceException()
+    				    .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+    	                .withModule(ExternalModuleError.DATA_OWNER)
+    	                .withMessageArg("Response from owner was null")
+    	                .withHttpStatus(HttpStatus.OK);
 				}
 			} else {
-				req = DE4AMarshaller.drUsiRequestMarshaller().read(request.getMessage());
+			    req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
+			            DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage(), false, 
+			            LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException());
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
 				requestorReq.setReturnServiceUri("unused");
-				try {
-					client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
-				} catch (MessageException e) {
-					logger.error("Fail...",e);
-					//TODO error handling
-				}
+				client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
 			}
 			// Save request information
 			requestorReq.setIdrequest(request.getId());
@@ -110,8 +120,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			logger.debug("Sending  message to as4 gateway ...");
 
 			String senderId = sender;
-			if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
-				senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
+			if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
+				senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
 			}
 
 			// TODO update as4 client, it is not handling payloads list anymore
