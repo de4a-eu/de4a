@@ -28,7 +28,7 @@ public class TestClient {
 	
 	@Test
 	public void testSmpNode() {
-		NodeInfo info=client.getNodeInfo("iso6523-actorid-upis::9999:egov","urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration", true);
+		NodeInfo info=client.getNodeInfo("iso6523-actorid-upis::9999:egov","urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration", true, null);
 		assertNotNull(info);
 		assertEquals("https://de4a-dev-connector.egovlab.eu/phase4", info.getEndpointURI ());
 	}

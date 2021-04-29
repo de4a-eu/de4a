@@ -1,6 +1,8 @@
 package eu.de4a.connector.client;
 
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -193,8 +195,8 @@ public class Client {
         uriBuilder.setParameter("dataOwnerId", request.getDataOwnerId());
         uriBuilder.setPath(path.toString());
         
-        String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), ExternalModuleError.IDK, 
-                new ResponseLookupRoutingInformationException(), this.restTemplate);
+        String response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
+                ExternalModuleError.IDK, new ResponseLookupRoutingInformationException(), this.restTemplate);
         
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
