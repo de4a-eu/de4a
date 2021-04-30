@@ -9,12 +9,17 @@ public class ResponseErrorExceptionHandler extends ConnectorExceptionHandler {
 
     @Override
     public String getResponseError(ConnectorException ex) {
+        ResponseErrorType response = buildResponse(ex);
+        return DE4AMarshaller.doUsiResponseMarshaller().getAsString(response);
+    }
+    
+    public ResponseErrorType buildResponse(ConnectorException ex) {
         ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(false);
         ErrorListType errorList = new ErrorListType();
         String msg = getMessage(ex);
         errorList.addError(DE4AResponseDocumentHelper.createError(ex.buildCode(), msg));
         response.setErrorList(errorList);
-        return DE4AMarshaller.doUsiResponseMarshaller().getAsString(response);
+        return response;
     }
 
 }

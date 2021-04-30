@@ -1,6 +1,5 @@
 package eu.de4a.connector.api.manager;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -17,21 +16,25 @@ import org.w3c.dom.Element;
 
 import com.helger.commons.mime.CMimeType;
 
+import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
 import eu.de4a.connector.api.controller.error.ExternalModuleError;
 import eu.de4a.connector.api.controller.error.FamilyErrorType;
 import eu.de4a.connector.api.controller.error.LayerError;
+import eu.de4a.connector.api.controller.error.ResponseErrorException;
+import eu.de4a.connector.api.controller.error.ResponseErrorExceptionHandler;
+import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationExceptionHandler;
 import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
-import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
@@ -64,56 +67,63 @@ public class EvidenceRequestorManager extends EvidenceManager {
 				return client.getProvisions(request);
 			}
 		} else {
-			response.setErrorList(new ErrorListType());
-			ErrorType error = new ErrorType();
-			error.setCode("COD_EMPTY");
-			error.setText("Bad request. Missing mandatory fields");
-			response.getErrorList().addError(error);
+		    new ResponseLookupRoutingInformationExceptionHandler().buildResponse(
+                    new ResponseErrorException().withFamily(FamilyErrorType.MISSING_REQUIRED_ARGUMENTS)
+                        .withLayer(LayerError.INTERNAL_FAILURE)
+                        .withModule(ExternalModuleError.IDK)
+                        .withMessageArg("CanonicalEvidenceTypeId is missing"));
 		}
-
 		return response;
 	}
 
-	public boolean manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
-		Document doc = DE4AMarshaller.drUsiRequestMarshaller().getAsDocument(request);
-
-		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
-			return false;
-		}
-		return sendRequestMessage(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
-				request.getCanonicalEvidenceTypeId());
+	public ResponseErrorType manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
+	    Document doc = (Document) ErrorHandlerUtils.conversionDocWithCatching(DE4AMarshaller.drUsiRequestMarshaller(), 
+	            request, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException());
+		try {
+            if(sendRequestMessage(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
+            		request.getCanonicalEvidenceTypeId())) {
+                return DE4AResponseDocumentHelper.createResponseError(true);
+            }            
+        } catch (MessageException e) {
+            return new ResponseErrorExceptionHandler().buildResponse(
+                    new ResponseErrorException().withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
+                        .withLayer(LayerError.COMMUNICATIONS)
+                        .withModule(ExternalModuleError.CONNECTOR)
+                        .withMessageArg(e.getMessage()));
+        }
+		return DE4AResponseDocumentHelper.createResponseError(false);
 	}
 
 	public ResponseTransferEvidenceType manageRequestIM(RequestTransferEvidenceUSIIMDRType request) {
 		Document doc = DE4AMarshaller.drImRequestMarshaller().getAsDocument(request);
-		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
-			return null;
-		}
-		return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
-				request.getRequestId(), request.getCanonicalEvidenceTypeId());
+		try {
+            return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
+            		request.getRequestId(), request.getCanonicalEvidenceTypeId());
+        } catch (MessageException e) {
+            new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+                .withFamily(FamilyErrorType.ERROR_RESPONSE)
+                .withModule(ExternalModuleError.NONE)
+                .withMessageArg(e.getMessage())
+                .withHttpStatus(HttpStatus.OK);
+        }
+		return DE4AResponseDocumentHelper.createResponseTransferEvidence(request);
 	}
 
 	private ResponseTransferEvidenceType handleRequestTransferEvidence(String from, String dataOwnerId,
-			Element documentElement, String requestId, String canonicalEvidenceTypeId) {
+			Element documentElement, String requestId, String canonicalEvidenceTypeId) throws MessageException {
 		boolean ok = false;
 		sendRequestMessage(from, dataOwnerId, documentElement, canonicalEvidenceTypeId);
 		try {
 			ok = waitResponse(requestId);
 		} catch (InterruptedException e) {
-			logger.error("Error waiting for response", e);
-			throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
-                .withFamily(FamilyErrorType.ERROR_RESPONSE)
-                .withModule(ExternalModuleError.NONE)
-                .withMessageArg("Error waiting for response")
-                .withHttpStatus(HttpStatus.OK);
+		    String errorMsg = "Error waiting for response";
+			logger.error(errorMsg, e);
+			throw new MessageException(errorMsg);
 		}
 		if (!ok) {
-			logger.error("No response before timeout");
-			throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
-                .withFamily(FamilyErrorType.ERROR_RESPONSE)
-                .withModule(ExternalModuleError.NONE)
-                .withMessageArg("No response before timeout")
-                .withHttpStatus(HttpStatus.OK);
+			String errorMsg = "No response before timeout";
+            logger.error(errorMsg);
+            throw new MessageException(errorMsg);
 		}
 		return responseManager.getResponse(requestId);		
 	}
@@ -132,7 +142,8 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	}
 
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
-			String canonicalEvidenceTypeId) {
+			String canonicalEvidenceTypeId) throws MessageException {
+	    String errorMsg;
 		String senderId = sender;
 		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
 		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
@@ -150,21 +161,11 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestWrapper, payloads, false);
 			
 			return true;
-		} catch (MEOutgoingException e) {
-			logger.error("Error with as4 gateway comunications", e);
-			throw new ResponseTransferEvidenceException().withLayer(LayerError.COMMUNICATIONS)
-                .withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
-                .withModule(ExternalModuleError.CONNECTOR)
-                .withMessageArg(e.getMessage())
-                .withHttpStatus(HttpStatus.OK);
-		} catch (MessageException e) {
-			logger.error("Error building regrep message", e);
-			throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
-                .withFamily(FamilyErrorType.CONVERSION_ERROR)
-                .withModule(ExternalModuleError.NONE)
-                .withMessageArg(e.getMessage())
-                .withHttpStatus(HttpStatus.OK);
+		} catch (MEOutgoingException | MessageException e) {
+		    errorMsg = "Error with as4 gateway comunications";
+			logger.error(errorMsg, e);
 		}
+		throw new MessageException(errorMsg);
 	}
 
 }
