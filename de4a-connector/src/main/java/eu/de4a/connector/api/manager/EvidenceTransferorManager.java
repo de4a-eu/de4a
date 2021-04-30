@@ -73,8 +73,11 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
 				            responseTransferEvidenceType, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, 
 				            new ResponseTransferEvidenceException());
-					sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),					        
-							docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE);
+				    //TODO if as4 message DT-DR failed, what is the approach. retries?
+					if(!sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),					        
+							docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
+					    logger.error("Error sending ResponseTransferEvidence to Data Requestor through AS4 gateway");
+					}
 				} else {
 				    throw new ResponseTransferEvidenceException()
     				    .withFamily(FamilyErrorType.CONNECTION_ERROR) 
@@ -109,8 +112,11 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		if (usirequest == null) {
 			logger.error("Does not exists any request with ID {}", response.getId());
 		} else {
-			sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
-					DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);
+		    //TODO if as4 message DT-DR failed, what is the approach. retries?
+			if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
+					DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST)) {
+			    logger.error("Error sending RequestForwardEvidence to Data Requestor through AS4 gateway");
+			}
 		}
 	}
 
@@ -123,8 +129,6 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
 				senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
 			}
-
-			// TODO update as4 client, it is not handling payloads list anymore
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload payload = new TCPayload();
 			payload.setContentID(tagContentId);
@@ -133,6 +137,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			payloads.add(payload);
 			Element requestWrapper = new RegRepTransformer().wrapMessage(message, false);
 			as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestWrapper, payloads, false);
+			
 			return true;
 		} catch (MEOutgoingException e) {
 			logger.error("Error with as4 gateway comunications", e);
