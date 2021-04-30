@@ -61,7 +61,6 @@ public class DOMUtils {
 			node.setTextContent(value);
 		} catch (XPathExpressionException e) {
 			logger.error(String.format("Error accessing indicated element '%s'", expression), e);
-
 		}
 		return node;
 	}
@@ -75,9 +74,9 @@ public class DOMUtils {
 			}
 			return null;
 		} catch (XPathExpressionException e) {
-			String err = "xpath error in building wrapping message.";
+			String err = "Error getting value from path: " + xpath;
 			logger.error(err, e);
-			throw new MessageException(err + e.getMessage());
+			throw new MessageException(err);
 		}
 	}
 
@@ -90,9 +89,9 @@ public class DOMUtils {
 			}
 			return null;
 		} catch (XPathExpressionException e) {
-			String err = "xpath error in building wrapping message.";
+			String err = "Error getting node from path: " + xpath;
 			logger.error(err, e);
-			throw new MessageException(err + e.getMessage());
+			throw new MessageException(err);
 		}
 	}
 
@@ -131,9 +130,9 @@ public class DOMUtils {
 			builder = factory.newDocumentBuilder();
 			return builder.parse(new ByteArrayInputStream(documentoXml));
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			String err = "xpath error in building DOM from bytes";
+			String err = "Xpath error in building DOM from bytes";
 			logger.error(err, e);
-			throw new MessageException(err + e.getMessage());
+			throw new MessageException(err);
 		}
 	}
 
