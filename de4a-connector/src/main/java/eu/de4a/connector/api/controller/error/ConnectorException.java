@@ -17,7 +17,7 @@ public class ConnectorException extends RuntimeException {
     private String code;
     private String message;
     private List<Object> args;
-    private RequestTransferEvidenceUSIIMDRType request;
+    private Object request;
 
     public ConnectorException withModule(ExternalModuleError module) {
         this.module = module;
@@ -57,7 +57,7 @@ public class ConnectorException extends RuntimeException {
         return this;
     }
     
-    public ConnectorException withRequest(RequestTransferEvidenceUSIIMDRType request) {
+    public ConnectorException withRequest(Object request) {
         this.request = request;
         return this;
     }
@@ -91,7 +91,7 @@ public class ConnectorException extends RuntimeException {
         this.args = args;
     }
 
-    public RequestTransferEvidenceUSIIMDRType getRequest() {
+    public Object getRequest() {
         return request;
     }
 

@@ -40,8 +40,8 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception;
             }
-            return new ResponseEntity<>(ResponseErrorFactory.getHandlerFromClassException(
-                    ex.getClass()).getResponseError(exception), HttpStatus.OK);
+            return new ResponseEntity<>((String) ResponseErrorFactory.getHandlerFromClassException(
+                    ex.getClass()).getResponseError(exception, false), HttpStatus.OK);
         }
         return response;
     }
@@ -64,7 +64,7 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception;
             }
-            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass()).getResponseError(exception);
+            return (String) ResponseErrorFactory.getHandlerFromClassException(ex.getClass()).getResponseError(exception, true);
         }
     }
     public static String postRestObjectWithCatching(String url, String request, ExternalModuleError module, boolean throwException,
@@ -88,52 +88,83 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception;
             }
-            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass()).getResponseError(exception);
+            return (String) ResponseErrorFactory.getHandlerFromClassException(ex.getClass()).getResponseError(exception, true);
         }
         response = checkResponse(response, module, ex, requestObj, throwException);
         return response.getBody();
     }
     
     @SuppressWarnings("unchecked")
-    public static <T> Object conversionStrWithCatching(DE4AMarshaller<T> marshaller, Object obj, boolean objToStr, 
-            LayerError layer, ExternalModuleError module, ConnectorException ex, RequestTransferEvidenceUSIIMDRType request) {
+    public static <T> Object conversionStrWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
+            boolean objToStr, boolean throwException, LayerError layer, ExternalModuleError module, 
+            ConnectorException ex, RequestTransferEvidenceUSIIMDRType request) {
+        Object returnObj = null;
+        ConnectorException exception = ex.withLayer(layer)
+            .withFamily(FamilyErrorType.CONVERSION_ERROR) 
+            .withModule(module)
+            .withRequest(request)
+            .withHttpStatus(HttpStatus.OK);
         try {
             if(objToStr) {
-                return marshaller.getAsString((T) obj);
+                returnObj = marshaller.getAsString((T) obj);
+            } else {
+                returnObj = marshaller.read((String) obj);
             }
-            return marshaller.read((String) obj);
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {
                 logger.debug("There was an error on marshal conversion of String object", e);
             }
-            throw ex.withLayer(layer)
-                .withFamily(FamilyErrorType.CONVERSION_ERROR) 
-                .withModule(module)
-                .withMessageArg(e.getMessage())
-                .withRequest(request)
-                .withHttpStatus(HttpStatus.OK);
+            
+            if(throwException) {
+                throw exception.withMessageArg(e.getMessage());
+            }
+            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+                    .getResponseError(exception.withMessageArg(e.getMessage()), objToStr);
         }
+        if(returnObj == null) {
+            if(throwException) {
+                throw exception.withMessageArg("There was an error on marshal conversion of String object");
+            }
+            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+                    .getResponseError(exception.withMessageArg("There was an error on marshal conversion of String object"), objToStr);
+        }
+        return returnObj;
     }
     
     @SuppressWarnings("unchecked")
     public static <T> Object conversionDocWithCatching(DE4AMarshaller<T> marshaller, Object obj, boolean objToDoc, 
-            LayerError layer, ExternalModuleError module, ConnectorException ex, RequestTransferEvidenceUSIIMDRType request) {
+            boolean throwException, LayerError layer, ExternalModuleError module, ConnectorException ex, 
+            RequestTransferEvidenceUSIIMDRType request) {
+        Object returnObj = null;
+        ConnectorException exception = ex.withLayer(layer)
+                .withFamily(FamilyErrorType.CONVERSION_ERROR) 
+                .withModule(module)
+                .withRequest(request)
+                .withHttpStatus(HttpStatus.OK);
         try {
             if(objToDoc) {
-                return marshaller.getAsDocument((T) obj);
+                returnObj = marshaller.getAsDocument((T) obj);
+            } else {
+                returnObj = marshaller.read((Document) obj);
             }
-            return marshaller.read((Document) obj);
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {
                 logger.debug("There was an error on marshal conversion of Document object", e);
+            }            
+            if(throwException) {
+                throw exception.withMessageArg(e.getMessage());
             }
-            throw ex.withLayer(layer)
-                .withFamily(FamilyErrorType.CONVERSION_ERROR) 
-                .withModule(module)
-                .withMessageArg(e.getMessage())
-                .withRequest(request)
-                .withHttpStatus(HttpStatus.OK);
+            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+                    .getResponseError(exception.withMessageArg(e.getMessage()), false);
         }
+        if(returnObj == null) {
+            if(throwException) {
+                throw exception.withMessageArg("There was an error on marshal conversion of String object");
+            }
+            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+                    .getResponseError(exception.withMessageArg("There was an error on marshal conversion of String object"), false);
+        }
+        return returnObj;
     }
 
 }

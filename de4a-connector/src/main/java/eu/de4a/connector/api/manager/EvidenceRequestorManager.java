@@ -79,7 +79,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 
 	public ResponseErrorType manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
 	    Document doc = (Document) ErrorHandlerUtils.conversionDocWithCatching(DE4AMarshaller.drUsiRequestMarshaller(), 
-	            request, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException(), request);
+	            request, true, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException(), request);
 		try {
             if(sendRequestMessage(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
             		request.getCanonicalEvidenceTypeId())) {

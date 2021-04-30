@@ -120,7 +120,7 @@ public class ResponseManager {
 			Document doc = getDocumentFromAttached(filesAttached, DE4AConstants.TAG_EVIDENCE_RESPONSE);
 			if(doc != null) {
 			    return (ResponseTransferEvidenceType) ErrorHandlerUtils.conversionDocWithCatching(
-			            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), doc, false, 
+			            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), doc, false, false,
 			            LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseTransferEvidenceException(),
 			            DE4AMarshaller.drImRequestMarshaller().read(request));
 			}

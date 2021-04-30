@@ -60,7 +60,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		if(ownerAddress != null) {
 		    RequestTransferEvidenceUSIIMDRType req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
 		            .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(), 
-                    request.getMessage().getOwnerDocument(), false, LayerError.INTERNAL_FAILURE, 
+                    request.getMessage().getOwnerDocument(), false, false, LayerError.INTERNAL_FAILURE, 
                     ExternalModuleError.NONE, new ResponseTransferEvidenceException(), null);
 			if (req != null) {
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
@@ -71,7 +71,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				if(responseTransferEvidenceType != null) {
 				    Document docResponse = (Document) ErrorHandlerUtils.conversionDocWithCatching(
 				            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
-				            responseTransferEvidenceType, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, 
+				            responseTransferEvidenceType, true, false, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, 
 				            new ResponseTransferEvidenceException(), null);
 				    //TODO if as4 message DT-DR failed, what is the approach. retries?
 					if(!sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),					        
@@ -87,7 +87,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				}
 			} else {
 			    req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
-			            DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage(), false, 
+			            DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage(), false, true,
 			            LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException(), null);
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());

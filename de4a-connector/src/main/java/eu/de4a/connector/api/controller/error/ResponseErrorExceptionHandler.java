@@ -8,9 +8,12 @@ import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 public class ResponseErrorExceptionHandler extends ConnectorExceptionHandler {
 
     @Override
-    public String getResponseError(ConnectorException ex) {
+    public Object getResponseError(ConnectorException ex, boolean returnString) {
         ResponseErrorType response = buildResponse(ex);
-        return DE4AMarshaller.doUsiResponseMarshaller().getAsString(response);
+        if(returnString) {
+            return DE4AMarshaller.doUsiResponseMarshaller().getAsString(response);
+        }
+        return response;
     }
     
     public ResponseErrorType buildResponse(ConnectorException ex) {

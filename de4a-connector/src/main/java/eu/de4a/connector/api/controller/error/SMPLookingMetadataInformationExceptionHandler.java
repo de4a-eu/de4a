@@ -11,11 +11,15 @@ import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.util.DOMUtils;
 
 public class SMPLookingMetadataInformationExceptionHandler  extends ConnectorExceptionHandler{
+    
 	@Override
-	public String getResponseError(ConnectorException ex) {
+	public Object getResponseError(ConnectorException ex, boolean returnString) {
 		ResponseTransferEvidenceType response = buildResponse(ex);
-		return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-			.getAsString(response);
+		if(returnString) {
+		    return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
+		            .getAsString(response);
+		}
+		return response;
 	}
 	
 	@Override

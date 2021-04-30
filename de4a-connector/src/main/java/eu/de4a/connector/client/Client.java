@@ -46,8 +46,8 @@ import eu.de4a.connector.api.controller.error.ExternalModuleError;
 import eu.de4a.connector.api.controller.error.FamilyErrorType;
 import eu.de4a.connector.api.controller.error.LayerError;
 import eu.de4a.connector.api.controller.error.ResponseErrorException;
+import eu.de4a.connector.api.controller.error.ResponseExtractEvidenceException;
 import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationException;
-import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
 import eu.de4a.connector.api.controller.error.SMPLookingMetadataInformationException;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.iem.jaxb.common.types.AckType;
@@ -273,14 +273,14 @@ public class Client {
                     .transformRequestToOwnerIM(evidenceRequest);
             String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
             String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
-                    ExternalModuleError.DATA_OWNER, false, new ResponseTransferEvidenceException(), 
+                    ExternalModuleError.DATA_OWNER, false, new ResponseExtractEvidenceException(), 
                     this.restTemplate, evidenceRequest);
             
             ResponseTransferEvidenceType responseTransferEvidence;
             ResponseExtractEvidenceType responseExtractEvidenceType = (ResponseExtractEvidenceType) ErrorHandlerUtils
                     .conversionStrWithCatching(DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
-                            String.valueOf(response), false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
-                            new ResponseTransferEvidenceException(), evidenceRequest);
+                            String.valueOf(response), false, false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
+                            new ResponseExtractEvidenceException(), evidenceRequest);
             responseTransferEvidence = MessagesUtils.transformResponseTransferEvidence(responseExtractEvidenceType, 
                     evidenceRequest);
             return responseTransferEvidence;
@@ -288,13 +288,13 @@ public class Client {
             RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
                     .transformRequestToOwnerUSI(evidenceRequest);
             String reqXML = (String) ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
-                    requestExtractEvidence, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
+                    requestExtractEvidence, true, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
                     new ResponseErrorException(), null);
             String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
                     ExternalModuleError.DATA_OWNER, false, new ResponseErrorException(), this.restTemplate, null);
             
             return ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
-                    String.valueOf(response), false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
+                    String.valueOf(response), false, false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
                     new ResponseErrorException(), null);
         }
     }
