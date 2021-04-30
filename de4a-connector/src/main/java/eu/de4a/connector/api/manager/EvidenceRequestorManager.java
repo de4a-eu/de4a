@@ -164,7 +164,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			
 			return true;
 		} catch (MEOutgoingException | MessageException e) {
-		    errorMsg = "Error with as4 gateway comunications";
+		    errorMsg = "Error with as4 gateway communications";
 			logger.error(errorMsg, e);
 		}
 		throw new MessageException(errorMsg);

@@ -12,17 +12,23 @@ import eu.de4a.util.DOMUtils;
 
 public class SMPLookingMetadataInformationExceptionHandler  extends ConnectorExceptionHandler{
 	@Override
-	public String getResponseError(ConnectorException ex) { 
-		SMPLookingMetadataInformationException exsmp = (SMPLookingMetadataInformationException) ex;
-		Element requestEl=exsmp.getUserMessage();
-		RequestTransferEvidenceUSIIMDRType request=DE4AMarshaller.drImRequestMarshaller().read(DOMUtils.documentToString(requestEl.getOwnerDocument()));
-		ResponseTransferEvidenceType response =DE4AResponseDocumentHelper.createResponseTransferEvidence(request);
-		ErrorListType errorList = new ErrorListType();  
-		String msg=getMessage(ex ) ;
-		errorList.addError( DE4AResponseDocumentHelper.createError( ex.buildCode(),msg));
-		response.setErrorList(errorList);
+	public String getResponseError(ConnectorException ex) {
+		ResponseTransferEvidenceType response = buildResponse(ex);
 		return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 			.getAsString(response);
+	}
+	
+	@Override
+	public ResponseTransferEvidenceType buildResponse(ConnectorException ex) {
+	    SMPLookingMetadataInformationException exsmp = (SMPLookingMetadataInformationException) ex;
+        Element requestEl=exsmp.getUserMessage();
+        RequestTransferEvidenceUSIIMDRType request=DE4AMarshaller.drImRequestMarshaller().read(DOMUtils.documentToString(requestEl.getOwnerDocument()));
+        ResponseTransferEvidenceType response =DE4AResponseDocumentHelper.createResponseTransferEvidence(request);
+        ErrorListType errorList = new ErrorListType();  
+        String msg=getMessage(ex ) ;
+        errorList.addError( DE4AResponseDocumentHelper.createError( ex.buildCode(),msg));
+        response.setErrorList(errorList);
+        return response;
 	}
  
 }

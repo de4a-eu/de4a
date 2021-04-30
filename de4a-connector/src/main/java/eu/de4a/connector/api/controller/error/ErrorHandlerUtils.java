@@ -24,23 +24,28 @@ public class ErrorHandlerUtils {
         //empty constructor
     }
     
-    public static boolean checkResponse(ResponseEntity<String> response, ExternalModuleError module, 
-            ConnectorException ex, RequestTransferEvidenceUSIIMDRType request) {
+    public static ResponseEntity<String> checkResponse(ResponseEntity<String> response, ExternalModuleError module, 
+            ConnectorException ex, RequestTransferEvidenceUSIIMDRType request, boolean throwException) {
         if(response == null || !HttpStatus.ACCEPTED.equals(response.getStatusCode()) 
                 || ObjectUtils.isEmpty(response.getBody())) {
             if(logger.isDebugEnabled()) {
                 logger.debug("Failed or empty response received - {}", response);
             }
-            throw ex.withLayer(LayerError.COMMUNICATIONS)
+            ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
                 .withFamily(FamilyErrorType.ERROR_RESPONSE) 
                 .withModule(module)
                 .withMessageArg(MessageFormat.format("Failed or empty response received {0}", response))
                 .withRequest(request)
                 .withHttpStatus(HttpStatus.OK);
+            if(throwException) {
+                throw exception;
+            }
+            return new ResponseEntity<>(ResponseErrorFactory.getHandlerFromClassException(
+                    ex.getClass()).getResponseError(exception), HttpStatus.OK);
         }
-        return true;
+        return response;
     }
-    public static String getRestObjectWithCatching(String url, ExternalModuleError module, 
+    public static String getRestObjectWithCatching(String url, ExternalModuleError module, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate, RequestTransferEvidenceUSIIMDRType request) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML); 
@@ -50,15 +55,19 @@ public class ErrorHandlerUtils {
             if(logger.isDebugEnabled()) {
                 logger.debug("There was an error on HTTP client GET connection", e);
             }
-            throw ex.withLayer(LayerError.COMMUNICATIONS)
-            .withFamily(FamilyErrorType.CONNECTION_ERROR) 
-            .withModule(module)
-            .withMessageArg(e.getMessage())
-            .withRequest(request)
-            .withHttpStatus(HttpStatus.OK);
-        } 
+            ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
+                    .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                    .withModule(module)
+                    .withMessageArg(e.getMessage())
+                    .withRequest(request)
+                    .withHttpStatus(HttpStatus.OK);
+            if(throwException) {
+                throw exception;
+            }
+            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass()).getResponseError(exception);
+        }
     }
-    public static String postRestObjectWithCatching(String url, String request, ExternalModuleError module, 
+    public static String postRestObjectWithCatching(String url, String request, ExternalModuleError module, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate, RequestTransferEvidenceUSIIMDRType requestObj) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML);
@@ -70,14 +79,18 @@ public class ErrorHandlerUtils {
             if(logger.isDebugEnabled()) {
                 logger.debug("There was an error on HTTP client POST connection", e);
             }
-            throw ex.withLayer(LayerError.COMMUNICATIONS)
-            .withFamily(FamilyErrorType.CONNECTION_ERROR) 
-            .withModule(module)
-            .withMessageArg(e.getMessage())
-            .withRequest(requestObj)
-            .withHttpStatus(HttpStatus.OK);
+            ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
+                .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                .withModule(module)
+                .withMessageArg(e.getMessage())
+                .withRequest(requestObj)
+                .withHttpStatus(HttpStatus.OK);
+            if(throwException) {
+                throw exception;
+            }
+            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass()).getResponseError(exception);
         }
-        checkResponse(response, module, ex, requestObj);
+        response = checkResponse(response, module, ex, requestObj, throwException);
         return response.getBody();
     }
     
@@ -94,11 +107,11 @@ public class ErrorHandlerUtils {
                 logger.debug("There was an error on marshal conversion of String object", e);
             }
             throw ex.withLayer(layer)
-            .withFamily(FamilyErrorType.CONVERSION_ERROR) 
-            .withModule(module)
-            .withMessageArg(e.getMessage())
-            .withRequest(request)
-            .withHttpStatus(HttpStatus.OK);
+                .withFamily(FamilyErrorType.CONVERSION_ERROR) 
+                .withModule(module)
+                .withMessageArg(e.getMessage())
+                .withRequest(request)
+                .withHttpStatus(HttpStatus.OK);
         }
     }
     

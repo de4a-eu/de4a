@@ -171,7 +171,7 @@ public class Client {
         }
         uriBuilder.setPath(path.toString());
 
-		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), ExternalModuleError.IDK, 
+		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), ExternalModuleError.IDK, true,
 		        new ResponseLookupRoutingInformationException(), this.restTemplate, null);
 		
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -207,7 +207,7 @@ public class Client {
         uriBuilder.setPath(path.toString());
         
         String response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
-                ExternalModuleError.IDK, new ResponseLookupRoutingInformationException(), this.restTemplate, null);
+                ExternalModuleError.IDK, true, new ResponseLookupRoutingInformationException(), this.restTemplate, null);
         
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
@@ -273,7 +273,8 @@ public class Client {
                     .transformRequestToOwnerIM(evidenceRequest);
             String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
             String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
-                    ExternalModuleError.DATA_OWNER, new ResponseTransferEvidenceException(), this.restTemplate, evidenceRequest);
+                    ExternalModuleError.DATA_OWNER, false, new ResponseTransferEvidenceException(), 
+                    this.restTemplate, evidenceRequest);
             
             ResponseTransferEvidenceType responseTransferEvidence;
             ResponseExtractEvidenceType responseExtractEvidenceType = (ResponseExtractEvidenceType) ErrorHandlerUtils
@@ -290,7 +291,7 @@ public class Client {
                     requestExtractEvidence, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
                     new ResponseErrorException(), null);
             String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
-                    ExternalModuleError.DATA_OWNER, new ResponseErrorException(), this.restTemplate, null);
+                    ExternalModuleError.DATA_OWNER, false, new ResponseErrorException(), this.restTemplate, null);
             
             return ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
                     String.valueOf(response), false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
