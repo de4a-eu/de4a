@@ -26,5 +26,6 @@ public abstract class ConnectorExceptionHandler {
 			return ex.getMessage();
 		}
 	}
-	public abstract String getResponseError(ConnectorException exception) ;
+	public abstract String getResponseError(ConnectorException exception);
+	public abstract Object buildResponse(ConnectorException exception);
 }

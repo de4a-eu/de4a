@@ -23,5 +23,8 @@ public class ResponseErrorFactory {
 	public static String getGenericResponseError(Exception ex) {
 		return GenericExceptionHandler.getResponseError(ex);
 	}
+	public static ConnectorExceptionHandler getHandlerFromClassException(Class<?> classException) {
+	    return handlers.get(classException);
+	}
 	
 }
