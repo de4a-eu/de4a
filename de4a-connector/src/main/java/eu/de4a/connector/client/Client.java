@@ -3,6 +3,7 @@ package eu.de4a.connector.client;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -226,20 +227,28 @@ public class Client {
 
 	public boolean pushEvidence(String endpoint, Document requestForwardDoc) {
 		logger.debug("Sending RequestForwardEvidence to evaluator {}", endpoint);
-
-		String urlRequest = endpoint + "/requestForwardEvidence";
+		
+		URIBuilder uriBuilder;
+		try {
+            uriBuilder = new URIBuilder(endpoint);
+        } catch (URISyntaxException e) {
+            logger.error(MessageFormat.format("There was an error creating URI from evaluator endpoint: {}", endpoint));
+            return false;
+        }
+		uriBuilder.setPath("/requestForwardEvidence");
 		String request = DOMUtils.documentToString(requestForwardDoc);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_XML);
-		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, new HttpEntity<>(request, headers),
+		ResponseEntity<String> response = restTemplate.postForEntity(uriBuilder.toString(), new HttpEntity<>(request, headers),
 				String.class);
 
 		ResponseErrorType responseObj = null;
 		if (!ObjectUtils.isEmpty(response.getBody()) && HttpStatus.ACCEPTED.equals(response.getStatusCode())) {
 			responseObj = DE4AMarshaller.deUsiResponseMarshaller().read(String.valueOf(response.getBody()));
 		} else {
-			// TODO error handling
+		    // TODO could be retries? 
+			logger.error(MessageFormat.format("There was an error pushing RequestForwardEvidence to the evaluator: {}", endpoint));
 			return false;
 		}
 		return AckType.OK.equals(responseObj.getAck());
@@ -250,13 +259,20 @@ public class Client {
         if (logger.isDebugEnabled()) {
             logger.debug("Sending request to owner - request ID: {}", evidenceRequest.getRequestId());
         }
-        String urlRequest = endpoint + (isUsi ? "USI" : "IM");
+        URIBuilder uriBuilder;
+        try {
+            uriBuilder = new URIBuilder(endpoint);
+        } catch (URISyntaxException e) {
+            logger.error(MessageFormat.format("There was an error creating URI from owner endpoint: {}", endpoint));
+            return false;
+        }
+        uriBuilder.setPath((isUsi ? "/requestExtractEvidenceUSI" : "/requestExtractEvidenceIM"));
         
         if (!isUsi) {
             RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
                     .transformRequestToOwnerIM(evidenceRequest);
             String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
-            String response = ErrorHandlerUtils.postRestObjectWithCatching(urlRequest, reqXML, 
+            String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
                     ExternalModuleError.DATA_OWNER, new ResponseTransferEvidenceException(), this.restTemplate);
             
             ResponseTransferEvidenceType responseTransferEvidence;
@@ -274,7 +290,7 @@ public class Client {
             String reqXML = (String) ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
                     requestExtractEvidence, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
                     new ResponseErrorException());
-            String response = ErrorHandlerUtils.postRestObjectWithCatching(urlRequest, reqXML, 
+            String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
                     ExternalModuleError.DATA_OWNER, new ResponseErrorException(), this.restTemplate);
             
             return ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 

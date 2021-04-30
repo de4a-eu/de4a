@@ -175,7 +175,7 @@ public class DOMUtils {
 				return writer.toString();
 			}
 		} catch (Exception e) {
-			logger.error("Error doc->string", e);
+			logger.error("Error on conversion doc->string", e);
 		}
 		return null;
 	}
