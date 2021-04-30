@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
 import eu.de4a.connector.api.controller.error.ExternalModuleError;
@@ -107,7 +108,7 @@ public class ResponseManager {
 		return evaluator != null && evaluator.isDone();
 	}
 
-	public ResponseTransferEvidenceType getResponse(String id) {
+	public ResponseTransferEvidenceType getResponse(String id, Element request) {
 		logger.debug("Processing ResponseTransferEvidence with id {}", id);
 
 		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);
@@ -120,13 +121,15 @@ public class ResponseManager {
 			if(doc != null) {
 			    return (ResponseTransferEvidenceType) ErrorHandlerUtils.conversionDocWithCatching(
 			            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), doc, false, 
-			            LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseTransferEvidenceException());
+			            LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseTransferEvidenceException(),
+			            DE4AMarshaller.drImRequestMarshaller().read(request));
 			}
 		}
 		throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
 		    .withFamily(FamilyErrorType.SAVING_DATA_ERROR)
 		    .withModule(ExternalModuleError.NONE)
 		    .withMessageArg(MessageFormat.format("Response {0} not found on database", id))
+		    .withRequest(DE4AMarshaller.drImRequestMarshaller().read(request))
 		    .withHttpStatus(HttpStatus.OK);
 	}
 

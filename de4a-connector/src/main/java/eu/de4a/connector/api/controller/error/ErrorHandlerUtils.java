@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 
 public class ErrorHandlerUtils {
@@ -24,7 +25,7 @@ public class ErrorHandlerUtils {
     }
     
     public static boolean checkResponse(ResponseEntity<String> response, ExternalModuleError module, 
-            ConnectorException ex) {
+            ConnectorException ex, RequestTransferEvidenceUSIIMDRType request) {
         if(response == null || !HttpStatus.ACCEPTED.equals(response.getStatusCode()) 
                 || ObjectUtils.isEmpty(response.getBody())) {
             if(logger.isDebugEnabled()) {
@@ -34,12 +35,13 @@ public class ErrorHandlerUtils {
                 .withFamily(FamilyErrorType.ERROR_RESPONSE) 
                 .withModule(module)
                 .withMessageArg(MessageFormat.format("Failed or empty response received {0}", response))
+                .withRequest(request)
                 .withHttpStatus(HttpStatus.OK);
         }
         return true;
     }
     public static String getRestObjectWithCatching(String url, ExternalModuleError module, 
-            ConnectorException ex, RestTemplate restTemplate) {
+            ConnectorException ex, RestTemplate restTemplate, RequestTransferEvidenceUSIIMDRType request) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML); 
         try {
@@ -52,11 +54,12 @@ public class ErrorHandlerUtils {
             .withFamily(FamilyErrorType.CONNECTION_ERROR) 
             .withModule(module)
             .withMessageArg(e.getMessage())
+            .withRequest(request)
             .withHttpStatus(HttpStatus.OK);
         } 
     }
     public static String postRestObjectWithCatching(String url, String request, ExternalModuleError module, 
-            ConnectorException ex, RestTemplate restTemplate) {
+            ConnectorException ex, RestTemplate restTemplate, RequestTransferEvidenceUSIIMDRType requestObj) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML);
         ResponseEntity<String> response;
@@ -71,15 +74,16 @@ public class ErrorHandlerUtils {
             .withFamily(FamilyErrorType.CONNECTION_ERROR) 
             .withModule(module)
             .withMessageArg(e.getMessage())
+            .withRequest(requestObj)
             .withHttpStatus(HttpStatus.OK);
         }
-        checkResponse(response, module, ex);
+        checkResponse(response, module, ex, requestObj);
         return response.getBody();
     }
     
     @SuppressWarnings("unchecked")
     public static <T> Object conversionStrWithCatching(DE4AMarshaller<T> marshaller, Object obj, boolean objToStr, 
-            LayerError layer, ExternalModuleError module, ConnectorException ex) {
+            LayerError layer, ExternalModuleError module, ConnectorException ex, RequestTransferEvidenceUSIIMDRType request) {
         try {
             if(objToStr) {
                 return marshaller.getAsString((T) obj);
@@ -93,13 +97,14 @@ public class ErrorHandlerUtils {
             .withFamily(FamilyErrorType.CONVERSION_ERROR) 
             .withModule(module)
             .withMessageArg(e.getMessage())
+            .withRequest(request)
             .withHttpStatus(HttpStatus.OK);
         }
     }
     
     @SuppressWarnings("unchecked")
     public static <T> Object conversionDocWithCatching(DE4AMarshaller<T> marshaller, Object obj, boolean objToDoc, 
-            LayerError layer, ExternalModuleError module, ConnectorException ex) {
+            LayerError layer, ExternalModuleError module, ConnectorException ex, RequestTransferEvidenceUSIIMDRType request) {
         try {
             if(objToDoc) {
                 return marshaller.getAsDocument((T) obj);
@@ -113,6 +118,7 @@ public class ErrorHandlerUtils {
                 .withFamily(FamilyErrorType.CONVERSION_ERROR) 
                 .withModule(module)
                 .withMessageArg(e.getMessage())
+                .withRequest(request)
                 .withHttpStatus(HttpStatus.OK);
         }
     }

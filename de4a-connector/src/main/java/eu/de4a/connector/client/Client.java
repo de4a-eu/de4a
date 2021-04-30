@@ -172,7 +172,7 @@ public class Client {
         uriBuilder.setPath(path.toString());
 
 		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), ExternalModuleError.IDK, 
-		        new ResponseLookupRoutingInformationException(), this.restTemplate);
+		        new ResponseLookupRoutingInformationException(), this.restTemplate, null);
 		
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
@@ -207,7 +207,7 @@ public class Client {
         uriBuilder.setPath(path.toString());
         
         String response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
-                ExternalModuleError.IDK, new ResponseLookupRoutingInformationException(), this.restTemplate);
+                ExternalModuleError.IDK, new ResponseLookupRoutingInformationException(), this.restTemplate, null);
         
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
@@ -273,14 +273,13 @@ public class Client {
                     .transformRequestToOwnerIM(evidenceRequest);
             String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
             String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
-                    ExternalModuleError.DATA_OWNER, new ResponseTransferEvidenceException(), this.restTemplate);
+                    ExternalModuleError.DATA_OWNER, new ResponseTransferEvidenceException(), this.restTemplate, evidenceRequest);
             
             ResponseTransferEvidenceType responseTransferEvidence;
-            ResponseExtractEvidenceType responseExtractEvidenceType = 
-                    (ResponseExtractEvidenceType) ErrorHandlerUtils.conversionStrWithCatching(
-                    DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
-                    String.valueOf(response), false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
-                    new ResponseTransferEvidenceException());
+            ResponseExtractEvidenceType responseExtractEvidenceType = (ResponseExtractEvidenceType) ErrorHandlerUtils
+                    .conversionStrWithCatching(DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+                            String.valueOf(response), false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
+                            new ResponseTransferEvidenceException(), evidenceRequest);
             responseTransferEvidence = MessagesUtils.transformResponseTransferEvidence(responseExtractEvidenceType, 
                     evidenceRequest);
             return responseTransferEvidence;
@@ -289,13 +288,13 @@ public class Client {
                     .transformRequestToOwnerUSI(evidenceRequest);
             String reqXML = (String) ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
                     requestExtractEvidence, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
-                    new ResponseErrorException());
+                    new ResponseErrorException(), null);
             String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
-                    ExternalModuleError.DATA_OWNER, new ResponseErrorException(), this.restTemplate);
+                    ExternalModuleError.DATA_OWNER, new ResponseErrorException(), this.restTemplate, null);
             
             return ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
                     String.valueOf(response), false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
-                    new ResponseErrorException());
+                    new ResponseErrorException(), null);
         }
     }
 }

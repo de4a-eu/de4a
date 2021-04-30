@@ -24,6 +24,7 @@ import eu.de4a.connector.api.controller.error.ResponseErrorException;
 import eu.de4a.connector.api.controller.error.ResponseErrorExceptionHandler;
 import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationExceptionHandler;
 import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
+import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceExceptionHandler;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.model.smp.NodeInfo;
@@ -78,7 +79,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 
 	public ResponseErrorType manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
 	    Document doc = (Document) ErrorHandlerUtils.conversionDocWithCatching(DE4AMarshaller.drUsiRequestMarshaller(), 
-	            request, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException());
+	            request, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException(), request);
 		try {
             if(sendRequestMessage(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
             		request.getCanonicalEvidenceTypeId())) {
@@ -88,7 +89,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
             return new ResponseErrorExceptionHandler().buildResponse(
                     new ResponseErrorException().withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
                         .withLayer(LayerError.COMMUNICATIONS)
-                        .withModule(ExternalModuleError.CONNECTOR)
+                        .withModule(ExternalModuleError.CONNECTOR_DT)
                         .withMessageArg(e.getMessage()));
         }
 		return DE4AResponseDocumentHelper.createResponseError(false);
@@ -100,13 +101,14 @@ public class EvidenceRequestorManager extends EvidenceManager {
             return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
             		request.getRequestId(), request.getCanonicalEvidenceTypeId());
         } catch (MessageException e) {
-            new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
-                .withFamily(FamilyErrorType.ERROR_RESPONSE)
-                .withModule(ExternalModuleError.NONE)
-                .withMessageArg(e.getMessage())
-                .withHttpStatus(HttpStatus.OK);
+            return new ResponseTransferEvidenceExceptionHandler().buildResponse(
+                    new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+                        .withFamily(FamilyErrorType.ERROR_RESPONSE)
+                        .withModule(ExternalModuleError.CONNECTOR_DR)
+                        .withMessageArg(e.getMessage())
+                        .withRequest(request)
+                        .withHttpStatus(HttpStatus.OK));
         }
-		return DE4AResponseDocumentHelper.createResponseTransferEvidence(request);
 	}
 
 	private ResponseTransferEvidenceType handleRequestTransferEvidence(String from, String dataOwnerId,
@@ -125,7 +127,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
             logger.error(errorMsg);
             throw new MessageException(errorMsg);
 		}
-		return responseManager.getResponse(requestId);		
+		return responseManager.getResponse(requestId, documentElement);		
 	}
 
 	private boolean waitResponse(String id) throws InterruptedException {
