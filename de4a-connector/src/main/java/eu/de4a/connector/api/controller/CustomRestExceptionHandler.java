@@ -38,7 +38,7 @@ import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
  */
 @ControllerAdvice
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
-	private static final Logger logger = LoggerFactory.getLogger(CustomRestExceptionHandler.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CustomRestExceptionHandler.class);
 	@Autowired
 	private MessageSource messageSource;
 	@Override
@@ -88,16 +88,16 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 			ResponseErrorType responseError=DE4AResponseDocumentHelper.createResponseError(false);
 			responseError.setErrorList(new ErrorListType()); 
 			//TODO same code for not found vs missing parameters?
-			String code= LayerError.COMMUNICATIONS.ordinal()+""+ExternalModuleError.NONE.getId()+""+FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID() ;
+			String code= LayerError.COMMUNICATIONS.ordinal() + ExternalModuleError.NONE.getId() + FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID() ;
 			responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));  
 			return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.NOT_FOUND);
 			
 	}
 	private ResponseEntity<Object> buildBadRequestError(String err) {
-		logger.warn("REST Client BAD REQUEST-> {}",err);
+		LOG.warn("REST Client BAD REQUEST-> {}",err);
 		ResponseErrorType responseError=DE4AResponseDocumentHelper.createResponseError(false);
 		responseError.setErrorList(new ErrorListType()); 
-		String code= LayerError.COMMUNICATIONS.ordinal()+""+ExternalModuleError.NONE.getId()+""+FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID() ;
+		String code= LayerError.COMMUNICATIONS.ordinal() + ExternalModuleError.NONE.getId() + FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID() ;
 		responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));  
 		return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.BAD_REQUEST);
 	}
