@@ -144,17 +144,12 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 			} catch (MessageException e1) {
 			    String errorMsg = "Error managing evidence DOM on AS4 response";
 				LOGGER.error(errorMsg, e1);
-			    switch (a.getContentID()) {			    
-    			    case DE4AConstants.TAG_EVIDENCE_RESPONSE:
-    			        throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
-    			            .withFamily(FamilyErrorType.CONVERSION_ERROR)
-    			            .withModule(ExternalModuleError.NONE)
-    			            .withMessageArg(errorMsg)
-    			            .withHttpStatus(HttpStatus.OK);
-                    default:
-                        //In the rest of the cases, it is not able to throw an error response,
-                        // because it is not a synchronous communication
-                        break;
+			    if(DE4AConstants.TAG_EVIDENCE_RESPONSE.equals(a.getContentID())) {
+			        throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+			            .withFamily(FamilyErrorType.CONVERSION_ERROR)
+			            .withModule(ExternalModuleError.NONE)
+			            .withMessageArg(errorMsg)
+			            .withHttpStatus(HttpStatus.OK);
                 }
 			}
 			responsewrapper.setTagDataId(a.getContentID());
