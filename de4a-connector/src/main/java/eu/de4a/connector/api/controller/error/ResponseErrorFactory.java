@@ -16,9 +16,10 @@ public class ResponseErrorFactory {
 		handlers.put(SMPLookingMetadataInformationException.class , new SMPLookingMetadataInformationExceptionHandler());
 		handlers.put(ResponseTransferEvidenceException.class, new ResponseTransferEvidenceExceptionHandler());
         handlers.put(ResponseErrorException.class, new ResponseErrorExceptionHandler());
+        handlers.put(ResponseExtractEvidenceException.class, new ResponseExtractEvidenceExceptionHandler());
 	}
 	public static String getResponseError(ConnectorException ex) {
-		return handlers.get(ex.getClass()).getResponseError(ex);
+		return (String) handlers.get(ex.getClass()).getResponseError(ex, true);
 	}
 	public static String getGenericResponseError(Exception ex) {
 		return GenericExceptionHandler.getResponseError(ex);
