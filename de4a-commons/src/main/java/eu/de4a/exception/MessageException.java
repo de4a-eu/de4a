@@ -1,19 +1,20 @@
 package eu.de4a.exception;
 
-public class MessageException extends Exception{
+public class MessageException extends Throwable{
 	private static final long serialVersionUID = 1L;
 	private String code;
 	private String message;
-  public MessageException(String err) {
-    super(err);
-    this.message=err;
-    this.code=ExceptionMapping.UNDEFINED.getCode();
-  }
-  public MessageException(String err, Throwable cause) {
-    super(err, cause);
-    this.message=err;
-    this.code=ExceptionMapping.UNDEFINED.getCode();
-  }
+	
+	public MessageException(String err) {
+		super(err);
+		this.message=err;
+		this.code=ExceptionMapping.UNDEFINED.getCode();
+	}
+	public MessageException(String err, String code) {
+	    super(err);
+	    this.message = err;
+	    this.code = code;
+	}
 	public MessageException(ExceptionMapping exmapping) {
 		super(exmapping.getMessage());
 		this.message=exmapping.getMessage();
@@ -22,8 +23,15 @@ public class MessageException extends Exception{
 	public String getCode() {
 		return code;
 	}
+	public void setCode(String code) {
+		this.code = code;
+	}
 	@Override
 	public String getMessage() {
 		return message;
 	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 }
