@@ -14,7 +14,6 @@ import org.w3c.dom.Element;
 import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
 import eu.de4a.connector.api.controller.error.ExternalModuleError;
 import eu.de4a.connector.api.controller.error.FamilyErrorType;
-import eu.de4a.connector.api.controller.error.LayerError;
 import eu.de4a.connector.api.controller.error.ResponseErrorException;
 import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
@@ -60,8 +59,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		if(ownerAddress != null) {
 		    RequestTransferEvidenceUSIIMDRType req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
 		            .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(), 
-                    request.getMessage().getOwnerDocument(), false, false, LayerError.INTERNAL_FAILURE, 
-                    ExternalModuleError.NONE, new ResponseTransferEvidenceException(), null);
+                    request.getMessage().getOwnerDocument(), false, false, 
+                    new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
 			if (req != null) {
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
@@ -71,8 +70,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
 				if(responseTransferEvidenceType != null) {
 				    Document docResponse = (Document) ErrorHandlerUtils.conversionDocWithCatching(
 				            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
-				            responseTransferEvidenceType, true, false, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, 
-				            new ResponseTransferEvidenceException(), null);
+				            responseTransferEvidenceType, true, false, 
+				            new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
 				    //TODO if as4 message DT-DR failed, what is the approach. retries?
 					if(!sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),					        
 							docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
@@ -88,7 +87,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 			} else {
 			    req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
 			            DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage(), false, true,
-			            LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException(), null);
+			            new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DT));
 				requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
 				requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
 				requestorReq.setReturnServiceUri("unused");

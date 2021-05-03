@@ -147,7 +147,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 			    if(DE4AConstants.TAG_EVIDENCE_RESPONSE.equals(a.getContentID())) {
 			        throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
 			            .withFamily(FamilyErrorType.CONVERSION_ERROR)
-			            .withModule(ExternalModuleError.NONE)
+			            .withModule(ExternalModuleError.CONNECTOR_DR)
 			            .withMessageArg(errorMsg)
 			            .withHttpStatus(HttpStatus.OK);
                 }

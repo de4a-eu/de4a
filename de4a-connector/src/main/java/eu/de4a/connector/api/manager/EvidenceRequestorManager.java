@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 
 import com.helger.commons.mime.CMimeType;
 
+import eu.de4a.connector.api.controller.error.ConnectorException;
 import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
 import eu.de4a.connector.api.controller.error.ExternalModuleError;
 import eu.de4a.connector.api.controller.error.FamilyErrorType;
@@ -72,25 +73,29 @@ public class EvidenceRequestorManager extends EvidenceManager {
                     new ResponseErrorException().withFamily(FamilyErrorType.MISSING_REQUIRED_ARGUMENTS)
                         .withLayer(LayerError.INTERNAL_FAILURE)
                         .withModule(ExternalModuleError.IDK)
-                        .withMessageArg("CanonicalEvidenceTypeId is missing"));
+                        .withMessageArg("CanonicalEvidenceTypeId is missing")
+                        .withHttpStatus(HttpStatus.OK));
 		}
 		return response;
 	}
 
 	public ResponseErrorType manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
 	    Document doc = (Document) ErrorHandlerUtils.conversionDocWithCatching(DE4AMarshaller.drUsiRequestMarshaller(), 
-	            request, true, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.NONE, new ResponseErrorException(), request);
+	            request, true, true, new ResponseErrorException()
+	                                        .withModule(ExternalModuleError.CONNECTOR_DR)
+	                                        .withRequest(request));
 		try {
             if(sendRequestMessage(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
             		request.getCanonicalEvidenceTypeId())) {
                 return DE4AResponseDocumentHelper.createResponseError(true);
             }            
-        } catch (MessageException e) {
+        } catch (ConnectorException e) {
             return new ResponseErrorExceptionHandler().buildResponse(
-                    new ResponseErrorException().withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
-                        .withLayer(LayerError.COMMUNICATIONS)
-                        .withModule(ExternalModuleError.CONNECTOR_DT)
-                        .withMessageArg(e.getMessage()));
+                    new ResponseErrorException().withFamily(e.getFamily())
+                        .withLayer(e.getLayer())
+                        .withModule(e.getModule())
+                        .withMessageArgs(e.getArgs())
+                        .withHttpStatus(HttpStatus.OK));
         }
 		return DE4AResponseDocumentHelper.createResponseError(false);
 	}
@@ -98,21 +103,21 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	public ResponseTransferEvidenceType manageRequestIM(RequestTransferEvidenceUSIIMDRType request) {
 		Document doc = DE4AMarshaller.drImRequestMarshaller().getAsDocument(request);
 		try {
-            return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
-            		request.getRequestId(), request.getCanonicalEvidenceTypeId());
-        } catch (MessageException e) {
+            return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), 
+                    doc.getDocumentElement(), request.getRequestId(), request.getCanonicalEvidenceTypeId());
+        } catch (ConnectorException e) {
             return new ResponseTransferEvidenceExceptionHandler().buildResponse(
-                    new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
-                        .withFamily(FamilyErrorType.ERROR_RESPONSE)
-                        .withModule(ExternalModuleError.CONNECTOR_DR)
-                        .withMessageArg(e.getMessage())
+                    new ResponseTransferEvidenceException().withLayer(e.getLayer())
+                        .withFamily(e.getFamily())
+                        .withModule(e.getModule())
+                        .withMessageArgs(e.getArgs())
                         .withRequest(request)
                         .withHttpStatus(HttpStatus.OK));
         }
 	}
 
 	private ResponseTransferEvidenceType handleRequestTransferEvidence(String from, String dataOwnerId,
-			Element documentElement, String requestId, String canonicalEvidenceTypeId) throws MessageException {
+			Element documentElement, String requestId, String canonicalEvidenceTypeId) {
 		boolean ok = false;
 		sendRequestMessage(from, dataOwnerId, documentElement, canonicalEvidenceTypeId);
 		try {
@@ -120,12 +125,18 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		} catch (InterruptedException e) {
 		    String errorMsg = "Error waiting for response";
 			logger.error(errorMsg, e);
-			throw new MessageException(errorMsg);
+			throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
+			    .withFamily(FamilyErrorType.ERROR_RESPONSE)
+			    .withModule(ExternalModuleError.CONNECTOR_DR)
+			    .withMessageArg(errorMsg);
 		}
 		if (!ok) {
 			String errorMsg = "No response before timeout";
             logger.error(errorMsg);
-            throw new MessageException(errorMsg);
+            throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
+                .withFamily(FamilyErrorType.ERROR_RESPONSE)
+                .withModule(ExternalModuleError.CONNECTOR_DR)
+                .withMessageArg(errorMsg);
 		}
 		return responseManager.getResponse(requestId, documentElement);		
 	}
@@ -144,7 +155,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	}
 
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
-			String canonicalEvidenceTypeId) throws MessageException {
+			String canonicalEvidenceTypeId) throws ConnectorException {
 	    String errorMsg;
 		String senderId = sender;
 		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
@@ -167,7 +178,11 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		    errorMsg = "Error with as4 gateway communications";
 			logger.error(errorMsg, e);
 		}
-		throw new MessageException(errorMsg);
+		throw new ConnectorException()
+		    .withLayer(LayerError.COMMUNICATIONS)
+		    .withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
+		    .withModule(ExternalModuleError.CONNECTOR_DT)
+		    .withMessageArg(errorMsg);
 	}
 
 }

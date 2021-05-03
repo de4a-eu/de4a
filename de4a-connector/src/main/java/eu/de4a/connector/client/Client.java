@@ -41,6 +41,7 @@ import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
+import eu.de4a.connector.api.controller.error.ConnectorException;
 import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
 import eu.de4a.connector.api.controller.error.ExternalModuleError;
 import eu.de4a.connector.api.controller.error.FamilyErrorType;
@@ -59,7 +60,6 @@ import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
-import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.util.DE4AConstants;
@@ -171,8 +171,9 @@ public class Client {
         }
         uriBuilder.setPath(path.toString());
 
-		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), ExternalModuleError.IDK, true,
-		        new ResponseLookupRoutingInformationException(), this.restTemplate, null);
+		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), true,
+		        new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), 
+		        this.restTemplate);
 		
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
@@ -185,7 +186,8 @@ public class Client {
                     .withLayer(LayerError.COMMUNICATIONS)
                     .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
                     .withModule(ExternalModuleError.IDK)
-                    .withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+                    .withMessageArg(e.getMessage())
+                    .withHttpStatus(HttpStatus.OK);
         }
 		return responseLookup;
 	}
@@ -207,7 +209,7 @@ public class Client {
         uriBuilder.setPath(path.toString());
         
         String response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
-                ExternalModuleError.IDK, true, new ResponseLookupRoutingInformationException(), this.restTemplate, null);
+                true, new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), this.restTemplate);
         
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
@@ -267,35 +269,36 @@ public class Client {
             return false;
         }
         uriBuilder.setPath((isUsi ? "/requestExtractEvidenceUSI" : "/requestExtractEvidenceIM"));
-        
+        ConnectorException exception;
         if (!isUsi) {
             RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
                     .transformRequestToOwnerIM(evidenceRequest);
+            exception = new ResponseExtractEvidenceException()
+                    .withModule(ExternalModuleError.DATA_OWNER)
+                    .withRequest(evidenceRequest);
+            
             String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
             String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
-                    ExternalModuleError.DATA_OWNER, false, new ResponseExtractEvidenceException(), 
-                    this.restTemplate, evidenceRequest);
-            
-            ResponseTransferEvidenceType responseTransferEvidence;
+                    false, exception, this.restTemplate);
             ResponseExtractEvidenceType responseExtractEvidenceType = (ResponseExtractEvidenceType) ErrorHandlerUtils
                     .conversionStrWithCatching(DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
-                            String.valueOf(response), false, false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
-                            new ResponseExtractEvidenceException(), evidenceRequest);
-            responseTransferEvidence = MessagesUtils.transformResponseTransferEvidence(responseExtractEvidenceType, 
+                            String.valueOf(response), false, false, exception);
+            return MessagesUtils.transformResponseTransferEvidence(responseExtractEvidenceType, 
                     evidenceRequest);
-            return responseTransferEvidence;
         } else {
             RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
                     .transformRequestToOwnerUSI(evidenceRequest);
+            
+            exception = new ResponseErrorException()
+                    .withModule(ExternalModuleError.DATA_OWNER);
             String reqXML = (String) ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
-                    requestExtractEvidence, true, true, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
-                    new ResponseErrorException(), null);
+                    requestExtractEvidence, true, true, exception);
+            
             String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
-                    ExternalModuleError.DATA_OWNER, false, new ResponseErrorException(), this.restTemplate, null);
+                    false, exception, this.restTemplate);
             
             return ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
-                    String.valueOf(response), false, false, LayerError.INTERNAL_FAILURE, ExternalModuleError.DATA_OWNER, 
-                    new ResponseErrorException(), null);
+                    String.valueOf(response), false, false, exception);
         }
     }
 }

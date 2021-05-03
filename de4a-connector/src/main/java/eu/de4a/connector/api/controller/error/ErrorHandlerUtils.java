@@ -45,8 +45,9 @@ public class ErrorHandlerUtils {
         }
         return response;
     }
-    public static String getRestObjectWithCatching(String url, ExternalModuleError module, boolean throwException,
-            ConnectorException ex, RestTemplate restTemplate, RequestTransferEvidenceUSIIMDRType request) {
+    
+    public static String getRestObjectWithCatching(String url, boolean throwException,
+            ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML); 
         try {
@@ -56,19 +57,19 @@ public class ErrorHandlerUtils {
                 logger.debug("There was an error on HTTP client GET connection", e);
             }
             ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
-                    .withFamily(FamilyErrorType.CONNECTION_ERROR) 
-                    .withModule(module)
+                    .withFamily(FamilyErrorType.CONNECTION_ERROR)
                     .withMessageArg(e.getMessage())
-                    .withRequest(request)
                     .withHttpStatus(HttpStatus.OK);
             if(throwException) {
                 throw exception;
             }
-            return (String) ResponseErrorFactory.getHandlerFromClassException(ex.getClass()).getResponseError(exception, true);
+            return (String) ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+                    .getResponseError(exception, true);
         }
     }
-    public static String postRestObjectWithCatching(String url, String request, ExternalModuleError module, boolean throwException,
-            ConnectorException ex, RestTemplate restTemplate, RequestTransferEvidenceUSIIMDRType requestObj) {
+    
+    public static String postRestObjectWithCatching(String url, String request, boolean throwException,
+            ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML);
         ResponseEntity<String> response;
@@ -80,30 +81,28 @@ public class ErrorHandlerUtils {
                 logger.debug("There was an error on HTTP client POST connection", e);
             }
             ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
-                .withFamily(FamilyErrorType.CONNECTION_ERROR) 
-                .withModule(module)
+                .withFamily(FamilyErrorType.CONNECTION_ERROR)
                 .withMessageArg(e.getMessage())
-                .withRequest(requestObj)
                 .withHttpStatus(HttpStatus.OK);
             if(throwException) {
                 throw exception;
             }
-            return (String) ResponseErrorFactory.getHandlerFromClassException(ex.getClass()).getResponseError(exception, true);
+            return (String) ResponseErrorFactory.getHandlerFromClassException(
+                    ex.getClass()).getResponseError(exception, true);
         }
-        response = checkResponse(response, module, ex, requestObj, throwException);
+        response = checkResponse(response, ex.getModule(), ex, 
+                (RequestTransferEvidenceUSIIMDRType) ex.getRequest(), throwException);
         return response.getBody();
     }
     
     @SuppressWarnings("unchecked")
     public static <T> Object conversionStrWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
-            boolean objToStr, boolean throwException, LayerError layer, ExternalModuleError module, 
-            ConnectorException ex, RequestTransferEvidenceUSIIMDRType request) {
+            boolean objToStr, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
-        ConnectorException exception = ex.withLayer(layer)
-            .withFamily(FamilyErrorType.CONVERSION_ERROR) 
-            .withModule(module)
-            .withRequest(request)
-            .withHttpStatus(HttpStatus.OK);
+        String errorMsg = "There was an error on marshal conversion of String object";
+        ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
+                .withLayer(LayerError.INTERNAL_FAILURE)
+                .withHttpStatus(HttpStatus.OK);
         try {
             if(objToStr) {
                 returnObj = marshaller.getAsString((T) obj);
@@ -112,9 +111,8 @@ public class ErrorHandlerUtils {
             }
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {
-                logger.debug("There was an error on marshal conversion of String object", e);
-            }
-            
+                logger.debug(errorMsg, e);
+            }            
             if(throwException) {
                 throw exception.withMessageArg(e.getMessage());
             }
@@ -123,23 +121,22 @@ public class ErrorHandlerUtils {
         }
         if(returnObj == null) {
             if(throwException) {
-                throw exception.withMessageArg("There was an error on marshal conversion of String object");
+                throw exception.withMessageArg(errorMsg);
             }
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
-                    .getResponseError(exception.withMessageArg("There was an error on marshal conversion of String object"), objToStr);
+                    .getResponseError(exception.withMessageArg(errorMsg), 
+                            objToStr);
         }
         return returnObj;
     }
     
     @SuppressWarnings("unchecked")
-    public static <T> Object conversionDocWithCatching(DE4AMarshaller<T> marshaller, Object obj, boolean objToDoc, 
-            boolean throwException, LayerError layer, ExternalModuleError module, ConnectorException ex, 
-            RequestTransferEvidenceUSIIMDRType request) {
+    public static <T> Object conversionDocWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
+            boolean objToDoc, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
-        ConnectorException exception = ex.withLayer(layer)
-                .withFamily(FamilyErrorType.CONVERSION_ERROR) 
-                .withModule(module)
-                .withRequest(request)
+        String errorMsg = "There was an error on marshal conversion of Document object";
+        ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
+                .withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withHttpStatus(HttpStatus.OK);
         try {
             if(objToDoc) {
@@ -149,7 +146,7 @@ public class ErrorHandlerUtils {
             }
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {
-                logger.debug("There was an error on marshal conversion of Document object", e);
+                logger.debug(errorMsg, e);
             }            
             if(throwException) {
                 throw exception.withMessageArg(e.getMessage());
@@ -159,10 +156,10 @@ public class ErrorHandlerUtils {
         }
         if(returnObj == null) {
             if(throwException) {
-                throw exception.withMessageArg("There was an error on marshal conversion of String object");
+                throw exception.withMessageArg(errorMsg);
             }
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
-                    .getResponseError(exception.withMessageArg("There was an error on marshal conversion of String object"), false);
+                    .getResponseError(exception.withMessageArg(errorMsg), false);
         }
         return returnObj;
     }

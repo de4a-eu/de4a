@@ -4,10 +4,16 @@ public class MessageException extends Throwable{
 	private static final long serialVersionUID = 1L;
 	private String code;
 	private String message;
+	
 	public MessageException(String err) {
 		super(err);
 		this.message=err;
 		this.code=ExceptionMapping.UNDEFINED.getCode();
+	}
+	public MessageException(String err, String code) {
+	    super(err);
+	    this.message = err;
+	    this.code = code;
 	}
 	public MessageException(ExceptionMapping exmapping) {
 		super(exmapping.getMessage());
