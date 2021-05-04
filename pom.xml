@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.de4a</groupId>
     <artifactId>de4a-parent-pom</artifactId>
@@ -20,7 +20,7 @@
         </license>
     </licenses>
     <properties>
-		<!-- Project encoding -->
+        <!-- Project encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -28,14 +28,13 @@
         <commons.io.version>2.6</commons.io.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
         <toop.version>2.1.2-SNAPSHOT</toop.version>
-        <helger.commons.version>10.1.1</helger.commons.version>
         <jaxb.version>2.3.3</jaxb.version>
         <jakarta.activation.api>1.2.2</jakarta.activation.api>
         <jakarta.xml.bind.api.version>2.3.3</jakarta.xml.bind.api.version>
         <log4j-api.version>2.14.1</log4j-api.version>
         <spring.version>5.3.5</spring.version>
         <spring.ws.version>3.0.10.RELEASE</spring.ws.version>
-        <spring.boot.version>2.4.4</spring.boot.version>
+        <spring.boot.version>2.4.5</spring.boot.version>
         <jackson-mapper-asl.version>1.9.9</jackson-mapper-asl.version>
         <jackson.databind.version>2.12.2</jackson.databind.version>
         <jaxb.api.version>2.3.1</jaxb.api.version>
@@ -58,7 +57,7 @@
         <xmlsec.version>2.2.1</xmlsec.version>
         <jacoco.version>0.8.6</jacoco.version>
 
-		<!-- Sonar/Jacoco -->
+        <!-- Sonar/Jacoco -->
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
@@ -71,7 +70,20 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
+            <dependency>
+                <groupId>com.helger.phase4</groupId>
+                <artifactId>phase4-parent-pom</artifactId>
+                <version>1.3.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.helger.photon</groupId>
+                <artifactId>ph-oton-parent-pom</artifactId>
+                <version>8.3.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>eu.toop</groupId>
                 <artifactId>tc-parent-pom</artifactId>
@@ -91,7 +103,7 @@
                 <version>${jaxb.version}</version>
             </dependency>
 
-			<!-- Log4j2 dependencies -->
+            <!-- Log4j2 dependencies -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
@@ -253,7 +265,7 @@
     </dependencyManagement>
 
     <dependencies>
-		<!-- JUnit 4 for testing -->
+        <!-- JUnit 4 for testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -261,7 +273,7 @@
         </dependency>
     </dependencies>
 
-	<!-- Sub-projects - must match child directory names; order is important! -->
+    <!-- Sub-projects - must match child directory names; order is important! -->
     <modules>
         <module>de4a-commons</module>
         <module>de4a-connector</module>
@@ -270,6 +282,7 @@
 
     <build>
         <plugins>
+        <!-- 
             <plugin>
                 <groupId>org.ec4j.maven</groupId>
                 <artifactId>editorconfig-maven-plugin</artifactId>
@@ -284,6 +297,7 @@
                     </execution>
                 </executions>
             </plugin>
+             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

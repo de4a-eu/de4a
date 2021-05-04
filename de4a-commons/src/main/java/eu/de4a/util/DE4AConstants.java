@@ -47,10 +47,6 @@ public class DE4AConstants {
 	//SMP response MessageType
 	public static final String MESSAGE_TYPE_RESPONSE = "response";
 
-	public static final String DOUBLE_SEPARATOR = "::";
-
-	public static final String SERVICES_PATH = "/services/";
-
 	// DE4A Schemes
 	public static final String DOCTYPE_SCHEME = "urn:de4a-eu:CanonicalEvidenceType";	
 	public static final String PROCESS_SCHEME = "urn:de4a-eu:MessageType";

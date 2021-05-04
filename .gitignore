@@ -7,5 +7,6 @@ target/
 de4a-evaluator/
 de4a-pid-owner/
 /.idea/
-**/*.iml
-**/*.log
+*.iml
+*.log
+zz
