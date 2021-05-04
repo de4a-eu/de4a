@@ -112,17 +112,19 @@ public class ResponseManager {
 		logger.debug("Processing ResponseTransferEvidence with id {}", id);
 
 		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);
-		EvaluatorRequestData data = new EvaluatorRequestData();
-		data.setRequest(evaluator);
-		Example<EvaluatorRequestData> example = Example.of(data);
-		List<EvaluatorRequestData> filesAttached = evaluatorRequestDataRepository.findAll(example);
-		if(!CollectionUtils.isEmpty(filesAttached)) {
-			Document doc = getDocumentFromAttached(filesAttached, DE4AConstants.TAG_EVIDENCE_RESPONSE);
-			if(doc != null) {
-			    return (ResponseTransferEvidenceType) ErrorHandlerUtils.conversionDocWithCatching(
-			            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), doc, false, false, 
-			            new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DR)
-			                .withRequest(DE4AMarshaller.drImRequestMarshaller().read(request)));
+		if(evaluator != null) {
+			EvaluatorRequestData data = new EvaluatorRequestData();
+			data.setRequest(evaluator);
+			Example<EvaluatorRequestData> example = Example.of(data);
+			List<EvaluatorRequestData> filesAttached = evaluatorRequestDataRepository.findAll(example);
+			if(!CollectionUtils.isEmpty(filesAttached)) {
+				Document doc = getDocumentFromAttached(filesAttached, DE4AConstants.TAG_EVIDENCE_RESPONSE);
+				if(doc != null) {
+					return (ResponseTransferEvidenceType) ErrorHandlerUtils.conversionDocWithCatching(
+							DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), doc, false, false, 
+							new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DR)
+								.withRequest(DE4AMarshaller.drImRequestMarshaller().read(request)));
+				}
 			}
 		}
 		throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
