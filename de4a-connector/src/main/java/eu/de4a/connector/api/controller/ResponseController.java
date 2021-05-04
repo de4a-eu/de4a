@@ -11,7 +11,6 @@ import org.w3c.dom.Document;
 
 import eu.de4a.connector.api.ResponseApi;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
-import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;

@@ -18,7 +18,6 @@ public class ConnectorException extends RuntimeException {
     private LayerError layer;
     private HttpStatus status = HttpStatus.CONFLICT;
     private String code;
-    private String message;
     private List<Object> args;
     private Object request;
 
@@ -34,11 +33,6 @@ public class ConnectorException extends RuntimeException {
 
     public ConnectorException withFamily(FamilyErrorType family) {
         this.family = family;
-        return this;
-    }
-
-    public ConnectorException withMessage(String message) {
-        this.message = message;
         return this;
     }
 
@@ -140,10 +134,6 @@ public class ConnectorException extends RuntimeException {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
 }
