@@ -1,4 +1,4 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.model;
 
 public enum LayerError {
 	COMMUNICATIONS(1), INTERNAL_FAILURE(2) ,CONFIGURATION(3) ;

@@ -23,13 +23,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
-import eu.de4a.connector.api.controller.error.ExternalModuleError;
-import eu.de4a.connector.api.controller.error.FamilyErrorType;
-import eu.de4a.connector.api.controller.error.LayerError;
-import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
 import eu.de4a.connector.as4.client.ResponseWrapper;
 import eu.de4a.connector.client.Client;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ErrorType;

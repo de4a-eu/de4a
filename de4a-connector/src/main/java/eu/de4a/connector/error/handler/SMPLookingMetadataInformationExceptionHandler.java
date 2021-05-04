@@ -1,7 +1,9 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.handler;
 
 import org.w3c.dom.Element;
 
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;

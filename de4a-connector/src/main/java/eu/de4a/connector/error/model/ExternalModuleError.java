@@ -1,4 +1,4 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.model;
 
 public enum ExternalModuleError {
     IDK("1", "IDK"), SMP("2", "SMP"), CONNECTOR_DR("3", "CONNECTOR DR"), CONNECTOR_DT("4", "CONNECTOR DT"),

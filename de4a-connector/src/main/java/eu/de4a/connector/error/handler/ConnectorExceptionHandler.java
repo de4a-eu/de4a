@@ -1,4 +1,4 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.handler;
 
 import java.util.Locale;
 
@@ -7,7 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 
-import eu.de4a.connector.api.manager.ApplicationContextProvider; 
+import eu.de4a.connector.api.manager.ApplicationContextProvider;
+import eu.de4a.connector.error.exceptions.ConnectorException; 
 
 public abstract class ConnectorExceptionHandler {
 	private static final Logger logger =  LoggerFactory.getLogger (ConnectorExceptionHandler.class);
