@@ -213,7 +213,7 @@ public class DOMUtils {
 		return writer.toString();
 	}
 
-	public static Document stringToDocument(String xml) {
+	public static Document stringToDocument(String xml) throws MessageException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
 		try {
@@ -227,9 +227,8 @@ public class DOMUtils {
 			return builder.parse(new InputSource(new StringReader(xml)));
 		} catch (Exception e) {
 			logger.error("Error string -> doc", e);
+			throw new MessageException(e.getMessage());
 		}
-
-		return null;
 	}
 
 	public static byte[] encodeCompressed(Document doc) {

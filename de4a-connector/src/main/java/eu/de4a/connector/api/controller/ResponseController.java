@@ -11,6 +11,7 @@ import org.w3c.dom.Document;
 
 import eu.de4a.connector.api.ResponseApi;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
+import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
@@ -41,7 +42,7 @@ public class ResponseController implements ResponseApi {
 
 			success = true;
 		} catch (Exception e) {
-			logger.error("There was a problem processing owner USI response");
+			logger.error("There was a problem processing owner USI response", e);
 			success = false;
 		}
 		ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(success);
