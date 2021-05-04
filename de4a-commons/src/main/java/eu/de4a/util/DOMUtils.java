@@ -255,7 +255,7 @@ public class DOMUtils {
 		try (GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decoded))) {
 			byte[] targetArray = IOUtils.toByteArray(gis);
 			return DOMUtils.byteToDocument(targetArray);
-		} catch (Exception | MessageException e) {
+		} catch (Exception e) {
 			logger.error("Error decoding compressed", e);
 			return null;
 		}
