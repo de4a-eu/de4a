@@ -65,12 +65,15 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generateEpisode>false</generateEpisode>
-                            <sources>
-                                <source>${project.basedir}/src/main/resources/xsds/canonicalEvidences/BirthCertificate.xsd</source>
-                            </sources>
-                            <packageName>eu.de4a.conn.api.canonical</packageName>
+                            <episode>false</episode>
+                            <schemaDirectory>${basedir}/src/main/resources/xsds</schemaDirectory>
+                            <schemaIncludes>
+                              <schemaInclude>canonicalEvidences/BirthCertificate.xsd</schemaInclude>
+                            </schemaIncludes>
+                            <generatePackage>eu.de4a.conn.api.canonical</generatePackage>
                             <clearOutputDir>false</clearOutputDir>
+                            <generateDirectory>${project.basedir}/src/main/java</generateDirectory>
+                            <cleanPackageDirectories>false</cleanPackageDirectories>
                             <noGeneratedHeaderComments>true</noGeneratedHeaderComments>
                         </configuration>
                     </execution>
