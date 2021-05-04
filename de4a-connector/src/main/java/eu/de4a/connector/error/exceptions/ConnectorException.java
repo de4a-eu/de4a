@@ -1,10 +1,13 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.exceptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 
 public class ConnectorException extends RuntimeException {
@@ -62,7 +65,7 @@ public class ConnectorException extends RuntimeException {
         return this;
     }
 
-    protected String buildCode() {
+    public String buildCode() {
         return layer.ordinal() + module.getId() + family.getID();
     }
 

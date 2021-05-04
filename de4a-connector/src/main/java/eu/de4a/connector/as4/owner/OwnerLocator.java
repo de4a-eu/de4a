@@ -5,10 +5,10 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import eu.de4a.connector.api.controller.error.ExternalModuleError;
-import eu.de4a.connector.api.controller.error.FamilyErrorType;
-import eu.de4a.connector.api.controller.error.LayerError;
-import eu.de4a.connector.api.controller.error.OwnerException;
+import eu.de4a.connector.error.exceptions.OwnerException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.model.OwnerAddresses;
 import eu.de4a.connector.repository.OwnerAddressesRepository;
 

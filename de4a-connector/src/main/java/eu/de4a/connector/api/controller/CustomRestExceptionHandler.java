@@ -24,11 +24,11 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import eu.de4a.connector.api.controller.error.ConnectorException;
-import eu.de4a.connector.api.controller.error.ExternalModuleError;
-import eu.de4a.connector.api.controller.error.FamilyErrorType;
-import eu.de4a.connector.api.controller.error.LayerError;
-import eu.de4a.connector.api.controller.error.ResponseErrorFactory;
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.utils.ResponseErrorFactory;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;

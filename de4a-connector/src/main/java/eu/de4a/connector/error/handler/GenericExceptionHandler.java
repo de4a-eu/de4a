@@ -1,4 +1,4 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.handler;
 
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;

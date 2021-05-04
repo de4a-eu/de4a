@@ -17,10 +17,10 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.commons.mime.MimeTypeParserException;
 import com.helger.commons.string.StringHelper;
 
-import eu.de4a.connector.api.controller.error.ExternalModuleError;
-import eu.de4a.connector.api.controller.error.FamilyErrorType;
-import eu.de4a.connector.api.controller.error.LayerError;
-import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;

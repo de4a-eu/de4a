@@ -16,18 +16,18 @@ import org.w3c.dom.Element;
 
 import com.helger.commons.mime.CMimeType;
 
-import eu.de4a.connector.api.controller.error.ConnectorException;
-import eu.de4a.connector.api.controller.error.ErrorHandlerUtils;
-import eu.de4a.connector.api.controller.error.ExternalModuleError;
-import eu.de4a.connector.api.controller.error.FamilyErrorType;
-import eu.de4a.connector.api.controller.error.LayerError;
-import eu.de4a.connector.api.controller.error.ResponseErrorException;
-import eu.de4a.connector.api.controller.error.ResponseErrorExceptionHandler;
-import eu.de4a.connector.api.controller.error.ResponseLookupRoutingInformationExceptionHandler;
-import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceException;
-import eu.de4a.connector.api.controller.error.ResponseTransferEvidenceExceptionHandler;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.exceptions.ResponseErrorException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.handler.ResponseErrorExceptionHandler;
+import eu.de4a.connector.error.handler.ResponseLookupRoutingInformationExceptionHandler;
+import eu.de4a.connector.error.handler.ResponseTransferEvidenceExceptionHandler;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;

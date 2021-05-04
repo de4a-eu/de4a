@@ -18,8 +18,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import eu.de4a.connector.api.controller.error.ConnectorException;
 import eu.de4a.connector.api.manager.EvidenceRequestorManager;
+import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.service.spring.Conf;
 
 @SpringBootTest(classes={Conf.class})

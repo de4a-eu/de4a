@@ -1,4 +1,4 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.utils;
 
 import java.text.MessageFormat;
 
@@ -14,6 +14,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 
 public class ErrorHandlerUtils {

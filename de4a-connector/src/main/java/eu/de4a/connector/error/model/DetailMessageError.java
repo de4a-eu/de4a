@@ -1,4 +1,4 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.model;
 
 public enum DetailMessageError { 
 	RESOURCE_UNAVAILABLE("01","error.resource.unavailable"), 

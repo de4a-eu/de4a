@@ -1,4 +1,4 @@
-package eu.de4a.connector.api.controller.error;
+package eu.de4a.connector.error.exceptions;
 
 import org.w3c.dom.Element;
 
