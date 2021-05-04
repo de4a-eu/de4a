@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -35,6 +34,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 
 import eu.de4a.exception.MessageException;
 
@@ -119,18 +120,20 @@ public class DOMUtils
         transformer.setOutputProperty (OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty (OutputKeys.OMIT_XML_DECLARATION, "yes");
 
-        final StringWriter writer = new StringWriter ();
-        final Result result = new StreamResult (writer);
-        final DOMSource source = new DOMSource (document);
-        transformer.transform (source, result);
-        return writer.getBuffer ().toString ().getBytes (StandardCharsets.UTF_8);
+        try (final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream ())
+        {
+          final Result result = new StreamResult (baos);
+          final DOMSource source = new DOMSource (document);
+          transformer.transform (source, result);
+          return baos.toByteArray ();
+        }
       }
     }
     catch (TransformerFactoryConfigurationError | TransformerException e)
     {
       final String err = "Error convert bytes from DOM";
       logger.error (err, e);
-      throw new MessageException (err + e.getMessage ());
+      throw new MessageException (err, e);
     }
     return new byte [0];
   }
@@ -153,7 +156,7 @@ public class DOMUtils
     {
       final String err = "xpath error in building DOM from bytes";
       logger.error (err, e);
-      throw new MessageException (err + e.getMessage ());
+      throw new MessageException (err, e);
     }
   }
 
@@ -251,7 +254,7 @@ public class DOMUtils
     }
     catch (final Exception e)
     {
-      e.printStackTrace ();
+      logger.error ("Error node -> Formatted string", e);
     }
     return writer.toString ();
   }

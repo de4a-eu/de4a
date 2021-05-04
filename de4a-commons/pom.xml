@@ -55,18 +55,17 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>${jaxb2.maven.plugin}</version>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.14.0</version>
                 <executions>
                     <execution>
                         <id>CanonicalEvidences</id>
                         <goals>
-                            <goal>xjc</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
                             <generateEpisode>false</generateEpisode>
-                            <target>2.1</target>
                             <sources>
                                 <source>${project.basedir}/src/main/resources/xsds/canonicalEvidences/BirthCertificate.xsd</source>
                             </sources>
@@ -76,18 +75,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-xjc</artifactId>
-                        <version>${jaxb.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>jakarta.activation</groupId>
-                        <artifactId>jakarta.activation-api</artifactId>
-                        <version>${jakarta.activation.api}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
         <finalName>de4a-commons</finalName>
