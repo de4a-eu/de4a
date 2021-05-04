@@ -25,14 +25,14 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 public class TestClient {
 	@Autowired
 	private Client client;
-	
+
 	@Test
 	public void testSmpNode() {
 		NodeInfo info=client.getNodeInfo("iso6523-actorid-upis::9999:egov","urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration", true);
 		assertNotNull(info);
 		assertEquals("https://de4a-dev-connector.egovlab.eu/phase4", info.getEndpointURI ());
 	}
-	
+
 	@Test
 	@Ignore("Endpoint connection problems")
     public void testIdkSources() {
@@ -44,7 +44,7 @@ public class TestClient {
         assertEquals("iso6523-actorid-upis::9999:AT000000271", response.getAvailableSources().getSourceAtIndex(0)
                 .getProvisionItems().getProvisionItemAtIndex(0).getDataOwnerId());
     }
-    
+
     @Test
     @Ignore("Endpoint connection problems")
     public void testIdkProvisions() {

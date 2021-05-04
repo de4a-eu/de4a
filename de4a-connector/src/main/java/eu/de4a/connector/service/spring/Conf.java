@@ -113,7 +113,7 @@ public class Conf implements WebMvcConfigurer {
 
 	@Value("${h2.console.port.jvm:#{null}}")
 	private String h2ConsoleJvmPort;
-	
+
 	@Value("#{ '${h2.console.port}' == '' ? '21080' : '${h2.console.port}' }")
 	private String h2ConsolePort;
 
@@ -143,7 +143,7 @@ public class Conf implements WebMvcConfigurer {
 	private String proxyPassword;
 	@Value("#{'${http.proxy.non-proxy:}'}")
 	private String proxyNonHosts;
-	
+
 	@Bean
 	public Docket api() {
 		TypeResolver typeResolver = new TypeResolver();
@@ -213,7 +213,7 @@ public class Conf implements WebMvcConfigurer {
 	@Bean
 	public RestTemplate restTemplate() {
 		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-				httpClient()); 
+				httpClient());
 		RestTemplate restTemplate = new RestTemplate(httpComponentsClientHttpRequestFactory);
 		restTemplate.getMessageConverters()
         .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
@@ -333,7 +333,7 @@ public class Conf implements WebMvcConfigurer {
 			slr.setDefaultLocale(Locale.ENGLISH);
 		return slr;
 	}
-	
+
 	@Bean
 	CharacterEncodingFilter characterEncodingFilter() {
 		CharacterEncodingFilter filter = new CharacterEncodingFilter();

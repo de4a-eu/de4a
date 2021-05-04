@@ -101,11 +101,11 @@ public class Client {
 			final BDXRClientReadOnly aSMPClient = smpEndpoint == null
 					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
 					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
-					
+
 		    logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());
             logger.info("Configured SMP truststore: '{}'", SMPClientConfiguration.getTrustStorePath());
             logger.info("Configured SMP password: '{}'", SMPClientConfiguration.getTrustStorePassword());
-			
+
 			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
 
 			if (signedServiceMetadata == null)
@@ -115,9 +115,9 @@ public class Client {
 			        .getServiceInformation().getParticipantIdentifierValue());
             nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
                     .getServiceInformation().getDocumentIdentifierValue());
-            
+
 			final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE
-					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ? 
+					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ?
 							DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
 			final EndpointType endpoint = BDXRClientReadOnly.getEndpoint(signedServiceMetadata, aProcID,
 					ESMPTransportProfile.TRANSPORT_PROFILE_BDXR_AS4);
