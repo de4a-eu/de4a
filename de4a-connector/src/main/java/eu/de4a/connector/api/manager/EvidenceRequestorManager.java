@@ -125,6 +125,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		} catch (InterruptedException e) {
 		    String errorMsg = "Error waiting for response";
 			logger.error(errorMsg, e);
+			Thread.currentThread().interrupt();
 			throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
 			    .withFamily(FamilyErrorType.ERROR_RESPONSE)
 			    .withModule(ExternalModuleError.CONNECTOR_DR)
@@ -155,7 +156,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	}
 
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
-			String canonicalEvidenceTypeId) throws ConnectorException {
+			String canonicalEvidenceTypeId) {
 	    String errorMsg;
 		String senderId = sender;
 		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);

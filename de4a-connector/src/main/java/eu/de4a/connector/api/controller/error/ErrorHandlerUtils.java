@@ -14,7 +14,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 
 public class ErrorHandlerUtils {
@@ -24,8 +23,8 @@ public class ErrorHandlerUtils {
         //empty constructor
     }
     
-    public static ResponseEntity<String> checkResponse(ResponseEntity<String> response, ExternalModuleError module, 
-            ConnectorException ex, RequestTransferEvidenceUSIIMDRType request, boolean throwException) {
+    public static ResponseEntity<String> checkResponse(ResponseEntity<String> response, ConnectorException ex, 
+            boolean throwException) {
         if(response == null || !HttpStatus.ACCEPTED.equals(response.getStatusCode()) 
                 || ObjectUtils.isEmpty(response.getBody())) {
             if(logger.isDebugEnabled()) {
@@ -33,9 +32,9 @@ public class ErrorHandlerUtils {
             }
             ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
                 .withFamily(FamilyErrorType.ERROR_RESPONSE) 
-                .withModule(module)
+                .withModule(ex.getModule())
                 .withMessageArg(MessageFormat.format("Failed or empty response received {0}", response))
-                .withRequest(request)
+                .withRequest(ex.getRequest())
                 .withHttpStatus(HttpStatus.OK);
             if(throwException) {
                 throw exception;
@@ -90,8 +89,7 @@ public class ErrorHandlerUtils {
             return (String) ResponseErrorFactory.getHandlerFromClassException(
                     ex.getClass()).getResponseError(exception, true);
         }
-        response = checkResponse(response, ex.getModule(), ex, 
-                (RequestTransferEvidenceUSIIMDRType) ex.getRequest(), throwException);
+        response = checkResponse(response, ex, throwException);
         return response.getBody();
     }
     
