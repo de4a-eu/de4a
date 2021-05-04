@@ -41,8 +41,8 @@ public class ResponseController implements ResponseApi {
 			applicationEventMulticaster.multicastEvent(responseUSI);
 
 			success = true;
-		} catch (Exception | MessageException e) {
-			logger.error("There was a problem processing owner USI response");
+		} catch (Exception e) {
+			logger.error("There was a problem processing owner USI response", e);
 			success = false;
 		}
 		ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(success);
