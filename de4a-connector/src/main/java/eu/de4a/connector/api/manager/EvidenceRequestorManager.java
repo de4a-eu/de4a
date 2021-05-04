@@ -175,15 +175,23 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestWrapper, payloads, false);
 			
 			return true;
-		} catch (MEOutgoingException | MessageException e) {
+		} catch (MEOutgoingException e) {
 		    errorMsg = "Error with as4 gateway communications";
 			logger.error(errorMsg, e);
+			throw new ConnectorException()
+                .withLayer(LayerError.COMMUNICATIONS)
+                .withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
+                .withModule(ExternalModuleError.CONNECTOR_DT)
+                .withMessageArg(errorMsg);
+		} catch (ConnectorException cE) {
+		    throw cE.withModule(ExternalModuleError.CONNECTOR_DT);
+		} catch (MessageException msgE) {
+		    throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
+		        .withFamily(FamilyErrorType.CONVERSION_ERROR)
+		        .withModule(ExternalModuleError.CONNECTOR_DR)
+		        .withMessageArg(msgE.getMessage())
+		        .withHttpStatus(HttpStatus.OK);
 		}
-		throw new ConnectorException()
-		    .withLayer(LayerError.COMMUNICATIONS)
-		    .withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
-		    .withModule(ExternalModuleError.CONNECTOR_DT)
-		    .withMessageArg(errorMsg);
 	}
 
 }

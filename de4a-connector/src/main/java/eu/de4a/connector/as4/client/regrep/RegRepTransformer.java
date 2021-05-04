@@ -20,10 +20,15 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
+import eu.de4a.connector.api.controller.error.ConnectorException;
+import eu.de4a.connector.api.controller.error.ExternalModuleError;
+import eu.de4a.connector.api.controller.error.FamilyErrorType;
+import eu.de4a.connector.api.controller.error.LayerError;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DOMUtils;
 
@@ -81,7 +86,11 @@ public class RegRepTransformer {
 		} catch (Exception e) {
 			String error = "Error building RegRep wrapped message";
 			log.error(error, e);
-			throw new MessageException(error);
+			throw new ConnectorException()
+			    .withFamily(FamilyErrorType.CONVERSION_ERROR)
+			    .withLayer(LayerError.INTERNAL_FAILURE)
+			    .withMessageArg(error)
+			    .withHttpStatus(HttpStatus.OK);
 		}
 
 	}
