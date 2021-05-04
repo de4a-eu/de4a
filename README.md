@@ -3,19 +3,19 @@
 Connector component. Check out following instructions and descriptions.
 
 ## de4a-commons
-Concived as a library that maintains:
+Conceived as a library that maintains:
 - Utils and general purpose methods
 - Common classes
 
 ## de4a-idk
-IDK entity mock based on [API definition](https://app.swaggerhub.com/apis/danieldecastrop/swagger-idk_de_4_a_information_desk/2.0.1#/). Maintains provided information on in-memory DB tables. Mock is able to process requests through the interfaces:
+Mocked IDK entity based on [API definition](https://app.swaggerhub.com/apis/danieldecastrop/swagger-idk_de_4_a_information_desk/2.0.1#/). It maintains provided information in the in-memory DB tables. Mock is able to process requests through the interfaces:
 - /idk/ial/{canonicalEvidenceTypeId}
 - /idk/ial/{canonicalEvidenceTypeId}/{countryCode}
 - /idk/provision
 
 ### Configuration
 #### H2 In-Memory database
-Inserts sql file to set up information provided by service
+SQL file with the inserts to set up the information provided by the service
 ```sh
 idk/src/main/resources/import.sql
 ```
@@ -30,25 +30,25 @@ idk/src/main/eu/idk/configuration/Conf.java
 ```
 
 ## de4a-connector
-Checkout technical documentation [DE4A Connector - Installation and configuration](https://newrepository.atosresearch.eu/index.php/f/1059081)
+Checkout the technical documentation on [DE4A Connector - Installation and configuration](https://newrepository.atosresearch.eu/index.php/f/1059081)
 ### API doc
-Once you deploy a Connector instance it be able to access to Swagger UI browsing:
+Once you deploy a Connector instance, it will be able to access to Swagger UI browsing:
 ```sh
 http://connector-endpoint:port/swagger-ui/
 ```
-Even so, API definition is published on:
+Even so, the API definition is published at:
 [Public Swagger API Connector](https://app.swaggerhub.com/apis/de4a/Connector/0.1.0)
 
 
 
 ### Configuration
 #### Application properties
-Global application properties definitions on:
+Global application properties definitions:
 ```sh
 ~/de4a/de4a-connector/src/main/resources/application.properties
 ```
 #### Phase4 Properties
-Toop and AS4 configuration properties
+TOOP and AS4 configuration properties
 ```sh
 ~/de4a/de4a-connector/src/main/resources/phase4.properties
 ```
@@ -57,29 +57,29 @@ Toop and AS4 configuration properties
 ~/de4a/de4a-connector/src/main/java/eu/de4a/connector/service/spring/Conf.java
 ```
 ## Installation
-You should be able to compile hole packages from parent POM file:
+You should be able to compile entire packages from the parent POM file:
 ```sh
 mvn clean install
 ```
-Also, it is possible to compile each package separately browsing into the folder and running the command above.
+It is also possible to compile each package separately by browsing to the folder and running the command above.
 #### Package
-Compilation process will pack the project into a `.war` file located on `/target/` path, which should be able to deploy on any applications server. If you compile parent pom, IDK and Connector target paths, with both `war` files, will be created.
+The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the IDK and Connector target paths will be created with their corresponding `war` files.
 
 #### de4a-commons `v0.1.1`
 [de4a-commons](https://github.com/de4a-wp5/de4a-commons) project is now on maven central [OSS Sonatype repository - v0.1.1](https://search.maven.org/search?q=g:eu.de4a)
 
 #### Toop version `v2.1.2-SNAPSHOT`
-Due last changes on [de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/development) Toop-connector-ng version should be `2.1.2-SNAPSHOT`, which it is possible you need to add following repo server on your maven settings
+Due to the last changes on [de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/development) Toop-connector-ng version should be `2.1.2-SNAPSHOT`, so you may need to add following repo server on your maven settings
 ```sh
 https://oss.sonatype.org/content/repositories/snapshots/
 ```
 ## Connector configuration guide
-In order to a correctly configuration of the Connector, we have to consider three main properties files:
+For a correct configuration of the Connector, three main property files must be cosidered:
 - `application.properties`: main system configuration
 - `phase4.properties`: AS4 gateway configurations
 - `log4j2.xml`: logging configuration
 
-Here, an working example of `application.prperties` file:
+Bellow, a working example of the `application.prperties` file:
 ```properties
 # Database properties
 database.datasourceConf.url=jdbc:h2:mem:testdb
@@ -171,19 +171,19 @@ as4.timeout.miliseconds=30000
 #http.proxyUsername=
 #http.proxyPassword=
 
-# Required renamed proxy configuration for BDXRClient (if is needed, only uncomment)
+# Required renamed proxy configuration for BDXRClient (if needed, only uncomment)
 #http.proxyHost=${http.proxy.address}
 #http.proxyPort=${http.proxy.port}
 #http.nonProxyHosts=${http.proxy.non-proxy}
 ```
-From now on, we will explain the main and more critical configuration:
+From now on, we will explain the main and most critical configuration:
 #### SSL Context (not for AS4) `application.properties`
-You can configure secure HTTP connections from Connector configuring the following property as `true`:
+You can configure secure HTTP connections from the Connector by setting the following property to `true`:
 ```properties
 # SSL context enabled (true|false)
 ssl.context.enabled=true
 ```
-In this case you should properly configure the following properties in order to create SSL context for HTTP communications:
+In this case you should properly configure the following properties in order to create an SSL context for HTTP communications:
 ```properties
 # SSL configuration (optional when ssl.context.enables is false)
 ssl.keystore.type= #(JKS|PKCS12)
@@ -206,11 +206,11 @@ de4a.kafka.topic=DE4A-CONNECTOR
 toop.tracker.enabled = ${de4a.kafka.enabled}
 toop.tracker.topic = ${de4a.kafka.topic}
 ```
-**IMPORTANT** - If your server have no access to external domains, the kafka configuration should be disabled.
-To disable kafka log producer, you only need to establish property to false `de4a.kafka.enabled=false` - **do not comment or leave empty the rest of properties**
+**IMPORTANT** - If your server has no access to external domains, the kafka configuration should be disabled.
+To disable kafka log producer, you only need to set the property to false `de4a.kafka.enabled=false` - **do not comment or leave empty the rest of properties**
 
 #### SMP properties `application.properties`
-To establish which SMP server will provide to the Connector metadata services we defined the following properties:
+To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
 ```properties
 # SMP Client configuration stuff - Don't touch (default values)
 truststore.type = JKS
@@ -220,7 +220,7 @@ truststore.password = de4a
 # External endpoints
 smp.endpoint=https://de4a-smp.egovlab.eu/
 ```
-You can define in there your SMP endpoint and truststore which will be used to validate the signature of the responses. - **Do not touch, all consortium SMPs should be validated with the default truststore**.
+You can define there your SMP endpoint and truststore which will be used to validate the signature of the responses. - **Do not modify, all consortium SMPs should be validated with the default truststore**.
 
 #### AS4 - TOOP properties `application.properties`
 ```properties
@@ -234,9 +234,9 @@ as4.gateway.implementation.bean=phase4GatewayClient
 # domibus.endpoint=
 ```
 #### Proxy properties
-Some environments could require perform connections via proxy due to security policies or environment limitations, that is why the Connector allow to establish HTTP connections through a proxy server.
+Some environments may require perform proxy connections due to security policies or environment limitations¡. That is why the Connector allows to establish HTTP connections via proxy.
 ```properties
-# Properties to create the http client connection through a proxy (optional)
+# Properties to create the HTTP client connection through a proxy (optional)
 #http.proxy.enabled=
 #http.proxy.address=
 #http.proxy.port=
@@ -244,7 +244,7 @@ Some environments could require perform connections via proxy due to security po
 #http.proxyUsername=
 #http.proxyPassword=
 
-# Required renamed proxy configuration for BDXRClient (if is needed, only uncomment)
+# Required renamed proxy configuration for BDXRClient (if needed, only uncomment)
 #http.proxyHost=${http.proxy.address}
 #http.proxyPort=${http.proxy.port}
 #http.nonProxyHosts=${http.proxy.non-proxy}
@@ -253,10 +253,10 @@ In order to disable proxy configuration, you can either comment the properties o
  ```properties
 http.proxy.enabled=false
 ````
-**NOTICE** that in case that you enabled the property (`http.proxy.enabled=true`) above you should uncomment and set up the rest of them. Also uncomment properties regarding to BDXRClient
+**PLEASE NOTE** that in case that you enabled the property (`http.proxy.enabled=true`) above you should uncomment and set up the rest of them. Also uncomment properties regarding to BDXRClient
 
 #### Phase4 properties `phase4.properties`
-Parameters used by the built-in Phase4 module of the Connector. Set up the properties above following commented indications. Some of them are filled in order to clarify the content -- **Important** to consider if each property is optional or not (*check out the in-line comments*).
+Parameters used by the built-in Phase4 module of the Connector. Set up the properties above following the commented indications. Some of them are filled in to clarify the content -- **Important** to consider if each property is optional or not (*check out the the in-line comments*).
 ```properties
 # (string) - the absolute path to a local directory to store data
 phase4.datapath=
@@ -294,8 +294,8 @@ phase4.truststore.path=
 phase4.truststore.password=
 ```
 #### Logging configuration `log4j2.xml`
-Configuration file bellow maintains logging configuration where you can establish the level of each appender, set up log file path, or even include more appenders or configuration.
-**Important** - to set up correctly the path of log file. By default it is a relative path to catalina.base (Tomcat server) `${sys:catalina.base}/logs/connector.log`
+The configuration file bellow maintains the logging configuration where you can set the level of each appender, set up log file path, or even include more appenders or configuration.
+**Important** - to correctly configure the path of log file. By default it is a relative path to catalina.base (Tomcat server) `${sys:catalina.base}/logs/connector.log`
 ```xml
 <File name="File" fileName="${sys:catalina.base}/logs/connector.log">
 	<PatternLayout>
@@ -304,11 +304,11 @@ Configuration file bellow maintains logging configuration where you can establis
 </File>
 ```
 ## Starting up Connector
-Once you have all configuration parameters well configured (if not, review the logs to find out the problem), it is time to deploy the component into an applications server.
+Once you have all configuration parameters well configured (if not, check the logs to find out the problem), it is time to deploy the component into an applications server.
 Once you have deployed the `war` file, there are several **checks to ensure that the deployment was successful**:
 - Open Swagger UI browsing: `http://host:port/swagger-ui/`
 	- Eg.: [eGovLab Connector](https://de4a-dev-connector.egovlab.eu/swagger-ui/)
-- Toop index page will be at root path: `http://host:port/`
+- TOOP index page will be at root path: `http://host:port/`
 	- Eg.: [eGovLab Connector](https://de4a-dev-connector.egovlab.eu/)
 - The Connector will be able to process requests through the following interfaces:
 	- `/requestTransferEvidenceIM`
