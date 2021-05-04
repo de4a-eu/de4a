@@ -2,18 +2,13 @@ package eu.de4a.commons;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
-
 import javax.annotation.Nonnull;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.helger.commons.wrapper.Wrapper;
 import com.helger.jaxb.GenericJAXBMarshaller;
-
 import eu.de4a.iem.xml.de4a.EDE4ACanonicalEvidenceType;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.util.XDE4AMarshaller;
