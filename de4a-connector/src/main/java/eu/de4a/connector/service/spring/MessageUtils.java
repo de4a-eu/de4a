@@ -2,18 +2,20 @@ package eu.de4a.connector.service.spring;
 
 import java.util.Locale;
 
-import javax.annotation.Resource;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+
+import eu.de4a.connector.api.manager.ApplicationContextProvider;
 
 public class MessageUtils {
 
     private String key;
     private Object[] args;
 
-    @Resource(name = "messageSource")
     private MessageSource messageSource;
+    {
+        messageSource = ApplicationContextProvider.getApplicationContext().getBean(MessageSource.class);
+    }
 
     public MessageUtils(String key) {
         super();
