@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>eu.de4a</groupId>
         <artifactId>de4a-parent-pom</artifactId>
@@ -13,12 +13,12 @@
     <name>de4a-commons</name>
     <packaging>jar</packaging>
     <dependencies>
-		<!-- DE4A GitHub commons project -->
+        <!-- DE4A GitHub commons project -->
         <dependency>
             <groupId>eu.de4a</groupId>
             <artifactId>de4a-iem</artifactId>
         </dependency>
-		<!-- JAXB Runtime -->
+        <!-- JAXB Runtime -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
@@ -69,9 +69,7 @@
                             <sources>
                                 <source>${project.basedir}/src/main/resources/xsds/canonicalEvidences/BirthCertificate.xsd</source>
                             </sources>
-                            <removeOldOutput>false</removeOldOutput>
                             <packageName>eu.de4a.conn.api.canonical</packageName>
-                            <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
                             <clearOutputDir>false</clearOutputDir>
                             <noGeneratedHeaderComments>true</noGeneratedHeaderComments>
                         </configuration>
