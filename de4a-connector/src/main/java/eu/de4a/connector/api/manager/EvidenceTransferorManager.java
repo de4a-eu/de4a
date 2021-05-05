@@ -113,7 +113,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 		} else {
 		    //TODO if as4 message DT-DR failed, what is the approach. retries?
 			if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
-					DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST)) {
+					DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
 			    logger.error("Error sending RequestForwardEvidence to Data Requestor through AS4 gateway");
 			}
 		}

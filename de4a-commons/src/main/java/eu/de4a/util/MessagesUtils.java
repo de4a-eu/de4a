@@ -3,6 +3,8 @@ package eu.de4a.util;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
+import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
@@ -75,6 +77,15 @@ public class MessagesUtils {
         responseTransferEvidenceType.setDataRequestSubject(evidenceRequest.getDataRequestSubject());
 
         return responseTransferEvidenceType;
+	}
+	
+	public static RequestForwardEvidenceType transformRequestTransferUSIDT(RequestTransferEvidenceUSIDTType request) {
+	    RequestForwardEvidenceType requestForward = new RequestForwardEvidenceType();
+	    requestForward.setRequestId(request.getRequestId());
+	    requestForward.setTimeStamp(request.getTimeStamp());
+	    requestForward.setCanonicalEvidence(request.getCanonicalEvidence());
+	    requestForward.setDomesticEvidenceList(request.getDomesticEvidenceList());	    
+	    return requestForward;
 	}
 
 }

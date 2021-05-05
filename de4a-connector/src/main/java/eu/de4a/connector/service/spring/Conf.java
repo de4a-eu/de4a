@@ -82,6 +82,7 @@ import eu.de4a.config.DataSourceConf;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
@@ -156,7 +157,8 @@ public class Conf implements WebMvcConfigurer {
 						typeResolver.resolve(ResponseErrorType.class),
 						typeResolver.resolve(RequestForwardEvidenceType.class),
 						typeResolver.resolve(RequestLookupRoutingInformationType.class),
-						typeResolver.resolve(ResponseLookupRoutingInformationType.class))
+						typeResolver.resolve(ResponseLookupRoutingInformationType.class),
+				        typeResolver.resolve(RequestTransferEvidenceUSIDTType.class))
 				.apiInfo(apiInfo());
 	}
 
