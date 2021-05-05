@@ -211,6 +211,10 @@
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xml.messaging.saaj</groupId>
+            <artifactId>saaj-impl</artifactId>
+        </dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.tomcat/juli -->
         <dependency>
