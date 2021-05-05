@@ -72,7 +72,7 @@ public class ResponseManager {
 			if (evaluatorinfo.isUsi()) {
 				// Send RequestForwardEvidence to evaluator - USI pattern
 				logger.debug("Pushing data to {}", evaluatorinfo.getUrlreturn());
-				Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);
+				Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
 				String endpointDE = evaluatorinfo.getUrlreturn().substring(0, evaluatorinfo.getUrlreturn().lastIndexOf("/"));
 				client.pushEvidence(endpointDE, doc);
 			}

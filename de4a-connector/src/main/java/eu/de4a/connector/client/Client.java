@@ -11,11 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
@@ -55,7 +51,9 @@ import eu.de4a.iem.jaxb.common.types.AckType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
+import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
@@ -63,7 +61,6 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.util.DE4AConstants;
-import eu.de4a.util.DOMUtils;
 import eu.de4a.util.MessagesUtils;
 
 @Component
@@ -227,9 +224,11 @@ public class Client {
         return responseLookup;
 	}
 
-	public boolean pushEvidence(String endpoint, Document requestForwardDoc) {
+	public boolean pushEvidence(String endpoint, Document requestDoc) {
 		logger.debug("Sending RequestForwardEvidence to evaluator {}", endpoint);
 		
+		ConnectorException exception = new ResponseErrorException()
+		        .withModule(ExternalModuleError.CONNECTOR_DR);
 		URIBuilder uriBuilder;
 		try {
             uriBuilder = new URIBuilder(endpoint);
@@ -238,21 +237,23 @@ public class Client {
             return false;
         }
 		uriBuilder.setPath("/requestForwardEvidence");
-		String request = DOMUtils.documentToString(requestForwardDoc);
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_XML);
-		ResponseEntity<String> response = restTemplate.postForEntity(uriBuilder.toString(), new HttpEntity<>(request, headers),
-				String.class);
-
-		ResponseErrorType responseObj = null;
-		if (!ObjectUtils.isEmpty(response.getBody()) && HttpStatus.ACCEPTED.equals(response.getStatusCode())) {
-			responseObj = DE4AMarshaller.deUsiResponseMarshaller().read(String.valueOf(response.getBody()));
-		} else {
-		    // TODO could be retries? 
-			logger.error(MessageFormat.format("There was an error pushing RequestForwardEvidence to the evaluator: {}", endpoint));
-			return false;
-		}
+		
+		//Transform RequestTransferEvidenceUSIDT to RequestForwardEvidence
+		RequestTransferEvidenceUSIDTType requestUSIDT = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
+		        .conversionStrWithCatching(DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+		        requestDoc, false, true, exception);
+		
+		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
+		String request = (String) ErrorHandlerUtils.conversionStrWithCatching(
+		        DE4AMarshaller.deUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+		        requestForward, true, true, exception);
+		
+		String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), request, 
+                 false, exception.withModule(ExternalModuleError.DATA_EVALUATOR), this.restTemplate);
+		
+		ResponseErrorType responseObj = (ResponseErrorType) ErrorHandlerUtils.conversionStrWithCatching(
+		        DE4AMarshaller.deUsiResponseMarshaller(), String.valueOf(response), false, false, exception);
+		
 		return AckType.OK.equals(responseObj.getAck());
 	}
 

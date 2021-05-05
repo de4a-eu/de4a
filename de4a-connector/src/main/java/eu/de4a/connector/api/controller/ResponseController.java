@@ -28,10 +28,10 @@ public class ResponseController implements ResponseApi {
 	private ApplicationContext context;
 
 
-	public String requestForwardEvidence(String requestForward) {
+	public String requestTransferEvidenceUSIDT(String request) {
 		boolean success;
 		try {
-			Document doc = DOMUtils.stringToDocument(requestForward);
+			Document doc = DOMUtils.stringToDocument(request);
 			String id = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, doc.getDocumentElement());
 
 			MessageResponseOwner responseUSI = new MessageResponseOwner(context);
