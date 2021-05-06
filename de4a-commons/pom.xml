@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>eu.de4a</groupId>
         <artifactId>de4a-parent-pom</artifactId>
@@ -13,12 +13,12 @@
     <name>de4a-commons</name>
     <packaging>jar</packaging>
     <dependencies>
-		<!-- DE4A GitHub commons project -->
+        <!-- DE4A GitHub commons project -->
         <dependency>
             <groupId>eu.de4a</groupId>
             <artifactId>de4a-iem</artifactId>
         </dependency>
-		<!-- JAXB Runtime -->
+        <!-- JAXB Runtime -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
@@ -65,15 +65,12 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <episode>false</episode>
-                            <schemaDirectory>${basedir}/src/main/resources/xsds</schemaDirectory>
-                            <schemaIncludes>
-                              <schemaInclude>canonicalEvidences/BirthCertificate.xsd</schemaInclude>
-                            </schemaIncludes>
-                            <generatePackage>eu.de4a.conn.api.canonical</generatePackage>
+                            <generateEpisode>false</generateEpisode>
+                            <sources>
+                                <source>${project.basedir}/src/main/resources/xsds/canonicalEvidences/BirthCertificate.xsd</source>
+                            </sources>
+                            <packageName>eu.de4a.conn.api.canonical</packageName>
                             <clearOutputDir>false</clearOutputDir>
-                            <generateDirectory>${project.basedir}/src/main/java</generateDirectory>
-                            <cleanPackageDirectories>false</cleanPackageDirectories>
                             <noGeneratedHeaderComments>true</noGeneratedHeaderComments>
                         </configuration>
                     </execution>

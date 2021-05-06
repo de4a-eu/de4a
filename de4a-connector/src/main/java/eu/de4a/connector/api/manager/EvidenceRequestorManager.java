@@ -1,31 +1,47 @@
 package eu.de4a.connector.api.manager;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.mime.CMimeType;
 import com.helger.peppolid.CIdentifier;
+
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.exceptions.ResponseErrorException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.handler.ResponseErrorExceptionHandler;
+import eu.de4a.connector.error.handler.ResponseLookupRoutingInformationExceptionHandler;
+import eu.de4a.connector.error.handler.ResponseTransferEvidenceExceptionHandler;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
-import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
@@ -58,64 +74,77 @@ public class EvidenceRequestorManager extends EvidenceManager {
 				return client.getProvisions(request);
 			}
 		} else {
-			response.setErrorList(new ErrorListType());
-			ErrorType error = new ErrorType();
-			error.setCode("COD_EMPTY");
-			error.setText("Bad request. Missing mandatory fields");
-			response.getErrorList().addError(error);
+		    new ResponseLookupRoutingInformationExceptionHandler().buildResponse(
+                    new ResponseErrorException().withFamily(FamilyErrorType.MISSING_REQUIRED_ARGUMENTS)
+                        .withLayer(LayerError.INTERNAL_FAILURE)
+                        .withModule(ExternalModuleError.IDK)
+                        .withMessageArg("CanonicalEvidenceTypeId is missing")
+                        .withHttpStatus(HttpStatus.OK));
 		}
-
 		return response;
 	}
 
-	public boolean manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
-		Document doc = DE4AMarshaller.drUsiRequestMarshaller().getAsDocument(request);
-
-		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
-			return false;
-		}
-		return sendRequestMessage(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
-				request.getCanonicalEvidenceTypeId());
+	public ResponseErrorType manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
+	    Document doc = (Document) ErrorHandlerUtils.conversionDocWithCatching(DE4AMarshaller.drUsiRequestMarshaller(), 
+	            request, true, true, new ResponseErrorException()
+	                                        .withModule(ExternalModuleError.CONNECTOR_DR)
+	                                        .withRequest(request));
+		try {
+            if(sendRequestMessage(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
+            		request.getCanonicalEvidenceTypeId())) {
+                return DE4AResponseDocumentHelper.createResponseError(true);
+            }            
+        } catch (ConnectorException e) {
+            return new ResponseErrorExceptionHandler().buildResponse(
+                    new ResponseErrorException().withFamily(e.getFamily())
+                        .withLayer(e.getLayer())
+                        .withModule(e.getModule())
+                        .withMessageArgs(e.getArgs())
+                        .withHttpStatus(HttpStatus.OK));
+        }
+		return DE4AResponseDocumentHelper.createResponseError(false);
 	}
 
 	public ResponseTransferEvidenceType manageRequestIM(RequestTransferEvidenceUSIIMDRType request) {
 		Document doc = DE4AMarshaller.drImRequestMarshaller().getAsDocument(request);
-		if (ObjectUtils.isEmpty(request.getDataOwner().getAgentUrn())) {
-			return null;
-		}
-		return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), doc.getDocumentElement(),
-				request.getRequestId(), request.getCanonicalEvidenceTypeId());
+		try {
+            return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), 
+                    doc.getDocumentElement(), request.getRequestId(), request.getCanonicalEvidenceTypeId());
+        } catch (ConnectorException e) {
+            return new ResponseTransferEvidenceExceptionHandler().buildResponse(
+                    new ResponseTransferEvidenceException().withLayer(e.getLayer())
+                        .withFamily(e.getFamily())
+                        .withModule(e.getModule())
+                        .withMessageArgs(e.getArgs())
+                        .withRequest(request)
+                        .withHttpStatus(HttpStatus.OK));
+        }
 	}
 
 	private ResponseTransferEvidenceType handleRequestTransferEvidence(String from, String dataOwnerId,
 			Element documentElement, String requestId, String canonicalEvidenceTypeId) {
 		boolean ok = false;
-		try {
-			ok = sendRequestMessage(from, dataOwnerId, documentElement, canonicalEvidenceTypeId);
-		} catch (Exception e) {
-			MessageException me = new MessageException(e.getMessage());
-			return responseManager.getErrorResponse(me);
-		}
-		if (!ok) {
-			return null;
-		}
+		sendRequestMessage(from, dataOwnerId, documentElement, canonicalEvidenceTypeId);
 		try {
 			ok = waitResponse(requestId);
-
 		} catch (InterruptedException e) {
-			logger.error("Error waiting for response", e);
+		    String errorMsg = "Error waiting for response";
+			logger.error(errorMsg, e);
 			Thread.currentThread().interrupt();
-			return null;
+			throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
+			    .withFamily(FamilyErrorType.ERROR_RESPONSE)
+			    .withModule(ExternalModuleError.CONNECTOR_DR)
+			    .withMessageArg(errorMsg);
 		}
 		if (!ok) {
-			logger.error("No response before timeout");
-			return null;
+			String errorMsg = "No response before timeout";
+            logger.error(errorMsg);
+            throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
+                .withFamily(FamilyErrorType.ERROR_RESPONSE)
+                .withModule(ExternalModuleError.CONNECTOR_DR)
+                .withMessageArg(errorMsg);
 		}
-		try {
-			return responseManager.getResponse(requestId);
-		} catch (MessageException e) {
-			return responseManager.getErrorResponse(e);
-		}
+		return responseManager.getResponse(requestId, documentElement);		
 	}
 
 	private boolean waitResponse(String id) throws InterruptedException {
@@ -133,13 +162,17 @@ public class EvidenceRequestorManager extends EvidenceManager {
 
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
 			String canonicalEvidenceTypeId) {
+	    String errorMsg;	    
 		String senderId = sender;
-		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false);
+		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
 		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
-			senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
+            senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
 		}
 		try {
-			logger.debug("Sending  message to as4 gateway ...");
+			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request message via AS4 gateway - "
+                    + "DataEvaluatorId: {0}, DataOwnerId: {1}, CanonicalEvidenceType: {2}",
+                    senderId, dataOwnerId, canonicalEvidenceTypeId));
+			
 			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload p = new TCPayload();
@@ -148,13 +181,25 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			payloads.add(p);
 			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestWrapper, payloads, false);
+			
 			return true;
 		} catch (MEOutgoingException e) {
-			logger.error("Error with as4 gateway comunications", e);
-		} catch (MessageException e) {
-			logger.error("Error building regrep message", e);
+		    errorMsg = "Error with as4 gateway communications";
+			logger.error(errorMsg, e);
+			throw new ConnectorException()
+                .withLayer(LayerError.COMMUNICATIONS)
+                .withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
+                .withModule(ExternalModuleError.CONNECTOR_DT)
+                .withMessageArg(errorMsg);
+		} catch (ConnectorException cE) {
+		    throw cE.withModule(ExternalModuleError.CONNECTOR_DT);
+		} catch (MessageException msgE) {
+		    throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
+		        .withFamily(FamilyErrorType.CONVERSION_ERROR)
+		        .withModule(ExternalModuleError.CONNECTOR_DR)
+		        .withMessageArg(msgE.getMessage())
+		        .withHttpStatus(HttpStatus.OK);
 		}
-		return false;
 	}
 
 }

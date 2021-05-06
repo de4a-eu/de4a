@@ -1,6 +1,7 @@
 package eu.de4a.connector.api.manager;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,21 +14,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.helger.commons.error.level.EErrorLevel;
 
 import eu.de4a.connector.as4.client.ResponseWrapper;
 import eu.de4a.connector.client.Client;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.model.EvaluatorRequestData;
 import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
@@ -54,9 +65,14 @@ public class ResponseManager {
 	public void cathResponseFromMultipleAs4(Object retVal) {
 		ResponseWrapper response = (ResponseWrapper) retVal;
 		String id = response.getId();
+		
+		String logMsg = MessageFormat.format("Processing response received from AS4 gateway - RequestId: {0}", id);
+        DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+		
 		EvaluatorRequest evaluatorinfo = evaluatorRequestRepository.findById(id).orElse(null);
 		if (evaluatorinfo == null) {
-			logger.error("Request does not exists ID: {}", id);
+		    logMsg = MessageFormat.format("Request not found on registries with the ID received - RequestId: {0}", id);
+			DE4AKafkaClient.send(EErrorLevel.ERROR, logMsg);
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
@@ -64,7 +80,7 @@ public class ResponseManager {
 			if (evaluatorinfo.isUsi()) {
 				// Send RequestForwardEvidence to evaluator - USI pattern
 				logger.debug("Pushing data to {}", evaluatorinfo.getUrlreturn());
-				Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_FORWARD_EVIDENCE_REQUEST);
+				Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
 				String endpointDE = evaluatorinfo.getUrlreturn().substring(0, evaluatorinfo.getUrlreturn().lastIndexOf("/"));
 				client.pushEvidence(endpointDE, doc);
 			}
@@ -73,7 +89,7 @@ public class ResponseManager {
 
 	private List<EvaluatorRequestData> saveData(ResponseWrapper response, EvaluatorRequest evaluatorRequest) {
 		try {
-			logger.debug("Saving data for response with id {}", response.getId());
+			logger.info("Saving data for response with id {}", response.getId());
 			List<EvaluatorRequestData> datas = new ArrayList<>();
 			for (MultipartFile part : response.getAttacheds()) {
 				byte[] data = part.getBytes();
@@ -100,22 +116,31 @@ public class ResponseManager {
 		return evaluator != null && evaluator.isDone();
 	}
 
-	public ResponseTransferEvidenceType getResponse(String id) throws MessageException {
-		logger.debug("Processing ResponseTransferEvidence with id {}", id);
+	public ResponseTransferEvidenceType getResponse(String id, Element request) {
+		logger.info("Processing ResponseTransferEvidence with id {}", id);
 
 		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);
-		EvaluatorRequestData data = new EvaluatorRequestData();
-		data.setRequest(evaluator);
-		Example<EvaluatorRequestData> example = Example.of(data);
-		List<EvaluatorRequestData> filesAttached = evaluatorRequestDataRepository.findAll(example);
-		if(!CollectionUtils.isEmpty(filesAttached)) {
-			Document doc = getDocumentFromAttached(filesAttached, DE4AConstants.TAG_EVIDENCE_RESPONSE);
-			if(doc != null) {
-				return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-						.read(doc);
+		if(evaluator != null) {
+			EvaluatorRequestData data = new EvaluatorRequestData();
+			data.setRequest(evaluator);
+			Example<EvaluatorRequestData> example = Example.of(data);
+			List<EvaluatorRequestData> filesAttached = evaluatorRequestDataRepository.findAll(example);
+			if(!CollectionUtils.isEmpty(filesAttached)) {
+				Document doc = getDocumentFromAttached(filesAttached, DE4AConstants.TAG_EVIDENCE_RESPONSE);
+				if(doc != null) {
+					return (ResponseTransferEvidenceType) ErrorHandlerUtils.conversionDocWithCatching(
+							DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), doc, false, false, 
+							new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DR)
+								.withRequest(DE4AMarshaller.drImRequestMarshaller().read(request)));
+				}
 			}
 		}
-		throw new MessageException("Not exists a ResponseTransferEvidence for ID:" + id);
+		throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+		    .withFamily(FamilyErrorType.SAVING_DATA_ERROR)
+		    .withModule(ExternalModuleError.NONE)
+		    .withMessageArg(MessageFormat.format("Response {0} not found on database", id))
+		    .withRequest(DE4AMarshaller.drImRequestMarshaller().read(request))
+		    .withHttpStatus(HttpStatus.OK);
 	}
 
 	private Document getDocumentFromAttached(List<EvaluatorRequestData> filesAttached,

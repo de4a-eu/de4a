@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.text.MessageFormat;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -82,9 +83,9 @@ public class DOMUtils
     }
     catch (final XPathExpressionException e)
     {
-      final String err = "xpath error in building wrapping message.";
+      final String err = MessageFormat.format("Error getting Xpath {0}", xpath);
       logger.error (err, e);
-      throw new MessageException (err + e.getMessage ());
+      throw new MessageException (err, e);
     }
   }
 
@@ -102,9 +103,9 @@ public class DOMUtils
     }
     catch (final XPathExpressionException e)
     {
-      final String err = "xpath error in building wrapping message.";
+      final String err = MessageFormat.format("Error getting Xpath {0}", xpath);
       logger.error (err, e);
-      throw new MessageException (err + e.getMessage ());
+      throw new MessageException (err, e);
     }
   }
 

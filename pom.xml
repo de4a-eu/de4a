@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.de4a</groupId>
     <artifactId>de4a-parent-pom</artifactId>
@@ -20,7 +20,7 @@
         </license>
     </licenses>
     <properties>
-		<!-- Project encoding -->
+        <!-- Project encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -57,7 +57,7 @@
         <xmlsec.version>2.2.1</xmlsec.version>
         <jacoco.version>0.8.6</jacoco.version>
 
-		<!-- Sonar/Jacoco -->
+        <!-- Sonar/Jacoco -->
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
@@ -103,7 +103,7 @@
                 <version>${jaxb.version}</version>
             </dependency>
 
-			<!-- Log4j2 dependencies -->
+            <!-- Log4j2 dependencies -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
@@ -265,7 +265,7 @@
     </dependencyManagement>
 
     <dependencies>
-		<!-- JUnit 4 for testing -->
+        <!-- JUnit 4 for testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -273,7 +273,7 @@
         </dependency>
     </dependencies>
 
-	<!-- Sub-projects - must match child directory names; order is important! -->
+    <!-- Sub-projects - must match child directory names; order is important! -->
     <modules>
         <module>de4a-commons</module>
         <module>de4a-connector</module>

@@ -1,5 +1,7 @@
 package eu.idk.api;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -79,12 +81,13 @@ public class IdkApiController implements IdkApi {
 
 	@Override
 	public ResponseEntity<String> provisionGet(String canonicalEvidenceTypeId, String dataOwnerId) {
-		log.debug(REQUEST_LOG_PARAMS, canonicalEvidenceTypeId, dataOwnerId);
+	    String ownerID = URLDecoder.decode(dataOwnerId, StandardCharsets.UTF_8);
+		log.debug(REQUEST_LOG_PARAMS, canonicalEvidenceTypeId, ownerID);
 		AvailableSourcesType availableSources = new AvailableSourcesType();
 		String jsonResponse = null;
 		List<Source> sources = sourceRepository.findByCanonicalEvidenceTypeId(canonicalEvidenceTypeId);
 		if (sources != null) {
-			manager.extractSourceInfo(sources, availableSources, dataOwnerId);
+			manager.extractSourceInfo(sources, availableSources, ownerID);
 		} else {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
