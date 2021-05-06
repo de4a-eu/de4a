@@ -100,7 +100,7 @@ public class ErrorHandlerUtils {
     public static <T> Object conversionStrWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
             boolean objToStr, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
-        String errorMsg = "There was an error on marshal conversion of String object";
+        String errorMsg = "Object received is not valid, check the structure";
         ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withLayer(LayerError.INTERNAL_FAILURE)
                 .withHttpStatus(HttpStatus.OK);
@@ -135,7 +135,7 @@ public class ErrorHandlerUtils {
     public static <T> Object conversionDocWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
             boolean objToDoc, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
-        String errorMsg = "There was an error on marshal conversion of Document object";
+        String errorMsg = "Object received is not valid, check the structure";
         ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
                 .withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withHttpStatus(HttpStatus.OK);

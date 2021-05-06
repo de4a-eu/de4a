@@ -35,7 +35,7 @@ public interface RequestApi {
 				content = @Content(schema = @Schema(implementation = ResponseLookupRoutingInformationType.class)))
 	})
 	public @ResponseBody String lookupRoutingInformation(
-			@Valid @RequestBody @ApiParam(hidden = true) RequestLookupRoutingInformationType request);
+			@Valid @RequestBody @ApiParam(hidden = true) String request);
 
 
 	@PostMapping(value = "/requestTransferEvidenceUSI")
