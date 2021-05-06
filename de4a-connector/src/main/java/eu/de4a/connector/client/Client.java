@@ -1,7 +1,12 @@
 package eu.de4a.connector.client;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,13 +136,22 @@ public class Client {
 
 	public ResponseLookupRoutingInformationType getSources(RequestLookupRoutingInformationType request) {
 
-		StringBuilder uri = new StringBuilder(idkEndpoint);
-		uri.append("/ial/");
-		uri.append(request.getCanonicalEvidenceTypeId());
-		if (!ObjectUtils.isEmpty(request.getCountryCode())) {
-			uri.append("/").append(request.getCountryCode());
-		}
-		String response = restTemplate.getForObject(uri.toString(), String.class);
+	    URIBuilder uriBuilder;
+        try {
+            uriBuilder = new URIBuilder(idkEndpoint);
+        } catch (URISyntaxException e1) {
+            logger.error("There was an error creating URI from IDK endpoint");
+            return null;
+        }
+        StringBuilder path = new StringBuilder(uriBuilder.getPath());
+        path.append("ial/");
+        path.append(request.getCanonicalEvidenceTypeId());
+        if (!ObjectUtils.isEmpty(request.getCountryCode())) {
+            path.append("/");
+            path.append(request.getCountryCode());
+        }
+        uriBuilder.setPath(path.toString());
+		String response = restTemplate.getForObject(uriBuilder.toString(), String.class);
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {
@@ -157,14 +171,19 @@ public class Client {
 
 	public ResponseLookupRoutingInformationType getProvisions(RequestLookupRoutingInformationType request) {
 
-		StringBuilder uri = new StringBuilder(idkEndpoint);
-		uri.append("/provision");
-		uri.append("?").append("canonicalEvidenceTypeId");
-		uri.append("=").append(request.getCanonicalEvidenceTypeId());
-		uri.append("&").append("dataOwnerId");
-		uri.append("=").append(request.getDataOwnerId());
-
-		String response = restTemplate.getForObject(uri.toString(), String.class);
+		URIBuilder uriBuilder;
+        try {
+            uriBuilder = new URIBuilder(idkEndpoint);
+        } catch (URISyntaxException e1) {
+            logger.error("There was an error creating URI from IDK endpoint");
+            return null;
+        }
+        StringBuilder path = new StringBuilder(uriBuilder.getPath());
+		path.append("provision");
+		uriBuilder.setParameter("canonicalEvidenceTypeId", request.getCanonicalEvidenceTypeId());
+		uriBuilder.setParameter("dataOwnerId", request.getDataOwnerId());
+		uriBuilder.setPath(path.toString());
+		String response = restTemplate.getForObject(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), String.class);
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
 		try {

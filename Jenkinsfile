@@ -30,7 +30,7 @@ pipeline {
                 }
             }
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean package -U'
             }
 
             // TODO: add pushing to a future de4a maven repo?
