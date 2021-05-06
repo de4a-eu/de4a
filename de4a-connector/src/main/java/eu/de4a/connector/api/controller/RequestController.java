@@ -15,6 +15,7 @@ import com.helger.commons.error.level.EErrorLevel;
 
 import eu.de4a.connector.api.RequestApi;
 import eu.de4a.connector.api.manager.EvidenceRequestorManager;
+import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
@@ -45,13 +46,17 @@ public class RequestController implements RequestApi {
 
 	@PostMapping(value = "/lookupRoutingInformation", produces = MediaType.APPLICATION_XML_VALUE, 
 	        consumes = MediaType.APPLICATION_XML_VALUE)
-	public String lookupRoutingInformation(RequestLookupRoutingInformationType request) {
+	public String lookupRoutingInformation(String request) {
+	    
+	    RequestLookupRoutingInformationType reqObj = (RequestLookupRoutingInformationType) ErrorHandlerUtils
+                .conversionStrWithCatching(DE4AMarshaller.idkRequestLookupRoutingInformationMarshaller(), request, false, true, 
+                new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.CONNECTOR_DR));
 	    
 	    DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Receiving RequestLookupRoutingInformation - "
-	            + "CanonicalEvidenceType: {0}, CountryCode: {1}, DataOwnerId: {2}", request.getCanonicalEvidenceTypeId(),
-	            request.getCountryCode(), request.getDataOwnerId()));
+	            + "CanonicalEvidenceType: {0}, CountryCode: {1}, DataOwnerId: {2}", reqObj.getCanonicalEvidenceTypeId(),
+	            reqObj.getCountryCode(), reqObj.getDataOwnerId()));
 	    
-		ResponseLookupRoutingInformationType response = evidenceRequestorManager.manageRequest(request);
+		ResponseLookupRoutingInformationType response = evidenceRequestorManager.manageRequest(reqObj);
 		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
 		return respMarshaller.formatted().getAsString(response);
 	}
