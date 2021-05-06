@@ -1,5 +1,6 @@
 package eu.de4a.connector.api.manager;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.mime.CMimeType;
 
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
@@ -37,6 +39,7 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
@@ -157,14 +160,19 @@ public class EvidenceRequestorManager extends EvidenceManager {
 
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
 			String canonicalEvidenceTypeId) {
-	    String errorMsg;
+	    String errorMsg;	    
 		String senderId = sender;
 		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
 		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
 			senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
 		}
 		try {
-			logger.debug("Sending  message to as4 gateway ...");
+		    String logMsg = MessageFormat.format("Sending request message via AS4 gateway - "
+	                + "DataEvaluatorId: {0}, DataOwnerId: {1}, CanonicalEvidenceType: {2}",
+	                senderId, dataOwnerId, canonicalEvidenceTypeId);
+			logger.info(logMsg);			
+			DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+			
 			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload p = new TCPayload();

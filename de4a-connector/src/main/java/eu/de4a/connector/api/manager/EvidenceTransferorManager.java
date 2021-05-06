@@ -1,5 +1,6 @@
 package eu.de4a.connector.api.manager;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.helger.commons.error.level.EErrorLevel;
+import com.helger.peppolid.CIdentifier;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.as4.owner.MessageOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
@@ -30,6 +33,7 @@ import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
@@ -48,12 +52,17 @@ public class EvidenceTransferorManager extends EvidenceManager {
 	private RequestorRequestRepository requestorRequestRepository;
 
 
-	public void queueMessage(MessageOwner request) {
-		ResponseTransferEvidenceType responseTransferEvidenceType = null;
-		if (logger.isDebugEnabled()) {
-			logger.debug("Queued message to send to owner:");
+	public void queueMessage(MessageOwner request) {		
+		logger.info("Queued message to be send to the owner - RequestId: {}, DataEvaluatorId: {}, DataOwnerId: {}", 
+		        request.getId(), request.getSenderId(), request.getReceiverId());
+		if (logger.isDebugEnabled()) {			
 			logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
 		}
+		ResponseTransferEvidenceType responseTransferEvidenceType = null;
+		
+		DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Looking for data owner address - "
+                + "DataOwnerId: {0}", request.getReceiverId()));
+		
 		OwnerAddresses ownerAddress  = ownerLocator.lookupOwnerAddress(request.getReceiverId()); 
 		RequestorRequest requestorReq = new RequestorRequest();
 		if(ownerAddress != null) {
@@ -103,8 +112,9 @@ public class EvidenceTransferorManager extends EvidenceManager {
 	}
 
 	public void queueMessageResponse(MessageResponseOwner response) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Queued response from owner USI-Pattern:");
+	    logger.info("Queued response from owner USI pattern - RequestId: {}, DataEvaluatorId: {}, DataOwnerId: {}", 
+	            response.getId(), response.getDataEvaluatorId(), response.getDataOwnerId());
+		if (logger.isDebugEnabled()) {			
 			logger.debug(DOMUtils.documentToString(response.getMessage().getOwnerDocument()));
 		}
 		RequestorRequest usirequest = requestorRequestRepository.findById(response.getId()).orElse(null);
@@ -122,12 +132,17 @@ public class EvidenceTransferorManager extends EvidenceManager {
 	public boolean sendResponseMessage(String sender, String docTypeID, Element message, String tagContentId) {
 		NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true,message);
 		try {
-			logger.debug("Sending  message to as4 gateway ...");
-
-			String senderId = sender;
-			if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
-				senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
-			}
+		    String senderId = sender;
+            if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
+                senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
+            }
+            
+		    String logMsg= MessageFormat.format("Sending response message via AS4 gateway - "
+                    + "DataEvaluatorId: {0}, Message tag: {1}, CanonicalEvidenceType: {3}", 
+                    senderId, tagContentId, docTypeID);
+			logger.info(logMsg);
+			DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+			
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload payload = new TCPayload();
 			payload.setContentID(tagContentId);
