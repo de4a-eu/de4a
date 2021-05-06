@@ -10,6 +10,7 @@ public class MessageKeys {
      * Errors message keys
      */
     public static final String ERROR_OWNER_NOT_FOUND = "error.owner.not.found";
+    public static final String ERROR_SERVICE_NOT_FOUND = "error.service.not.found";
     public static final String ERROR_MISSING_ARGS = "error.missing.arguments";
     public static final String ERROR_CONNECTION = "error.connection";
     public static final String ERROR_RESPONSE = "error.response";

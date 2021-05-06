@@ -84,7 +84,8 @@ public class MessagesUtils {
 	    requestForward.setRequestId(request.getRequestId());
 	    requestForward.setTimeStamp(request.getTimeStamp());
 	    requestForward.setCanonicalEvidence(request.getCanonicalEvidence());
-	    requestForward.setDomesticEvidenceList(request.getDomesticEvidenceList());	    
+	    requestForward.setDomesticEvidenceList(request.getDomesticEvidenceList());
+	    requestForward.setErrorList(request.getErrorList());
 	    return requestForward;
 	}
 

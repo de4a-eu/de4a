@@ -2,11 +2,14 @@ package eu.de4a.connector.service.spring;
 
 import java.util.Locale;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Component;
 
 import eu.de4a.connector.api.manager.ApplicationContextProvider;
 
+@Component
 public class MessageUtils {
 
     private String key;
@@ -15,6 +18,10 @@ public class MessageUtils {
     private MessageSource messageSource;
     {
         messageSource = ApplicationContextProvider.getApplicationContext().getBean(MessageSource.class);
+    }
+    
+    public MessageUtils() {
+        super();
     }
 
     public MessageUtils(String key) {
