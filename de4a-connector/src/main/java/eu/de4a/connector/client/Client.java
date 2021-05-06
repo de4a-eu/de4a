@@ -21,6 +21,7 @@ import org.w3c.dom.Element;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ISMLInfo;
 import com.helger.peppol.sml.SMLInfo;
@@ -60,6 +61,7 @@ import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.MessagesUtils;
 
@@ -90,7 +92,12 @@ public class Client {
 	 * @return NodeInfo Service metadata
 	 */
 	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService, Element userMessage) {
-		logger.debug("Request SMP {}, {}", participantId, documentTypeId);
+	    String messageType = (isReturnService ?  DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
+	    String logMsg = MessageFormat.format("Request to SMP - "
+                + "ParticipantId: {0}, DocumentTypeId: {1}, MessageType: {2}", 
+                participantId, documentTypeId, messageType);
+		logger.info(logMsg);
+		DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
 
 		NodeInfo nodeInfo = new NodeInfo();
 		try {
@@ -128,8 +135,7 @@ public class Client {
                     .getServiceInformation().getDocumentIdentifierValue());
             
 			final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE
-					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ? 
-							DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
+					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, messageType);
 			final EndpointType endpoint = BDXRClientReadOnly.getEndpoint(signedServiceMetadata, aProcID,
 					ESMPTransportProfile.TRANSPORT_PROFILE_BDXR_AS4);
 			if (endpoint != null) {
@@ -224,11 +230,10 @@ public class Client {
         return responseLookup;
 	}
 
-	public boolean pushEvidence(String endpoint, Document requestDoc) {
-		logger.debug("Sending RequestForwardEvidence to evaluator {}", endpoint);
-		
+	public boolean pushEvidence(String endpoint, Document requestDoc) {		
 		ConnectorException exception = new ResponseErrorException()
 		        .withModule(ExternalModuleError.CONNECTOR_DR);
+		
 		URIBuilder uriBuilder;
 		try {
             uriBuilder = new URIBuilder(endpoint);
@@ -242,6 +247,13 @@ public class Client {
 		RequestTransferEvidenceUSIDTType requestUSIDT = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
 		        .conversionStrWithCatching(DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
 		        requestDoc, false, true, exception);
+		
+        String logMsg = MessageFormat.format("Sending RequestForwardEvidence to the data evaluator - "
+                + "RequestId: {0}, DataEvaluatorId: {1}, DataOwnerId: {2}, Endpoint: {3}",
+                requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
+                requestUSIDT.getDataOwner().getAgentUrn(), endpoint);
+        logger.info(logMsg);
+        DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
 		
 		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
 		String request = (String) ErrorHandlerUtils.conversionStrWithCatching(
@@ -259,9 +271,14 @@ public class Client {
 
 	public Object sendEvidenceRequest(RequestTransferEvidenceUSIIMDRType evidenceRequest, String endpoint,
             boolean isUsi) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Sending request to owner - request ID: {}", evidenceRequest.getRequestId());
-        }
+	    String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");
+	    String logMsg = MessageFormat.format("Sending {0} to the data owner - "
+                + "RequestId: {1}, CanonicalEvidenceType: {2}, DataEvaluatorId: {3}, DataOwnerId: {4}, "
+                + "Endpoint: {5}", requestType, evidenceRequest.getRequestId(), evidenceRequest.getCanonicalEvidenceTypeId(),
+                evidenceRequest.getDataEvaluator().getAgentUrn(), evidenceRequest.getDataOwner().getAgentUrn(), endpoint);
+        logger.info(logMsg);
+        DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+        
         URIBuilder uriBuilder;
         try {
             uriBuilder = new URIBuilder(endpoint);

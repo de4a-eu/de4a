@@ -23,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.helger.commons.error.level.EErrorLevel;
+
 import eu.de4a.connector.as4.client.ResponseWrapper;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
@@ -36,6 +38,7 @@ import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.model.EvaluatorRequestData;
 import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
@@ -62,9 +65,16 @@ public class ResponseManager {
 	public void cathResponseFromMultipleAs4(Object retVal) {
 		ResponseWrapper response = (ResponseWrapper) retVal;
 		String id = response.getId();
+		
+		String logMsg = MessageFormat.format("Processing response received from AS4 gateway - RequestId: {0}", id);
+        logger.info(logMsg);
+        DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+		
 		EvaluatorRequest evaluatorinfo = evaluatorRequestRepository.findById(id).orElse(null);
 		if (evaluatorinfo == null) {
-			logger.error("Request does not exists ID: {}", id);
+		    logMsg = MessageFormat.format("Request not found on registries with the ID received - RequestId: {0}", id);
+			logger.error(logMsg);
+			DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
@@ -81,7 +91,7 @@ public class ResponseManager {
 
 	private List<EvaluatorRequestData> saveData(ResponseWrapper response, EvaluatorRequest evaluatorRequest) {
 		try {
-			logger.debug("Saving data for response with id {}", response.getId());
+			logger.info("Saving data for response with id {}", response.getId());
 			List<EvaluatorRequestData> datas = new ArrayList<>();
 			for (MultipartFile part : response.getAttacheds()) {
 				byte[] data = part.getBytes();
@@ -109,7 +119,7 @@ public class ResponseManager {
 	}
 
 	public ResponseTransferEvidenceType getResponse(String id, Element request) {
-		logger.debug("Processing ResponseTransferEvidence with id {}", id);
+		logger.info("Processing ResponseTransferEvidence with id {}", id);
 
 		EvaluatorRequest evaluator = evaluatorRequestRepository.findById(id).orElse(null);
 		if(evaluator != null) {

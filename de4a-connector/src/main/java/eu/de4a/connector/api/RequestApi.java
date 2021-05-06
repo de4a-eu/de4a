@@ -50,7 +50,7 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
-	public @ResponseBody String sendRequestUSI(@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public @ResponseBody String requestTransferEvidenceUSI(@Valid @RequestBody @ApiParam(hidden = true) String request);
 
 
 	@ApiOperation(value = "Receive RequestTransferEvidence message through IM pattern",
@@ -64,6 +64,6 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseTransferEvidenceType.class)))
 	})
-	public @ResponseBody String sendRequestIM(@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public @ResponseBody String requestTransferEvidenceIM(@Valid @RequestBody @ApiParam(hidden = true) String request);
 
 }

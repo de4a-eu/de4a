@@ -1,5 +1,7 @@
 package eu.de4a.connector.api.controller;
 
+import java.text.MessageFormat;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +11,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.helger.commons.error.level.EErrorLevel;
+
 import eu.de4a.connector.api.RequestApi;
 import eu.de4a.connector.api.manager.EvidenceRequestorManager;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
@@ -20,6 +27,7 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 
 @Controller
 @Validated
@@ -38,7 +46,11 @@ public class RequestController implements RequestApi {
 	@PostMapping(value = "/lookupRoutingInformation", produces = MediaType.APPLICATION_XML_VALUE, 
 	        consumes = MediaType.APPLICATION_XML_VALUE)
 	public String lookupRoutingInformation(RequestLookupRoutingInformationType request) {
-
+	    
+	    DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Receiving RequestLookupRoutingInformation - "
+	            + "CanonicalEvidenceType: {0}, CountryCode: {1}, DataOwnerId: {2}", request.getCanonicalEvidenceTypeId(),
+	            request.getCountryCode(), request.getDataOwnerId()));
+	    
 		ResponseLookupRoutingInformationType response = evidenceRequestorManager.manageRequest(request);
 		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
 		return respMarshaller.formatted().getAsString(response);
@@ -46,16 +58,10 @@ public class RequestController implements RequestApi {
 
 	@PostMapping(value = "/requestTransferEvidenceUSI", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public String sendRequestUSI(String request) {
-		RequestTransferEvidenceUSIIMDRType reqObj = DE4AMarshaller.drUsiRequestMarshaller().read(request);
-		EvaluatorRequest entity = new EvaluatorRequest();
-		entity.setIdevaluator(reqObj.getDataEvaluator().getAgentNameValue());
-		entity.setIdrequest(reqObj.getRequestId());
-		entity.setUrlreturn(reqObj.getDataEvaluator().getRedirectURL());
-		entity.setUsi(true);
-		logger.debug("Saving evaluator request - evaluator:{},request:{},urlreturn:{}",
-				reqObj.getDataEvaluator().getAgentNameValue(), reqObj.getRequestId(), reqObj.getDataEvaluator().getRedirectURL());
-		evaluatorRequestRepository.save(entity);
+	public String requestTransferEvidenceUSI(String request) {
+	    
+	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(), 
+                request, true);
 
 		ResponseErrorType response = evidenceRequestorManager.manageRequestUSI(reqObj);		
 		return DE4AMarshaller.drUsiResponseMarshaller().getAsString(response);
@@ -63,22 +69,42 @@ public class RequestController implements RequestApi {
 
 	@PostMapping(value = "/requestTransferEvidenceIM", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public String sendRequestIM(String request) {
-		ResponseTransferEvidenceType response = null;
-		var reqMarshaller = DE4AMarshaller.drImRequestMarshaller();
-		RequestTransferEvidenceUSIIMDRType reqObj = reqMarshaller.read(request);
-		EvaluatorRequest entity = new EvaluatorRequest();
-		entity.setIdevaluator(reqObj.getDataEvaluator().getAgentNameValue());
-		entity.setIdrequest(reqObj.getRequestId());
-		entity.setUrlreturn(reqObj.getDataEvaluator().getRedirectURL());
-		entity.setUsi(false);
-		evaluatorRequestRepository.save(entity);
-		logger.debug("Saving evaluator request evaluator:{},request:{},urlreturn:{}",
-				reqObj.getDataEvaluator().getAgentNameValue(), reqObj.getRequestId(),
-				reqObj.getDataEvaluator().getRedirectURL());
-		response = evidenceRequestorManager.manageRequestIM(reqObj);
-			
+	public String requestTransferEvidenceIM(String request) {
+		
+	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(), 
+	            request, false);
+		
+		ResponseTransferEvidenceType response = evidenceRequestorManager.manageRequestIM(reqObj);
 		return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
 				.getAsString(response);
+	}
+	
+	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, String request,
+	        boolean isUsi) {
+	    RequestTransferEvidenceUSIIMDRType reqObj = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
+                .conversionStrWithCatching(marshaller, request, false, true, 
+                new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DR));
+	    
+        String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Receiving {0} - "
+                + "RequestId: {1}, CanonicalEvidenceType: {2}, DataEvaluator: {3}, DataOwner: {4}", 
+                requestType, reqObj.getRequestId(), reqObj.getCanonicalEvidenceTypeId(), 
+                reqObj.getDataEvaluator().getAgentUrn(), reqObj.getDataOwner().getAgentUrn()));
+        
+        saveEvaluatorRequest(reqObj, isUsi);        
+        return reqObj;
+	}
+	
+	private void saveEvaluatorRequest(RequestTransferEvidenceUSIIMDRType request, boolean isUsi) {
+	    EvaluatorRequest entity = new EvaluatorRequest();
+        entity.setIdevaluator(request.getDataEvaluator().getAgentNameValue());
+        entity.setIdrequest(request.getRequestId());
+        entity.setUrlreturn(request.getDataEvaluator().getRedirectURL());
+        entity.setUsi(isUsi);
+        evaluatorRequestRepository.save(entity);
+        if(logger.isDebugEnabled())
+            logger.debug("Saving evaluator request - evaluator:{}, request:{}, urlreturn:{}",
+                    request.getDataEvaluator().getAgentNameValue(), request.getRequestId(),
+                    request.getDataEvaluator().getRedirectURL());
 	}
 }
