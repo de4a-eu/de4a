@@ -1,8 +1,13 @@
 package eu.de4a.connector.error.model;
 
 public enum ExternalModuleError {
-    IDK("1", "IDK"), SMP("2", "SMP"), CONNECTOR_DR("3", "CONNECTOR DR"), CONNECTOR_DT("4", "CONNECTOR DT"),
-    DATA_OWNER("4", "DATA OWNER"), DATA_EVALUATOR("5", "DATA EVALUATOR"), NONE("0", "NONE");
+    IDK("01", "IDK"), 
+    SMP("02", "SMP"), 
+    CONNECTOR_DR("03", "CONNECTOR DR"), 
+    CONNECTOR_DT("04", "CONNECTOR DT"),
+    DATA_OWNER("04", "DATA OWNER"), 
+    DATA_EVALUATOR("05", "DATA EVALUATOR"), 
+    NONE("00", "NONE");
 
     private String id;
     private String label;
@@ -16,16 +21,8 @@ public enum ExternalModuleError {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getLabel() {
         return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
     }
 
 }

@@ -88,13 +88,13 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
-        logger.warn("REST Client request not found service");
-        String err = new MessageUtils(MessageKeys.ERROR_404, null).value();
+        logger.warn("REST service requested not found");
+        String err = new MessageUtils(MessageKeys.ERROR_SERVICE_NOT_FOUND, 
+                new Object[] {request.getContextPath()}).value();
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
         responseError.setErrorList(new ErrorListType());
-        // TODO same code for not found vs missing parameters?
         String code = LayerError.COMMUNICATIONS.ordinal() + ExternalModuleError.NONE.getId()
-                + FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID();
+                + FamilyErrorType.SERVICE_NOT_FOUND.getID();
         responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.NOT_FOUND);
 

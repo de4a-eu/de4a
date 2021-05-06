@@ -5,12 +5,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.w3c.dom.Document;
 
 import eu.de4a.connector.api.ResponseApi;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
+import eu.de4a.connector.error.exceptions.ResponseErrorException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
@@ -27,9 +33,9 @@ public class ResponseController implements ResponseApi {
 	@Autowired
 	private ApplicationContext context;
 
-
+	@PostMapping(value = "/requestTransferEvidenceUSIDT", produces = MediaType.APPLICATION_XML_VALUE, 
+            consumes = MediaType.APPLICATION_XML_VALUE)
 	public String requestTransferEvidenceUSIDT(String request) {
-		boolean success;
 		try {
 			Document doc = DOMUtils.stringToDocument(request);
 			String id = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, doc.getDocumentElement());
@@ -38,13 +44,15 @@ public class ResponseController implements ResponseApi {
 			responseUSI.setId(id);
 			responseUSI.setMessage(doc.getDocumentElement());
 			applicationEventMulticaster.multicastEvent(responseUSI);
-
-			success = true;
 		} catch (Exception e) {
-			logger.error("There was a problem processing owner USI response", e);
-			success = false;
+		    String error = "There was an error processing RequestTransferEvidenceUSIDT";
+			logger.error(error, e);
+			throw new ResponseErrorException().withLayer(LayerError.INTERNAL_FAILURE)
+			    .withModule(ExternalModuleError.CONNECTOR_DT)
+			    .withMessageArg(error)
+			    .withHttpStatus(HttpStatus.OK);
 		}
-		ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(success);
+		ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(true);
 		return DE4AMarshaller.dtUsiResponseMarshaller().getAsString(response);
 	}
 }
