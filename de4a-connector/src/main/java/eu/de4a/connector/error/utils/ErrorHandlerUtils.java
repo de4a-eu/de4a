@@ -28,7 +28,7 @@ public class ErrorHandlerUtils {
     
     public static ResponseEntity<String> checkResponse(ResponseEntity<String> response, ConnectorException ex, 
             boolean throwException) {
-        if(response == null || !HttpStatus.ACCEPTED.equals(response.getStatusCode()) 
+        if(response == null || !HttpStatus.OK.equals(response.getStatusCode())
                 || ObjectUtils.isEmpty(response.getBody())) {
             if(logger.isDebugEnabled()) {
                 logger.debug("Failed or empty response received - {}", response);
@@ -43,7 +43,7 @@ public class ErrorHandlerUtils {
                 throw exception;
             }
             return new ResponseEntity<>((String) ResponseErrorFactory.getHandlerFromClassException(
-                    ex.getClass()).getResponseError(exception, false), HttpStatus.OK);
+                    ex.getClass()).getResponseError(exception, true), HttpStatus.OK);
         }
         return response;
     }

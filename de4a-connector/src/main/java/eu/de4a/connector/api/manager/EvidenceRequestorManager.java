@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,11 +168,9 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
 		}
 		try {
-		    String logMsg = MessageFormat.format("Sending request message via AS4 gateway - "
-	                + "DataEvaluatorId: {0}, DataOwnerId: {1}, CanonicalEvidenceType: {2}",
-	                senderId, dataOwnerId, canonicalEvidenceTypeId);
-			logger.info(logMsg);			
-			DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request message via AS4 gateway - "
+                    + "DataEvaluatorId: {0}, DataOwnerId: {1}, CanonicalEvidenceType: {2}",
+                    senderId, dataOwnerId, canonicalEvidenceTypeId));
 			
 			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();

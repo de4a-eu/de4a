@@ -67,14 +67,12 @@ public class ResponseManager {
 		String id = response.getId();
 		
 		String logMsg = MessageFormat.format("Processing response received from AS4 gateway - RequestId: {0}", id);
-        logger.info(logMsg);
         DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
 		
 		EvaluatorRequest evaluatorinfo = evaluatorRequestRepository.findById(id).orElse(null);
 		if (evaluatorinfo == null) {
 		    logMsg = MessageFormat.format("Request not found on registries with the ID received - RequestId: {0}", id);
-			logger.error(logMsg);
-			DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+			DE4AKafkaClient.send(EErrorLevel.ERROR, logMsg);
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
