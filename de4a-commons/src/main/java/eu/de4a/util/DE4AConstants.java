@@ -4,6 +4,7 @@ public class DE4AConstants {
 	public static final String ID_MIMEPART="id";
 
 	public static final String TAG_EVIDENCE_REQUEST="RequestTransferEvidence";
+	public static final String TAG_EVIDENCE_REQUEST_DT="RequestTransferEvidenceUSIDT";
 	public static final String TAG_EXTRACT_EVIDENCE_REQUEST="RequestExtractEvidence";
 	public static final String TAG_EVIDENCE_RESPONSE="ResponseTransferEvidence";
 	public static final String TAG_FORWARD_EVIDENCE_REQUEST="RequestForwardEvidence";
@@ -46,10 +47,6 @@ public class DE4AConstants {
 
 	//SMP response MessageType
 	public static final String MESSAGE_TYPE_RESPONSE = "response";
-
-	public static final String DOUBLE_SEPARATOR = "::";
-
-	public static final String SERVICES_PATH = "/services/";
 
 	// DE4A Schemes
 	public static final String DOCTYPE_SCHEME = "urn:de4a-eu:CanonicalEvidenceType";	

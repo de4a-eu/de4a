@@ -26,6 +26,17 @@ public class TCWebAppListener extends WebAppListener
   {
     setHandleStatisticsOnEnd (false);
   }
+  
+  @Override
+  protected void logStartupInfo (@Nonnull final ServletContext aSC)
+  {
+    logLogo ();
+    logServerInfo (aSC);
+    logClassPath ();
+    logInitParameters (aSC);
+    logThirdpartyModules ();
+    logJMX ();
+  }
 
   @Override
   protected String getDataPath (@Nonnull final ServletContext aSC)

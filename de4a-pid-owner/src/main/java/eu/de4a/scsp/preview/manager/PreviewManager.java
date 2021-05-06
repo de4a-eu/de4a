@@ -173,7 +173,7 @@ public class PreviewManager {
 			registerRequestorRequest(request, true, isUsi);
 					
 			responseExtractEvidence = translator.translateExtractEvidenceResponse(scspResponse);
-		} catch(Exception | MessageException e) {
+		} catch(Exception e) {
 			responseExtractEvidence.setErrorList(new ErrorListType());
 			setErrorResponse(responseExtractEvidence.getErrorList());
 		}

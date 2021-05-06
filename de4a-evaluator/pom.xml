@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>eu.de4a</groupId>
 			<artifactId>de4a-iem</artifactId>
-			<version>${project.version}</version>
+			<version>${de4a-iem.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu-de4a</groupId>

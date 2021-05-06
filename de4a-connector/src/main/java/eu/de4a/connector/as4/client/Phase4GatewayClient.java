@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -16,6 +17,10 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.commons.mime.MimeTypeParserException;
 import com.helger.commons.string.StringHelper;
 
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
@@ -68,8 +73,9 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 			try {
 				aPayload.setValue(DOMUtils.documentToByte(requestUsuario.getOwnerDocument()));
 			} catch (MessageException e) {
-				//TODO error handler
-				LOGGER.error("Error convert bytes from DOM");
+			    String error = "Error on conversion of request payload";
+				LOGGER.error(error);
+				throw new MEOutgoingException(error);
 			}
 			aPayload.setMimeType(CMimeType.APPLICATION_XML.getAsString());
 			aPayload.setContentID("message");
@@ -136,7 +142,15 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 				evidence = DOMUtils.byteToDocument(a.getData().bytes());
 				requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, evidence.getDocumentElement());
 			} catch (MessageException e1) {
-				LOGGER.error("Error managing evidence dom", e1);
+			    String errorMsg = "Error managing evidence DOM on AS4 response";
+				LOGGER.error(errorMsg, e1);
+			    if(DE4AConstants.TAG_EVIDENCE_RESPONSE.equals(a.getContentID())) {
+			        throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
+			            .withFamily(FamilyErrorType.CONVERSION_ERROR)
+			            .withModule(ExternalModuleError.CONNECTOR_DR)
+			            .withMessageArg(errorMsg)
+			            .withHttpStatus(HttpStatus.OK);
+                }
 			}
 			responsewrapper.setTagDataId(a.getContentID());
 			responsewrapper.setId(requestId);

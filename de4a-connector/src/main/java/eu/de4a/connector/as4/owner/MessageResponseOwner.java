@@ -8,7 +8,9 @@ public class MessageResponseOwner extends ContextRefreshedEvent {
 	private static final long serialVersionUID = 1L;
 	private transient Element message;
 	private String id;
-	private String requestorId;
+	private String dataEvaluatorId;
+	private String dataOwnerId;
+	
 	public MessageResponseOwner(ApplicationContext context) {
 	        super(context);
 	}
@@ -29,13 +31,21 @@ public class MessageResponseOwner extends ContextRefreshedEvent {
 		this.id = id;
 	}
 
-	public String getRequestorId() {
-		return requestorId;
+	public String getDataEvaluatorId() {
+		return dataEvaluatorId;
 	}
 
-	public void setRequestorId(String evaluatorId) {
-		this.requestorId = evaluatorId;
+	public void setDataEvaluatorId(String dataEvaluatorId) {
+		this.dataEvaluatorId = dataEvaluatorId;
 	}
+	
+	public String getDataOwnerId() {
+        return dataOwnerId;
+    }
+
+    public void setDataOwnerId(String dataOwnerId) {
+        this.dataOwnerId = dataOwnerId;
+    }
 
 
 }

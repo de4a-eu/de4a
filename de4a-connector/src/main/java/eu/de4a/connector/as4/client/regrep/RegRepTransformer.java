@@ -20,10 +20,14 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DOMUtils;
 
@@ -49,7 +53,7 @@ public class RegRepTransformer {
 
 		try {
 			String template = request ? REQUEST_TEMPLATE : RESPONSE_TEMPLATE;
-			log.debug("wrapping canonical request");
+			log.debug("Wrapping canonical request");
 			TransformerFactory factory = TransformerFactory.newInstance();
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -79,9 +83,13 @@ public class RegRepTransformer {
 
 			return docFinal.getDocumentElement();
 		} catch (Exception e) {
-			String error = "Error building wrapping message";
+			String error = "Error building RegRep wrapped message";
 			log.error(error, e);
-			throw new MessageException(error);
+			throw new ConnectorException()
+			    .withFamily(FamilyErrorType.CONVERSION_ERROR)
+			    .withLayer(LayerError.INTERNAL_FAILURE)
+			    .withMessageArg(error)
+			    .withHttpStatus(HttpStatus.OK);
 		}
 
 	}

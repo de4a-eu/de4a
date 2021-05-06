@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>eu.de4a</groupId>
@@ -18,21 +18,29 @@
             <artifactId>de4a-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
-		<!-- DE4A GitHub commons project -->
+        <!-- DE4A GitHub commons project -->
         <dependency>
             <groupId>eu.de4a</groupId>
             <artifactId>de4a-iem</artifactId>
         </dependency>
         <dependency>
+            <groupId>eu.de4a</groupId>
+            <artifactId>de4a-kafka-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
+            <artifactId>jaxb-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.messaging.saaj</groupId>
+            <artifactId>saaj-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-		<!-- Spring dependencies -->
+        <!-- Spring dependencies -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
@@ -74,18 +82,10 @@
             <artifactId>jackson-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-        </dependency>
-		<!-- Log4j2 dependencies -->
+        <!-- Log4j2 dependencies -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -120,6 +120,10 @@
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-orm</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -148,12 +152,6 @@
         <dependency>
             <groupId>eu.toop</groupId>
             <artifactId>tc-mem-external</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-impl</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>eu.toop</groupId>
@@ -175,28 +173,22 @@
         <dependency>
             <groupId>eu.toop</groupId>
             <artifactId>toop-edm</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-impl</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.helger.peppol</groupId>
             <artifactId>peppol-smp-client</artifactId>
         </dependency>
-		<!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+        <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
         </dependency>
-		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
@@ -228,7 +220,7 @@
             <artifactId>validation-api</artifactId>
         </dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.tomcat/juli -->
+        <!-- https://mvnrepository.com/artifact/org.apache.tomcat/juli -->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>juli</artifactId>
@@ -243,44 +235,33 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>${jaxb2.maven.plugin}</version>
+                <groupId>com.sun.xml.ws</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>2.3.3</version>
                 <executions>
                     <execution>
-                        <id>xjc</id>
                         <goals>
-                            <goal>xjc</goal>
+                            <goal>wsimport</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <generateEpisode>false</generateEpisode>
-                    <bindingIncludes>
-                        <bindingInclude>bindings-domibus.xjb</bindingInclude>
-                    </bindingIncludes>
+                    <bindingFiles>
+                        <bindingFile>${basedir}/src/main/jaxb/bindings-domibus.xjb</bindingFile>
+                    </bindingFiles>
+                    <wsdlDirectory>${project.basedir}/src/main/resources/domibus</wsdlDirectory>
+                    <wsdlFiles>
+                        <wsdlFile>domibus.wsdl</wsdlFile>
+                    </wsdlFiles>
+                    <wsdlLocation>/domibus/domibus.wsdl</wsdlLocation>
                     <packageName>eu.de4a.connector.as4.domibus.soap.auto</packageName>
-                    <bindingDirectory>${basedir}/src/main/jaxb</bindingDirectory>
-                    <sourceType>wsdl</sourceType>
-                    <sources>
-                        <source>${project.basedir}/src/main/resources/domibus/domibus.wsdl</source>
-                    </sources>
-                    <outputDirectory>${basedir}/target/generated-sources/</outputDirectory>
-                    <clearOutputDir>true</clearOutputDir>
-                    <noGeneratedHeaderComments>true</noGeneratedHeaderComments>
+                    <sourceDestDir>${basedir}/target/generated-sources/</sourceDestDir>
+                    <xnocompile>true</xnocompile>
+                    <xjcArgs>
+                        <xjcArg>-no-header</xjcArg>
+                    </xjcArgs>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-xjc</artifactId>
-                        <version>${jaxb.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>jakarta.activation</groupId>
-                        <artifactId>jakarta.activation-api</artifactId>
-                        <version>${jakarta.activation.api}</version>
-                    </dependency>
-                </dependencies>
+
             </plugin>
         </plugins>
         <finalName>de4a-connector</finalName>

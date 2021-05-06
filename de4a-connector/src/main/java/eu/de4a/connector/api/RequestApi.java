@@ -3,7 +3,6 @@ package eu.de4a.connector.api;
 import javax.validation.Valid;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -21,8 +20,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 public interface RequestApi {
-
-	@PostMapping(value = "/lookupRoutingInformation")
+    
+    @ApiOperation(httpMethod = "GET", value = "Connector Index Page")
+    public String rootPath();
+	
 	@ApiOperation(value = "Lookup Routing Information",
 		consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
 	@ApiImplicitParams({
@@ -38,7 +39,6 @@ public interface RequestApi {
 			@Valid @RequestBody @ApiParam(hidden = true) RequestLookupRoutingInformationType request);
 
 
-	@PostMapping(value = "/requestTransferEvidenceUSI")
 	@ApiOperation(value = "Receive RequestTransferEvidence message through USI pattern",
 			consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
 	@ApiImplicitParams({
@@ -50,10 +50,9 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
-	public @ResponseBody String sendRequestUSI(@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public @ResponseBody String requestTransferEvidenceUSI(@Valid @RequestBody @ApiParam(hidden = true) String request);
 
 
-	@PostMapping(value = "/requestTransferEvidenceIM")
 	@ApiOperation(value = "Receive RequestTransferEvidence message through IM pattern",
 			consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
 	@ApiImplicitParams({
@@ -65,6 +64,6 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseTransferEvidenceType.class)))
 	})
-	public @ResponseBody String sendRequestIM(@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public @ResponseBody String requestTransferEvidenceIM(@Valid @RequestBody @ApiParam(hidden = true) String request);
 
 }
