@@ -93,11 +93,10 @@ public class Client {
 	 */
 	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService, Element userMessage) {
 	    String messageType = (isReturnService ?  DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
-	    String logMsg = MessageFormat.format("Request to SMP - "
+
+		DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Requesting to SMP - "
                 + "ParticipantId: {0}, DocumentTypeId: {1}, MessageType: {2}", 
-                participantId, documentTypeId, messageType);
-		logger.info(logMsg);
-		DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+                participantId, documentTypeId, messageType));
 
 		NodeInfo nodeInfo = new NodeInfo();
 		try {
@@ -144,7 +143,7 @@ public class Client {
 				nodeInfo.setProcessIdentifier(aProcID.getURIEncoded());
 			} 
 		} catch (final SMPClientException | SMPDNSResolutionException ex) {
-            logger.error("Service metadata not found on SMP", ex); 
+            logger.error("Service metadata not found on SMP", ex);
             throw new SMPLookingMetadataInformationException( )
                         .withUserMessage(userMessage)
                         .withLayer(LayerError.COMMUNICATIONS)
@@ -247,13 +246,11 @@ public class Client {
 		RequestTransferEvidenceUSIDTType requestUSIDT = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
 		        .conversionStrWithCatching(DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
 		        requestDoc, false, true, exception);
-		
-        String logMsg = MessageFormat.format("Sending RequestForwardEvidence to the data evaluator - "
+
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending RequestForwardEvidence to the data evaluator - "
                 + "RequestId: {0}, DataEvaluatorId: {1}, DataOwnerId: {2}, Endpoint: {3}",
                 requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
-                requestUSIDT.getDataOwner().getAgentUrn(), endpoint);
-        logger.info(logMsg);
-        DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+                requestUSIDT.getDataOwner().getAgentUrn(), endpoint));
 		
 		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
 		String request = (String) ErrorHandlerUtils.conversionStrWithCatching(
@@ -272,12 +269,11 @@ public class Client {
 	public Object sendEvidenceRequest(RequestTransferEvidenceUSIIMDRType evidenceRequest, String endpoint,
             boolean isUsi) {
 	    String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");
-	    String logMsg = MessageFormat.format("Sending {0} to the data owner - "
+
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending {0} to the data owner - "
                 + "RequestId: {1}, CanonicalEvidenceType: {2}, DataEvaluatorId: {3}, DataOwnerId: {4}, "
                 + "Endpoint: {5}", requestType, evidenceRequest.getRequestId(), evidenceRequest.getCanonicalEvidenceTypeId(),
-                evidenceRequest.getDataEvaluator().getAgentUrn(), evidenceRequest.getDataOwner().getAgentUrn(), endpoint);
-        logger.info(logMsg);
-        DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+                evidenceRequest.getDataEvaluator().getAgentUrn(), evidenceRequest.getDataOwner().getAgentUrn(), endpoint));
         
         URIBuilder uriBuilder;
         try {

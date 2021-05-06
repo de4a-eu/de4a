@@ -248,7 +248,6 @@ public class Conf implements WebMvcConfigurer {
 			} catch (Exception e) {
 				LOG.error("Unable to create SSL factory", e);
 			}
-			this.httpClient = HttpClientBuilder.create().build();
 		}
 		return this.httpClient;
 	}

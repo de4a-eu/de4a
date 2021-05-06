@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.exceptions.OwnerException;
 import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
@@ -31,6 +32,7 @@ public class ResponseErrorFactory {
 		handlers.put(ResponseTransferEvidenceException.class, new ResponseTransferEvidenceExceptionHandler());
         handlers.put(ResponseErrorException.class, new ResponseErrorExceptionHandler());
         handlers.put(ResponseExtractEvidenceException.class, new ResponseExtractEvidenceExceptionHandler());
+        handlers.put(OwnerException.class, new ResponseTransferEvidenceExceptionHandler());
 	}
 	public static String getResponseError(ConnectorException ex) {
 		return (String) handlers.get(ex.getClass()).getResponseError(ex, true);
