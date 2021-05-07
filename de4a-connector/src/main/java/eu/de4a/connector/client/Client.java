@@ -1,9 +1,9 @@
 package eu.de4a.connector.client;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -11,19 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ISMLInfo;
 import com.helger.peppol.sml.SMLInfo;
@@ -40,24 +38,31 @@ import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.exceptions.ResponseErrorException;
+import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceException;
+import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
+import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
+import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.FamilyErrorType;
+import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.model.smp.NodeInfo;
-import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.AckType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
-import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
+import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
-import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
-import eu.de4a.util.DOMUtils;
 import eu.de4a.util.MessagesUtils;
 
 @Component
@@ -86,8 +91,12 @@ public class Client {
 	 *                        or request
 	 * @return NodeInfo Service metadata
 	 */
-	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService) {
-		logger.debug("Request SMP {}, {}", participantId, documentTypeId);
+	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService, Element userMessage) {
+	    String messageType = (isReturnService ?  DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
+
+		DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Requesting to SMP - "
+                + "ParticipantId: {0}, DocumentTypeId: {1}, MessageType: {2}", 
+                participantId, documentTypeId, messageType));
 
 		NodeInfo nodeInfo = new NodeInfo();
 		try {
@@ -101,36 +110,47 @@ public class Client {
 			final BDXRClientReadOnly aSMPClient = smpEndpoint == null
 					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
 					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
-
+					
 		    logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());
             logger.info("Configured SMP truststore: '{}'", SMPClientConfiguration.getTrustStorePath());
             logger.info("Configured SMP password: '{}'", SMPClientConfiguration.getTrustStorePassword());
-
+			
 			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
 
-			if (signedServiceMetadata == null)
-				return nodeInfo;
-
+			if (signedServiceMetadata == null) {
+				String error="It is not possible to retrieve data from the SMP, either because of a connection problem or because it does not exist.";
+				logger.error(error);
+				throw new SMPLookingMetadataInformationException( )
+                 .withUserMessage(userMessage)
+                 .withLayer(LayerError.COMMUNICATIONS)
+                 .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                 .withModule(ExternalModuleError.SMP)
+                 .withMessageArg(error).withHttpStatus(HttpStatus.OK);
+			}
+				 
 			nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata()
 			        .getServiceInformation().getParticipantIdentifierValue());
             nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
                     .getServiceInformation().getDocumentIdentifierValue());
-
+            
 			final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE
-					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, isReturnService ?
-							DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
+					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, messageType);
 			final EndpointType endpoint = BDXRClientReadOnly.getEndpoint(signedServiceMetadata, aProcID,
 					ESMPTransportProfile.TRANSPORT_PROFILE_BDXR_AS4);
 			if (endpoint != null) {
 				nodeInfo.setEndpointURI(endpoint.getEndpointURI());
 				nodeInfo.setCertificate(endpoint.getCertificate());
 				nodeInfo.setProcessIdentifier(aProcID.getURIEncoded());
-			}
-			// TODO error handling
+			} 
 		} catch (final SMPClientException | SMPDNSResolutionException ex) {
-			logger.error("Service metadata not found on SMP", ex);
-			return new NodeInfo();
-		}
+            logger.error("Service metadata not found on SMP", ex);
+            throw new SMPLookingMetadataInformationException( )
+                        .withUserMessage(userMessage)
+                        .withLayer(LayerError.COMMUNICATIONS)
+                        .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                        .withModule(ExternalModuleError.SMP)
+                        .withMessageArg(ex.getMessage()).withHttpStatus(HttpStatus.OK);
+        }
 		return nodeInfo;
 	}
 
@@ -144,6 +164,7 @@ public class Client {
             return null;
         }
         StringBuilder path = new StringBuilder(uriBuilder.getPath());
+        if(!uriBuilder.toString().endsWith("/"))path.append("/");
         path.append("ial/");
         path.append(request.getCanonicalEvidenceTypeId());
         if (!ObjectUtils.isEmpty(request.getCountryCode())) {
@@ -151,27 +172,31 @@ public class Client {
             path.append(request.getCountryCode());
         }
         uriBuilder.setPath(path.toString());
-		String response = restTemplate.getForObject(uriBuilder.toString(), String.class);
-		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
-		try {
-			AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
-			responseLookup.setAvailableSources(availableSources);
-		} catch (JsonProcessingException e) {
-			ErrorListType errorList = new ErrorListType();
-			ErrorType error = new ErrorType();
-			// TODO error handling
-			error.setCode("501");
-			error.setText("Error converting JSON to object");
-			errorList.addError(error);
-			responseLookup.setErrorList(errorList);
-		}
+
+		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), true,
+		        new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), 
+		        this.restTemplate);
+		
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
+        try {
+            AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
+            responseLookup.setAvailableSources(availableSources);
+        } catch (JsonProcessingException e) {
+            logger.error("Error processing idk  response", e);
+            throw new ResponseLookupRoutingInformationException()
+                    .withLayer(LayerError.COMMUNICATIONS)
+                    .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
+                    .withModule(ExternalModuleError.IDK)
+                    .withMessageArg(e.getMessage())
+                    .withHttpStatus(HttpStatus.OK);
+        }
 		return responseLookup;
 	}
 
 	public ResponseLookupRoutingInformationType getProvisions(RequestLookupRoutingInformationType request) {
 
-		URIBuilder uriBuilder;
+	    URIBuilder uriBuilder;
         try {
             uriBuilder = new URIBuilder(idkEndpoint);
         } catch (URISyntaxException e1) {
@@ -179,84 +204,115 @@ public class Client {
             return null;
         }
         StringBuilder path = new StringBuilder(uriBuilder.getPath());
-		path.append("provision");
-		uriBuilder.setParameter("canonicalEvidenceTypeId", request.getCanonicalEvidenceTypeId());
-		uriBuilder.setParameter("dataOwnerId", request.getDataOwnerId());
-		uriBuilder.setPath(path.toString());
-		String response = restTemplate.getForObject(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), String.class);
-		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
-		try {
-			AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
-			responseLookup.setAvailableSources(availableSources);
-		} catch (JsonProcessingException e) {
-			ErrorListType errorList = new ErrorListType();
-			ErrorType error = new ErrorType();
-			// TODO error handling
-			error.setCode("501");
-			error.setText("Error converting JSON to object");
-			errorList.addError(error);
-			responseLookup.setErrorList(errorList);
-		}
-		return responseLookup;
+        if(!uriBuilder.toString().endsWith("/"))path.append("/");
+        path.append("provision");
+        uriBuilder.setParameter("canonicalEvidenceTypeId", request.getCanonicalEvidenceTypeId());
+        uriBuilder.setParameter("dataOwnerId", request.getDataOwnerId());
+        uriBuilder.setPath(path.toString());
+        
+        String response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
+                true, new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), this.restTemplate);
+        
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
+        try {
+            AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
+            responseLookup.setAvailableSources(availableSources);
+        } catch (JsonProcessingException e) {
+            logger.error("Error processing idk  response", e);
+            throw new ResponseLookupRoutingInformationException()
+                    .withLayer(LayerError.COMMUNICATIONS)
+                    .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
+                    .withModule(ExternalModuleError.IDK)
+                    .withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+        }
+        return responseLookup;
 	}
 
-	public boolean pushEvidence(String endpoint, Document requestForwardDoc) {
-		logger.debug("Sending RequestForwardEvidence to evaluator {}", endpoint);
+	public boolean pushEvidence(String endpoint, Document requestDoc) {		
+		ConnectorException exception = new ResponseErrorException()
+		        .withModule(ExternalModuleError.CONNECTOR_DR);
+		
+		URIBuilder uriBuilder;
+		try {
+            uriBuilder = new URIBuilder(endpoint);
+        } catch (URISyntaxException e) {
+            logger.error(MessageFormat.format("There was an error creating URI from evaluator endpoint: {}", endpoint));
+            return false;
+        }
+		uriBuilder.setPath("/requestForwardEvidence");
+		
+		//Transform RequestTransferEvidenceUSIDT to RequestForwardEvidence
+		RequestTransferEvidenceUSIDTType requestUSIDT = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
+		        .conversionStrWithCatching(DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+		        requestDoc, false, true, exception);
 
-		String urlRequest = endpoint + "/requestForwardEvidence";
-		String request = DOMUtils.documentToString(requestForwardDoc);
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_XML);
-		ResponseEntity<String> response = restTemplate.postForEntity(urlRequest, new HttpEntity<>(request, headers),
-				String.class);
-
-		ResponseErrorType responseObj = null;
-		if (!ObjectUtils.isEmpty(response.getBody()) && HttpStatus.ACCEPTED.equals(response.getStatusCode())) {
-			responseObj = DE4AMarshaller.deUsiResponseMarshaller().read(String.valueOf(response.getBody()));
-		} else {
-			// TODO error handling
-			return false;
-		}
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending RequestForwardEvidence to the data evaluator - "
+                + "RequestId: {0}, DataEvaluatorId: {1}, DataOwnerId: {2}, Endpoint: {3}",
+                requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
+                requestUSIDT.getDataOwner().getAgentUrn(), endpoint));
+		
+		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
+		String request = (String) ErrorHandlerUtils.conversionStrWithCatching(
+		        DE4AMarshaller.deUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+		        requestForward, true, true, exception);
+		
+		String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), request, 
+                 false, exception.withModule(ExternalModuleError.DATA_EVALUATOR), this.restTemplate);
+		
+		ResponseErrorType responseObj = (ResponseErrorType) ErrorHandlerUtils.conversionStrWithCatching(
+		        DE4AMarshaller.deUsiResponseMarshaller(), String.valueOf(response), false, false, exception);
+		
 		return AckType.OK.equals(responseObj.getAck());
 	}
 
 	public Object sendEvidenceRequest(RequestTransferEvidenceUSIIMDRType evidenceRequest, String endpoint,
-			boolean isUsi) throws MessageException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Request: {}", evidenceRequest.getRequestId());
-		}
-		String urlRequest = endpoint + (isUsi ? "USI" : "IM");
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_XML);
+            boolean isUsi) {
+	    String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");
 
-		try {
-			if (!isUsi) {
-				RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
-						.transformRequestToOwnerIM(evidenceRequest);
-				String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
-
-				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest,
-						new HttpEntity<>(reqXML, headers), String.class);
-
-				ResponseExtractEvidenceType responseExtractEvidenceType = DE4AMarshaller
-						.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-						.read(String.valueOf(response.getBody()));
-				return MessagesUtils.transformResponseTransferEvidenceUSI(responseExtractEvidenceType, evidenceRequest);
-			} else {
-				RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
-						.transformRequestToOwnerUSI(evidenceRequest);
-				String reqXML = DE4AMarshaller.doUsiRequestMarshaller().getAsString(requestExtractEvidence);
-				ResponseEntity<String> response = restTemplate.postForEntity(urlRequest,
-						new HttpEntity<>(reqXML, headers), String.class);
-				if (ObjectUtils.isEmpty(response.getBody())) {
-					return DE4AResponseDocumentHelper.createResponseError(false);
-				}
-				return DE4AMarshaller.doUsiResponseMarshaller().read(String.valueOf(response.getBody()));
-			}
-		} catch (NullPointerException e) {
-			throw new MessageException("Error processing response from Owner:" + e.getMessage());
-		}
-	}
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending {0} to the data owner - "
+                + "RequestId: {1}, CanonicalEvidenceType: {2}, DataEvaluatorId: {3}, DataOwnerId: {4}, "
+                + "Endpoint: {5}", requestType, evidenceRequest.getRequestId(), evidenceRequest.getCanonicalEvidenceTypeId(),
+                evidenceRequest.getDataEvaluator().getAgentUrn(), evidenceRequest.getDataOwner().getAgentUrn(), endpoint));
+        
+        URIBuilder uriBuilder;
+        try {
+            uriBuilder = new URIBuilder(endpoint);
+        } catch (URISyntaxException e) {
+            logger.error(MessageFormat.format("There was an error creating URI from owner endpoint: {}", endpoint));
+            return false;
+        }
+        uriBuilder.setPath((isUsi ? "/requestExtractEvidenceUSI" : "/requestExtractEvidenceIM"));
+        ConnectorException exception;
+        if (!isUsi) {
+            RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
+                    .transformRequestToOwnerIM(evidenceRequest);
+            exception = new ResponseExtractEvidenceException()
+                    .withModule(ExternalModuleError.DATA_OWNER)
+                    .withRequest(evidenceRequest);
+            
+            String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
+            String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
+                    false, exception, this.restTemplate);
+            ResponseExtractEvidenceType responseExtractEvidenceType = (ResponseExtractEvidenceType) ErrorHandlerUtils
+                    .conversionStrWithCatching(DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+                            String.valueOf(response), false, false, exception);
+            return MessagesUtils.transformResponseTransferEvidence(responseExtractEvidenceType, 
+                    evidenceRequest);
+        } else {
+            RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
+                    .transformRequestToOwnerUSI(evidenceRequest);
+            
+            exception = new ResponseErrorException()
+                    .withModule(ExternalModuleError.DATA_OWNER);
+            String reqXML = (String) ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
+                    requestExtractEvidence, true, true, exception);
+            
+            String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
+                    false, exception, this.restTemplate);
+            
+            return ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
+                    String.valueOf(response), false, false, exception);
+        }
+    }
 }
