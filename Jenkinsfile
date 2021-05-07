@@ -5,7 +5,7 @@ pipeline {
         stage('Test') {
             when {
                 anyOf {
-                    branch pattern: 'develop\\w*', comparator: 'REGEXP'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
+                    branch pattern: 'dev\\w*', comparator: 'REGEXP'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
                 }
             }
             agent {
