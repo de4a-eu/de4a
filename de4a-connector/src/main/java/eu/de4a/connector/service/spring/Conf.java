@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -75,6 +76,7 @@ import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
 import com.fasterxml.classmate.TypeResolver;
+import com.helger.httpclient.HttpClientSettings;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -82,10 +84,12 @@ import eu.de4a.config.DataSourceConf;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
+import eu.de4a.kafkaclient.DE4AKafkaSettings;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -110,25 +114,26 @@ public class Conf implements WebMvcConfigurer {
 
 	private DataSourceConf dataSourceConf = new DataSourceConf();
 	private HttpClient httpClient;
+	private HttpClientSettings httpSettings = new HttpClientSettings();
 
 	@Value("${h2.console.port.jvm:#{null}}")
 	private String h2ConsoleJvmPort;
-
+	
 	@Value("#{ '${h2.console.port}' == '' ? '21080' : '${h2.console.port}' }")
 	private String h2ConsolePort;
 
 	@Value("${ssl.context.enabled}")
 	private boolean sslContextEnabled;
 
-	@Value("${ssl.keystore.path}")
+	@Value("#{'${ssl.keystore.path:}'}")
 	private String keystore;
-	@Value("${ssl.keystore.password}")
+	@Value("#{'${ssl.keystore.password:}'}")
 	private String keyStorePassword;
-	@Value("${ssl.truststore.path}")
+	@Value("#{'${ssl.truststore.path:}'}")
 	private String trustStore;
-	@Value("${ssl.truststore.password}")
+	@Value("#{'${ssl.truststore.password:}'}")
 	private String trustStorePassword;
-	@Value("${ssl.keystore.type}")
+	@Value("#{'${ssl.keystore.type:}'}")
 	private String type;
 
 	@Value("#{'${http.proxy.enabled:false}'}")
@@ -143,7 +148,16 @@ public class Conf implements WebMvcConfigurer {
 	private String proxyPassword;
 	@Value("#{'${http.proxy.non-proxy:}'}")
 	private String proxyNonHosts;
-
+	
+	@Value("${de4a.kafka.enabled:false}")
+	private boolean kafkaEnabled;
+    @Value("${de4a.kafka.http.enabled:false}")
+    private boolean kafkaHttp;
+    @Value("${de4a.kafka.url:#{null}}")
+    private String kafkaUrl;
+    @Value("${de4a.kafka.topic:#{de4a-connector}}")
+    private String kafkaTopic;
+	
 	@Bean
 	public Docket api() {
 		TypeResolver typeResolver = new TypeResolver();
@@ -156,7 +170,8 @@ public class Conf implements WebMvcConfigurer {
 						typeResolver.resolve(ResponseErrorType.class),
 						typeResolver.resolve(RequestForwardEvidenceType.class),
 						typeResolver.resolve(RequestLookupRoutingInformationType.class),
-						typeResolver.resolve(ResponseLookupRoutingInformationType.class))
+						typeResolver.resolve(ResponseLookupRoutingInformationType.class),
+				        typeResolver.resolve(RequestTransferEvidenceUSIDTType.class))
 				.apiInfo(apiInfo());
 	}
 
@@ -213,7 +228,7 @@ public class Conf implements WebMvcConfigurer {
 	@Bean
 	public RestTemplate restTemplate() {
 		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-				httpClient());
+				httpClient()); 
 		RestTemplate restTemplate = new RestTemplate(httpComponentsClientHttpRequestFactory);
 		restTemplate.getMessageConverters()
         .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
@@ -226,17 +241,20 @@ public class Conf implements WebMvcConfigurer {
 				LOG.debug("SSL context setted to: {}", sslContextEnabled);
 				SSLConnectionSocketFactory factory;
 				if (sslContextEnabled) {
-					factory = new SSLConnectionSocketFactory(sslContext());
+				    SSLContext sslContext = sslContext();
+					factory = new SSLConnectionSocketFactory(sslContext);
+					httpSettings.setSSLContext(sslContext);
 				} else {
 					factory = new SSLConnectionSocketFactory(sslContextTrustAll());
+					httpSettings.setSSLContextTrustAll();
 				}
 				this.httpClient = HttpClientBuilder.create().setSSLSocketFactory(factory)
 						.setRoutePlanner(buildRoutePlanner()).build();
 			} catch (Exception e) {
 				LOG.error("Unable to create SSL factory", e);
 			}
-			this.httpClient = HttpClientBuilder.create().build();
 		}
+		kafkaSettings();
 		return this.httpClient;
 	}
 
@@ -244,6 +262,7 @@ public class Conf implements WebMvcConfigurer {
 		if (!proxyEnabled)
 			return null;
 		HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+		this.httpSettings.setProxyHost(proxy);
 		return new DefaultProxyRoutePlanner(proxy) {
 			@Override
 			public HttpHost determineProxy(HttpHost target, HttpRequest request, HttpContext context)
@@ -333,7 +352,7 @@ public class Conf implements WebMvcConfigurer {
 			slr.setDefaultLocale(Locale.ENGLISH);
 		return slr;
 	}
-
+	
 	@Bean
 	CharacterEncodingFilter characterEncodingFilter() {
 		CharacterEncodingFilter filter = new CharacterEncodingFilter();
@@ -348,6 +367,17 @@ public class Conf implements WebMvcConfigurer {
 		messageSource.setBasename("classpath:messages/messages");
 		messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
 		return messageSource;
+	}
+
+	public void kafkaSettings() {
+ 	    DE4AKafkaSettings.defaultProperties().put("bootstrap.servers", kafkaUrl);
+        DE4AKafkaSettings.setKafkaEnabled(kafkaEnabled);
+        DE4AKafkaSettings.setKafkaHttp(kafkaHttp);
+        if(kafkaHttp) {
+            DE4AKafkaSettings.setHttpClientSetting(this.httpSettings);
+        }
+        DE4AKafkaSettings.setLoggingEnabled(kafkaEnabled);        
+        DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
 	}
 
 	@Bean
