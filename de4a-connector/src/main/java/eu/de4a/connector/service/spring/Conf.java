@@ -76,6 +76,7 @@ import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
 import com.fasterxml.classmate.TypeResolver;
+import com.helger.httpclient.HttpClientSettings;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -113,6 +114,7 @@ public class Conf implements WebMvcConfigurer {
 
 	private DataSourceConf dataSourceConf = new DataSourceConf();
 	private HttpClient httpClient;
+	private HttpClientSettings httpSettings = new HttpClientSettings();
 
 	@Value("${h2.console.port.jvm:#{null}}")
 	private String h2ConsoleJvmPort;
@@ -239,9 +241,12 @@ public class Conf implements WebMvcConfigurer {
 				LOG.debug("SSL context setted to: {}", sslContextEnabled);
 				SSLConnectionSocketFactory factory;
 				if (sslContextEnabled) {
-					factory = new SSLConnectionSocketFactory(sslContext());
+				    SSLContext sslContext = sslContext();
+					factory = new SSLConnectionSocketFactory(sslContext);
+					httpSettings.setSSLContext(sslContext);
 				} else {
 					factory = new SSLConnectionSocketFactory(sslContextTrustAll());
+					httpSettings.setSSLContextTrustAll();
 				}
 				this.httpClient = HttpClientBuilder.create().setSSLSocketFactory(factory)
 						.setRoutePlanner(buildRoutePlanner()).build();
@@ -249,6 +254,7 @@ public class Conf implements WebMvcConfigurer {
 				LOG.error("Unable to create SSL factory", e);
 			}
 		}
+		kafkaSettings();
 		return this.httpClient;
 	}
 
@@ -256,6 +262,7 @@ public class Conf implements WebMvcConfigurer {
 		if (!proxyEnabled)
 			return null;
 		HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+		this.httpSettings.setProxyHost(proxy);
 		return new DefaultProxyRoutePlanner(proxy) {
 			@Override
 			public HttpHost determineProxy(HttpHost target, HttpRequest request, HttpContext context)
@@ -361,12 +368,14 @@ public class Conf implements WebMvcConfigurer {
 		messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
 		return messageSource;
 	}
-	
-	@PostConstruct
+
 	public void kafkaSettings() {
  	    DE4AKafkaSettings.defaultProperties().put("bootstrap.servers", kafkaUrl);
         DE4AKafkaSettings.setKafkaEnabled(kafkaEnabled);
         DE4AKafkaSettings.setKafkaHttp(kafkaHttp);
+        if(kafkaHttp) {
+            DE4AKafkaSettings.setHttpClientSetting(this.httpSettings);
+        }
         DE4AKafkaSettings.setLoggingEnabled(kafkaEnabled);        
         DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
 	}

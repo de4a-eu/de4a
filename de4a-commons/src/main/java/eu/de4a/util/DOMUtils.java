@@ -83,7 +83,7 @@ public class DOMUtils
     }
     catch (final XPathExpressionException e)
     {
-      final String err = MessageFormat.format("Error getting Xpath {0}", xpath);
+      final String err = "Error getting Xpath " + xpath;
       logger.error (err, e);
       throw new MessageException (err, e);
     }
@@ -103,7 +103,7 @@ public class DOMUtils
     }
     catch (final XPathExpressionException e)
     {
-      final String err = MessageFormat.format("Error getting Xpath {0}", xpath);
+        final String err = "Error getting Xpath " + xpath;
       logger.error (err, e);
       throw new MessageException (err, e);
     }

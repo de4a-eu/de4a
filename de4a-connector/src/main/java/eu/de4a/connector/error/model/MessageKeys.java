@@ -1,8 +1,8 @@
 package eu.de4a.connector.error.model;
 
-public class MessageKeys {
+public final class MessageKeys {
     
-    MessageKeys() {
+    private MessageKeys() {
         //empty constructor
     }
     

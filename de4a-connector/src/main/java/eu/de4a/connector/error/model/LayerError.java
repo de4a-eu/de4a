@@ -1,17 +1,17 @@
 package eu.de4a.connector.error.model;
 
 public enum LayerError {
-    COMMUNICATIONS(1),
-    INTERNAL_FAILURE(2), 
-    CONFIGURATION(3);
+    COMMUNICATIONS("1"),
+    INTERNAL_FAILURE("2"), 
+    CONFIGURATION("3");
 
-    private int id;
+    private String id;
 
-    LayerError(int id) {
+    LayerError(String id) {
         this.id = id;
     }
 
-    public int getID() {
+    public String getID() {
         return id;
     }
 }

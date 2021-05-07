@@ -93,7 +93,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
                 new Object[] {request.getContextPath()}).value();
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
         responseError.setErrorList(new ErrorListType());
-        String code = LayerError.COMMUNICATIONS.ordinal() + ExternalModuleError.NONE.getId()
+        String code = LayerError.COMMUNICATIONS.getID() + ExternalModuleError.NONE.getId()
                 + FamilyErrorType.SERVICE_NOT_FOUND.getID();
         responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.NOT_FOUND);
@@ -104,7 +104,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         LOG.warn("REST Client BAD REQUEST-> {}", err);
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
         responseError.setErrorList(new ErrorListType());
-        String code = LayerError.COMMUNICATIONS.ordinal() + ExternalModuleError.NONE.getId()
+        String code = LayerError.COMMUNICATIONS.getID() + ExternalModuleError.NONE.getId()
                 + FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID();
         responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.BAD_REQUEST);

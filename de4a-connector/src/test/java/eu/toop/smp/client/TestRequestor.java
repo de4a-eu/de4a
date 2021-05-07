@@ -1,6 +1,7 @@
 package eu.toop.smp.client;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,8 +40,7 @@ public class TestRequestor {
             assertTrue(evidenceRequestorManager.sendRequestMessage("9914:tc-ng-test-sender", "urn:eu:toop:ns:dataexchange-1p40::Response##urn:eu.toop.response.registeredorganization::1.40",
             		 doc.getDocumentElement(), null));
         } catch (ConnectorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            assertFalse(true, "Exception occurs: " + e.getMessage());
         }
 	}
 }
