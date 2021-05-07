@@ -65,8 +65,8 @@ It is also possible to compile each package separately by browsing to the folder
 #### Package
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the IDK and Connector target paths will be created with their corresponding `war` files.
 
-#### de4a-commons `v0.1.3`
-[de4a-commons](https://github.com/de4a-wp5/de4a-commons) project is now on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
+#### de4a-commons `v0.1.1`
+[de4a-commons](https://github.com/de4a-wp5/de4a-commons) project is now on maven central [OSS Sonatype repository - v0.1.1](https://search.maven.org/search?q=g:eu.de4a)
 
 #### Toop version `v2.1.2-SNAPSHOT`
 Due to the last changes on [de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/development) Toop-connector-ng version should be `2.1.2-SNAPSHOT`, so you may need to add following repo server on your maven settings
@@ -126,17 +126,20 @@ global.production = false
 global.instancename = dev-from-ide
 
 # DE4A Kafka settings
-de4a.kafka.enabled=false
-# Enables Kafka connection via HTTP (it must be used when HTTP connections are being established via proxy)
+de4a.kafka.enabled=true
+# Enables Kafka connection via HTTP (Only enable HTTP mode if outbound TCP connections are blocked from your internal network)
 de4a.kafka.http.enabled=false
-# Kafka server address (default: de4a-dev-kafka.egovlab.eu:9092)
+
+# Kafka server address (Eg.: de4a-dev-kafka.egovlab.eu:9092)
 de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
-# Add any suffix if you have multiple Connector instances on the same kafka server (default: de4a-connector)
+# Uncomment the following property and remove the above one if HTTP mode is enabled
+# de4a.kafka.url=https://de4a-dev-kafka.egovlab.eu
+
+# Establish a topic on kafka tracker - Pattern: de4a-<country-code>-<partner-name> - Eg.: de4a-se-egovlab - (default: de4a-connector)
 de4a.kafka.topic=de4a-connector
 
-# toop legacy kafka properties (Don´t touch)
-toop.tracker.enabled = ${de4a.kafka.enabled}
-toop.tracker.topic = ${de4a.kafka.topic}
+# toop legacy kafka properties (Do not touch)
+toop.tracker.enabled = false
 
 # DSD base URL (Do not modify)
 toop.dsd.service.baseurl = http://dsd.dev.exchange.toop.eu
@@ -151,9 +154,9 @@ toop.mem.implementation = phase4
 # domibus.endpoint=
 
 # SMP Client configuration stuff - Do not modify (default values)
-truststore.type = JKS
-truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
-truststore.password = de4a
+smpclient.truststore.type = JKS
+smpclient.truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
+smpclient.truststore.password = de4a
 
 # Spring As4 gateway  implementation bean(provided: phase4GatewayClient and domibusGatewayClient).Implements eu.toop.as4.client.As4GatewayInterface
 as4.gateway.implementation.bean=phase4GatewayClient
@@ -197,31 +200,31 @@ ssl.truststore.path= #(JKS truststore)
 ssl.truststore.password= #(Truststore password)
 ```
 #### Kafka configuration `application.properties`
-In order to send messages to a kafka server, configure the following parameters:
+In order to send log messages to a kafka server, configure the following parameters:
 ```properties
 # DE4A Kafka settings
-de4a.kafka.enabled=false
-# Enables Kafka connection via HTTP (it must be used when HTTP connections are being established via proxy)
+de4a.kafka.enabled=true
+# Enables Kafka connection via HTTP (Only enable HTTP mode if outbound TCP connections are blocked from your internal network)
 de4a.kafka.http.enabled=false
-# Kafka server address (default: de4a-dev-kafka.egovlab.eu:9092)
-de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
-# Add any suffix if you have multiple Connector instances on the same kafka server (default: de4a-connector)
-de4a.kafka.topic=de4a-connector
 
-# toop legacy kafka properties (Don´t touch)
-toop.tracker.enabled = ${de4a.kafka.enabled}
-toop.tracker.topic = ${de4a.kafka.topic}
+# Kafka server address (Eg.: de4a-dev-kafka.egovlab.eu:9092)
+de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
+# Uncomment the following property and remove the above one if HTTP mode is enabled
+# de4a.kafka.url=https://de4a-dev-kafka.egovlab.eu
+
+# toop legacy kafka properties (Do not touch)
+toop.tracker.enabled = false
 ```
-**IMPORTANT** - If your server has no access to external domains, the kafka configuration should be disabled.
-To disable kafka log producer, you only need to set the property to false `de4a.kafka.enabled=false` - **do not comment or leave empty the rest of properties**
+**IMPORTANT** - If your server has no access to external domains, the HTTP kafka configuration should be enabled.
+To enable HTTP kafka log producer, you only need to set the property to false `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**
 
 #### SMP properties `application.properties`
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
 ```properties
 # SMP Client configuration stuff - Don't touch (default values)
-truststore.type = JKS
-truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
-truststore.password = de4a
+smpclient.truststore.type = JKS
+smpclient.truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
+smpclient.truststore.password = de4a
 ..........
 # External endpoints
 smp.endpoint=https://de4a-smp.egovlab.eu/
