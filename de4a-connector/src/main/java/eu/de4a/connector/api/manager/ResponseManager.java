@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -77,13 +78,27 @@ public class ResponseManager {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
 			List<EvaluatorRequestData> responseData = saveData(response, evaluatorinfo);
-			if (evaluatorinfo.isUsi()) {
-				// Send RequestForwardEvidence to evaluator - USI pattern
-				logger.debug("Pushing data to {}", evaluatorinfo.getUrlreturn());
-				Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
-				String endpointDE = evaluatorinfo.getUrlreturn().substring(0, evaluatorinfo.getUrlreturn().lastIndexOf("/"));
-				client.pushEvidence(endpointDE, doc);
-			}
+            if (evaluatorinfo.isUsi()) {
+
+                // TODO USI pattern depends on redirectURL of DataEvaluator setted on the request
+                // to perform the way back once the response is received by Connector
+                // temporary solution until the final solution will be defined
+                if (ObjectUtils.isEmpty(evaluatorinfo.getUrlreturn())) {
+                    // Send RequestForwardEvidence to evaluator - USI pattern
+                    String msg = MessageFormat.format("Sending RequestForwardEvidence to DataEvaluator - RequestId: {0}, "
+                            + "DataEvaluatorId: {1}, Endpoint: {2}", id, evaluatorinfo.getIdevaluator(), evaluatorinfo.getUrlreturn());
+                    DE4AKafkaClient.send(EErrorLevel.INFO, msg);
+                    
+                    Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
+                    client.pushEvidence(evaluatorinfo.getUrlreturn(), doc);
+                } else {
+                    //TODO in this case, how DE or DO is advised of the situation?
+                    // turn redirectURL into a mandatory field?
+                    DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format("RequestForwardEvidence could not been sended, "
+                            + "unkown DataEvaluator endpoint - RequestId: {0}, DataEvaluatorId: {1}, Endpoint: {2}", id, 
+                            evaluatorinfo.getIdevaluator(), evaluatorinfo.getUrlreturn()));
+                }
+            }
 		}
 	}
 
