@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
 
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.mime.CMimeType;
+import com.helger.peppolid.CIdentifier;
 
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
@@ -164,8 +165,8 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	    String errorMsg;	    
 		String senderId = sender;
 		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
-		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR)) {
-			senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + DE4AConstants.DOUBLE_SEPARATOR, "");
+		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
+            senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
 		}
 		try {
 			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request message via AS4 gateway - "
