@@ -65,8 +65,8 @@ It is also possible to compile each package separately by browsing to the folder
 #### Package
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the IDK and Connector target paths will be created with their corresponding `war` files.
 
-#### de4a-commons `v0.1.1`
-[de4a-commons](https://github.com/de4a-wp5/de4a-commons) project is now on maven central [OSS Sonatype repository - v0.1.1](https://search.maven.org/search?q=g:eu.de4a)
+#### de4a-commons `v0.1.3`
+[de4a-commons](https://github.com/de4a-wp5/de4a-commons) project is now on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
 
 #### Toop version `v2.1.2-SNAPSHOT`
 Due to the last changes on [de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/development) Toop-connector-ng version should be `2.1.2-SNAPSHOT`, so you may need to add following repo server on your maven settings
@@ -216,7 +216,7 @@ de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
 toop.tracker.enabled = false
 ```
 **IMPORTANT** - If your server has no access to external domains, the HTTP kafka configuration should be enabled.
-To enable HTTP kafka log producer, you only need to set the property to false `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**
+To enable HTTP kafka log producer, you only need to set the property to true `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**
 
 #### SMP properties `application.properties`
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
