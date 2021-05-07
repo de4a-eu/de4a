@@ -83,7 +83,7 @@ public class ResponseManager {
                 // TODO USI pattern depends on redirectURL of DataEvaluator setted on the request
                 // to perform the way back once the response is received by Connector
                 // temporary solution until the final solution will be defined
-                if (ObjectUtils.isEmpty(evaluatorinfo.getUrlreturn())) {
+                if (!ObjectUtils.isEmpty(evaluatorinfo.getUrlreturn())) {
                     // Send RequestForwardEvidence to evaluator - USI pattern
                     String msg = MessageFormat.format("Sending RequestForwardEvidence to DataEvaluator - RequestId: {0}, "
                             + "DataEvaluatorId: {1}, Endpoint: {2}", id, evaluatorinfo.getIdevaluator(), evaluatorinfo.getUrlreturn());
