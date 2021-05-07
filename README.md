@@ -65,7 +65,7 @@ It is also possible to compile each package separately by browsing to the folder
 #### Package
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the IDK and Connector target paths will be created with their corresponding `war` files.
 
-#### de4a-commons `v0.1.2`
+#### de4a-commons `v0.1.3`
 [de4a-commons](https://github.com/de4a-wp5/de4a-commons) project is now on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
 
 #### Toop version `v2.1.2-SNAPSHOT`
@@ -94,12 +94,12 @@ database.datasourceConf.jpaHibernate.namingStrategy=org.hibernate.cfg.ImprovedNa
 database.datasourceConf.jpaHibernate.showSql=true
 database.datasourceConf.jpaHibernate.formatSql=true
 
-# H2 in-memory database console port (if not setted, default 21080)
+# H2 in-memory database console port (default 21080)
 h2.console.port=21080
 
 # i18n properties
 spring.messages.basename=messages/messages
-spring.messages.default_locale=es
+spring.messages.default_locale=en
 
 # Spring allowing override beans
 spring.main.allow-bean-definition-overriding=true
@@ -111,12 +111,12 @@ server.servlet.encoding.force-response=true
 # SSL context enabled (true|false)
 ssl.context.enabled=false
 
-# SSL configuration (optional when ssl.context.enables is false)
-ssl.keystore.type=
-ssl.keystore.path=
-ssl.keystore.password=
-ssl.truststore.path=
-ssl.truststore.password=
+# SSL configuration (optional when ssl.context.enabled is false, otherwise, it must be configured)
+#ssl.keystore.type=
+#ssl.keystore.path=
+#ssl.keystore.password=
+#ssl.truststore.path=
+#ssl.truststore.password=
 
 # Global flags for initializer
 global.debug = true
@@ -127,16 +127,18 @@ global.instancename = dev-from-ide
 
 # DE4A Kafka settings
 de4a.kafka.enabled=false
+# Enables Kafka connection via HTTP (it must be used when HTTP connections are being established via proxy)
+de4a.kafka.http.enabled=false
 # Kafka server address (default: de4a-dev-kafka.egovlab.eu:9092)
 de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
-# Add any suffix if you have multiple Connector instances on the same kafka server (default: DE4A-CONNECTOR)
-de4a.kafka.topic=DE4A-CONNECTOR
+# Add any suffix if you have multiple Connector instances on the same kafka server (default: de4a-connector)
+de4a.kafka.topic=de4a-connector
 
 # toop legacy kafka properties (Don´t touch)
 toop.tracker.enabled = ${de4a.kafka.enabled}
 toop.tracker.topic = ${de4a.kafka.topic}
 
-# DSD base URL (Don't touch)
+# DSD base URL (Do not modify)
 toop.dsd.service.baseurl = http://dsd.dev.exchange.toop.eu
 
 # What AS4 implementation to use?
@@ -148,7 +150,7 @@ toop.mem.implementation = phase4
 # Domibus server endpoint
 # domibus.endpoint=
 
-# SMP Client configuration stuff - Don't touch (default values)
+# SMP Client configuration stuff - Do not modify (default values)
 truststore.type = JKS
 truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
 truststore.password = de4a
@@ -157,8 +159,10 @@ truststore.password = de4a
 as4.gateway.implementation.bean=phase4GatewayClient
 
 # External endpoints
-smp.endpoint=https://de4a-smp.egovlab.eu/
-idk.endpoint=https://de4a-dev-idk.egovlab.eu/
+# SMP endpoint Eg.: https://de4a-smp.egovlab.eu/
+smp.endpoint=
+# IDK endpoint Eg.: https://de4a-dev-idk.egovlab.eu/
+idk.endpoint=
 
 # IM response timeout
 as4.timeout.miliseconds=30000
@@ -171,7 +175,7 @@ as4.timeout.miliseconds=30000
 #http.proxyUsername=
 #http.proxyPassword=
 
-# Required renamed proxy configuration for BDXRClient (if needed, only uncomment)
+# Required renamed proxy configuration for BDXRClient (if is needed, only uncomment)
 #http.proxyHost=${http.proxy.address}
 #http.proxyPort=${http.proxy.port}
 #http.nonProxyHosts=${http.proxy.non-proxy}
@@ -193,14 +197,16 @@ ssl.truststore.path= #(JKS truststore)
 ssl.truststore.password= #(Truststore password)
 ```
 #### Kafka configuration `application.properties`
-In order to send log messages to a kafka server, configure the following parameters:
+In order to send messages to a kafka server, configure the following parameters:
 ```properties
 # DE4A Kafka settings
-de4a.kafka.enabled=true
+de4a.kafka.enabled=false
+# Enables Kafka connection via HTTP (it must be used when HTTP connections are being established via proxy)
+de4a.kafka.http.enabled=false
 # Kafka server address (default: de4a-dev-kafka.egovlab.eu:9092)
 de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
-# Add any suffix if you have multiple Connector instances on the same kafka server (default: DE4A-CONNECTOR)
-de4a.kafka.topic=DE4A-CONNECTOR
+# Add any suffix if you have multiple Connector instances on the same kafka server (default: de4a-connector)
+de4a.kafka.topic=de4a-connector
 
 # toop legacy kafka properties (Don´t touch)
 toop.tracker.enabled = ${de4a.kafka.enabled}
@@ -314,5 +320,5 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 	- `/requestTransferEvidenceIM`
 	- `/requestTransferEvidenceUSI`
 	- `/lookupRoutingInformation`
-	- `/requestForwardEvidence`
+	- `/requestTransferEvidenceUSIDT`
 - Accessing to in-memory database: `http://host:h2.console.port/`
