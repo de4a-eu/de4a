@@ -5,7 +5,7 @@ pipeline {
         stage('Test') {
             when {
                 anyOf {
-                    branch 'developer-tmp'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
+                    branch 'develop*'; branch pattern: 'PR-\\d+', comparator: 'REGEXP'
                 }
             }
             agent {
@@ -81,12 +81,12 @@ pipeline {
                 }
             }
         }
-        success {
+        fixed {
             node('master') {
                 script {
-                    if(currentBuild.getPreviousBuild() && currentBuild.getPreviousBuild().getResult().toString() != 'SUCCESS') {
+            //        if(currentBuild.getPreviousBuild() && currentBuild.getPreviousBuild().getResult().toString() != 'SUCCESS') {
                         slackSend color: "good", message: ":baby-yoda: This is the way! :baby-yoda: \nJob name: ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}\nGit Author: ${env.CHANGE_AUTHOR}, Branch: ${env.GIT_BRANCH}, ${env.GIT_URL}\n"
-                    }
+             //       }
                 }
             }
         }
