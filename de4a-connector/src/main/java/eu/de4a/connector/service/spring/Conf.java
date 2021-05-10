@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -276,7 +275,7 @@ public class Conf implements WebMvcConfigurer {
 			private boolean skipProxy(String host) {
 				if (proxyHost.isEmpty())
 					return false;
-				StringTokenizer st = new StringTokenizer(proxyNonHosts, ";");
+				StringTokenizer st = new StringTokenizer(proxyNonHosts, "|");
 				while (st.hasMoreTokens()) {
 					String pattern = st.nextToken();
 					pattern = pattern.replace("\\*", "");

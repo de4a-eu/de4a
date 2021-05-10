@@ -49,14 +49,14 @@ import eu.toop.connector.api.rest.TCPayload;
 
 @Component
 public class EvidenceTransferorManager extends EvidenceManager {
-	private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class);
+    private static final Logger logger = LoggerFactory.getLogger (EvidenceTransferorManager.class);
 
-	@Autowired
-	private Client client;
-	@Autowired
-	private OwnerLocator ownerLocator;
-	@Autowired
-	private RequestorRequestRepository requestorRequestRepository;
+    @Autowired
+    private Client client;
+    @Autowired
+    private OwnerLocator ownerLocator;
+    @Autowired
+    private RequestorRequestRepository requestorRequestRepository;
 
 
     public void queueMessage(MessageOwner request) {
@@ -123,54 +123,57 @@ public class EvidenceTransferorManager extends EvidenceManager {
         }
     }
 
-	public void queueMessageResponse(MessageResponseOwner response) {
-	    logger.info("Queued response from owner USI pattern - RequestId: {}, DataEvaluatorId: {}, DataOwnerId: {}", 
-	            response.getId(), response.getDataEvaluatorId(), response.getDataOwnerId());
-		if (logger.isDebugEnabled()) {			
-			logger.debug(DOMUtils.documentToString(response.getMessage().getOwnerDocument()));
-		}
-		RequestorRequest usirequest = requestorRequestRepository.findById(response.getId()).orElse(null);
-		if (usirequest == null) {
-			logger.error("Does not exists any request with ID {}", response.getId());
-		} else {
-		    //TODO if as4 message DT-DR failed, what is the approach. retries?
-			if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
-					DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
-			    logger.error("Error sending RequestForwardEvidence to Data Requestor through AS4 gateway");
-			}
-		}
-	}
+    public void queueMessageResponse(MessageResponseOwner response) {
+        logger.info("Queued response from owner USI pattern - RequestId: {}, DataEvaluatorId: {}, DataOwnerId: {}", 
+                response.getId(), response.getDataEvaluatorId(), response.getDataOwnerId());
+        if (logger.isDebugEnabled()) {          
+            logger.debug(DOMUtils.documentToString(response.getMessage().getOwnerDocument()));
+        }
+        RequestorRequest usirequest = requestorRequestRepository.findById(response.getId()).orElse(null);
+        if (usirequest == null) {
+            logger.error("Does not exists any request with ID {}", response.getId());
+        } else {
+            //TODO if as4 message DT-DR failed, what is the approach. retries?
+            if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
+                    DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
+                logger.error("Error sending RequestForwardEvidence to Data Requestor through AS4 gateway");
+            }
+        }
+    }
 
-	public boolean sendResponseMessage(String sender, String docTypeID, Element message, String tagContentId) {
-		NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true,message);
-		try {
-		    String senderId = sender;
+    public boolean sendResponseMessage(String sender, String docTypeID, Element message, String tagContentId) {
+        String errorMsg;
+        NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true,message);
+        try {
+            String senderId = sender;
             if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
                 senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
             }
             
-			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending response message via AS4 gateway - "
-                    + "DataEvaluatorId: {0}, Message tag: {1}, CanonicalEvidenceType: {3}", 
+            DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending response message via AS4 gateway - "
+                    + "DataEvaluatorId: {0}, Message tag: {1}, CanonicalEvidenceType: {2}", 
                     senderId, tagContentId, docTypeID));
-			
-			List<TCPayload> payloads = new ArrayList<>();
-			TCPayload payload = new TCPayload();
-			payload.setContentID(tagContentId);
-			payload.setValue(DOMUtils.documentToByte(message.getOwnerDocument()));
-			payload.setMimeType("application/xml");
-			payloads.add(payload);
-			Element requestWrapper = new RegRepTransformer().wrapMessage(message, false);
-			as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestWrapper, payloads, false);
-			
-			return true;
-		} catch (MEOutgoingException e) {
-			logger.error("Error with as4 gateway comunications", e);
-		} catch (MessageException e) {
-			logger.error("Error building wrapper message", e);
-		}
-		return false;
-	}
-	
+            
+            List<TCPayload> payloads = new ArrayList<>();
+            TCPayload payload = new TCPayload();
+            payload.setContentID(tagContentId);
+            payload.setValue(DOMUtils.documentToByte(message.getOwnerDocument()));
+            payload.setMimeType("application/xml");
+            payloads.add(payload);
+            Element requestWrapper = new RegRepTransformer().wrapMessage(message, false);
+            as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestWrapper, payloads, false);
+            
+            return true;
+        } catch (MEOutgoingException e) {
+            errorMsg = "Error with as4 gateway comunications: " + e.getMessage();
+            
+        } catch (MessageException e) {
+            errorMsg = "Error building wrapper message: " + e.getMessage();
+        }
+        DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+        return false;
+    }
+    
     private OwnerAddresses getOwnerAddress(String dataOwnerId, ConnectorException ex) {
         DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Looking for data owner address - "
                 + "DataOwnerId: {0}", dataOwnerId));

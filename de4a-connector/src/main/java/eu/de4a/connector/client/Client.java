@@ -282,7 +282,7 @@ public class Client {
             logger.error(MessageFormat.format("There was an error creating URI from owner endpoint: {}", endpoint));
             return false;
         }
-        uriBuilder.setPath((isUsi ? "/requestExtractEvidenceUSI" : "/requestExtractEvidenceIM"));
+        uriBuilder.setPath(uriBuilder.getPath() + (isUsi ? "requestExtractEvidenceUSI" : "requestExtractEvidenceIM"));
         ConnectorException exception;
         if (!isUsi) {
             RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
