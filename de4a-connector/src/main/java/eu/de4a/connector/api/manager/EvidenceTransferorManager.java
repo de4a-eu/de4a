@@ -142,8 +142,9 @@ public class EvidenceTransferorManager extends EvidenceManager {
     }
 
     public boolean sendResponseMessage(String sender, String docTypeID, Element message, String tagContentId) {
-		NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true,message);
-		try {
+        String errorMsg;
+        NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true,message);
+        try {
             String senderId = sender;
             if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
                 senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
@@ -164,10 +165,12 @@ public class EvidenceTransferorManager extends EvidenceManager {
             
             return true;
         } catch (MEOutgoingException e) {
-            logger.error("Error with as4 gateway comunications", e);
+            errorMsg = "Error with as4 gateway comunications: " + e.getMessage();
+            
         } catch (MessageException e) {
-            logger.error("Error building wrapper message", e);
+            errorMsg = "Error building wrapper message: " + e.getMessage();
         }
+        DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
         return false;
     }
     
