@@ -158,7 +158,7 @@ public class Client {
 
 	    URIBuilder uriBuilder;
         try {
-            uriBuilder = new URIBuilder(idkEndpoint);
+            uriBuilder = new URIBuilder(idkEndpoint + (idkEndpoint.endsWith("/") ? "" : "/"));
         } catch (URISyntaxException e1) {
             logger.error("There was an error creating URI from IDK endpoint");
             return null;
@@ -172,6 +172,9 @@ public class Client {
             path.append(request.getCountryCode());
         }
         uriBuilder.setPath(path.toString());
+        
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request to IDK - "
+                + "URL: {0}", uriBuilder.toString()));
 
 		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), true,
 		        new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), 
