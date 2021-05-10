@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+    de4aconnector:
+        image: de4a/connector:latest
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./config/phase4:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/phase4
+            - ./config/application.properties:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+            - ./config/phase4.properties:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/phase4.properties
+            - /tmp/connector:/tmp
