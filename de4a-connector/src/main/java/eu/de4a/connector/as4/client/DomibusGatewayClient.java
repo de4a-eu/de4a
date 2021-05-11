@@ -25,6 +25,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import eu.de4a.connector.api.manager.EvidenceTransferorManager;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.connector.as4.domibus.soap.DomibusException;
 import eu.de4a.connector.as4.domibus.soap.MessageFactory;
@@ -36,7 +37,7 @@ import eu.de4a.connector.as4.domibus.soap.auto.PartInfo;
 import eu.de4a.connector.as4.domibus.soap.auto.PartProperties;
 import eu.de4a.connector.as4.domibus.soap.auto.Property;
 import eu.de4a.connector.as4.domibus.soap.auto.RetrieveMessageResponse;
-import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
+import eu.de4a.connector.as4.owner.MessageOwner;
 import eu.de4a.connector.model.DomibusRequest;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.connector.repository.DomibusRequestRepository;
@@ -54,9 +55,9 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 	@Autowired
 	private DomibusClientWS domibusClientWS;
 	@Autowired
-	private OwnerMessageEventPublisher publisher;
-	@Autowired
 	private DomibusRequestRepository domibusRequestRepository;
+	@Autowired
+	private EvidenceTransferorManager evidenceTransferorManager;
 
 	@Value("${as4.gateway.implementation.bean}")
 	private String nameAs4Gateway;
@@ -97,8 +98,8 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 								try {
 									builder = factory.newDocumentBuilder();
 									Document doc = builder.parse(new ByteArrayInputStream(targetArray));
-									RequestWrapper request = new RequestWrapper();
-									request.setRequest(doc.getDocumentElement());
+									MessageOwner messageOwner = new MessageOwner();
+									messageOwner.setMessage(doc.getDocumentElement());
 									String idrequest = null;
 									try {
 										idrequest = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID,
@@ -110,10 +111,10 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 										LOGGER.error("EvidenceRequest without id");
 										LOGGER.error(DOMUtils.documentToString(doc));
 									} else {
-										request.setId(idrequest);
-										request.setReceiverId(
+									    messageOwner.setId(idrequest);
+									    messageOwner.setReceiverId(
 												response.getInfo().getUserMessage().getCollaborationInfo().getAction());
-										publisher.publishCustomEvent(request);
+										evidenceTransferorManager.queueMessage(messageOwner);
 									}
 
 								} catch (SAXException | IOException | ParserConfigurationException e) {

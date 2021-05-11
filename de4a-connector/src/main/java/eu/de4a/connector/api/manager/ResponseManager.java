@@ -33,17 +33,15 @@ import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
-import eu.de4a.exception.MessageException;
-import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ErrorType;
-import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
-import eu.de4a.iem.xml.de4a.DE4AMarshaller;
-import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.model.EvaluatorRequestData;
 import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
+import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
+import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
+import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 
@@ -67,36 +65,32 @@ public class ResponseManager {
 		ResponseWrapper response = (ResponseWrapper) retVal;
 		String id = response.getId();
 		
-		String logMsg = MessageFormat.format("Processing response received from AS4 gateway - RequestId: {0}", id);
+		String logMsg = MessageFormat.format("Processing the response received via AS4 gateway - RequestId: {0}", id);
         DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
 		
 		EvaluatorRequest evaluatorinfo = evaluatorRequestRepository.findById(id).orElse(null);
 		if (evaluatorinfo == null) {
-		    logMsg = MessageFormat.format("Request not found on registries with the ID received - RequestId: {0}", id);
+		    logMsg = MessageFormat.format("The corresponding request to the received response is not found on database "
+		            + "- RequestId: {0}", id);
 			DE4AKafkaClient.send(EErrorLevel.ERROR, logMsg);
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
 			List<EvaluatorRequestData> responseData = saveData(response, evaluatorinfo);
             if (evaluatorinfo.isUsi()) {
-
                 // TODO USI pattern depends on redirectURL of DataEvaluator setted on the request
                 // to perform the way back once the response is received by Connector
                 // temporary solution until the final solution will be defined
                 if (!ObjectUtils.isEmpty(evaluatorinfo.getUrlreturn())) {
                     // Send RequestForwardEvidence to evaluator - USI pattern
-                    String msg = MessageFormat.format("Sending RequestForwardEvidence to DataEvaluator - RequestId: {0}, "
-                            + "DataEvaluatorId: {1}, Endpoint: {2}", id, evaluatorinfo.getIdevaluator(), evaluatorinfo.getUrlreturn());
-                    DE4AKafkaClient.send(EErrorLevel.INFO, msg);
-                    
                     Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
                     client.pushEvidence(evaluatorinfo.getUrlreturn(), doc);
                 } else {
                     //TODO in this case, how DE or DO is advised of the situation?
                     // turn redirectURL into a mandatory field?
-                    DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format("RequestForwardEvidence could not been sended, "
-                            + "unkown DataEvaluator endpoint - RequestId: {0}, DataEvaluatorId: {1}, Endpoint: {2}", id, 
-                            evaluatorinfo.getIdevaluator(), evaluatorinfo.getUrlreturn()));
+                    DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format("RequestForwardEvidence has not been sent, "
+                            + "unkown Data Evaluator endpoint - RequestId: {0}, DataEvaluatorId: {1}", id, 
+                            evaluatorinfo.getIdevaluator()));
                 }
             }
 		}
@@ -174,16 +168,4 @@ public class ResponseManager {
 		}
 		return null;
 	}
-
-	public ResponseTransferEvidenceType getErrorResponse(MessageException ex) {
-		ResponseTransferEvidenceType error = new ResponseTransferEvidenceType();
-		ErrorListType errorList = new ErrorListType();
-		ErrorType errortype = new ErrorType();
-		errortype.setCode(ex.getCode());
-		errortype.setText(ex.getMessage());
-		errorList.addError(errortype);
-		error.setErrorList(errorList);
-		return error;
-	}
-
 }

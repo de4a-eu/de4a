@@ -5,8 +5,6 @@ import java.text.MessageFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -17,6 +15,7 @@ import org.w3c.dom.Document;
 import com.helger.commons.error.level.EErrorLevel;
 
 import eu.de4a.connector.api.ResponseApi;
+import eu.de4a.connector.api.manager.EvidenceTransferorManager;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
 import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.model.ExternalModuleError;
@@ -34,32 +33,23 @@ public class ResponseController implements ResponseApi {
 	private static final Logger logger = LoggerFactory.getLogger(ResponseController.class);
 
 	@Autowired
-	private ApplicationEventMulticaster applicationEventMulticaster;
-	@Autowired
-	private ApplicationContext context;
+    private EvidenceTransferorManager evidenceTransferorManager;
 
 	@PostMapping(value = "/requestTransferEvidenceUSIDT", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
 	public String requestTransferEvidenceUSIDT(String request) {
+	    MessageResponseOwner responseUSI;
 		try {
 			Document doc = DOMUtils.stringToDocument(request);
-			String id = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, doc.getDocumentElement());
-			String dataEvaluatorId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EVALUATOR_ID, doc.getDocumentElement());
-			String dataOwnerId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_OWNER_ID, doc.getDocumentElement());
 			
-			if(logger.isDebugEnabled())
-			    logger.debug("Received requestTransferEvidenceUSIDT - RequestId: {}", id);
-
-			MessageResponseOwner responseUSI = new MessageResponseOwner(context);
-			responseUSI.setId(id);
+			responseUSI = new MessageResponseOwner();
 			responseUSI.setMessage(doc.getDocumentElement());
-			responseUSI.setDataEvaluatorId(dataEvaluatorId);
-			responseUSI.setDataOwnerId(dataOwnerId);
+			responseUSI.setId(DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, doc.getDocumentElement()));
+			responseUSI.setDataEvaluatorId(DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EVALUATOR_ID, doc.getDocumentElement()));
+			responseUSI.setDataOwnerId(DOMUtils.getValueFromXpath(DE4AConstants.XPATH_OWNER_ID, doc.getDocumentElement()));
 			
-			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Receiving RequestTransferEvidenceUSI from DT - "
-	                + "RequestId: {0}", id));
-			
-			applicationEventMulticaster.multicastEvent(responseUSI);
+			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("RequestTransferEvidenceUSI message received - "
+	                + "RequestId: {0}", responseUSI.getId()));			
 		} catch (Exception e) {
 		    String error = "There was an error processing RequestTransferEvidenceUSIDT";
 			logger.error(error, e);
@@ -68,6 +58,8 @@ public class ResponseController implements ResponseApi {
 			    .withMessageArg(error)
 			    .withHttpStatus(HttpStatus.OK);
 		}
+		evidenceTransferorManager.queueMessageResponse(responseUSI);
+		
 		ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(true);
 		return DE4AMarshaller.dtUsiResponseMarshaller().getAsString(response);
 	}

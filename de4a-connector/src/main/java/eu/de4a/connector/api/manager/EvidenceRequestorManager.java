@@ -165,10 +165,11 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	    String errorMsg;	    
 		String senderId = sender;
 		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
-		if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
-            senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
-		}
 		try {
+		    if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
+	            senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
+	        }
+		    
 			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request message via AS4 gateway - "
                     + "DataEvaluatorId: {0}, DataOwnerId: {1}, CanonicalEvidenceType: {2}",
                     senderId, dataOwnerId, canonicalEvidenceTypeId));
@@ -193,7 +194,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
                 .withMessageArg(errorMsg);
 		} catch (ConnectorException cE) {
 		    throw cE.withModule(ExternalModuleError.CONNECTOR_DT);
-		} catch (MessageException msgE) {
+		} catch (NullPointerException | MessageException msgE) {
 		    throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
 		        .withFamily(FamilyErrorType.CONVERSION_ERROR)
 		        .withModule(ExternalModuleError.CONNECTOR_DR)

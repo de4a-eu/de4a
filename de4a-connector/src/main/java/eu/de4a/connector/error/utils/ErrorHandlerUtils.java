@@ -104,6 +104,10 @@ public class ErrorHandlerUtils {
         ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withLayer(LayerError.INTERNAL_FAILURE)
                 .withHttpStatus(HttpStatus.OK);
+        marshaller.readExceptionCallbacks().set(e -> {
+            if(!ObjectUtils.isEmpty(e.getLinkedException()))
+                ex.withMessageArg(e.getLinkedException().getMessage());
+        });
         try {
             if(objToStr) {
                 returnObj = marshaller.getAsString((T) obj);
@@ -120,13 +124,13 @@ public class ErrorHandlerUtils {
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
                     .getResponseError(exception.withMessageArg(e.getMessage()), objToStr);
         }
-        if(returnObj == null) {
+        if(returnObj == null) {            
+            exception.withMessageArg(ex.getArgs());
             if(throwException) {
-                throw exception.withMessageArg(errorMsg);
+                throw exception;
             }
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
-                    .getResponseError(exception.withMessageArg(errorMsg), 
-                            objToStr);
+                    .getResponseError(exception, objToStr);
         }
         return returnObj;
     }
@@ -139,6 +143,10 @@ public class ErrorHandlerUtils {
         ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
                 .withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withHttpStatus(HttpStatus.OK);
+        marshaller.readExceptionCallbacks().set(e -> {
+            if(!ObjectUtils.isEmpty(e.getLinkedException()))
+                ex.withMessageArg(e.getLinkedException().getMessage());
+        });
         try {
             if(objToDoc) {
                 returnObj = marshaller.getAsDocument((T) obj);
@@ -156,6 +164,7 @@ public class ErrorHandlerUtils {
                     .getResponseError(exception.withMessageArg(e.getMessage()), false);
         }
         if(returnObj == null) {
+            exception.withMessageArg(ex.getArgs());
             if(throwException) {
                 throw exception.withMessageArg(errorMsg);
             }
