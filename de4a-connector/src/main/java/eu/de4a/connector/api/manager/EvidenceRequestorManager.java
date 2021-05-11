@@ -165,6 +165,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	    String errorMsg;	    
 		String senderId = sender;
 		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
+		try {
 		    if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
 	            senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
 	        }
