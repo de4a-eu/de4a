@@ -3,11 +3,13 @@
 Connector component. Check out following instructions and descriptions.
 
 ## de4a-commons
+#### `package`
 Conceived as a library that maintains:
 - Utils and general purpose methods
 - Common classes
 
 ## de4a-idk
+#### `package`
 Mocked IDK entity based on [API definition](https://app.swaggerhub.com/apis/danieldecastrop/swagger-idk_de_4_a_information_desk/2.0.1#/). It maintains provided information in the in-memory DB tables. Mock is able to process requests through the interfaces:
 - /idk/ial/{canonicalEvidenceTypeId}
 - /idk/ial/{canonicalEvidenceTypeId}/{countryCode}
@@ -30,6 +32,7 @@ idk/src/main/eu/idk/configuration/Conf.java
 ```
 
 ## de4a-connector
+#### `package`
 Checkout the technical documentation on [DE4A Connector - Installation and configuration](https://newrepository.atosresearch.eu/index.php/f/1059081)
 ### API doc
 Once you deploy a Connector instance, it will be able to access to Swagger UI browsing:
@@ -37,7 +40,7 @@ Once you deploy a Connector instance, it will be able to access to Swagger UI br
 http://connector-endpoint:port/swagger-ui/
 ```
 Even so, the API definition is published at:
-[Public Swagger API Connector](https://app.swaggerhub.com/apis/de4a/Connector/0.1.0)
+[Public Swagger API Connector](https://app.swaggerhub.com/apis/de4a/Connector/0.1.1)
 
 
 
@@ -55,6 +58,10 @@ TOOP and AS4 configuration properties
 #### Spring config
 ```sh
 ~/de4a/de4a-connector/src/main/java/eu/de4a/connector/service/spring/Conf.java
+```
+#### Logging config
+```sh
+~/de4a/de4a-connector/src/main/resources/log4j2.xml
 ```
 ## Installation
 You should be able to compile entire packages from the parent POM file:
@@ -215,13 +222,13 @@ de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
 # toop legacy kafka properties (Do not touch)
 toop.tracker.enabled = false
 ```
-**IMPORTANT** - If your server has no access to external domains, the HTTP kafka configuration should be enabled.
+**IMPORTANT** - If your server has no access to external domains, the HTTP kafka and proxy configuration should be enabled.
 To enable HTTP kafka log producer, you only need to set the property to true `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**
 
 #### SMP properties `application.properties`
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
 ```properties
-# SMP Client configuration stuff - Don't touch (default values)
+# SMP Client configuration stuff - Do not touch (default values)
 smpclient.truststore.type = JKS
 smpclient.truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
 smpclient.truststore.password = de4a
@@ -249,7 +256,7 @@ Some environments may require perform proxy connections due to security policies
 #http.proxy.enabled=
 #http.proxy.address=
 #http.proxy.port=
-#http.proxy.non-proxy=
+#http.proxy.non-proxy= ("|" delimiter)
 #http.proxyUsername=
 #http.proxyPassword=
 
@@ -306,11 +313,19 @@ phase4.truststore.password=
 The configuration file bellow maintains the logging configuration where you can set the level of each appender, set up log file path, or even include more appenders or configuration.
 **Important** - to correctly configure the path of log file. By default it is a relative path to catalina.base (Tomcat server) `${sys:catalina.base}/logs/connector.log`
 ```xml
-<File name="File" fileName="${sys:catalina.base}/logs/connector.log">
-	<PatternLayout>
-		<pattern>%d %p %C{1.} [%t] %m%n</pattern>
-	</PatternLayout>
-</File>
+<RollingFile name="rollingFile"
+    fileName="${sys:catalina.base}/logs/connector.log"
+    filePattern="${sys:catalina.base}/logs/history/connector.%d{dd-MMM}.log.gz"
+    ignoreExceptions="false">
+    <PatternLayout>
+        <Pattern>>%d %p %C{1.} [%t] %m%n</Pattern>
+    </PatternLayout>
+    <Policies>
+        <OnStartupTriggeringPolicy />
+        <SizeBasedTriggeringPolicy size="30 MB" />
+    </Policies>
+    <DefaultRolloverStrategy max="5" />
+</RollingFile>
 ```
 ## Starting up Connector
 Once you have all configuration parameters well configured (if not, check the logs to find out the problem), it is time to deploy the component into an applications server.
