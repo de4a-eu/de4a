@@ -41,6 +41,8 @@ public class DE4AConstants {
 	public static final String XPATH_EIDAS_NAME_NODE="//*[local-name()='PersonGivenName']";
 	public static final String XPATH_EIDAS_FULLNAME_NODE="//*[local-name()='PersonBirthName']";
 	public static final String XPATH_EIDAS_BIRTHDATE_NODE="//*[local-name()='PersonBirthDate']";
+	
+	public static final String NAMESPACE_USI = "http://www.de4a.eu/2020/data/requestor/pattern/usi";
 
 	//SMP request MessageType
 	public static final String MESSAGE_TYPE_REQUEST = "request";

@@ -17,6 +17,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -90,7 +91,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatus status, WebRequest request) {
         logger.warn("REST service requested not found");
         String err = new MessageUtils(MessageKeys.ERROR_SERVICE_NOT_FOUND, 
-                new Object[] {request.getContextPath()}).value();
+                new Object[] {((ServletWebRequest)request).getRequest().getRequestURI()}).value();
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
         responseError.setErrorList(new ErrorListType());
         String code = LayerError.COMMUNICATIONS.getID() + ExternalModuleError.NONE.getId()

@@ -15,8 +15,8 @@ import com.helger.commons.error.level.EErrorLevel;
 
 import eu.de4a.connector.api.RequestApi;
 import eu.de4a.connector.api.manager.EvidenceRequestorManager;
+import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
-import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.model.EvaluatorRequest;
@@ -52,7 +52,7 @@ public class RequestController implements RequestApi {
                 .conversionStrWithCatching(DE4AMarshaller.idkRequestLookupRoutingInformationMarshaller(), request, false, true, 
                 new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.CONNECTOR_DR));
 	    
-	    DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Receiving RequestLookupRoutingInformation - "
+	    DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("RequestLookupRoutingInformation message received - "
 	            + "CanonicalEvidenceType: {0}, CountryCode: {1}, DataOwnerId: {2}", reqObj.getCanonicalEvidenceTypeId(),
 	            reqObj.getCountryCode(), reqObj.getDataOwnerId()));
 	    
@@ -65,7 +65,7 @@ public class RequestController implements RequestApi {
             consumes = MediaType.APPLICATION_XML_VALUE)
 	public String requestTransferEvidenceUSI(String request) {
 	    
-	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(), 
+	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drUsiRequestMarshaller(), 
                 request, true);
 
 		ResponseErrorType response = evidenceRequestorManager.manageRequestUSI(reqObj);		
@@ -88,10 +88,10 @@ public class RequestController implements RequestApi {
 	        boolean isUsi) {
 	    RequestTransferEvidenceUSIIMDRType reqObj = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
                 .conversionStrWithCatching(marshaller, request, false, true, 
-                new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DR));
+                new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DR));
 	    
         String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");
-        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Receiving {0} - "
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("{0} message received - "
                 + "RequestId: {1}, CanonicalEvidenceType: {2}, DataEvaluator: {3}, DataOwner: {4}", 
                 requestType, reqObj.getRequestId(), reqObj.getCanonicalEvidenceTypeId(), 
                 reqObj.getDataEvaluator().getAgentUrn(), reqObj.getDataOwner().getAgentUrn()));

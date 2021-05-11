@@ -66,17 +66,18 @@ public class EvidenceTransferorManager extends EvidenceManager {
             logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
         }
         ResponseTransferEvidenceType responseTransferEvidenceType = null;
-        RequestTransferEvidenceUSIIMDRType req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
-                .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(),
-                        request.getMessage().getOwnerDocument(), false, false,
-                        new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
-
-        ConnectorException ex = new OwnerException().withModule(ExternalModuleError.CONNECTOR_DT).withRequest(req)
-                .withHttpStatus(HttpStatus.OK);        
+        RequestTransferEvidenceUSIIMDRType req = null;
+        ConnectorException ex = new OwnerException().withModule(ExternalModuleError.CONNECTOR_DT)
+                .withHttpStatus(HttpStatus.OK);
         try {
             OwnerAddresses ownerAddress = getOwnerAddress(request.getReceiverId(), ex);
             RequestorRequest requestorReq = new RequestorRequest();
-            if (req != null) {
+            if(!DE4AConstants.NAMESPACE_USI.equals(request.getMessage().getNamespaceURI())) {
+                req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
+                        .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(),
+                                request.getMessage().getOwnerDocument(), false, false,
+                                new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
+                
                 requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
                 responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(req,
@@ -89,7 +90,9 @@ public class EvidenceTransferorManager extends EvidenceManager {
                     // TODO if as4 message DT-DR failed, what is the approach. retries?
                     if (!sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),
                             docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
-                        logger.error("Error sending ResponseTransferEvidence to Data Requestor through AS4 gateway");
+                        String errorMsg = MessageFormat.format("Error sending ResponseTransferEvidence to Data Requestor via AS4 gateway - "
+                                + "RequestId: {0}", req.getRequestId());
+                        DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
                     }
                 } else {
                     throw ex.withFamily(FamilyErrorType.CONNECTION_ERROR).withModule(ExternalModuleError.DATA_OWNER)
@@ -97,8 +100,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 }
             } else {
                 req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
-                        DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage(), false, true,
-                        new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DT));
+                        DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage().getOwnerDocument(), false, 
+                        true, new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DT));
                 requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
                 client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
@@ -118,7 +121,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
                     DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
                             .getAsDocument(responseTransferEvidenceType).getDocumentElement(),
                     DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
-                logger.error("Error sending ResponseTransferEvidence to Data Requestor through AS4 gateway");
+                logger.error("Error sending ResponseTransferEvidence to Data Requestor via AS4 gateway");
             }
         }
     }
@@ -129,14 +132,24 @@ public class EvidenceTransferorManager extends EvidenceManager {
         if (logger.isDebugEnabled()) {          
             logger.debug(DOMUtils.documentToString(response.getMessage().getOwnerDocument()));
         }
+        ConnectorException ex = new ResponseErrorException()
+                .withLayer(LayerError.INTERNAL_FAILURE)
+                .withModule(ExternalModuleError.CONNECTOR_DT);
         RequestorRequest usirequest = requestorRequestRepository.findById(response.getId()).orElse(null);
         if (usirequest == null) {
-            logger.error("Does not exists any request with ID {}", response.getId());
+            String msgError = MessageFormat.format("The corresponding request to the received response is not found on database - "
+                    + "RequestId: {0}", response.getId());
+            DE4AKafkaClient.send(EErrorLevel.WARN, "Processing RequestTransferEvidenceUSIDT - " + msgError);
+            throw ex.withFamily(FamilyErrorType.SAVING_DATA_ERROR).withMessageArg(msgError);
         } else {
-            //TODO if as4 message DT-DR failed, what is the approach. retries?
             if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
                     DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
-                logger.error("Error sending RequestForwardEvidence to Data Requestor through AS4 gateway");
+                String errorMsg = MessageFormat.format("Error sending message to Data Requestor via AS4 gateway - "
+                        + "RequestId: {0}", response.getId());                
+                DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+                
+                throw ex.withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
+                    .withModule(ExternalModuleError.CONNECTOR_DR).withMessageArg(errorMsg);
             }
         }
     }
@@ -164,24 +177,26 @@ public class EvidenceTransferorManager extends EvidenceManager {
             as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestWrapper, payloads, false);
             
             return true;
-        } catch (MEOutgoingException e) {
-            errorMsg = "Error with as4 gateway comunications: " + e.getMessage();
+        } catch (NullPointerException | MEOutgoingException e) {
+            errorMsg = "Error with AS4 gateway comunications: " + e.getMessage();
             
         } catch (MessageException e) {
             errorMsg = "Error building wrapper message: " + e.getMessage();
         }
-        DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+        if(logger.isDebugEnabled())
+            logger.debug(errorMsg);
+
         return false;
     }
     
     private OwnerAddresses getOwnerAddress(String dataOwnerId, ConnectorException ex) {
-        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Looking for data owner address - "
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Looking for Data Owner address - "
                 + "DataOwnerId: {0}", dataOwnerId));
         
         OwnerAddresses ownerAddress = ownerLocator.lookupOwnerAddress(dataOwnerId);
         if (ownerAddress == null) {
             DE4AKafkaClient.send(EErrorLevel.ERROR,
-                    MessageFormat.format("Data owner address not found - DataOwnerId: {0}", dataOwnerId));
+                    MessageFormat.format("Data Owner address not found - DataOwnerId: {0}", dataOwnerId));
 
             throw ex.withFamily(FamilyErrorType.SAVING_DATA_ERROR).withLayer(LayerError.CONFIGURATION)
                     .withMessageArg(new MessageUtils(MessageKeys.ERROR_OWNER_NOT_FOUND, new Object[] { dataOwnerId }));

@@ -47,6 +47,7 @@ import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.error.utils.ResponseErrorFactory;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.iem.jaxb.common.types.AckType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
@@ -240,40 +241,46 @@ public class Client {
 		try {
             uriBuilder = new URIBuilder(endpoint);
         } catch (URISyntaxException e) {
-            logger.error(MessageFormat.format("There was an error creating URI from evaluator endpoint: {}", endpoint));
+            String errorMsg = MessageFormat.format("Error building URI from Data Evaluator endpoint: {}", endpoint);
+            DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
             return false;
         }
-		uriBuilder.setPath("/requestForwardEvidence");
+		uriBuilder.setPath(uriBuilder.getPath() + "/requestForwardEvidence");
 		
-		//Transform RequestTransferEvidenceUSIDT to RequestForwardEvidence
-		RequestTransferEvidenceUSIDTType requestUSIDT = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
-		        .conversionStrWithCatching(DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
-		        requestDoc, false, true, exception);
-
-        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending RequestForwardEvidence to the data evaluator - "
-                + "RequestId: {0}, DataEvaluatorId: {1}, DataOwnerId: {2}, Endpoint: {3}",
-                requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
-                requestUSIDT.getDataOwner().getAgentUrn(), endpoint));
-		
-		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
-		String request = (String) ErrorHandlerUtils.conversionStrWithCatching(
-		        DE4AMarshaller.deUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
-		        requestForward, true, true, exception);
-		
-		String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), request, 
-                 false, exception.withModule(ExternalModuleError.DATA_EVALUATOR), this.restTemplate);
-		
-		ResponseErrorType responseObj = (ResponseErrorType) ErrorHandlerUtils.conversionStrWithCatching(
-		        DE4AMarshaller.deUsiResponseMarshaller(), String.valueOf(response), false, false, exception);
-		
-		return AckType.OK.equals(responseObj.getAck());
+		try {
+    		RequestTransferEvidenceUSIDTType requestUSIDT = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
+    		        .conversionDocWithCatching(DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+    		        requestDoc, false, true, exception);
+    
+            DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending RequestForwardEvidence to the Data Evaluator - "
+                    + "RequestId: {0}, DataEvaluatorId: {1}, DataOwnerId: {2}, Endpoint: {3}",
+                    requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
+                    requestUSIDT.getDataOwner().getAgentUrn(), endpoint));
+    		
+    		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
+    		String request = (String) ErrorHandlerUtils.conversionStrWithCatching(
+    		        DE4AMarshaller.deUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+    		        requestForward, true, true, exception);
+    		
+    		String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), request, 
+                    false, exception.withModule(ExternalModuleError.DATA_EVALUATOR), this.restTemplate);
+           
+           ResponseErrorType responseObj = (ResponseErrorType) ErrorHandlerUtils.conversionStrWithCatching(
+                   DE4AMarshaller.deUsiResponseMarshaller(), String.valueOf(response), false, false, exception);
+           
+           return AckType.OK.equals(responseObj.getAck());
+		} catch(ConnectorException e) {
+		    String errorMsg = ResponseErrorFactory.getHandlerFromClassException(e.getClass()).getMessage(e);
+		    DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+		}
+		return false;
 	}
 
 	public Object sendEvidenceRequest(RequestTransferEvidenceUSIIMDRType evidenceRequest, String endpoint,
             boolean isUsi) {
-	    String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");
+	    String requestType = "RequestExtractEvidence" + (isUsi ? " USI" : " IM");
 
-        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending {0} to the data owner - "
+        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending {0} to the Data Owner - "
                 + "RequestId: {1}, CanonicalEvidenceType: {2}, DataEvaluatorId: {3}, DataOwnerId: {4}, "
                 + "Endpoint: {5}", requestType, evidenceRequest.getRequestId(), evidenceRequest.getCanonicalEvidenceTypeId(),
                 evidenceRequest.getDataEvaluator().getAgentUrn(), evidenceRequest.getDataOwner().getAgentUrn(), endpoint));
