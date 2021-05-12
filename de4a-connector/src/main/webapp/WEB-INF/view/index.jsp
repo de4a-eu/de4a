@@ -16,7 +16,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="https://www.thymeleaf.org" lang="en">
 <head>
-    <title>DE4A-Connector</title>
+    <title>DE4A-Connector - Info</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style type="text/css">
         body {
@@ -30,6 +30,23 @@
         }
         h4 {
             margin: 15px auto;
+        }
+        .h1-title {
+            color: #21739a;
+		    display: inline-block;
+		    border: 1px solid #ececec;
+		    padding-right: 7px;
+		    border-radius: 8px;
+		    background: #f7f7f7;
+		    margin-bottom: 0px;
+		    color: #21739a;
+        }
+        .de4a {
+            background: #ffd89121;
+		    padding: 0px 5px;
+		    border-radius: 5px;
+		    border: 1px solid #ffd891;
+		    color: #2483bf;
         }
         .param-value {
             font-weight: normal;		    
@@ -57,7 +74,7 @@
     </style>
 </head>
 <body>
-    <h1 style="color: #21739a;"><span>DE4A</span> - Connector</h1>
+    <h1 class="h1-title"><span class="de4a">DE4A</span> - Connector</h1>
     <h3>Status: <span class="param-value value-true">Running</span></h3>
     <br>
     <h3 style="margin-bottom: 5px;">System Parameters</h3>
