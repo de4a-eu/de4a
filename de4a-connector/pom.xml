@@ -166,9 +166,8 @@
             <artifactId>tc-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.toop</groupId>
-            <artifactId>tc-webapp</artifactId>
-            <classifier>classes</classifier>
+            <groupId>com.helger.photon</groupId>
+            <artifactId>ph-oton-core</artifactId>
         </dependency>
         <dependency>
             <groupId>eu.toop</groupId>
