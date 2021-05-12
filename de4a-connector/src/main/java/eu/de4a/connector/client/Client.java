@@ -119,7 +119,8 @@ public class Client {
 			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
 
 			if (signedServiceMetadata == null) {
-				String error="It is not possible to retrieve data from the SMP, either because of a connection problem or because it does not exist.";
+				String error="It is not possible to retrieve data from the SMP, either because of a "
+				        + "connection problem or because it does not exist.";
 				logger.error(error);
 				throw new SMPLookingMetadataInformationException( )
                  .withUserMessage(userMessage)
@@ -142,7 +143,10 @@ public class Client {
 				nodeInfo.setEndpointURI(endpoint.getEndpointURI());
 				nodeInfo.setCertificate(endpoint.getCertificate());
 				nodeInfo.setProcessIdentifier(aProcID.getURIEncoded());
-			} 
+			} else {
+			    throw new SMPClientException(MessageFormat.format("Endpoint data not found for ParticipantID: {0}, MessageType: {1}",
+			            participantId, messageType));
+			}
 		} catch (final SMPClientException | SMPDNSResolutionException ex) {
             logger.error("Service metadata not found on SMP", ex);
             throw new SMPLookingMetadataInformationException( )
