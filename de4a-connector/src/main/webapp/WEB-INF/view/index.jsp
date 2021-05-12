@@ -66,14 +66,14 @@
 	<h4 class="param-name">http.proxy.enabled: <span class="param-value ${httpProxyEnabled ? ' value-true' : ' value-false'}">${httpProxyEnabled}</span></h4><br>
 	<h4 class="param-name">de4a.kafka.enabled: <span class="param-value ${kafkaEnabled ? ' value-true' : ' value-false'}">${kafkaEnabled}</span></h4>
 	<h4 class="param-name">de4a.kafka.http.enabled: <span class="param-value ${kafkaHttpEnabled ? ' value-true' : ' value-false'}">${kafkaHttpEnabled}</span></h4>
-	<h4 class="param-name">de4a.kafka.url: <span class="param-value value">${empty kafkaUrl ? 'not-setted' : kafkaUrl}</span></h4>
-	<h4 class="param-name">de4a.kafka.topic: <span class="param-value value">${empty kafkaTopic ? 'not-setted' : kafkaTopic}</span></h4><br>
-	<h4 class="param-name">smp.endpoint: <span class="param-value value">${empty smpEndpoint ? 'not-setted' : smpEndpoint}</span></h4>
-	<h4 class="param-name">idk.endpoint: <span class="param-value value">${empty idkEndpoint ? 'not-setted' : idkEndpoint}</span></h4><br>
-	<h4 class="param-name">phase4.send.toparty.id.type: <span class="param-value value">${empty phase4SendToParty ? 'not-setted' : phase4SendToParty}</span></h4>
-	<h4 class="param-name">phase4.send.fromparty.id.type: <span class="param-value value">${empty phase4SendFromParty ? 'not-setted' : phase4SendFromParty}</span></h4>
-	<h4 class="param-name">toop.mem.implementation: <span class="param-value value">${empty toopImpl ? 'not-setted' : toopImpl}</span></h4>
-	<h4 class="param-name">as4.gateway.implementation.bean: <span class="param-value value">${empty as4GatewayBean ? 'not-setted' : as4GatewayBean}</span></h4>
+	<h4 class="param-name">de4a.kafka.url: <span class="param-value value">${empty kafkaUrl ? 'not-set' : kafkaUrl}</span></h4>
+	<h4 class="param-name">de4a.kafka.topic: <span class="param-value value">${empty kafkaTopic ? 'not-set' : kafkaTopic}</span></h4><br>
+	<h4 class="param-name">smp.endpoint: <span class="param-value value">${empty smpEndpoint ? 'not-set' : smpEndpoint}</span></h4>
+	<h4 class="param-name">idk.endpoint: <span class="param-value value">${empty idkEndpoint ? 'not-set' : idkEndpoint}</span></h4><br>
+	<h4 class="param-name">phase4.send.toparty.id.type: <span class="param-value value">${empty phase4SendToParty ? 'not-set' : phase4SendToParty}</span></h4>
+	<h4 class="param-name">phase4.send.fromparty.id.type: <span class="param-value value">${empty phase4SendFromParty ? 'not-set' : phase4SendFromParty}</span></h4>
+	<h4 class="param-name">toop.mem.implementation: <span class="param-value value">${empty toopImpl ? 'not-set' : toopImpl}</span></h4>
+	<h4 class="param-name">as4.gateway.implementation.bean: <span class="param-value value">${empty as4GatewayBean ? 'not-set' : as4GatewayBean}</span></h4>
 	<hr style="width: 40%;margin-left: 0; margin-top:25px;">
 	
 	<h4>Check out the system API on: <a href="./swagger-ui/">Connector Swagger API definition</a></h4>
