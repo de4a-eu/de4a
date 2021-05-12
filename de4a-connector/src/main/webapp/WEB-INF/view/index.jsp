@@ -74,7 +74,7 @@
     </style>
 </head>
 <body>
-    <h1 class="h1-title"><span class="de4a">DE4A</span> - Connector</h1>
+    <h1 class="h1-title"><span class="de4a">DE4A</span> Connector</h1>
     <h3>Status: <span class="param-value value-true">Running</span></h3>
     <br>
     <h3 style="margin-bottom: 5px;">System Parameters</h3>
