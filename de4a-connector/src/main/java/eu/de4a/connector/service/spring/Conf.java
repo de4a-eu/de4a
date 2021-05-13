@@ -328,7 +328,7 @@ public class Conf implements WebMvcConfigurer {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/").setViewName("index");
-		registry.addViewController("/swagger-ui/").setViewName("forward:/swagger-ui/index.html");
+		registry.addViewController("/swagger-ui/").setViewName("redirect:/swagger-ui/index.html");
 	}
 
 	@Bean
