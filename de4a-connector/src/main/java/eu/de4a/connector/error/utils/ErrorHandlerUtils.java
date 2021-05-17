@@ -1,5 +1,7 @@
 package eu.de4a.connector.error.utils;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 
 import org.slf4j.Logger;
@@ -51,7 +53,7 @@ public class ErrorHandlerUtils {
     public static String getRestObjectWithCatching(String url, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML); 
+        headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8)); 
         try {
             return restTemplate.getForObject(url, String.class);
         } catch(RestClientException e) {
@@ -73,7 +75,7 @@ public class ErrorHandlerUtils {
     public static String postRestObjectWithCatching(String url, String request, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
+        headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
         ResponseEntity<String> response;
         try {
             response = restTemplate.postForEntity(url,
@@ -96,7 +98,6 @@ public class ErrorHandlerUtils {
         return response.getBody();
     }
     
-    @SuppressWarnings("unchecked")
     public static <T> Object conversionStrWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
             boolean objToStr, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
@@ -109,11 +110,7 @@ public class ErrorHandlerUtils {
                 ex.withMessageArg(e.getLinkedException().getMessage());
         });
         try {
-            if(objToStr) {
-                returnObj = marshaller.getAsString((T) obj);
-            } else {
-                returnObj = marshaller.read((String) obj);
-            }
+            returnObj = getObjectTypeFromObject(marshaller, obj, objToStr);
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {
                 logger.debug(errorMsg, e);
@@ -133,6 +130,22 @@ public class ErrorHandlerUtils {
                     .getResponseError(exception, objToStr);
         }
         return returnObj;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static <T> Object getObjectTypeFromObject(DE4AMarshaller<T> marshaller, Object obj, 
+            boolean objToStr) {
+        Object retObj;
+        if(objToStr) {
+            retObj = marshaller.getAsString((T) obj);
+        } else {
+            if(obj instanceof String) {
+                retObj = marshaller.read((String) obj);
+            } else {
+                retObj = marshaller.read((InputStream) obj);
+            }
+        }
+        return retObj;
     }
     
     @SuppressWarnings("unchecked")

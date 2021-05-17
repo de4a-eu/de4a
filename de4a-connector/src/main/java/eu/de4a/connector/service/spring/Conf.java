@@ -178,7 +178,7 @@ public class Conf implements WebMvcConfigurer {
 		return new ApiInfoBuilder()
 			.title("DE4A - Connector")
 			.description("DE4A Connector component - eDelivery Exchange")
-			.version("0.1.0")
+			.version("0.1.1")
 			.termsOfServiceUrl("http://www.de4a.eu")
 			.licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
 			.license("APACHE2")
