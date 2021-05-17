@@ -78,7 +78,7 @@
     <h3>Status: <span class="param-value value-true">Running</span></h3>
     <br>
     <h3 style="margin-bottom: 5px;">System Parameters</h3>
-    <hr style="width: 40%;margin-left: 0;">
+    <hr style="width:40%;min-width:600px;margin-left:0;">
 	<h4 class="param-name">ssl.context.enabled: <span class="param-value ${sslContextEnabled ? ' value-true' : ' value-false'}">${sslContextEnabled}</span></h4>
 	<h4 class="param-name">http.proxy.enabled: <span class="param-value ${httpProxyEnabled ? ' value-true' : ' value-false'}">${httpProxyEnabled}</span></h4><br>
 	<h4 class="param-name">de4a.kafka.enabled: <span class="param-value ${kafkaEnabled ? ' value-true' : ' value-false'}">${kafkaEnabled}</span></h4>
@@ -91,7 +91,7 @@
 	<h4 class="param-name">phase4.send.fromparty.id.type: <span class="param-value value">${empty phase4SendFromParty ? 'not-set' : phase4SendFromParty}</span></h4>
 	<h4 class="param-name">toop.mem.implementation: <span class="param-value value">${empty toopImpl ? 'not-set' : toopImpl}</span></h4>
 	<h4 class="param-name">as4.gateway.implementation.bean: <span class="param-value value">${empty as4GatewayBean ? 'not-set' : as4GatewayBean}</span></h4>
-	<hr style="width: 40%;margin-left: 0; margin-top:25px;">
+	<hr style="width: 40%;min-width:600px;margin-left:0; margin-top:25px;">
 	
 	<h4>Check out the system API on: <a href="./swagger-ui/">Connector Swagger API definition</a></h4>
 </body>
