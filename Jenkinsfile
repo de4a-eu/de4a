@@ -50,7 +50,7 @@ pipeline {
                     def img
                     if (env.BRANCH_NAME == 'master') {
                         dir('de4a-idk') {
-                            img = docker.build('de4a/mock-idk','.')
+                            img = docker.build('de4a/mock-idk','--build-arg VERSION=$VERSION .')
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
                                 img.push('$VERSION')
