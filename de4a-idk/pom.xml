@@ -10,7 +10,7 @@
     </parent>
     <artifactId>idk</artifactId>
     <packaging>war</packaging>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
     <name>de4a-idk-mock</name>
     <url>http://maven.apache.org</url>
     <properties>
