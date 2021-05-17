@@ -1,9 +1,10 @@
 package eu.de4a.connector.api;
 
+import java.io.InputStream;
+
 import javax.validation.Valid;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
@@ -34,8 +35,7 @@ public interface RequestApi {
 		@ApiResponse(responseCode = "200", description = "OK",
 				content = @Content(schema = @Schema(implementation = ResponseLookupRoutingInformationType.class)))
 	})
-	public @ResponseBody String lookupRoutingInformation(
-			@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public @ResponseBody String lookupRoutingInformation(@Valid @ApiParam(hidden = true) InputStream request);
 
 
 	@ApiOperation(value = "Receive RequestTransferEvidence message through USI pattern",
@@ -49,7 +49,7 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
-	public @ResponseBody String requestTransferEvidenceUSI(@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public @ResponseBody String requestTransferEvidenceUSI(@Valid @ApiParam(hidden = true) InputStream request);
 
 
 	@ApiOperation(value = "Receive RequestTransferEvidence message through IM pattern",
@@ -63,6 +63,6 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseTransferEvidenceType.class)))
 	})
-	public @ResponseBody String requestTransferEvidenceIM(@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public @ResponseBody String requestTransferEvidenceIM(@Valid @ApiParam(hidden = true) InputStream request);
 
 }

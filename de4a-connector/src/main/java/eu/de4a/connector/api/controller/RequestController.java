@@ -1,5 +1,6 @@
 package eu.de4a.connector.api.controller;
 
+import java.io.InputStream;
 import java.text.MessageFormat;
 
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class RequestController implements RequestApi {
 
 	@PostMapping(value = "/lookupRoutingInformation", produces = MediaType.APPLICATION_XML_VALUE, 
 	        consumes = MediaType.APPLICATION_XML_VALUE)
-	public String lookupRoutingInformation(String request) {
+	public String lookupRoutingInformation(InputStream request) {
 	    
 	    RequestLookupRoutingInformationType reqObj = (RequestLookupRoutingInformationType) ErrorHandlerUtils
                 .conversionStrWithCatching(DE4AMarshaller.idkRequestLookupRoutingInformationMarshaller(), request, false, true, 
@@ -63,7 +64,7 @@ public class RequestController implements RequestApi {
 
 	@PostMapping(value = "/requestTransferEvidenceUSI", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public String requestTransferEvidenceUSI(String request) {
+	public String requestTransferEvidenceUSI(InputStream request) {
 	    
 	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drUsiRequestMarshaller(), 
                 request, true);
@@ -74,9 +75,9 @@ public class RequestController implements RequestApi {
 
 	@PostMapping(value = "/requestTransferEvidenceIM", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public String requestTransferEvidenceIM(String request) {
+	public String requestTransferEvidenceIM(InputStream request) {
 		
-	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(), 
+	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(),
 	            request, false);
 		
 		ResponseTransferEvidenceType response = evidenceRequestorManager.manageRequestIM(reqObj);
@@ -84,7 +85,7 @@ public class RequestController implements RequestApi {
 				.getAsString(response);
 	}
 	
-	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, String request,
+	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, InputStream request,
 	        boolean isUsi) {
 	    RequestTransferEvidenceUSIIMDRType reqObj = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
                 .conversionStrWithCatching(marshaller, request, false, true, 

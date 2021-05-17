@@ -178,7 +178,7 @@ public class Conf implements WebMvcConfigurer {
 		return new ApiInfoBuilder()
 			.title("DE4A - Connector")
 			.description("DE4A Connector component - eDelivery Exchange")
-			.version("0.1.0")
+			.version("0.1.1")
 			.termsOfServiceUrl("http://www.de4a.eu")
 			.licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
 			.license("APACHE2")
@@ -328,7 +328,7 @@ public class Conf implements WebMvcConfigurer {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/").setViewName("index");
-		registry.addViewController("/swagger-ui/").setViewName("forward:/swagger-ui/index.html");
+		registry.addViewController("/swagger-ui/").setViewName("redirect:/swagger-ui/index.html");
 	}
 
 	@Bean
