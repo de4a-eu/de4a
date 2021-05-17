@@ -42,25 +42,27 @@ pipeline {
                 branch 'master'
             }
             agent { label 'master' }
-            environment {
-                VERSION=readMavenPom().getVersion()
-            }
+//            environment {
+//                VERSION=readMavenPom().getVersion()
+//            }
             steps {
                 script{
                     def img
                     if (env.BRANCH_NAME == 'master') {
                         dir('de4a-idk') {
-                            img = docker.build('de4a/mock-idk','--build-arg VERSION=$VERSION .')
+                            env.VERSION = sh script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
+                            img = docker.build('de4a/mock-idk',"--build-arg VERSION=${env.VERSION} .")
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
-                                img.push('$VERSION')
+                                img.push("${env.VERSION}")
                             }
                         }
                         dir('de4a-connector') {
+                            env.VERSION = sh script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
                             img = docker.build('de4a/connector','.')
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
-                                img.push('$VERSION')
+                                img.push("${env.VERSION}")
                             }
                         }
                     }
