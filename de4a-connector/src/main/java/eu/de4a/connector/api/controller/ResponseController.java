@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,7 +43,7 @@ public class ResponseController implements ResponseApi {
 
 	@PostMapping(value = "/requestTransferEvidenceUSIDT", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public String requestTransferEvidenceUSIDT(InputStream request) {
+	public ResponseEntity<String> requestTransferEvidenceUSIDT(InputStream request) {
 	    MessageResponseOwner responseUSI;
 	    DE4AMarshaller<RequestTransferEvidenceUSIDTType> marshaller = 
 	            DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE);
@@ -72,6 +73,6 @@ public class ResponseController implements ResponseApi {
 		evidenceTransferorManager.queueMessageResponse(responseUSI);
 		
 		ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError(true);
-		return DE4AMarshaller.dtUsiResponseMarshaller().getAsString(response);
+		return ResponseEntity.status(HttpStatus.OK).body(DE4AMarshaller.dtUsiResponseMarshaller().getAsString(response));
 	}
 }
