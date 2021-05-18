@@ -49,7 +49,7 @@ public class RequestController implements RequestApi {
 
 	@PostMapping(value = "/lookupRoutingInformation", produces = MediaType.APPLICATION_XML_VALUE, 
 	        consumes = MediaType.APPLICATION_XML_VALUE)
-	public ResponseEntity<String> lookupRoutingInformation(InputStream request) {
+	public ResponseEntity<byte[]> lookupRoutingInformation(InputStream request) {
 	    
 	    RequestLookupRoutingInformationType reqObj = (RequestLookupRoutingInformationType) ErrorHandlerUtils
                 .conversionStrWithCatching(DE4AMarshaller.idkRequestLookupRoutingInformationMarshaller(), request, false, true, 
@@ -61,30 +61,30 @@ public class RequestController implements RequestApi {
 	    
 		ResponseLookupRoutingInformationType response = evidenceRequestorManager.manageRequest(reqObj);
 		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
-		return ResponseEntity.status(HttpStatus.OK).body(respMarshaller.formatted().getAsString(response));
+		return ResponseEntity.status(HttpStatus.OK).body(respMarshaller.formatted().getAsBytes(response));
 	}
 
 	@PostMapping(value = "/requestTransferEvidenceUSI", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public ResponseEntity<String> requestTransferEvidenceUSI(InputStream request) {
+	public ResponseEntity<byte[]> requestTransferEvidenceUSI(InputStream request) {
 	    
 	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drUsiRequestMarshaller(), 
                 request, true);
 
 		ResponseErrorType response = evidenceRequestorManager.manageRequestUSI(reqObj);		
-		return ResponseEntity.status(HttpStatus.OK).body(DE4AMarshaller.drUsiResponseMarshaller().getAsString(response));
+		return ResponseEntity.status(HttpStatus.OK).body(DE4AMarshaller.drUsiResponseMarshaller().getAsBytes(response));
 	}
 
 	@PostMapping(value = "/requestTransferEvidenceIM", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public ResponseEntity<String> requestTransferEvidenceIM(InputStream request) {
+	public ResponseEntity<byte[]> requestTransferEvidenceIM(InputStream request) {
 		
 	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(),
 	            request, false);
 		
 		ResponseTransferEvidenceType response = evidenceRequestorManager.manageRequestIM(reqObj);
 		return ResponseEntity.status(HttpStatus.OK).body(DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-				.getAsString(response));
+				.getAsBytes(response));
 	}
 	
 	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, InputStream request,

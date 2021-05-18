@@ -35,7 +35,7 @@ public interface RequestApi {
 		@ApiResponse(responseCode = "200", description = "OK",
 				content = @Content(schema = @Schema(implementation = ResponseLookupRoutingInformationType.class)))
 	})
-	public ResponseEntity<String> lookupRoutingInformation(@Valid @ApiParam(hidden = true) InputStream request);
+	public ResponseEntity<byte[]> lookupRoutingInformation(@Valid @ApiParam(hidden = true) InputStream request);
 
 
 	@ApiOperation(value = "Receive RequestTransferEvidence message through USI pattern",
@@ -49,7 +49,7 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
-	public ResponseEntity<String> requestTransferEvidenceUSI(@Valid @ApiParam(hidden = true) InputStream request);
+	public ResponseEntity<byte[]> requestTransferEvidenceUSI(@Valid @ApiParam(hidden = true) InputStream request);
 
 
 	@ApiOperation(value = "Receive RequestTransferEvidence message through IM pattern",
@@ -63,6 +63,6 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseTransferEvidenceType.class)))
 	})
-	public ResponseEntity<String> requestTransferEvidenceIM(@Valid @ApiParam(hidden = true) InputStream request);
+	public ResponseEntity<byte[]> requestTransferEvidenceIM(@Valid @ApiParam(hidden = true) InputStream request);
 
 }

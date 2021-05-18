@@ -28,6 +28,6 @@ public interface ResponseApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
-	public ResponseEntity<String> requestTransferEvidenceUSIDT(@ApiParam(hidden = true) InputStream request);
+	public ResponseEntity<byte[]> requestTransferEvidenceUSIDT(@ApiParam(hidden = true) InputStream request);
 
 }
