@@ -6,7 +6,9 @@ import java.text.MessageFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +49,7 @@ public class RequestController implements RequestApi {
 
 	@PostMapping(value = "/lookupRoutingInformation", produces = MediaType.APPLICATION_XML_VALUE, 
 	        consumes = MediaType.APPLICATION_XML_VALUE)
-	public String lookupRoutingInformation(InputStream request) {
+	public ResponseEntity<String> lookupRoutingInformation(InputStream request) {
 	    
 	    RequestLookupRoutingInformationType reqObj = (RequestLookupRoutingInformationType) ErrorHandlerUtils
                 .conversionStrWithCatching(DE4AMarshaller.idkRequestLookupRoutingInformationMarshaller(), request, false, true, 
@@ -59,30 +61,30 @@ public class RequestController implements RequestApi {
 	    
 		ResponseLookupRoutingInformationType response = evidenceRequestorManager.manageRequest(reqObj);
 		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
-		return respMarshaller.formatted().getAsString(response);
+		return ResponseEntity.status(HttpStatus.OK).body(respMarshaller.formatted().getAsString(response));
 	}
 
 	@PostMapping(value = "/requestTransferEvidenceUSI", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public String requestTransferEvidenceUSI(InputStream request) {
+	public ResponseEntity<String> requestTransferEvidenceUSI(InputStream request) {
 	    
 	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drUsiRequestMarshaller(), 
                 request, true);
 
 		ResponseErrorType response = evidenceRequestorManager.manageRequestUSI(reqObj);		
-		return DE4AMarshaller.drUsiResponseMarshaller().getAsString(response);
+		return ResponseEntity.status(HttpStatus.OK).body(DE4AMarshaller.drUsiResponseMarshaller().getAsString(response));
 	}
 
 	@PostMapping(value = "/requestTransferEvidenceIM", produces = MediaType.APPLICATION_XML_VALUE, 
             consumes = MediaType.APPLICATION_XML_VALUE)
-	public String requestTransferEvidenceIM(InputStream request) {
+	public ResponseEntity<String> requestTransferEvidenceIM(InputStream request) {
 		
 	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(),
 	            request, false);
 		
 		ResponseTransferEvidenceType response = evidenceRequestorManager.manageRequestIM(reqObj);
-		return DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-				.getAsString(response);
+		return ResponseEntity.status(HttpStatus.OK).body(DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
+				.getAsString(response));
 	}
 	
 	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, InputStream request,
