@@ -227,8 +227,7 @@ public class Conf implements WebMvcConfigurer {
 	public RestTemplate restTemplate() {
 		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
 				httpClient()); 
-		RestTemplate restTemplate = new RestTemplate(httpComponentsClientHttpRequestFactory);
-		return restTemplate;
+		return new RestTemplate(httpComponentsClientHttpRequestFactory);
 	}
 
 	public HttpClient httpClient() {
