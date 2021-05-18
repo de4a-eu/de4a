@@ -42,9 +42,6 @@ pipeline {
                 branch 'master'
             }
             agent { label 'master' }
-//            environment {
-//                VERSION=readMavenPom().getVersion()
-//            }
             steps {
                 script{
                     def img
@@ -59,7 +56,6 @@ pipeline {
                         }
                         dir('de4a-connector') {
                             env.VERSION = readMavenPom().getVersion()
-                            //env.VERSION = sh script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
                             img = docker.build('de4a/connector','.')
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
