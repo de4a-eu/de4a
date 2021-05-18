@@ -49,7 +49,7 @@ public class ResponseController implements ResponseApi {
 	            DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE);
 	    
 	    RequestTransferEvidenceUSIDTType reqObj = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
-                .conversionStrWithCatching(marshaller, request, false, true, 
+                .conversionBytesWithCatching(marshaller, request, false, true, 
                         new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DT));
 		try {
 			Document doc = marshaller.getAsDocument(reqObj);

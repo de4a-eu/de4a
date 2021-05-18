@@ -262,15 +262,15 @@ public class Client {
                     requestUSIDT.getDataOwner().getAgentUrn(), endpoint));
     		
     		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
-    		String request = (String) ErrorHandlerUtils.conversionStrWithCatching(
+    		byte[] request = (byte[]) ErrorHandlerUtils.conversionBytesWithCatching(
     		        DE4AMarshaller.deUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
     		        requestForward, true, true, exception);
     		
-    		String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), request, 
+    		byte[] response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), request, 
                     false, exception.withModule(ExternalModuleError.DATA_EVALUATOR), this.restTemplate);
            
-           ResponseErrorType responseObj = (ResponseErrorType) ErrorHandlerUtils.conversionStrWithCatching(
-                   DE4AMarshaller.deUsiResponseMarshaller(), String.valueOf(response), false, false, exception);
+           ResponseErrorType responseObj = (ResponseErrorType) ErrorHandlerUtils.conversionBytesWithCatching(
+                   DE4AMarshaller.deUsiResponseMarshaller(), response, false, false, exception);
            
            return AckType.OK.equals(responseObj.getAck());
 		} catch(ConnectorException e) {
@@ -305,12 +305,12 @@ public class Client {
                     .withModule(ExternalModuleError.DATA_OWNER)
                     .withRequest(evidenceRequest);
             
-            String reqXML = DE4AMarshaller.doImRequestMarshaller().getAsString(requestExtractEvidence);
-            String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
+            byte[] reqXML = DE4AMarshaller.doImRequestMarshaller().getAsBytes(requestExtractEvidence);
+            byte[] response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
                     false, exception, this.restTemplate);
             ResponseExtractEvidenceType responseExtractEvidenceType = (ResponseExtractEvidenceType) ErrorHandlerUtils
-                    .conversionStrWithCatching(DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
-                            String.valueOf(response), false, false, exception);
+                    .conversionBytesWithCatching(DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE), 
+                            response, false, false, exception);
             return MessagesUtils.transformResponseTransferEvidence(responseExtractEvidenceType, 
                     evidenceRequest);
         } else {
@@ -319,14 +319,14 @@ public class Client {
             
             exception = new ResponseErrorException()
                     .withModule(ExternalModuleError.DATA_OWNER);
-            String reqXML = (String) ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
+            byte[] reqXML = (byte[]) ErrorHandlerUtils.conversionBytesWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
                     requestExtractEvidence, true, true, exception);
             
-            String response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
+            byte[] response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
                     false, exception, this.restTemplate);
             
-            return ErrorHandlerUtils.conversionStrWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
-                    String.valueOf(response), false, false, exception);
+            return ErrorHandlerUtils.conversionBytesWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
+                    response, false, false, exception);
         }
     }
 }

@@ -34,10 +34,10 @@ public class ResponseErrorFactory {
         handlers.put(ResponseExtractEvidenceException.class, new ResponseExtractEvidenceExceptionHandler());
         handlers.put(OwnerException.class, new ResponseTransferEvidenceExceptionHandler());
 	}
-	public static String getResponseError(ConnectorException ex) {
-		return (String) handlers.get(ex.getClass()).getResponseError(ex, true);
+	public static byte[] getResponseError(ConnectorException ex) {
+		return (byte[]) handlers.get(ex.getClass()).getResponseError(ex, true);
 	}
-	public static String getGenericResponseError(Exception ex) {
+	public static byte[] getGenericResponseError(Exception ex) {
 		return GenericExceptionHandler.getResponseError(ex);
 	}
 	public static ConnectorExceptionHandler getHandlerFromClassException(Class<?> classException) {

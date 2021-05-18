@@ -52,7 +52,7 @@ public class RequestController implements RequestApi {
 	public ResponseEntity<byte[]> lookupRoutingInformation(InputStream request) {
 	    
 	    RequestLookupRoutingInformationType reqObj = (RequestLookupRoutingInformationType) ErrorHandlerUtils
-                .conversionStrWithCatching(DE4AMarshaller.idkRequestLookupRoutingInformationMarshaller(), request, false, true, 
+                .conversionBytesWithCatching(DE4AMarshaller.idkRequestLookupRoutingInformationMarshaller(), request, false, true, 
                 new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.CONNECTOR_DR));
 	    
 	    DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("RequestLookupRoutingInformation message received - "
@@ -90,7 +90,7 @@ public class RequestController implements RequestApi {
 	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, InputStream request,
 	        boolean isUsi) {
 	    RequestTransferEvidenceUSIIMDRType reqObj = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
-                .conversionStrWithCatching(marshaller, request, false, true, 
+                .conversionBytesWithCatching(marshaller, request, false, true, 
                 new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DR));
 	    
         String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");

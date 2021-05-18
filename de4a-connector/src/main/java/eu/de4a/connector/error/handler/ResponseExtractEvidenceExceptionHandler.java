@@ -12,11 +12,11 @@ import eu.de4a.util.MessagesUtils;
 public class ResponseExtractEvidenceExceptionHandler extends ConnectorExceptionHandler {
     
     @Override
-    public Object getResponseError(ConnectorException ex, boolean returnString) {
+    public Object getResponseError(ConnectorException ex, boolean returnBytes) {
         ResponseExtractEvidenceType response = buildResponse(ex);
-        if(returnString) {
+        if(returnBytes) {
             return DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
-                    .getAsString(response);
+                    .getAsBytes(response);
         }
         return response;
     }
