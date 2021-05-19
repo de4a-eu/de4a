@@ -4,7 +4,6 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.util.Locale;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
