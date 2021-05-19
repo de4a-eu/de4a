@@ -48,7 +48,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 		org.apache.xml.security.Init.init();
 	}
 
-	public void sendMessage(String sender, NodeInfo receiver, String dataOwnerId, Element requestUsuario,
+	public void sendMessage(String sender, NodeInfo receiver, Element requestUsuario,
 			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
 		final TCOutgoingMessage aOM = new TCOutgoingMessage();
 		{

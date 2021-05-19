@@ -4,21 +4,22 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.helger.commons.error.level.EErrorLevel;
-import com.helger.commons.mime.CMimeType;
-import com.helger.peppolid.CIdentifier;
+import com.helger.peppolid.IParticipantIdentifier;
+import com.helger.peppolid.factory.SimpleIdentifierFactory;
 
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
@@ -44,7 +45,6 @@ import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 
@@ -162,26 +162,33 @@ public class EvidenceRequestorManager extends EvidenceManager {
 
 	public boolean sendRequestMessage(String sender, String dataOwnerId, Element userMessage,
 			String canonicalEvidenceTypeId) {
-	    String errorMsg;	    
-		String senderId = sender;
-		NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false,  userMessage);
+	    String errorMsg;
 		try {
-		    if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
-	            senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
-	        }
+		    IParticipantIdentifier doPI = SimpleIdentifierFactory.INSTANCE
+		            .parseParticipantIdentifier(dataOwnerId.toLowerCase(Locale.ROOT));
+		    IParticipantIdentifier sPI = SimpleIdentifierFactory
+		            .INSTANCE.parseParticipantIdentifier(sender.toLowerCase(Locale.ROOT));
+		    if(doPI != null) {
+		        dataOwnerId = doPI.getValue();
+		    }
+		    if(sPI != null) {
+		        sender = sPI.getValue();
+		    }
 		    
+		    NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false, userMessage);
 			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request message via AS4 gateway - "
                     + "DataEvaluatorId: {0}, DataOwnerId: {1}, CanonicalEvidenceType: {2}",
-                    senderId, dataOwnerId, canonicalEvidenceTypeId));
+                    sender, dataOwnerId, canonicalEvidenceTypeId));
 			
 			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();
 			TCPayload p = new TCPayload();
 			p.setContentID(DE4AConstants.TAG_EVIDENCE_REQUEST);
-			p.setMimeType(CMimeType.APPLICATION_XML.getAsString());
+			p.setMimeType(MediaType.APPLICATION_XML_VALUE);
 			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			payloads.add(p);
-			as4Client.sendMessage(senderId, nodeInfo, dataOwnerId, requestWrapper, payloads, false);
+			
+			as4Client.sendMessage(sender, nodeInfo, requestWrapper, payloads, true);
 			
 			return true;
 		} catch (MEOutgoingException e) {

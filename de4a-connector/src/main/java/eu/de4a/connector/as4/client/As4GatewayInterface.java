@@ -10,7 +10,7 @@ import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 
 public interface As4GatewayInterface {
-	public void sendMessage(String sender, NodeInfo receiver, String dataOwnerId, Element userRequest,
+	public void sendMessage(String sender, NodeInfo receiver, Element userRequest,
 			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException;
 
 	public ResponseWrapper processResponseAs4(IncomingEDMResponse data);

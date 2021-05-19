@@ -38,6 +38,7 @@ import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
+import eu.de4a.connector.as4.client.DomibusGatewayClient;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceException;
@@ -65,6 +66,7 @@ import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.MessagesUtils;
+import eu.toop.connector.api.TCIdentifierFactory;
 
 @Component
 public class Client {
@@ -74,6 +76,9 @@ public class Client {
 	private String idkEndpoint;
 	@Value("#{'${smp.endpoint.jvm:${smp.endpoint:}}'}")
 	private String smpEndpoint;
+	@Value("${as4.gateway.implementation.bean}")
+    private String as4ClientBean;
+	
 	private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
 	private static final ISMLInfo SML_DE4A = new SMLInfo("de4a", "SML [DE4A]", "de4a.acc.edelivery.tech.ec.europa.eu.",
@@ -94,16 +99,21 @@ public class Client {
 	 */
 	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService, Element userMessage) {
 	    String messageType = (isReturnService ?  DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
-
+	    NodeInfo nodeInfo = new NodeInfo();
+	    
+	    if(DomibusGatewayClient.class.getSimpleName().equalsIgnoreCase(as4ClientBean)) {
+	        nodeInfo.setParticipantIdentifier(participantId);
+	        nodeInfo.setProcessIdentifier(messageType);
+	        return nodeInfo;
+	    }
+	    
 		DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Requesting to SMP - "
                 + "ParticipantId: {0}, DocumentTypeId: {1}, MessageType: {2}", 
-                participantId, documentTypeId, messageType));
-
-		NodeInfo nodeInfo = new NodeInfo();
+                participantId, documentTypeId, messageType));		
 		try {
 			// Requires the form iso6523-actorid-upis::9915:demo
 			final IParticipantIdentifier aPI = SimpleIdentifierFactory.INSTANCE
-					.parseParticipantIdentifier(participantId.toLowerCase(Locale.ROOT));
+					.createParticipantIdentifier(TCIdentifierFactory.PARTICIPANT_SCHEME, participantId);
 			// Requires the form urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration
 			final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
 					.parseDocumentTypeIdentifier(documentTypeId);
