@@ -148,6 +148,7 @@
                 </executions>
             </plugin>
         </plugins>
+		<finalName>de4a-idk-mock</finalName>
     </build>
     <dependencyManagement>
         <dependencies>
