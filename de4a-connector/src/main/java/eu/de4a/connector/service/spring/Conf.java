@@ -229,8 +229,6 @@ public class Conf implements WebMvcConfigurer {
 		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
 				httpClient()); 
 		RestTemplate restTemplate = new RestTemplate(httpComponentsClientHttpRequestFactory);
-		restTemplate.getMessageConverters()
-        .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 		return restTemplate;
 	}
 
