@@ -3,15 +3,16 @@ package eu.de4a.connector.as4.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.phase4.attachment.WSS4JAttachment;
 
-import eu.de4a.connector.api.manager.EvidenceTransferorManager;
 import eu.de4a.connector.as4.client.Phase4GatewayClient;
-import eu.de4a.connector.as4.owner.MessageOwner;
+import eu.de4a.connector.as4.owner.MessageRequestOwner;
+import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
 import eu.de4a.connector.mem.phase4.servlet.EdmRequestWrapper;
 import eu.de4a.exception.MessageException;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
@@ -29,16 +30,18 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
 	private static final Logger logger = LoggerFactory.getLogger (IncomingAS4PKHandler.class);
 
 	@Autowired
-	private Phase4GatewayClient phase4GatewayClient;
+	private Phase4GatewayClient phase4GatewayClient;	
 	@Autowired
-    private EvidenceTransferorManager evidenceTransferorManager;
+    private ApplicationContext context;
+	@Autowired
+    private OwnerMessageEventPublisher publisher;
 
 	@Override
     public void handleIncomingRequest(IncomingEDMRequest aRequest) throws MEIncomingException {
         logger.debug("Incoming request...");
         
         EdmRequestWrapper edmwrapper = (EdmRequestWrapper) aRequest;
-        MessageOwner messageOwner = new MessageOwner();
+        MessageRequestOwner messageOwner = new MessageRequestOwner(context);
         
         WSS4JAttachment attached = edmwrapper.getAttacheds().stream()
                 .filter(e -> e.getId().equals(DE4AConstants.TAG_EVIDENCE_REQUEST)).findFirst().orElse(null);
@@ -62,7 +65,7 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
             DE4AKafkaClient.send(EErrorLevel.ERROR, "Error processing incoming request from AS4 gateway: " 
                     + e.getMessage());
         }
-        evidenceTransferorManager.queueMessage(messageOwner);
+        publisher.publishCustomEvent(messageOwner);
     }
 
 	@Override

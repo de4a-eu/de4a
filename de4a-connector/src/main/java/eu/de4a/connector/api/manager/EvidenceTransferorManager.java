@@ -19,7 +19,7 @@ import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
 
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
-import eu.de4a.connector.as4.owner.MessageOwner;
+import eu.de4a.connector.as4.owner.MessageRequestOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
 import eu.de4a.connector.as4.owner.OwnerLocator;
 import eu.de4a.connector.client.Client;
@@ -61,7 +61,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
     private RequestorRequestRepository requestorRequestRepository;
 
 
-    public void queueMessage(MessageOwner request) {
+    public void queueMessage(MessageRequestOwner request) {
         logger.info("Queued message to be send to the owner - RequestId: {}, DataEvaluatorId: {}, DataOwnerId: {}",
                 request.getId(), request.getSenderId(), request.getReceiverId());
         if (logger.isDebugEnabled()) {

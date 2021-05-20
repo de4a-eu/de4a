@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,7 +37,8 @@ import eu.de4a.connector.as4.domibus.soap.auto.PartInfo;
 import eu.de4a.connector.as4.domibus.soap.auto.PartProperties;
 import eu.de4a.connector.as4.domibus.soap.auto.Property;
 import eu.de4a.connector.as4.domibus.soap.auto.RetrieveMessageResponse;
-import eu.de4a.connector.as4.owner.MessageOwner;
+import eu.de4a.connector.as4.owner.MessageRequestOwner;
+import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
@@ -63,6 +65,10 @@ public class DomibusGatewayClient implements As4GatewayInterface {
     private DomibusRequestRepository domibusRequestRepository;
     @Autowired
     private EvidenceTransferorManager evidenceTransferorManager;
+    @Autowired
+    private ApplicationContext context;
+    @Autowired
+    private OwnerMessageEventPublisher publisher;
 
     @Value("${as4.gateway.implementation.bean}")
     private String nameAs4Gateway;
@@ -127,7 +133,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
         }
     }
 
-    public ResponseWrapper processResponseAs4(IncomingEDMResponse responseas4) {
+    public void processResponseAs4(IncomingEDMResponse responseas4) {
         LOGGER.debug("Processing AS4 response...");
         
         ConnectorException ex = new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
@@ -135,7 +141,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
             .withModule(ExternalModuleError.CONNECTOR_DR)
             .withHttpStatus(HttpStatus.OK);
         
-        ResponseWrapper responsewrapper = new ResponseWrapper();
+        ResponseWrapper responsewrapper = new ResponseWrapper(context);
         responseas4.getAllAttachments().forEachValue(a -> {
             try {
                 responsewrapper.addAttached(
@@ -162,7 +168,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
             responsewrapper.setId(requestId);
             responsewrapper.setResponseDocument(evidence);
         });
-        return responsewrapper;
+        publisher.publishCustomEvent(responsewrapper);
     }
 
     private List<PartInfo> getAttachments(String idMessageAttached, String idCanonical) {
@@ -186,7 +192,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
         return attachments;
     }
 
-    private MessageOwner buildMessageOwner(LargePayloadType payload, ResponseAndHeader response) {
+    private MessageRequestOwner buildMessageOwner(LargePayloadType payload, ResponseAndHeader response) {
         byte[] targetArray = null;
         try {
             targetArray = IOUtils.toByteArray(payload.getValue().getDataSource().getInputStream());
@@ -195,7 +201,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
             }
 
             Document doc = DOMUtils.byteToDocument(targetArray);
-            MessageOwner messageOwner = new MessageOwner();
+            MessageRequestOwner messageOwner = new MessageRequestOwner(context);
             messageOwner.setMessage(doc.getDocumentElement());
             String idrequest = null;
             idrequest = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, doc.getDocumentElement());
@@ -213,7 +219,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
                 messageOwner.setSenderId(sender.getURIEncoded());
                 return messageOwner;
             }
-        } catch (MessageException | IOException e) {
+        } catch (NullPointerException | MessageException | IOException e) {
             LOGGER.error("Error retrieving bytes from domibus response", e);
         }
         return null;
