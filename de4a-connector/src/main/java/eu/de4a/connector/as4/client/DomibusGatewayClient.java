@@ -69,18 +69,18 @@ public class DomibusGatewayClient implements As4GatewayInterface {
     @Value("#{'${domibus.endpoint.jvm:${domibus.endpoint:}}'}")
     private String domibusEndpoint;
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 2000)
     public void lookUpPendingMessage() {
         if (nameAs4Gateway.equalsIgnoreCase(DomibusGatewayClient.class.getSimpleName())) {
             ListPendingMessagesResponse messagesPendingList = domibusClientWS.getPendindMessages(domibusEndpoint);
             messagesPendingList.getMessageID().forEach(id -> {
-                DomibusRequest req = domibusRequestRepository.findById(id).orElse(null);
-                if (req == null) {
-                    req = new DomibusRequest();
-                    req.setIdrequest(id);
-                    domibusRequestRepository.save(req);                    
-                    processMessage(id);
-                }
+                DomibusRequest req = domibusRequestRepository.findById(id).orElseGet(() -> {
+                    DomibusRequest domibusRequest = new DomibusRequest();
+                    domibusRequest.setIdrequest(id);
+                    return domibusRequest;
+                });
+                domibusRequestRepository.save(req);                    
+                processMessage(id);
             });
         }
     }
@@ -221,18 +221,13 @@ public class DomibusGatewayClient implements As4GatewayInterface {
     
     private void processMessage(String requestId) {
         ResponseAndHeader response = domibusClientWS.getMessageWithHeader(requestId, domibusEndpoint);
-        LargePayloadType payload = null;
         if (response != null && response.getInfo() != null) {
             RetrieveMessageResponse message = response.getMessage();
 
-            payload = message.getPayload().stream()
+            message.getPayload().stream()
                     .filter(p -> p.getPayloadId().contains(DE4AConstants.TAG_EVIDENCE_REQUEST)).findFirst()
-                    .orElse(null);
-            if (payload == null) {
-                LOGGER.error("EvidenceRequest not found!");
-            } else {
-                evidenceTransferorManager.queueMessage(buildMessageOwner(payload, response));
-            }
+                    .ifPresentOrElse((value) -> evidenceTransferorManager.queueMessage(buildMessageOwner(value, response)), 
+                            () -> LOGGER.error("EvidenceRequest not found!"));
         } else {
             LOGGER.error("Error getting message from Domibus. requestId = {}", requestId);
         }
