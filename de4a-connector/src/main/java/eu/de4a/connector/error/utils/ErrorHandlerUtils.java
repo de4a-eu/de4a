@@ -28,7 +28,7 @@ public class ErrorHandlerUtils {
         //empty constructor
     }
     
-    public static ResponseEntity<String> checkResponse(ResponseEntity<String> response, ConnectorException ex, 
+    public static ResponseEntity<byte[]> checkResponse(ResponseEntity<byte[]> response, ConnectorException ex, 
             boolean throwException) {
         if(response == null || !HttpStatus.OK.equals(response.getStatusCode())
                 || ObjectUtils.isEmpty(response.getBody())) {
@@ -44,7 +44,7 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception;
             }
-            return new ResponseEntity<>((String) ResponseErrorFactory.getHandlerFromClassException(
+            return new ResponseEntity<>((byte[]) ResponseErrorFactory.getHandlerFromClassException(
                     ex.getClass()).getResponseError(exception, true), HttpStatus.OK);
         }
         return response;
@@ -72,14 +72,14 @@ public class ErrorHandlerUtils {
         }
     }
     
-    public static String postRestObjectWithCatching(String url, String request, boolean throwException,
+    public static byte[] postRestObjectWithCatching(String url, byte[] request, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-        ResponseEntity<String> response;
+        ResponseEntity<byte[]> response;
         try {
             response = restTemplate.postForEntity(url,
-                    new HttpEntity<>(request, headers), String.class);
+                    new HttpEntity<>(request, headers), byte[].class);
         } catch(RestClientException e) {
             if(logger.isDebugEnabled()) {
                 logger.debug("There was an error on HTTP client POST connection", e);
@@ -91,14 +91,14 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception;
             }
-            return (String) ResponseErrorFactory.getHandlerFromClassException(
+            return (byte[]) ResponseErrorFactory.getHandlerFromClassException(
                     ex.getClass()).getResponseError(exception, true);
         }
         response = checkResponse(response, ex, throwException);
         return response.getBody();
     }
     
-    public static <T> Object conversionStrWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
+    public static <T> Object conversionBytesWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
             boolean objToStr, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
         String errorMsg = "Object received is not valid, check the structure";
@@ -141,8 +141,12 @@ public class ErrorHandlerUtils {
         } else {
             if(obj instanceof String) {
                 retObj = marshaller.read((String) obj);
-            } else {
+            } else if(obj instanceof InputStream) {
                 retObj = marshaller.read((InputStream) obj);
+            } else if(obj instanceof byte[]) {
+                retObj = marshaller.read((byte[]) obj);
+            } else {
+                retObj = null;
             }
         }
         return retObj;

@@ -17,6 +17,8 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.commons.mime.MimeTypeParserException;
 import com.helger.commons.string.StringHelper;
 
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
@@ -48,7 +50,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 		org.apache.xml.security.Init.init();
 	}
 
-	public void sendMessage(String sender, NodeInfo receiver, String dataOwnerId, Element requestUsuario,
+	public void sendMessage(String sender, NodeInfo receiver, Element requestUsuario,
 			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
 		final TCOutgoingMessage aOM = new TCOutgoingMessage();
 		{
@@ -127,17 +129,21 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 		aMEM.sendOutgoing(aRoutingInfo, aMessage.build());
 	}
 
-	public ResponseWrapper processResponseAs4(IncomingEDMResponse responseas4) {
-		LOGGER.debug("Processing AS4 response...");
+	public ResponseWrapper processResponseAs4(IncomingEDMResponse responseas4) {		
+		ConnectorException ex = new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
+            .withFamily(FamilyErrorType.CONVERSION_ERROR)
+            .withModule(ExternalModuleError.CONNECTOR_DR)
+            .withHttpStatus(HttpStatus.OK);
+		
 		ResponseWrapper responsewrapper = new ResponseWrapper();
 		responseas4.getAllAttachments().forEachValue(a -> {
 			try {
 				responsewrapper.addAttached(FileUtils.getMultipart(a.getContentID(), a.getMimeTypeString(), a.getData().bytes()));
 			} catch (IOException e) {
-				LOGGER.error("Error attaching files", e);
+				LOGGER.error("Error attaching files to response wrapper", e);
 			}
 			Document evidence = null;
-			String requestId = null;
+			String requestId = "";
 			try {
 				evidence = DOMUtils.byteToDocument(a.getData().bytes());
 				requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, evidence.getDocumentElement());
@@ -145,11 +151,9 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 			    String errorMsg = "Error managing evidence DOM on AS4 response";
 				LOGGER.error(errorMsg, e1);
 			    if(DE4AConstants.TAG_EVIDENCE_RESPONSE.equals(a.getContentID())) {
-			        throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
-			            .withFamily(FamilyErrorType.CONVERSION_ERROR)
-			            .withModule(ExternalModuleError.CONNECTOR_DR)
-			            .withMessageArg(errorMsg)
-			            .withHttpStatus(HttpStatus.OK);
+			        throw (ResponseTransferEvidenceException) ex.withMessageArg(errorMsg);
+                } else {
+                    throw (ResponseErrorException) ex.withMessageArg(errorMsg);
                 }
 			}
 			responsewrapper.setTagDataId(a.getContentID());

@@ -3,18 +3,21 @@ package eu.de4a.connector.api.manager;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.helger.commons.error.level.EErrorLevel;
-import com.helger.peppolid.CIdentifier;
+import com.helger.peppolid.IParticipantIdentifier;
+import com.helger.peppolid.factory.SimpleIdentifierFactory;
+
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.as4.owner.MessageOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
@@ -43,7 +46,6 @@ import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
-import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 
@@ -88,8 +90,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
                             responseTransferEvidenceType, true, false,
                             new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
                     // TODO if as4 message DT-DR failed, what is the approach. retries?
-                    if (!sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getCanonicalEvidenceTypeId(),
-                            docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
+                    if (!sendResponseMessage(req.getDataEvaluator().getAgentUrn(),req.getDataOwner().getAgentUrn(),
+                            req.getCanonicalEvidenceTypeId(), docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
                         String errorMsg = MessageFormat.format("Error sending ResponseTransferEvidence to Data Requestor via AS4 gateway - "
                                 + "RequestId: {0}", req.getRequestId());
                         DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
@@ -117,8 +119,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
             responseTransferEvidenceType = (ResponseTransferEvidenceType) ResponseErrorFactory
                     .getHandlerFromClassException(ex.getClass()).buildResponse(ex);
 
-            if (req == null || !sendResponseMessage(request.getSenderId(), req.getCanonicalEvidenceTypeId(),
-                    DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
+            if (req == null || !sendResponseMessage(request.getSenderId(), request.getReceiverId(),
+                    req.getCanonicalEvidenceTypeId(), DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
                             .getAsDocument(responseTransferEvidenceType).getDocumentElement(),
                     DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
                 logger.error("Error sending ResponseTransferEvidence to Data Requestor via AS4 gateway");
@@ -142,8 +144,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
             DE4AKafkaClient.send(EErrorLevel.WARN, "Processing RequestTransferEvidenceUSIDT - " + msgError);
             throw ex.withFamily(FamilyErrorType.SAVING_DATA_ERROR).withMessageArg(msgError);
         } else {
-            if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getCanonicalEvidenceTypeId (), response.getMessage(),
-                    DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
+            if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getDataOwnerId(), usirequest.getCanonicalEvidenceTypeId(), 
+                    response.getMessage(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
                 String errorMsg = MessageFormat.format("Error sending message to Data Requestor via AS4 gateway - "
                         + "RequestId: {0}", response.getId());                
                 DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
@@ -154,27 +156,34 @@ public class EvidenceTransferorManager extends EvidenceManager {
         }
     }
 
-    public boolean sendResponseMessage(String sender, String docTypeID, Element message, String tagContentId) {
+    public boolean sendResponseMessage(String receiverId, String dataOwnerId, String docTypeID, Element message, String tagContentId) {
         String errorMsg;
-        NodeInfo nodeInfo = client.getNodeInfo(sender, docTypeID, true,message);
         try {
-            String senderId = sender;
-            if(sender.contains(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR)) {
-                senderId = sender.replace(TCIdentifierFactory.PARTICIPANT_SCHEME + CIdentifier.URL_SCHEME_VALUE_SEPARATOR, "");
+            IParticipantIdentifier doPI = SimpleIdentifierFactory.INSTANCE
+                    .parseParticipantIdentifier(dataOwnerId.toLowerCase(Locale.ROOT));
+            IParticipantIdentifier rPI = SimpleIdentifierFactory.INSTANCE
+                    .parseParticipantIdentifier(receiverId.toLowerCase(Locale.ROOT));
+            if(doPI != null) {
+                dataOwnerId = doPI.getValue();
+            }
+            if(rPI != null) {
+                receiverId = rPI.getValue();
             }
             
+            NodeInfo nodeInfo = client.getNodeInfo(receiverId, docTypeID, true, message);
             DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending response message via AS4 gateway - "
                     + "DataEvaluatorId: {0}, Message tag: {1}, CanonicalEvidenceType: {2}", 
-                    senderId, tagContentId, docTypeID));
+                    receiverId, tagContentId, docTypeID));
             
             List<TCPayload> payloads = new ArrayList<>();
             TCPayload payload = new TCPayload();
             payload.setContentID(tagContentId);
             payload.setValue(DOMUtils.documentToByte(message.getOwnerDocument()));
-            payload.setMimeType("application/xml");
+            payload.setMimeType(MediaType.APPLICATION_XML_VALUE);
             payloads.add(payload);
             Element requestWrapper = new RegRepTransformer().wrapMessage(message, false);
-            as4Client.sendMessage(senderId, nodeInfo, nodeInfo.getDocumentIdentifier(), requestWrapper, payloads, false);
+            
+            as4Client.sendMessage(dataOwnerId, nodeInfo, requestWrapper, payloads, false);
             
             return true;
         } catch (NullPointerException | MEOutgoingException e) {

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
