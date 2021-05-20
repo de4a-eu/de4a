@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -17,6 +19,7 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.commons.mime.MimeTypeParserException;
 import com.helger.commons.string.StringHelper;
 
+import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
@@ -49,6 +52,11 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 	static {
 		org.apache.xml.security.Init.init();
 	}
+	
+	@Autowired
+    private ApplicationContext context;
+    @Autowired
+    private OwnerMessageEventPublisher publisher;
 
 	public void sendMessage(String sender, NodeInfo receiver, Element requestUsuario,
 			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
@@ -129,13 +137,13 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 		aMEM.sendOutgoing(aRoutingInfo, aMessage.build());
 	}
 
-	public ResponseWrapper processResponseAs4(IncomingEDMResponse responseas4) {		
+	public void processResponseAs4(IncomingEDMResponse responseas4) {		
 		ConnectorException ex = new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
             .withFamily(FamilyErrorType.CONVERSION_ERROR)
             .withModule(ExternalModuleError.CONNECTOR_DR)
             .withHttpStatus(HttpStatus.OK);
 		
-		ResponseWrapper responsewrapper = new ResponseWrapper();
+		ResponseWrapper responsewrapper = new ResponseWrapper(context);
 		responseas4.getAllAttachments().forEachValue(a -> {
 			try {
 				responsewrapper.addAttached(FileUtils.getMultipart(a.getContentID(), a.getMimeTypeString(), a.getData().bytes()));
@@ -160,7 +168,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 			responsewrapper.setId(requestId);
 			responsewrapper.setResponseDocument(evidence);
 		});
-		return responsewrapper;
+		publisher.publishCustomEvent(responsewrapper);
 	}
 
 }

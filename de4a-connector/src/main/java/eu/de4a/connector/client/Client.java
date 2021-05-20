@@ -4,6 +4,8 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -170,22 +172,14 @@ public class Client {
 
 	public ResponseLookupRoutingInformationType getSources(RequestLookupRoutingInformationType request) {
 
-	    URIBuilder uriBuilder;
-        try {
-            uriBuilder = new URIBuilder(idkEndpoint + (idkEndpoint.endsWith("/") ? "" : "/"));
-        } catch (URISyntaxException e1) {
-            logger.error("There was an error creating URI from IDK endpoint");
-            return null;
-        }
-        StringBuilder path = new StringBuilder(uriBuilder.getPath());
-        if(!uriBuilder.toString().endsWith("/"))path.append("/");
-        path.append("ial/");
-        path.append(request.getCanonicalEvidenceTypeId());
+        List<String> paths = new ArrayList<>();
+        paths.add("ial");
+        paths.add(request.getCanonicalEvidenceTypeId());
         if (!ObjectUtils.isEmpty(request.getCountryCode())) {
-            path.append("/");
-            path.append(request.getCountryCode());
+            paths.add(request.getCountryCode());
         }
-        uriBuilder.setPath(path.toString());
+        URIBuilder uriBuilder = buildURI(idkEndpoint, "There was an error creating URI from IDK endpoint", 
+                paths.toArray(new String[0]), new String[] {}, new String[] {});
         
         DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request to IDK - "
                 + "URL: {0}", uriBuilder.toString()));
@@ -213,19 +207,9 @@ public class Client {
 
 	public ResponseLookupRoutingInformationType getProvisions(RequestLookupRoutingInformationType request) {
 
-	    URIBuilder uriBuilder;
-        try {
-            uriBuilder = new URIBuilder(idkEndpoint);
-        } catch (URISyntaxException e1) {
-            logger.error("There was an error creating URI from IDK endpoint");
-            return null;
-        }
-        StringBuilder path = new StringBuilder(uriBuilder.getPath());
-        if(!uriBuilder.toString().endsWith("/"))path.append("/");
-        path.append("provision");
-        uriBuilder.setParameter("canonicalEvidenceTypeId", request.getCanonicalEvidenceTypeId());
-        uriBuilder.setParameter("dataOwnerId", request.getDataOwnerId());
-        uriBuilder.setPath(path.toString());
+	    URIBuilder uriBuilder = buildURI(idkEndpoint, "There was an error creating URI from IDK endpoint", 
+                new String[] {"provision"}, new String[] {"canonicalEvidenceTypeId", "dataOwnerId"}, 
+                new String[] {request.getCanonicalEvidenceTypeId(), request.getDataOwnerId()});
         
         String response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
                 true, new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), this.restTemplate);
@@ -250,15 +234,8 @@ public class Client {
 		ConnectorException exception = new ResponseErrorException()
 		        .withModule(ExternalModuleError.CONNECTOR_DR);
 		
-		URIBuilder uriBuilder;
-		try {
-            uriBuilder = new URIBuilder(endpoint);
-        } catch (URISyntaxException e) {
-            String errorMsg = MessageFormat.format("Error building URI from Data Evaluator endpoint: {}", endpoint);
-            DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
-            return false;
-        }
-		uriBuilder.setPath(uriBuilder.getPath() + "/requestForwardEvidence");
+		URIBuilder uriBuilder = buildURI(endpoint, "Error building URI from Data Evaluator endpoint: {}", 
+	                new String[] {"requestForwardEvidence"}, new String[] {}, new String[] {});
 		
 		try {
     		RequestTransferEvidenceUSIDTType requestUSIDT = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
@@ -298,14 +275,10 @@ public class Client {
                 + "Endpoint: {5}", requestType, evidenceRequest.getRequestId(), evidenceRequest.getCanonicalEvidenceTypeId(),
                 evidenceRequest.getDataEvaluator().getAgentUrn(), evidenceRequest.getDataOwner().getAgentUrn(), endpoint));
         
-        URIBuilder uriBuilder;
-        try {
-            uriBuilder = new URIBuilder(endpoint);
-        } catch (URISyntaxException e) {
-            logger.error(MessageFormat.format("There was an error creating URI from owner endpoint: {}", endpoint));
-            return false;
-        }
-        uriBuilder.setPath(uriBuilder.getPath() + (isUsi ? "requestExtractEvidenceUSI" : "requestExtractEvidenceIM"));
+        String path = (isUsi ? "requestExtractEvidenceUSI" : "requestExtractEvidenceIM");
+        URIBuilder uriBuilder = buildURI(endpoint, "There was an error creating URI from owner endpoint: {}", 
+                new String[] {path}, new String[] {}, new String[] {});
+
         ConnectorException exception;
         if (!isUsi) {
             RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
@@ -338,4 +311,27 @@ public class Client {
                     response, false, false, exception);
         }
     }
+	
+	private URIBuilder buildURI(String endpoint, String errorMsg, String[] paths, 
+	        String[] params, String[] values) {
+	    URIBuilder uriBuilder;	    
+	    try {
+            uriBuilder = new URIBuilder(endpoint);
+        
+            if(!uriBuilder.toString().endsWith("/")) uriBuilder.setPath(uriBuilder.getPath() + "/");            
+            for(String path : paths) {
+                uriBuilder.setPath(uriBuilder.getPath() + path + "/");
+            }
+            if(params.length == values.length) {
+                for(int i = 0; i < params.length; i++) {
+                    uriBuilder.addParameter(params[i], values[i]);
+                }
+            }
+	    } catch (NullPointerException | URISyntaxException e) {
+            DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format(errorMsg, endpoint));
+            return new URIBuilder();
+        }
+	    
+	    return uriBuilder;
+	}
 }

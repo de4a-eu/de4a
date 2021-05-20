@@ -3,7 +3,7 @@ package eu.de4a.connector.as4.owner;
 import org.w3c.dom.Element;
 
 public class MessageResponseOwner {
-	private transient Element message;
+	private Element message;
 	private String id;
 	private String dataEvaluatorId;
 	private String dataOwnerId;

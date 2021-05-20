@@ -8,7 +8,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +58,7 @@ public class ResponseManager {
 	@PersistenceContext
     private EntityManager entityManager;
 
-	@Transactional(isolation = Isolation.SERIALIZABLE)
-	@AfterReturning(pointcut = "execution(* *.processResponseAs4(..))", returning = "retVal")
-	public void cathResponseFromMultipleAs4(Object retVal) {
-		ResponseWrapper response = (ResponseWrapper) retVal;
+	public void processAS4Response(ResponseWrapper response) {
 		String id = response.getId();
 		
 		String logMsg = MessageFormat.format("Processing the response received via AS4 gateway - RequestId: {0}", id);
