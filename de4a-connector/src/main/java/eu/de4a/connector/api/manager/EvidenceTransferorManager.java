@@ -21,7 +21,6 @@ import com.helger.peppolid.factory.SimpleIdentifierFactory;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.as4.owner.MessageRequestOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
-import eu.de4a.connector.as4.owner.OwnerLocator;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.OwnerException;
@@ -36,6 +35,7 @@ import eu.de4a.connector.error.utils.ResponseErrorFactory;
 import eu.de4a.connector.model.OwnerAddresses;
 import eu.de4a.connector.model.RequestorRequest;
 import eu.de4a.connector.model.smp.NodeInfo;
+import eu.de4a.connector.model.utils.AgentsLocator;
 import eu.de4a.connector.repository.RequestorRequestRepository;
 import eu.de4a.connector.service.spring.MessageUtils;
 import eu.de4a.exception.MessageException;
@@ -56,7 +56,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
     @Autowired
     private Client client;
     @Autowired
-    private OwnerLocator ownerLocator;
+    private AgentsLocator agentsLocator;
     @Autowired
     private RequestorRequestRepository requestorRequestRepository;
 
@@ -202,7 +202,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
         DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Looking for Data Owner address - "
                 + "DataOwnerId: {0}", dataOwnerId));
         
-        OwnerAddresses ownerAddress = ownerLocator.lookupOwnerAddress(dataOwnerId);
+        OwnerAddresses ownerAddress = agentsLocator.lookupOwnerAddress(dataOwnerId);
         if (ownerAddress == null) {
             DE4AKafkaClient.send(EErrorLevel.ERROR,
                     MessageFormat.format("Data Owner address not found - DataOwnerId: {0}", dataOwnerId));
