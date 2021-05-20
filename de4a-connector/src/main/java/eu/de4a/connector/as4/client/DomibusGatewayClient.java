@@ -37,6 +37,8 @@ import eu.de4a.connector.as4.domibus.soap.auto.PartProperties;
 import eu.de4a.connector.as4.domibus.soap.auto.Property;
 import eu.de4a.connector.as4.domibus.soap.auto.RetrieveMessageResponse;
 import eu.de4a.connector.as4.owner.MessageOwner;
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
@@ -125,19 +127,24 @@ public class DomibusGatewayClient implements As4GatewayInterface {
         }
     }
 
-    @Override
     public ResponseWrapper processResponseAs4(IncomingEDMResponse responseas4) {
         LOGGER.debug("Processing AS4 response...");
+        
+        ConnectorException ex = new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
+            .withFamily(FamilyErrorType.CONVERSION_ERROR)
+            .withModule(ExternalModuleError.CONNECTOR_DR)
+            .withHttpStatus(HttpStatus.OK);
+        
         ResponseWrapper responsewrapper = new ResponseWrapper();
         responseas4.getAllAttachments().forEachValue(a -> {
             try {
                 responsewrapper.addAttached(
                         FileUtils.getMultipart(a.getContentID().replace("cid:", ""), a.getMimeTypeString(), a.getData().bytes()));
             } catch (IOException e) {
-                LOGGER.error("Error attaching files", e);
+                LOGGER.error("Error attaching files to response wrapper", e);
             }
             Document evidence = null;
-            String requestId = null;
+            String requestId = "";
             try {
                 evidence = DOMUtils.byteToDocument(a.getData().bytes());
                 requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, evidence.getDocumentElement());
@@ -146,11 +153,9 @@ public class DomibusGatewayClient implements As4GatewayInterface {
                 LOGGER.error(errorMsg, e1);
                 if(a.getContentID() != null && 
                         a.getContentID().contains(DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
-                    throw new ResponseTransferEvidenceException().withLayer(LayerError.INTERNAL_FAILURE)
-                        .withFamily(FamilyErrorType.CONVERSION_ERROR)
-                        .withModule(ExternalModuleError.CONNECTOR_DR)
-                        .withMessageArg(errorMsg)
-                        .withHttpStatus(HttpStatus.OK);
+                    throw (ResponseTransferEvidenceException) ex.withMessageArg(errorMsg);
+                } else {
+                    throw (ResponseErrorException) ex.withMessageArg(errorMsg);
                 }
             }
             responsewrapper.setTagDataId(a.getContentID());
