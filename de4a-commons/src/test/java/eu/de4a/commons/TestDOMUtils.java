@@ -4,9 +4,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringReader;
-
-import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -18,7 +15,6 @@ import eu.de4a.util.DOMUtils;
 public class TestDOMUtils
 {
   private final String xmlString = "<test>Hello World</test>";
-  private final StreamSource src = new StreamSource (new StringReader (xmlString));
 
   // @Ignore
   @Test
