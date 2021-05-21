@@ -105,7 +105,7 @@ public class RequestController implements RequestApi {
 	
 	private void saveEvaluatorRequest(RequestTransferEvidenceUSIIMDRType request, boolean isUsi) {
 	    EvaluatorRequest entity = new EvaluatorRequest();
-        entity.setIdevaluator(request.getDataEvaluator().getAgentNameValue());
+        entity.setIdevaluator(request.getDataEvaluator().getAgentUrn());
         entity.setIdrequest(request.getRequestId());
         entity.setUrlreturn(request.getDataEvaluator().getRedirectURL());
         entity.setUsi(isUsi);

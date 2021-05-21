@@ -32,8 +32,10 @@ import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.model.EvaluatorAddresses;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.model.EvaluatorRequestData;
+import eu.de4a.connector.model.utils.AgentsLocator;
 import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
 import eu.de4a.exception.MessageException;
@@ -55,6 +57,8 @@ public class ResponseManager {
 	private EvaluatorRequestRepository evaluatorRequestRepository;
 	@Autowired
 	private EvaluatorRequestDataRepository evaluatorRequestDataRepository;
+	@Autowired
+	private AgentsLocator agentsLocator;
 	@PersistenceContext
     private EntityManager entityManager;
 
@@ -74,16 +78,13 @@ public class ResponseManager {
 			evaluatorRequestRepository.save(evaluatorinfo);
 			List<EvaluatorRequestData> responseData = saveData(response, evaluatorinfo);
             if (evaluatorinfo.isUsi()) {
-                // TODO USI pattern depends on redirectURL of DataEvaluator setted on the request
-                // to perform the way back once the response is received by Connector
-                // temporary solution until the final solution will be defined
-                if (!ObjectUtils.isEmpty(evaluatorinfo.getUrlreturn())) {
+                EvaluatorAddresses evaluatorAddress = agentsLocator.lookupEvaluatorAddress(evaluatorinfo.getIdevaluator());
+                if (!ObjectUtils.isEmpty(evaluatorAddress)) {
                     // Send RequestForwardEvidence to evaluator - USI pattern
                     Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
-                    client.pushEvidence(evaluatorinfo.getUrlreturn(), doc);
+                    client.pushEvidence(evaluatorAddress.getEndpoint(), doc);
                 } else {
                     //TODO in this case, how DE or DO is advised of the situation?
-                    // turn redirectURL into a mandatory field?
                     DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format("RequestForwardEvidence has not been sent, "
                             + "unkown Data Evaluator endpoint - RequestId: {0}, DataEvaluatorId: {1}", id, 
                             evaluatorinfo.getIdevaluator()));
