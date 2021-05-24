@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -39,13 +40,16 @@ import eu.de4a.connector.model.utils.AgentsLocator;
 import eu.de4a.connector.repository.RequestorRequestRepository;
 import eu.de4a.connector.service.spring.MessageUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
+import eu.de4a.util.MessagesUtils;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
 import eu.toop.connector.api.rest.TCPayload;
 
@@ -84,21 +88,16 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
                 responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(req,
                         ownerAddress.getEndpoint(), false);
-                if (responseTransferEvidenceType != null) {
-                    Document docResponse = (Document) ErrorHandlerUtils.conversionDocWithCatching(
-                            DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE),
-                            responseTransferEvidenceType, true, false,
-                            new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
-                    // TODO if as4 message DT-DR failed, what is the approach. retries?
-                    if (!sendResponseMessage(req.getDataEvaluator().getAgentUrn(),req.getDataOwner().getAgentUrn(),
-                            req.getCanonicalEvidenceTypeId(), docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
-                        String errorMsg = MessageFormat.format("Error sending ResponseTransferEvidence to Data Requestor via AS4 gateway - "
-                                + "RequestId: {0}", req.getRequestId());
-                        DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
-                    }
-                } else {
-                    throw ex.withFamily(FamilyErrorType.CONNECTION_ERROR).withModule(ExternalModuleError.DATA_OWNER)
-                            .withMessageArg("Response from owner was empty");
+                Document docResponse = (Document) ErrorHandlerUtils.conversionDocWithCatching(
+                        DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE),
+                        responseTransferEvidenceType, true, false,
+                        new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
+                // TODO if as4 message DT-DR failed, what is the approach. retries?
+                if (!sendResponseMessage(req.getDataEvaluator().getAgentUrn(),req.getDataOwner().getAgentUrn(),
+                        req.getCanonicalEvidenceTypeId(), docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
+                    String errorMsg = MessageFormat.format("Error sending ResponseTransferEvidence to Data Requestor via AS4 gateway - "
+                            + "RequestId: {0}", req.getRequestId());
+                    DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
                 }
             } else {
                 req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
@@ -106,7 +105,20 @@ public class EvidenceTransferorManager extends EvidenceManager {
                         true, new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DT));
                 requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
-                client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
+                
+                ResponseErrorType response = (ResponseErrorType) client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
+                
+                if(response != null && !ObjectUtils.isEmpty(response.getErrorList())) {
+                    RequestTransferEvidenceUSIDTType reqUSIDT = MessagesUtils.getErrorRequestTransferEvidenceUSIDT(req, response.getErrorList());
+                    Document doc = DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE).getAsDocument(reqUSIDT);
+                    //An error sending request to DO occurs. The error is sending back to the DE
+                    if(!sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getDataOwner().getAgentUrn(), req.getCanonicalEvidenceTypeId(), 
+                            doc.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
+                        String errorMsg = MessageFormat.format("Error sending message to Data Requestor via AS4 gateway - "
+                                + "RequestId: {0}", req.getRequestId());                
+                        DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+                    }
+                }
             }
             // Save request information
             requestorReq.setIdrequest(request.getId());
