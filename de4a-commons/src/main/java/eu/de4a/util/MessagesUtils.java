@@ -43,6 +43,20 @@ public class MessagesUtils {
 		requestExtractEvidence.setTimeStamp(evidenceRequest.getTimeStamp());
 		return requestExtractEvidence;
 	}
+	
+	public static RequestTransferEvidenceUSIDTType getErrorRequestTransferEvidenceUSIDT(RequestTransferEvidenceUSIIMDRType evidenceRequest,
+	        ErrorListType errorList) {
+        RequestTransferEvidenceUSIDTType requestTransferEvidenceUSIDT = new RequestTransferEvidenceUSIDTType();
+        requestTransferEvidenceUSIDT.setDataEvaluator(evidenceRequest.getDataEvaluator());
+        requestTransferEvidenceUSIDT.setDataOwner(evidenceRequest.getDataOwner());
+        requestTransferEvidenceUSIDT.setDataRequestSubject(evidenceRequest.getDataRequestSubject());
+        requestTransferEvidenceUSIDT.setProcedureId(evidenceRequest.getProcedureId());
+        requestTransferEvidenceUSIDT.setRequestId(evidenceRequest.getRequestId());
+        requestTransferEvidenceUSIDT.setSpecificationId(evidenceRequest.getSpecificationId());
+        requestTransferEvidenceUSIDT.setTimeStamp(evidenceRequest.getTimeStamp());
+        requestTransferEvidenceUSIDT.setErrorList(errorList);
+        return requestTransferEvidenceUSIDT;
+    }
 
 	public static ResponseTransferEvidenceType transformResponseTransferEvidence(
 			ResponseExtractEvidenceType responseExtractEvidenceType,

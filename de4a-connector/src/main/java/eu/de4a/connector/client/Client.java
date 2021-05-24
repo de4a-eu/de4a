@@ -307,7 +307,7 @@ public class Client {
             byte[] response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), reqXML, 
                     false, exception, this.restTemplate);
             
-            return ErrorHandlerUtils.conversionBytesWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
+            return ErrorHandlerUtils.conversionBytesWithCatching(DE4AMarshaller.doUsiResponseMarshaller(), 
                     response, false, false, exception);
         }
     }
