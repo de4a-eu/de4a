@@ -126,7 +126,6 @@ public class Client {
 					
 		    logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());
             logger.info("Configured SMP truststore: '{}'", SMPClientConfiguration.getTrustStorePath());
-            logger.info("Configured SMP password: '{}'", SMPClientConfiguration.getTrustStorePassword());
 			
 			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
 
