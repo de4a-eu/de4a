@@ -19,7 +19,7 @@ import com.helger.commons.error.level.EErrorLevel;
 import eu.de4a.connector.api.ResponseApi;
 import eu.de4a.connector.api.manager.EvidenceTransferorManager;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
-import eu.de4a.connector.error.exceptions.ResponseErrorException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
@@ -50,7 +50,7 @@ public class ResponseController implements ResponseApi {
 	    
 	    RequestTransferEvidenceUSIDTType reqObj = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
                 .conversionBytesWithCatching(marshaller, request, false, true, 
-                        new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DT));
+                        new ResponseTransferEvidenceUSIDTException().withModule(ExternalModuleError.CONNECTOR_DT));
 		try {
 			Document doc = marshaller.getAsDocument(reqObj);
 			responseUSI = new MessageResponseOwner();
@@ -64,7 +64,7 @@ public class ResponseController implements ResponseApi {
 		} catch (Exception e) {
 		    String error = "There was an error processing RequestTransferEvidenceUSIDT";
 			logger.error(error, e);
-			throw new ResponseErrorException().withLayer(LayerError.INTERNAL_FAILURE)
+			throw new ResponseTransferEvidenceUSIDTException().withLayer(LayerError.INTERNAL_FAILURE)
 			    .withFamily(FamilyErrorType.CONVERSION_ERROR)
 			    .withModule(ExternalModuleError.CONNECTOR_DT)
 			    .withMessageArg(error)

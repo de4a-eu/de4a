@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,9 @@ import com.helger.peppolid.factory.SimpleIdentifierFactory;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.exceptions.ResponseErrorException;
+import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIException;
 import eu.de4a.connector.error.handler.ResponseErrorExceptionHandler;
 import eu.de4a.connector.error.handler.ResponseLookupRoutingInformationExceptionHandler;
 import eu.de4a.connector.error.handler.ResponseTransferEvidenceExceptionHandler;
@@ -75,7 +77,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			}
 		} else {
 		    new ResponseLookupRoutingInformationExceptionHandler().buildResponse(
-                    new ResponseErrorException().withFamily(FamilyErrorType.MISSING_REQUIRED_ARGUMENTS)
+                    new ResponseLookupRoutingInformationException().withFamily(FamilyErrorType.MISSING_REQUIRED_ARGUMENTS)
                         .withLayer(LayerError.INTERNAL_FAILURE)
                         .withModule(ExternalModuleError.IDK)
                         .withMessageArg("CanonicalEvidenceTypeId is missing")
@@ -86,7 +88,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 
 	public ResponseErrorType manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
 	    Document doc = (Document) ErrorHandlerUtils.conversionDocWithCatching(DE4AMarshaller.drUsiRequestMarshaller(), 
-	            request, true, true, new ResponseErrorException()
+	            request, true, true, new ResponseTransferEvidenceUSIException()
 	                                        .withModule(ExternalModuleError.CONNECTOR_DR)
 	                                        .withRequest(request));
 		try {
@@ -96,7 +98,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
             }            
         } catch (ConnectorException e) {
             return new ResponseErrorExceptionHandler().buildResponse(
-                    new ResponseErrorException().withFamily(e.getFamily())
+                    new ResponseTransferEvidenceUSIException().withFamily(e.getFamily())
                         .withLayer(e.getLayer())
                         .withModule(e.getModule())
                         .withMessageArgs(e.getArgs())

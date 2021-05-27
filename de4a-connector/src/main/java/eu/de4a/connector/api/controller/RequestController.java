@@ -18,8 +18,10 @@ import com.helger.commons.error.level.EErrorLevel;
 
 import eu.de4a.connector.api.RequestApi;
 import eu.de4a.connector.api.manager.EvidenceRequestorManager;
-import eu.de4a.connector.error.exceptions.ResponseErrorException;
+import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.model.EvaluatorRequest;
@@ -69,7 +71,7 @@ public class RequestController implements RequestApi {
 	public ResponseEntity<byte[]> requestTransferEvidenceUSI(InputStream request) {
 	    
 	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drUsiRequestMarshaller(), 
-                request, true);
+                request, true, new ResponseTransferEvidenceUSIException());
 
 		ResponseErrorType response = evidenceRequestorManager.manageRequestUSI(reqObj);		
 		return ResponseEntity.status(HttpStatus.OK).body(DE4AMarshaller.drUsiResponseMarshaller().getAsBytes(response));
@@ -80,7 +82,7 @@ public class RequestController implements RequestApi {
 	public ResponseEntity<byte[]> requestTransferEvidenceIM(InputStream request) {
 		
 	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(),
-	            request, false);
+	            request, false, new ResponseTransferEvidenceException());
 		
 		ResponseTransferEvidenceType response = evidenceRequestorManager.manageRequestIM(reqObj);
 		return ResponseEntity.status(HttpStatus.OK).body(DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
@@ -88,10 +90,10 @@ public class RequestController implements RequestApi {
 	}
 	
 	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, InputStream request,
-	        boolean isUsi) {
+	        boolean isUsi, ConnectorException ex) {	    
 	    RequestTransferEvidenceUSIIMDRType reqObj = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
                 .conversionBytesWithCatching(marshaller, request, false, true, 
-                new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DR));
+                ex.withModule(ExternalModuleError.CONNECTOR_DR));
 	    
         String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");
         DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("{0} message received - "

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,9 @@ import eu.de4a.connector.as4.owner.MessageResponseOwner;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.OwnerException;
-import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
@@ -102,7 +104,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
             } else {
                 req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
                         DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage().getOwnerDocument(), false, 
-                        true, new ResponseErrorException().withModule(ExternalModuleError.CONNECTOR_DT));
+                        true, new ResponseTransferEvidenceUSIException().withModule(ExternalModuleError.CONNECTOR_DT));
                 requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
                 
@@ -146,7 +148,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
         if (logger.isDebugEnabled()) {          
             logger.debug(DOMUtils.documentToString(response.getMessage().getOwnerDocument()));
         }
-        ConnectorException ex = new ResponseErrorException()
+        ConnectorException ex = new ResponseTransferEvidenceUSIDTException()
                 .withLayer(LayerError.INTERNAL_FAILURE)
                 .withModule(ExternalModuleError.CONNECTOR_DT);
         RequestorRequest usirequest = requestorRequestRepository.findById(response.getId()).orElse(null);
