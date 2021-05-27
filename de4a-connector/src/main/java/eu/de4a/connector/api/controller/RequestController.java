@@ -65,7 +65,7 @@ public class RequestController implements RequestApi {
             consumes = MediaType.APPLICATION_XML_VALUE)
 	public String requestTransferEvidenceUSI(String request) {
 	    
-	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(), 
+	    RequestTransferEvidenceUSIIMDRType reqObj = processIncomingEvidenceReq(DE4AMarshaller.drUsiRequestMarshaller(), 
                 request, true);
 
 		ResponseErrorType response = evidenceRequestorManager.manageRequestUSI(reqObj);		
@@ -76,7 +76,7 @@ public class RequestController implements RequestApi {
             consumes = MediaType.APPLICATION_XML_VALUE)
 	public String requestTransferEvidenceIM(String request) {
 		
-	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(), 
+	    RequestTransferEvidenceUSIIMDRType reqObj = processIncomingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(), 
 	            request, false);
 		
 		ResponseTransferEvidenceType response = evidenceRequestorManager.manageRequestIM(reqObj);
@@ -84,7 +84,7 @@ public class RequestController implements RequestApi {
 				.getAsString(response);
 	}
 	
-	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, String request,
+	private <T> RequestTransferEvidenceUSIIMDRType processIncomingEvidenceReq(DE4AMarshaller<T> marshaller, String request,
 	        boolean isUsi) {
 	    RequestTransferEvidenceUSIIMDRType reqObj = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
                 .conversionStrWithCatching(marshaller, request, false, true, 

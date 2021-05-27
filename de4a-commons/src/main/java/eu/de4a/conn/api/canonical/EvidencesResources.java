@@ -4,7 +4,6 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.xsds.xml.CXML_XSD;
-
 import eu.de4a.iem.xml.de4a.CDE4AJAXB;
 
 public enum EvidencesResources {
@@ -44,6 +43,6 @@ public enum EvidencesResources {
         eu.de4a.iem.jaxb.eidas.lp.ObjectFactory.class,
         eu.de4a.iem.jaxb.eidas.np.ObjectFactory.class,
         eu.de4a.iem.jaxb.idk.ObjectFactory.class,
-        eu.de4a.iem.jaxb.w3.cv.bc.ObjectFactory.class,
+        eu.de4a.iem.jaxb.w3.cv11.bc.ObjectFactory.class,
         ObjectFactory.class};
 }
