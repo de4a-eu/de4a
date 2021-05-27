@@ -21,8 +21,8 @@ import com.helger.commons.string.StringHelper;
 
 import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
@@ -161,7 +161,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 			    if(DE4AConstants.TAG_EVIDENCE_RESPONSE.equals(a.getContentID())) {
 			        throw (ResponseTransferEvidenceException) ex.withMessageArg(errorMsg);
                 } else {
-                    throw (ResponseErrorException) ex.withMessageArg(errorMsg);
+                    throw (ResponseTransferEvidenceUSIDTException) ex.withMessageArg(errorMsg);
                 }
 			}
 			responsewrapper.setTagDataId(a.getContentID());

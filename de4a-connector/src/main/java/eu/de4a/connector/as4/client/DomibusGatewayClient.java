@@ -40,8 +40,8 @@ import eu.de4a.connector.as4.domibus.soap.auto.RetrieveMessageResponse;
 import eu.de4a.connector.as4.owner.MessageRequestOwner;
 import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
@@ -161,7 +161,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
                         a.getContentID().contains(DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
                     throw (ResponseTransferEvidenceException) ex.withMessageArg(errorMsg);
                 } else {
-                    throw (ResponseErrorException) ex.withMessageArg(errorMsg);
+                    throw (ResponseTransferEvidenceUSIDTException) ex.withMessageArg(errorMsg);
                 }
             }
             responsewrapper.setTagDataId(a.getContentID());

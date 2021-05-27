@@ -41,8 +41,9 @@ import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
 import eu.de4a.connector.as4.client.DomibusGatewayClient;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.exceptions.ResponseErrorException;
 import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceException;
+import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceUSIException;
+import eu.de4a.connector.error.exceptions.ResponseForwardEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
 import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
 import eu.de4a.connector.error.model.ExternalModuleError;
@@ -231,7 +232,7 @@ public class Client {
 	}
 
 	public boolean pushEvidence(String endpoint, Document requestDoc) {		
-		ConnectorException exception = new ResponseErrorException()
+		ConnectorException exception = new ResponseForwardEvidenceException()
 		        .withModule(ExternalModuleError.CONNECTOR_DR);
 		
 		URIBuilder uriBuilder = buildURI(endpoint, "Error building URI from Data Evaluator endpoint: {}", 
@@ -299,7 +300,7 @@ public class Client {
             RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
                     .transformRequestToOwnerUSI(evidenceRequest);
             
-            exception = new ResponseErrorException()
+            exception = new ResponseExtractEvidenceUSIException()
                     .withModule(ExternalModuleError.DATA_OWNER);
             byte[] reqXML = (byte[]) ErrorHandlerUtils.conversionBytesWithCatching(DE4AMarshaller.doUsiRequestMarshaller(), 
                     requestExtractEvidence, true, true, exception);
