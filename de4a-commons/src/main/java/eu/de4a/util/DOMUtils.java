@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.text.MessageFormat;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -161,37 +161,32 @@ public class DOMUtils
     }
   }
 
-  public static Document newDocumentFromInputStream (final InputStream in)
-  {
-    DocumentBuilderFactory factory = null;
-    DocumentBuilder builder = null;
-    Document ret = null;
-    final String err = "Error parsing DOM.";
+  public static Document newDocumentFromInputStream(final InputStream in) {
+      DocumentBuilderFactory factory = null;
+      DocumentBuilder builder = null;
+      Document ret = null;
+      final String err = "Error parsing DOM.";
 
-    try
-    {
-      factory = DocumentBuilderFactory.newInstance ();
-      factory.setAttribute (XMLConstants.ACCESS_EXTERNAL_DTD, "");
-      factory.setAttribute (XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-      factory.setFeature (XMLConstants.FEATURE_SECURE_PROCESSING, true);
-      factory.setNamespaceAware (true);
-      builder = factory.newDocumentBuilder ();
-    }
-    catch (final ParserConfigurationException e)
-    {
-      logger.error (err, e);
-      return null;
-    }
+      try {
+          factory = DocumentBuilderFactory.newInstance();
+          factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+          factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+          factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+          factory.setNamespaceAware(true);
+          builder = factory.newDocumentBuilder();
+      } catch (final ParserConfigurationException e) {
+          logger.error(err, e);
+          return null;
+      }
 
-    try
-    {
-      ret = builder.parse (new InputSource (in));
-    }
-    catch (SAXException | IOException e)
-    {
-      logger.error (err, e);
-    }
-    return ret;
+      try {
+          InputSource is = new InputSource(in);
+          is.setEncoding(StandardCharsets.UTF_8.toString());
+          ret = builder.parse(is);
+      } catch (SAXException | IOException e) {
+          logger.error(err, e);
+      }
+      return ret;
   }
 
   public static String documentToString (final Document doc)

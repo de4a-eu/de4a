@@ -1,8 +1,9 @@
 package eu.de4a.connector.api;
 
+import java.io.InputStream;
+
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.ResponseEntity;
 
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import io.swagger.annotations.ApiImplicitParam;
@@ -27,6 +28,6 @@ public interface ResponseApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
-	public @ResponseBody String requestTransferEvidenceUSIDT(@RequestBody @ApiParam(hidden = true) String request);
+	public ResponseEntity<byte[]> requestTransferEvidenceUSIDT(@ApiParam(hidden = true) InputStream request);
 
 }

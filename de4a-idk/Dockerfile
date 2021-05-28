@@ -1,7 +1,6 @@
 FROM tomcat:9-jdk11
 
-ARG VERSION="0.1.0-SNAPSHOT"
-ARG WAR_NAME=idk-${VERSION}.war
+ARG WAR_NAME=de4a-idk-mock.war
 
 #create tc webapp folder
 WORKDIR $CATALINA_HOME/webapps

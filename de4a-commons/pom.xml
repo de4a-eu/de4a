@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu-de4a</groupId>
     <artifactId>de4a-commons</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
     <name>de4a-commons</name>
     <packaging>jar</packaging>
     <dependencies>
@@ -53,33 +53,6 @@
         </dependency>
     </dependencies>
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.14.0</version>
-                <executions>
-                    <execution>
-                        <id>CanonicalEvidences</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <episode>false</episode>
-                            <schemaDirectory>${basedir}/src/main/resources/xsds</schemaDirectory>
-                            <schemaIncludes>
-                              <schemaInclude>canonicalEvidences/BirthCertificate.xsd</schemaInclude>
-                            </schemaIncludes>
-                            <generatePackage>eu.de4a.conn.api.canonical</generatePackage>
-                            <clearOutputDir>false</clearOutputDir>
-                            <generateDirectory>${project.basedir}/src/main/java</generateDirectory>
-                            <cleanPackageDirectories>false</cleanPackageDirectories>
-                            <noGeneratedHeaderComments>true</noGeneratedHeaderComments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
         <finalName>de4a-commons</finalName>
     </build>
 </project>

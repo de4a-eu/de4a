@@ -1,5 +1,7 @@
 package eu.de4a.connector.error.utils;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 
 import org.slf4j.Logger;
@@ -26,7 +28,7 @@ public class ErrorHandlerUtils {
         //empty constructor
     }
     
-    public static ResponseEntity<String> checkResponse(ResponseEntity<String> response, ConnectorException ex, 
+    public static ResponseEntity<byte[]> checkResponse(ResponseEntity<byte[]> response, ConnectorException ex, 
             boolean throwException) {
         if(response == null || !HttpStatus.OK.equals(response.getStatusCode())
                 || ObjectUtils.isEmpty(response.getBody())) {
@@ -42,7 +44,7 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception;
             }
-            return new ResponseEntity<>((String) ResponseErrorFactory.getHandlerFromClassException(
+            return new ResponseEntity<>((byte[]) ResponseErrorFactory.getHandlerFromClassException(
                     ex.getClass()).getResponseError(exception, true), HttpStatus.OK);
         }
         return response;
@@ -51,7 +53,7 @@ public class ErrorHandlerUtils {
     public static String getRestObjectWithCatching(String url, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML); 
+        headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8)); 
         try {
             return restTemplate.getForObject(url, String.class);
         } catch(RestClientException e) {
@@ -70,14 +72,14 @@ public class ErrorHandlerUtils {
         }
     }
     
-    public static String postRestObjectWithCatching(String url, String request, boolean throwException,
+    public static byte[] postRestObjectWithCatching(String url, byte[] request, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
-        ResponseEntity<String> response;
+        headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
+        ResponseEntity<byte[]> response;
         try {
             response = restTemplate.postForEntity(url,
-                    new HttpEntity<>(request, headers), String.class);
+                    new HttpEntity<>(request, headers), byte[].class);
         } catch(RestClientException e) {
             if(logger.isDebugEnabled()) {
                 logger.debug("There was an error on HTTP client POST connection", e);
@@ -89,27 +91,26 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception;
             }
-            return (String) ResponseErrorFactory.getHandlerFromClassException(
+            return (byte[]) ResponseErrorFactory.getHandlerFromClassException(
                     ex.getClass()).getResponseError(exception, true);
         }
         response = checkResponse(response, ex, throwException);
         return response.getBody();
     }
     
-    @SuppressWarnings("unchecked")
-    public static <T> Object conversionStrWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
+    public static <T> Object conversionBytesWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
             boolean objToStr, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
         String errorMsg = "Object received is not valid, check the structure";
         ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withLayer(LayerError.INTERNAL_FAILURE)
                 .withHttpStatus(HttpStatus.OK);
+        marshaller.readExceptionCallbacks().set(e -> {
+            if(!ObjectUtils.isEmpty(e.getLinkedException()))
+                ex.withMessageArg(e.getLinkedException().getMessage());
+        });
         try {
-            if(objToStr) {
-                returnObj = marshaller.getAsString((T) obj);
-            } else {
-                returnObj = marshaller.read((String) obj);
-            }
+            returnObj = getObjectTypeFromObject(marshaller, obj, objToStr);
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {
                 logger.debug(errorMsg, e);
@@ -120,15 +121,35 @@ public class ErrorHandlerUtils {
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
                     .getResponseError(exception.withMessageArg(e.getMessage()), objToStr);
         }
-        if(returnObj == null) {
+        if(returnObj == null) {            
+            exception.withMessageArg(ex.getArgs());
             if(throwException) {
-                throw exception.withMessageArg(errorMsg);
+                throw exception;
             }
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
-                    .getResponseError(exception.withMessageArg(errorMsg), 
-                            objToStr);
+                    .getResponseError(exception, objToStr);
         }
         return returnObj;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static <T> Object getObjectTypeFromObject(DE4AMarshaller<T> marshaller, Object obj, 
+            boolean objToStr) {
+        Object retObj;
+        if(objToStr) {
+            retObj = marshaller.getAsString((T) obj);
+        } else {
+            if(obj instanceof String) {
+                retObj = marshaller.read((String) obj);
+            } else if(obj instanceof InputStream) {
+                retObj = marshaller.read((InputStream) obj);
+            } else if(obj instanceof byte[]) {
+                retObj = marshaller.read((byte[]) obj);
+            } else {
+                retObj = null;
+            }
+        }
+        return retObj;
     }
     
     @SuppressWarnings("unchecked")
@@ -139,6 +160,10 @@ public class ErrorHandlerUtils {
         ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
                 .withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withHttpStatus(HttpStatus.OK);
+        marshaller.readExceptionCallbacks().set(e -> {
+            if(!ObjectUtils.isEmpty(e.getLinkedException()))
+                ex.withMessageArg(e.getLinkedException().getMessage());
+        });
         try {
             if(objToDoc) {
                 returnObj = marshaller.getAsDocument((T) obj);
@@ -156,6 +181,7 @@ public class ErrorHandlerUtils {
                     .getResponseError(exception.withMessageArg(e.getMessage()), false);
         }
         if(returnObj == null) {
+            exception.withMessageArg(ex.getArgs());
             if(throwException) {
                 throw exception.withMessageArg(errorMsg);
             }

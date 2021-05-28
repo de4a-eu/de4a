@@ -12,7 +12,7 @@ import eu.de4a.connector.service.spring.MessageUtils;
 public abstract class ConnectorExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(ConnectorExceptionHandler.class);
 
-    protected String getMessage(ConnectorException ex) {
+    public String getMessage(ConnectorException ex) {
         try {
             String key = ex.getMessage();
             ex.getArgs().add(0, ex.getModule().getLabel());
@@ -23,6 +23,6 @@ public abstract class ConnectorExceptionHandler {
         }
     }
 
-    public abstract Object getResponseError(ConnectorException exception, boolean returnString);
+    public abstract Object getResponseError(ConnectorException exception, boolean returnBytes);
     public abstract Object buildResponse(ConnectorException exception);
 }

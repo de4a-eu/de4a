@@ -16,7 +16,7 @@ public class ConnectorException extends RuntimeException {
     private ExternalModuleError module;
     private FamilyErrorType family;
     private LayerError layer;
-    private HttpStatus status = HttpStatus.CONFLICT;
+    private HttpStatus status = HttpStatus.OK;
     private String code;
     private List<Object> args;
     private Object request;

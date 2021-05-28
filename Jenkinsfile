@@ -42,25 +42,24 @@ pipeline {
                 branch 'master'
             }
             agent { label 'master' }
-            environment {
-                VERSION=readMavenPom().getVersion()
-            }
             steps {
                 script{
                     def img
                     if (env.BRANCH_NAME == 'master') {
                         dir('de4a-idk') {
-                            img = docker.build('de4a/mock-idk','.')
+                            env.VERSION = readMavenPom().getVersion()
+                            img = docker.build('de4a/mock-idk',".")
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
-                                img.push('$VERSION')
+                                img.push("${env.VERSION}")
                             }
                         }
                         dir('de4a-connector') {
+                            env.VERSION = readMavenPom().getVersion()
                             img = docker.build('de4a/connector','.')
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
-                                img.push('$VERSION')
+                                img.push("${env.VERSION}")
                             }
                         }
                     }
@@ -84,9 +83,7 @@ pipeline {
         fixed {
             node('master') {
                 script {
-            //        if(currentBuild.getPreviousBuild() && currentBuild.getPreviousBuild().getResult().toString() != 'SUCCESS') {
                         slackSend color: "good", message: ":baby-yoda: This is the way! :baby-yoda: \nJob name: ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}\nGit Author: ${env.CHANGE_AUTHOR}, Branch: ${env.GIT_BRANCH}, ${env.GIT_URL}\n"
-             //       }
                 }
             }
         }

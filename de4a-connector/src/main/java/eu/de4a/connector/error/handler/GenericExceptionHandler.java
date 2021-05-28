@@ -11,12 +11,12 @@ public class GenericExceptionHandler {
         //empty constructor
     }
     
-    public static String getResponseError(Exception ex) {
+    public static byte[] getResponseError(Exception ex) {
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
         responseError.setErrorList(new ErrorListType());
         String msg = ex.getMessage() == null ? "Internal Connector Error" : ex.getMessage();
         responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError("99999", msg));
-        return DE4AMarshaller.dtUsiResponseMarshaller().getAsString(responseError);
+        return DE4AMarshaller.dtUsiResponseMarshaller().getAsBytes(responseError);
     }
 
 }

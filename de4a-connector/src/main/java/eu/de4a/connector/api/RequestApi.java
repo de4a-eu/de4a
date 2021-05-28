@@ -1,12 +1,12 @@
 package eu.de4a.connector.api;
 
+import java.io.InputStream;
+
 import javax.validation.Valid;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.ResponseEntity;
 
-import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
@@ -35,8 +35,7 @@ public interface RequestApi {
 		@ApiResponse(responseCode = "200", description = "OK",
 				content = @Content(schema = @Schema(implementation = ResponseLookupRoutingInformationType.class)))
 	})
-	public @ResponseBody String lookupRoutingInformation(
-			@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public ResponseEntity<byte[]> lookupRoutingInformation(@Valid @ApiParam(hidden = true) InputStream request);
 
 
 	@ApiOperation(value = "Receive RequestTransferEvidence message through USI pattern",
@@ -50,7 +49,7 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
-	public @ResponseBody String requestTransferEvidenceUSI(@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public ResponseEntity<byte[]> requestTransferEvidenceUSI(@Valid @ApiParam(hidden = true) InputStream request);
 
 
 	@ApiOperation(value = "Receive RequestTransferEvidence message through IM pattern",
@@ -64,6 +63,6 @@ public interface RequestApi {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = @Content(schema = @Schema(implementation = ResponseTransferEvidenceType.class)))
 	})
-	public @ResponseBody String requestTransferEvidenceIM(@Valid @RequestBody @ApiParam(hidden = true) String request);
+	public ResponseEntity<byte[]> requestTransferEvidenceIM(@Valid @ApiParam(hidden = true) InputStream request);
 
 }

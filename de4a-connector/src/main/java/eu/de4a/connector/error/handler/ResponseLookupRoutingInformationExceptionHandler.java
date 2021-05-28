@@ -9,10 +9,10 @@ import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 public class ResponseLookupRoutingInformationExceptionHandler  extends ConnectorExceptionHandler {
     
 	@Override
-	public Object getResponseError(ConnectorException ex, boolean returnString) {        
+	public Object getResponseError(ConnectorException ex, boolean returnBytes) {        
         ResponseLookupRoutingInformationType responseLookup = buildResponse(ex);
-        if(returnString) {
-            return DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller().getAsString(responseLookup);
+        if(returnBytes) {
+            return DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller().getAsBytes(responseLookup);
         }
         return responseLookup;
 	}

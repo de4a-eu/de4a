@@ -8,7 +8,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,17 +32,17 @@ import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.model.EvaluatorAddresses;
+import eu.de4a.connector.model.EvaluatorRequest;
+import eu.de4a.connector.model.EvaluatorRequestData;
+import eu.de4a.connector.model.utils.AgentsLocator;
+import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
+import eu.de4a.connector.repository.EvaluatorRequestRepository;
 import eu.de4a.exception.MessageException;
-import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
-import eu.de4a.connector.model.EvaluatorRequest;
-import eu.de4a.connector.model.EvaluatorRequestData;
-import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
-import eu.de4a.connector.repository.EvaluatorRequestRepository;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 
@@ -57,33 +57,39 @@ public class ResponseManager {
 	private EvaluatorRequestRepository evaluatorRequestRepository;
 	@Autowired
 	private EvaluatorRequestDataRepository evaluatorRequestDataRepository;
+	@Autowired
+	private AgentsLocator agentsLocator;
 	@PersistenceContext
     private EntityManager entityManager;
 
-	@Transactional(isolation = Isolation.SERIALIZABLE)
-	@AfterReturning(pointcut = "execution(* *.processResponseAs4(..))", returning = "retVal")
-	public void cathResponseFromMultipleAs4(Object retVal) {
-		ResponseWrapper response = (ResponseWrapper) retVal;
+	public void processAS4Response(ResponseWrapper response) {
 		String id = response.getId();
 		
-		String logMsg = MessageFormat.format("Processing response received from AS4 gateway - RequestId: {0}", id);
+		String logMsg = MessageFormat.format("Processing the response received via AS4 gateway - RequestId: {0}", id);
         DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
 		
 		EvaluatorRequest evaluatorinfo = evaluatorRequestRepository.findById(id).orElse(null);
 		if (evaluatorinfo == null) {
-		    logMsg = MessageFormat.format("Request not found on registries with the ID received - RequestId: {0}", id);
+		    logMsg = MessageFormat.format("The corresponding request to the received response is not found on database "
+		            + "- RequestId: {0}", id);
 			DE4AKafkaClient.send(EErrorLevel.ERROR, logMsg);
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
 			List<EvaluatorRequestData> responseData = saveData(response, evaluatorinfo);
-			if (evaluatorinfo.isUsi()) {
-				// Send RequestForwardEvidence to evaluator - USI pattern
-				logger.debug("Pushing data to {}", evaluatorinfo.getUrlreturn());
-				Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
-				String endpointDE = evaluatorinfo.getUrlreturn().substring(0, evaluatorinfo.getUrlreturn().lastIndexOf("/"));
-				client.pushEvidence(endpointDE, doc);
-			}
+            if (evaluatorinfo.isUsi()) {
+                EvaluatorAddresses evaluatorAddress = agentsLocator.lookupEvaluatorAddress(evaluatorinfo.getIdevaluator());
+                if (!ObjectUtils.isEmpty(evaluatorAddress)) {
+                    // Send RequestForwardEvidence to evaluator - USI pattern
+                    Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
+                    client.pushEvidence(evaluatorAddress.getEndpoint(), doc);
+                } else {
+                    //TODO in this case, how DE or DO is advised of the situation?
+                    DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format("RequestForwardEvidence has not been sent, "
+                            + "unkown Data Evaluator endpoint - RequestId: {0}, DataEvaluatorId: {1}", id, 
+                            evaluatorinfo.getIdevaluator()));
+                }
+            }
 		}
 	}
 
@@ -159,16 +165,4 @@ public class ResponseManager {
 		}
 		return null;
 	}
-
-	public ResponseTransferEvidenceType getErrorResponse(MessageException ex) {
-		ResponseTransferEvidenceType error = new ResponseTransferEvidenceType();
-		ErrorListType errorList = new ErrorListType();
-		ErrorType errortype = new ErrorType();
-		errortype.setCode(ex.getCode());
-		errortype.setText(ex.getMessage());
-		errorList.addError(errortype);
-		error.setErrorList(errorList);
-		return error;
-	}
-
 }

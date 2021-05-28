@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -51,7 +50,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -179,7 +177,7 @@ public class Conf implements WebMvcConfigurer {
 		return new ApiInfoBuilder()
 			.title("DE4A - Connector")
 			.description("DE4A Connector component - eDelivery Exchange")
-			.version("0.1.0")
+			.version("0.1.1")
 			.termsOfServiceUrl("http://www.de4a.eu")
 			.licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
 			.license("APACHE2")
@@ -229,10 +227,7 @@ public class Conf implements WebMvcConfigurer {
 	public RestTemplate restTemplate() {
 		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
 				httpClient()); 
-		RestTemplate restTemplate = new RestTemplate(httpComponentsClientHttpRequestFactory);
-		restTemplate.getMessageConverters()
-        .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-		return restTemplate;
+		return new RestTemplate(httpComponentsClientHttpRequestFactory);
 	}
 
 	public HttpClient httpClient() {
@@ -276,7 +271,7 @@ public class Conf implements WebMvcConfigurer {
 			private boolean skipProxy(String host) {
 				if (proxyHost.isEmpty())
 					return false;
-				StringTokenizer st = new StringTokenizer(proxyNonHosts, ";");
+				StringTokenizer st = new StringTokenizer(proxyNonHosts, "|");
 				while (st.hasMoreTokens()) {
 					String pattern = st.nextToken();
 					pattern = pattern.replace("\\*", "");
@@ -329,7 +324,7 @@ public class Conf implements WebMvcConfigurer {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/").setViewName("index");
-		registry.addViewController("/swagger-ui/").setViewName("forward:/swagger-ui/index.html");
+		registry.addViewController("/swagger-ui/").setViewName("redirect:/swagger-ui/index.html");
 	}
 
 	@Bean
