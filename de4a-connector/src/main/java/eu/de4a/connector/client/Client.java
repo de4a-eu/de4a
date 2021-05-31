@@ -120,7 +120,7 @@ public class Client {
 			final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
 					.parseDocumentTypeIdentifier(documentTypeId);
 			// Use explicit SMP or use DNS to resolve
-			final BDXRClientReadOnly aSMPClient = smpEndpoint == null
+			final BDXRClientReadOnly aSMPClient = ObjectUtils.isEmpty(smpEndpoint)
 					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
 					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
 					
