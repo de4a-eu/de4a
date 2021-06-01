@@ -99,7 +99,7 @@ public class ErrorHandlerUtils {
     }
     
     public static <T> Object conversionBytesWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
-            boolean objToStr, boolean throwException, ConnectorException ex) {
+            boolean objToBytes, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
         String errorMsg = "Object received is not valid, check the structure";
         ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
@@ -110,7 +110,7 @@ public class ErrorHandlerUtils {
                 ex.withMessageArg(e.getLinkedException().getMessage());
         });
         try {
-            returnObj = getObjectTypeFromObject(marshaller, obj, objToStr);
+            returnObj = getObjectTypeFromObject(marshaller, obj, objToBytes);
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {
                 logger.debug(errorMsg, e);
@@ -119,7 +119,7 @@ public class ErrorHandlerUtils {
                 throw exception.withMessageArg(e.getMessage());
             }
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
-                    .getResponseError(exception.withMessageArg(e.getMessage()), objToStr);
+                    .getResponseError(exception.withMessageArg(e.getMessage()), objToBytes);
         }
         if(returnObj == null) {            
             exception.withMessageArg(ex.getArgs());
@@ -127,17 +127,17 @@ public class ErrorHandlerUtils {
                 throw exception;
             }
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
-                    .getResponseError(exception, objToStr);
+                    .getResponseError(exception, objToBytes);
         }
         return returnObj;
     }
     
     @SuppressWarnings("unchecked")
     private static <T> Object getObjectTypeFromObject(DE4AMarshaller<T> marshaller, Object obj, 
-            boolean objToStr) {
+            boolean objToBytes) {
         Object retObj;
-        if(objToStr) {
-            retObj = marshaller.getAsString((T) obj);
+        if(objToBytes) {
+            retObj = marshaller.getAsBytes((T) obj);
         } else {
             if(obj instanceof String) {
                 retObj = marshaller.read((String) obj);
