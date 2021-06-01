@@ -101,8 +101,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
                     new ResponseTransferEvidenceUSIException().withFamily(e.getFamily())
                         .withLayer(e.getLayer())
                         .withModule(e.getModule())
-                        .withMessageArgs(e.getArgs())
-                        .withHttpStatus(HttpStatus.OK));
+                        .withMessageArgs(e.getArgs()));
         }
 		return DE4AResponseDocumentHelper.createResponseError(false);
 	}
@@ -118,8 +117,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
                         .withFamily(e.getFamily())
                         .withModule(e.getModule())
                         .withMessageArgs(e.getArgs())
-                        .withRequest(request)
-                        .withHttpStatus(HttpStatus.OK));
+                        .withRequest(request));
         }
 	}
 

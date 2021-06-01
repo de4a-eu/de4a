@@ -45,7 +45,6 @@ import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceUSIException;
 import eu.de4a.connector.error.exceptions.ResponseForwardEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
-import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
 import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
@@ -135,11 +134,11 @@ public class Client {
 				        + "connection problem or because it does not exist.";
 				logger.error(error);
 				throw new SMPLookingMetadataInformationException( )
-                 .withUserMessage(userMessage)
-                 .withLayer(LayerError.COMMUNICATIONS)
-                 .withFamily(FamilyErrorType.CONNECTION_ERROR) 
-                 .withModule(ExternalModuleError.SMP)
-                 .withMessageArg(error).withHttpStatus(HttpStatus.OK);
+                     .withUserMessage(userMessage)
+                     .withLayer(LayerError.COMMUNICATIONS)
+                     .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                     .withModule(ExternalModuleError.SMP)
+                     .withMessageArg(error);
 			}
 				 
 			nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata()
@@ -161,12 +160,12 @@ public class Client {
 			}
 		} catch (final SMPClientException | SMPDNSResolutionException ex) {
             logger.error("Service metadata not found on SMP", ex);
-            throw new SMPLookingMetadataInformationException( )
+            throw new SMPLookingMetadataInformationException()
                         .withUserMessage(userMessage)
                         .withLayer(LayerError.COMMUNICATIONS)
                         .withFamily(FamilyErrorType.CONNECTION_ERROR) 
                         .withModule(ExternalModuleError.SMP)
-                        .withMessageArg(ex.getMessage()).withHttpStatus(HttpStatus.OK);
+                        .withMessageArg(ex.getMessage());
         }
 		return nodeInfo;
 	}

@@ -29,6 +29,7 @@ import eu.de4a.connector.error.exceptions.OwnerException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIException;
+import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
@@ -158,14 +159,20 @@ public class EvidenceTransferorManager extends EvidenceManager {
             DE4AKafkaClient.send(EErrorLevel.WARN, "Processing RequestTransferEvidenceUSIDT - " + msgError);
             throw ex.withFamily(FamilyErrorType.SAVING_DATA_ERROR).withMessageArg(msgError);
         } else {
-            if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getDataOwnerId(), usirequest.getCanonicalEvidenceTypeId(), 
-                    response.getMessage(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
-                String errorMsg = MessageFormat.format("Error sending message to Data Requestor via AS4 gateway - "
-                        + "RequestId: {0}", response.getId());                
-                DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
-                
-                throw ex.withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
-                    .withModule(ExternalModuleError.CONNECTOR_DR).withMessageArg(errorMsg);
+            try {
+                if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getDataOwnerId(), usirequest.getCanonicalEvidenceTypeId(), 
+                        response.getMessage(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
+                    String errorMsg = MessageFormat.format("Error sending message to Data Requestor via AS4 gateway - "
+                            + "RequestId: {0}", response.getId());                
+                    DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+                    
+                    throw ex.withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
+                        .withModule(ExternalModuleError.CONNECTOR_DR).withMessageArg(errorMsg);
+                }
+            } catch(SMPLookingMetadataInformationException ex1) {
+                throw ex.withLayer(ex1.getLayer())
+                .withFamily(ex1.getFamily()) 
+                .withModule(ex1.getModule()).withMessageArg(ex1.getArgs());
             }
         }
     }
