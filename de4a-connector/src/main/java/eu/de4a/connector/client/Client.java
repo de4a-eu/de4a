@@ -1,5 +1,6 @@
 package eu.de4a.connector.client;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helger.commons.error.level.EErrorLevel;
@@ -45,6 +45,7 @@ import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceUSIException;
 import eu.de4a.connector.error.exceptions.ResponseForwardEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
+import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
 import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
@@ -184,7 +185,7 @@ public class Client {
         DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request to IDK - "
                 + "URL: {0}", uriBuilder.toString()));
 
-		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), true,
+		byte[] response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), true,
 		        new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), 
 		        this.restTemplate);
 		
@@ -193,7 +194,7 @@ public class Client {
         try {
             AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
             responseLookup.setAvailableSources(availableSources);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             logger.error("Error processing idk  response", e);
             throw new ResponseLookupRoutingInformationException()
                     .withLayer(LayerError.COMMUNICATIONS)
@@ -211,7 +212,7 @@ public class Client {
                 new String[] {"provision"}, new String[] {"canonicalEvidenceTypeId", "dataOwnerId"}, 
                 new String[] {request.getCanonicalEvidenceTypeId(), request.getDataOwnerId()});
         
-        String response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
+        byte[] response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
                 true, new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), this.restTemplate);
         
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -219,7 +220,7 @@ public class Client {
         try {
             AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
             responseLookup.setAvailableSources(availableSources);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             logger.error("Error processing idk  response", e);
             throw new ResponseLookupRoutingInformationException()
                     .withLayer(LayerError.COMMUNICATIONS)

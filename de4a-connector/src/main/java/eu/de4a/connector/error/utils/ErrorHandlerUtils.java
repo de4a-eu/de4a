@@ -50,12 +50,12 @@ public class ErrorHandlerUtils {
         return response;
     }
     
-    public static String getRestObjectWithCatching(String url, boolean throwException,
+    public static byte[] getRestObjectWithCatching(String url, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8)); 
         try {
-            return restTemplate.getForObject(url, String.class);
+            return restTemplate.getForObject(url, byte[].class);
         } catch(RestClientException e) {
             if(logger.isDebugEnabled()) {
                 logger.debug("There was an error on HTTP client GET connection", e);
@@ -67,7 +67,7 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception;
             }
-            return (String) ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+            return (byte[]) ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
                     .getResponseError(exception, true);
         }
     }
