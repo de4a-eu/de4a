@@ -199,8 +199,7 @@ public class Client {
                     .withLayer(LayerError.COMMUNICATIONS)
                     .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
                     .withModule(ExternalModuleError.IDK)
-                    .withMessageArg(e.getMessage())
-                    .withHttpStatus(HttpStatus.OK);
+                    .withMessageArg(e.getMessage());
         }
 		return responseLookup;
 	}
@@ -220,12 +219,12 @@ public class Client {
             AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
             responseLookup.setAvailableSources(availableSources);
         } catch (IOException e) {
-            logger.error("Error processing idk  response", e);
+            logger.error("Error processing IDK response", e);
             throw new ResponseLookupRoutingInformationException()
                     .withLayer(LayerError.COMMUNICATIONS)
                     .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
                     .withModule(ExternalModuleError.IDK)
-                    .withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+                    .withMessageArg(e.getMessage());
         }
         return responseLookup;
 	}
