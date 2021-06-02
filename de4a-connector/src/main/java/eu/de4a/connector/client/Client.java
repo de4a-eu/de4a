@@ -1,5 +1,6 @@
 package eu.de4a.connector.client;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helger.commons.error.level.EErrorLevel;
@@ -120,7 +120,7 @@ public class Client {
 			final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
 					.parseDocumentTypeIdentifier(documentTypeId);
 			// Use explicit SMP or use DNS to resolve
-			final BDXRClientReadOnly aSMPClient = smpEndpoint == null
+			final BDXRClientReadOnly aSMPClient = ObjectUtils.isEmpty(smpEndpoint)
 					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
 					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
 					
@@ -134,11 +134,11 @@ public class Client {
 				        + "connection problem or because it does not exist.";
 				logger.error(error);
 				throw new SMPLookingMetadataInformationException( )
-                 .withUserMessage(userMessage)
-                 .withLayer(LayerError.COMMUNICATIONS)
-                 .withFamily(FamilyErrorType.CONNECTION_ERROR) 
-                 .withModule(ExternalModuleError.SMP)
-                 .withMessageArg(error).withHttpStatus(HttpStatus.OK);
+                     .withUserMessage(userMessage)
+                     .withLayer(LayerError.COMMUNICATIONS)
+                     .withFamily(FamilyErrorType.CONNECTION_ERROR) 
+                     .withModule(ExternalModuleError.SMP)
+                     .withMessageArg(error);
 			}
 				 
 			nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata()
@@ -160,12 +160,12 @@ public class Client {
 			}
 		} catch (final SMPClientException | SMPDNSResolutionException ex) {
             logger.error("Service metadata not found on SMP", ex);
-            throw new SMPLookingMetadataInformationException( )
+            throw new SMPLookingMetadataInformationException()
                         .withUserMessage(userMessage)
                         .withLayer(LayerError.COMMUNICATIONS)
                         .withFamily(FamilyErrorType.CONNECTION_ERROR) 
                         .withModule(ExternalModuleError.SMP)
-                        .withMessageArg(ex.getMessage()).withHttpStatus(HttpStatus.OK);
+                        .withMessageArg(ex.getMessage());
         }
 		return nodeInfo;
 	}
@@ -184,7 +184,7 @@ public class Client {
         DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request to IDK - "
                 + "URL: {0}", uriBuilder.toString()));
 
-		String response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), true,
+		byte[] response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), true,
 		        new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), 
 		        this.restTemplate);
 		
@@ -193,14 +193,13 @@ public class Client {
         try {
             AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
             responseLookup.setAvailableSources(availableSources);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             logger.error("Error processing idk  response", e);
             throw new ResponseLookupRoutingInformationException()
                     .withLayer(LayerError.COMMUNICATIONS)
                     .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
                     .withModule(ExternalModuleError.IDK)
-                    .withMessageArg(e.getMessage())
-                    .withHttpStatus(HttpStatus.OK);
+                    .withMessageArg(e.getMessage());
         }
 		return responseLookup;
 	}
@@ -211,7 +210,7 @@ public class Client {
                 new String[] {"provision"}, new String[] {"canonicalEvidenceTypeId", "dataOwnerId"}, 
                 new String[] {request.getCanonicalEvidenceTypeId(), request.getDataOwnerId()});
         
-        String response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
+        byte[] response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
                 true, new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), this.restTemplate);
         
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -219,13 +218,13 @@ public class Client {
         try {
             AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
             responseLookup.setAvailableSources(availableSources);
-        } catch (JsonProcessingException e) {
-            logger.error("Error processing idk  response", e);
+        } catch (IOException e) {
+            logger.error("Error processing IDK response", e);
             throw new ResponseLookupRoutingInformationException()
                     .withLayer(LayerError.COMMUNICATIONS)
                     .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
                     .withModule(ExternalModuleError.IDK)
-                    .withMessageArg(e.getMessage()).withHttpStatus(HttpStatus.OK);
+                    .withMessageArg(e.getMessage());
         }
         return responseLookup;
 	}
