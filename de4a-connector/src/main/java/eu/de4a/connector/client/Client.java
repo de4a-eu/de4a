@@ -7,14 +7,15 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
@@ -188,36 +189,38 @@ public class Client {
 		        new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), 
 		        this.restTemplate);
 		
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
-        try {
-            AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
-            responseLookup.setAvailableSources(availableSources);
-        } catch (IOException e) {
-            logger.error("Error processing idk  response", e);
-            throw new ResponseLookupRoutingInformationException()
-                    .withLayer(LayerError.COMMUNICATIONS)
-                    .withFamily(FamilyErrorType.SCHEMA_VALIDATION_FAILED) 
-                    .withModule(ExternalModuleError.IDK)
-                    .withMessageArg(e.getMessage());
-        }
-		return responseLookup;
+        return parseLookupResponse(response);
 	}
 
 	public ResponseLookupRoutingInformationType getProvisions(RequestLookupRoutingInformationType request) {
 
 	    URIBuilder uriBuilder = buildURI(idkEndpoint, "There was an error creating URI from IDK endpoint", 
                 new String[] {"provision"}, new String[] {"canonicalEvidenceTypeId", "dataOwnerId"}, 
-                new String[] {request.getCanonicalEvidenceTypeId(), request.getDataOwnerId()});
+                new String[] {request.getCanonicalEvidenceTypeId(), request.getDataOwnerId().toLowerCase(Locale.ROOT)});
+	    
+	    DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request to IDK - "
+                + "URL: {0}", uriBuilder.toString()));
         
         byte[] response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
                 true, new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), this.restTemplate);
         
+        return parseLookupResponse(response);
+	}
+	
+	public ResponseLookupRoutingInformationType parseLookupResponse(byte[] response) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ResponseLookupRoutingInformationType responseLookup = new ResponseLookupRoutingInformationType();
         try {
             AvailableSourcesType availableSources = mapper.readValue(response, AvailableSourcesType.class);
-            responseLookup.setAvailableSources(availableSources);
+            if(!CollectionUtils.isEmpty(availableSources.getSource())) {
+                responseLookup.setAvailableSources(availableSources);
+            } else {
+                throw new ResponseLookupRoutingInformationException()
+                    .withLayer(LayerError.CONFIGURATION)
+                    .withFamily(FamilyErrorType.SAVING_DATA_ERROR) 
+                    .withModule(ExternalModuleError.IDK)
+                    .withMessageArg("Data not found for the request");
+            }
         } catch (IOException e) {
             logger.error("Error processing IDK response", e);
             throw new ResponseLookupRoutingInformationException()
@@ -227,7 +230,7 @@ public class Client {
                     .withMessageArg(e.getMessage());
         }
         return responseLookup;
-	}
+    }
 
 	public boolean pushEvidence(String endpoint, Document requestDoc) {		
 		ConnectorException exception = new ResponseForwardEvidenceException()
