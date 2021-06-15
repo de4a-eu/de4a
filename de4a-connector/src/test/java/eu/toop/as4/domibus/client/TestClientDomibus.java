@@ -29,7 +29,7 @@ import org.xml.sax.SAXException;
 
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.connector.as4.domibus.soap.DomibusException;
-import eu.de4a.connector.as4.domibus.soap.MessageFactory;
+import eu.de4a.connector.as4.domibus.soap.DomibusMessageFactory;
 import eu.de4a.connector.as4.domibus.soap.ResponseAndHeader;
 import eu.de4a.connector.as4.domibus.soap.auto.LargePayloadType;
 import eu.de4a.connector.as4.domibus.soap.auto.Messaging;
@@ -90,7 +90,7 @@ public class TestClientDomibus {
 		props.getProperty().add(prop);
 		partInfo.setPartProperties(props);
 		attacheds.add(partInfo);
-		Messaging messageHeader = MessageFactory.makeMessage("domibus-blue", "red_gw", messageId, "TC1Leg1", attacheds);
+		Messaging messageHeader = DomibusMessageFactory.makeMessage("domibus-blue", "red_gw", messageId, "TC1Leg1", attacheds);
 		List<LargePayloadType> bodies = new ArrayList<LargePayloadType>();
 		LargePayloadType payload = new LargePayloadType();
 		payload.setContentType("application/xml");
