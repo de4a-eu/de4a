@@ -44,6 +44,8 @@ import eu.de4a.connector.service.spring.Conf;
 public class TestClientDomibus {
 	@Autowired
 	private DomibusClientWS clienteWS;
+	@Autowired
+	private DomibusMessageFactory domibusMessageFactory;
 
 	/**
 	 *  https://eu-domibus-client.redsara.es/domibus/services/backend
@@ -90,7 +92,7 @@ public class TestClientDomibus {
 		props.getProperty().add(prop);
 		partInfo.setPartProperties(props);
 		attacheds.add(partInfo);
-		Messaging messageHeader = DomibusMessageFactory.makeMessage("domibus-blue", "red_gw", messageId, "TC1Leg1", attacheds);
+		Messaging messageHeader = this.domibusMessageFactory.makeMessage("domibus-blue", "red_gw", messageId, "TC1Leg1", attacheds);
 		List<LargePayloadType> bodies = new ArrayList<LargePayloadType>();
 		LargePayloadType payload = new LargePayloadType();
 		payload.setContentType("application/xml");
