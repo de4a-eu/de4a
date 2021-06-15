@@ -81,7 +81,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers, HttpStatus status, WebRequest request) {
         String error;
         if (ex.getCause() instanceof UnmarshalException) {
-            String args[] = { ex.getMessage() };
+            String[] args = { ex.getMessage() };
             error = new MessageUtils(MessageKeys.ERROR_400_UNMARSHALLING, args).value();
         } else {
             error = new MessageUtils(MessageKeys.ERROR_400_ARGS_REQUIRED, null).value();

@@ -19,6 +19,7 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.commons.mime.MimeTypeParserException;
 import com.helger.commons.string.StringHelper;
 
+import eu.de4a.connector.as4.handler.Phase4MessageExchangeSPI;
 import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
@@ -133,7 +134,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 				throw new MEOutgoingException("Invalid parsing MimeType: " + e.getMessage());
 			}
 		}
-		IMessageExchangeSPI aMEM = MessageExchangeManager.getConfiguredImplementation();
+		Phase4MessageExchangeSPI aMEM = new Phase4MessageExchangeSPI();
 		aMEM.sendOutgoing(aRoutingInfo, aMessage.build());
 	}
 
