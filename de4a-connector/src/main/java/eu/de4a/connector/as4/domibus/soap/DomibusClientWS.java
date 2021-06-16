@@ -21,13 +21,13 @@ import javax.xml.transform.dom.DOMSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ws.WebServiceMessage;
+import org.springframework.ws.WebServiceMessageFactory;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceMessageExtractor;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.SoapHeader;
 import org.springframework.ws.soap.SoapHeaderElement;
 import org.springframework.ws.soap.SoapMessage;
-import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.support.MarshallingUtils;
 import org.w3c.dom.Document;
 
@@ -44,8 +44,8 @@ public class DomibusClientWS extends WebServiceGatewaySupport {
 
     private static final Logger LOG = LoggerFactory.getLogger(DomibusClientWS.class);
 
-    public DomibusClientWS(AxiomSoapMessageFactory messageFactory) {
-        this.setMessageFactory(messageFactory);
+    public DomibusClientWS(WebServiceMessageFactory webServiceMessageFactory) {
+        this.setMessageFactory(webServiceMessageFactory);
     }
 
     public ListPendingMessagesResponse getPendindMessages(String domibusEndpoint) {

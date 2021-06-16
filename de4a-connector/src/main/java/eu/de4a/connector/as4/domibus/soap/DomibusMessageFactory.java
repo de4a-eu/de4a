@@ -2,6 +2,12 @@ package eu.de4a.connector.as4.domibus.soap;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+
 import eu.de4a.connector.as4.domibus.soap.auto.CollaborationInfo;
 import eu.de4a.connector.as4.domibus.soap.auto.From;
 import eu.de4a.connector.as4.domibus.soap.auto.MessageProperties;
@@ -17,49 +23,41 @@ import eu.de4a.connector.as4.domibus.soap.auto.UserMessage;
 import eu.de4a.util.DE4AConstants;
 import eu.toop.connector.api.TCIdentifierFactory;
 
-public class MessageFactory {
+@Component
+public class DomibusMessageFactory {
 
     private static final String ROLE_FROM = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator";
     private static final String ROLE_TO = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
-    private static final String SERVICE_TYPE_DEFAULT = "toop-procid-agreement";
-    private static final String SERVICE_VALUE_DEFAULT = "bdx:noprocess";
     private static final String MESSAGE_PRO_NAME_SENDER = "originalSender";
-    private static final String MESSAGE_PRO_VALUE_SENDER_DEFAULT = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
     private static final String MESSAGE_PRO_NAME_RECIPIENT = "finalRecipient";
-    private static final String MESSAGE_PRO_VALUE_RECIPIENT_DEFAULT = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
-
-    private MessageFactory() {
-        // Empty constructor
-    }
-
-    public static Messaging makeMessage(String domibusMeId, String domibusOtherId, String conversationId, String action,
-            List<PartInfo> attacheds) {
+    
+    @Value("${phase4.send.fromparty.id:#{null}}")
+    private String fromParty;
+    @Value("${phase4.send.toparty.id:#{null}}")
+    private String toParty;
+    @Value("${phase4.send.fromparty.id.type:#{null}}")
+    private String fromPartyType;
+    @Value("${phase4.send.toparty.id.type:#{null}}")
+    private String toPartyType;
+    
+    public Messaging makeMessage(String sender, String receiver, String documentIdentifier, 
+            String processIdentifier, List<PartInfo> attacheds) {
         Messaging messaging = new Messaging();
         UserMessage userMessage = new UserMessage();
         messaging.setUserMessage(userMessage);
+        userMessage.setPartyInfo(getPartyInfo());
 
-        PartyInfo partyInfo = new PartyInfo();
-        From from = new From();
-        from.setRole(ROLE_FROM);
-        from.setPartyId(getPartyId((DE4AConstants.MESSAGE_TYPE_REQUEST.equals(action) 
-                ? domibusMeId : domibusOtherId)));
-        To to = new To();
-        to.setRole(ROLE_TO);
-        to.setPartyId(getPartyId((DE4AConstants.MESSAGE_TYPE_RESPONSE.equals(action) 
-                ? domibusMeId : domibusOtherId)));
-        partyInfo.setTo(to);
-        partyInfo.setFrom(from);
-        userMessage.setPartyInfo(partyInfo);
-
-        userMessage.setCollaborationInfo(getCollaborationInfo(conversationId, action));
+        userMessage.setCollaborationInfo(getCollaborationInfo(documentIdentifier, processIdentifier));
         MessageProperties messagesProperties = new MessageProperties();
         Property pro1 = new Property();
         pro1.setName(MESSAGE_PRO_NAME_SENDER);
-        pro1.setValue(MESSAGE_PRO_VALUE_SENDER_DEFAULT);
+        pro1.setType(TCIdentifierFactory.PARTICIPANT_SCHEME);
+        pro1.setValue(sender);
         messagesProperties.getProperty().add(pro1);
         Property pro2 = new Property();
         pro2.setName(MESSAGE_PRO_NAME_RECIPIENT);
-        pro2.setValue(MESSAGE_PRO_VALUE_RECIPIENT_DEFAULT);
+        pro2.setType(TCIdentifierFactory.PARTICIPANT_SCHEME);
+        pro2.setValue(receiver);
         messagesProperties.getProperty().add(pro2);
         userMessage.setMessageProperties(messagesProperties);
         PayloadInfo payloadInfo = new PayloadInfo();
@@ -69,14 +67,13 @@ public class MessageFactory {
         return messaging;
     }
 
-    private static CollaborationInfo getCollaborationInfo(String conversationId, String action) {
+    private static CollaborationInfo getCollaborationInfo(String documentIdentifier, String processIdentifier) {
         CollaborationInfo col = new CollaborationInfo();
         Service service = new Service();
-        service.setType(SERVICE_TYPE_DEFAULT);
-        service.setValue(SERVICE_VALUE_DEFAULT);
+        service.setType(DE4AConstants.PROCESS_SCHEME);
+        service.setValue(processIdentifier);
         col.setService(service);
-        col.setAction(action);
-        col.setConversationId(conversationId);
+        col.setAction(DE4AConstants.DOCTYPE_SCHEME + "::" + documentIdentifier);
         return col;
     }
 
@@ -84,10 +81,26 @@ public class MessageFactory {
         return new UserMessage();
     }
 
-    private static PartyId getPartyId(String id) {
+    private static PartyId getPartyId(String id, String partyType) {
         PartyId partyId = new PartyId();
         partyId.setValue(id);
-        partyId.setType(TCIdentifierFactory.PARTICIPANT_SCHEME);
+        partyId.setType(partyType);
         return partyId;
+    }
+    
+    private PartyInfo getPartyInfo() {
+        PartyInfo partyInfo = new PartyInfo();
+        From from = new From();
+        from.setRole(ROLE_FROM);
+        from.setPartyId(getPartyId(this.fromParty, this.fromPartyType));
+        To to = new To();
+        if(!ObjectUtils.isEmpty(this.toParty)) {
+            to.setRole(ROLE_TO);
+            to.setPartyId(getPartyId(this.toParty, this.toPartyType));
+        }
+        partyInfo.setTo(to);
+        partyInfo.setFrom(from);
+        
+        return partyInfo;
     }
 }
