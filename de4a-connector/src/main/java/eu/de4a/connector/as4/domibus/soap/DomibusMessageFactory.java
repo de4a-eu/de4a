@@ -2,8 +2,6 @@ package eu.de4a.connector.as4.domibus.soap;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -73,7 +71,7 @@ public class DomibusMessageFactory {
         service.setType(DE4AConstants.PROCESS_SCHEME);
         service.setValue(processIdentifier);
         col.setService(service);
-        col.setAction(DE4AConstants.DOCTYPE_SCHEME + "::" + documentIdentifier);
+        col.setAction(documentIdentifier);
         return col;
     }
 
