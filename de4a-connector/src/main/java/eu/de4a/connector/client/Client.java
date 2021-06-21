@@ -154,7 +154,7 @@ public class Client {
 			if (endpoint != null) {
 				nodeInfo.setEndpointURI(endpoint.getEndpointURI());
 				nodeInfo.setCertificate(endpoint.getCertificate());
-				nodeInfo.setProcessIdentifier(aProcID.getURIEncoded());
+				nodeInfo.setProcessIdentifier(messageType);
 			} else {
 			    throw new SMPClientException(MessageFormat.format("Endpoint data not found for ParticipantID: {0}, MessageType: {1}",
 			            participantId, messageType));
