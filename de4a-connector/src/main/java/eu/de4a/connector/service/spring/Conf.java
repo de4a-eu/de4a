@@ -149,6 +149,8 @@ public class Conf implements WebMvcConfigurer {
 	
 	@Value("${de4a.kafka.enabled:false}")
 	private boolean kafkaEnabled;
+	@Value("${de4a.kafka.logging.enabled:true}")
+	private boolean kafkaLoggingEnabled;
     @Value("${de4a.kafka.http.enabled:false}")
     private boolean kafkaHttp;
     @Value("${de4a.kafka.url:#{null}}")
@@ -371,7 +373,7 @@ public class Conf implements WebMvcConfigurer {
         if(kafkaHttp) {
             DE4AKafkaSettings.setHttpClientSetting(this.httpSettings);
         }
-        DE4AKafkaSettings.setLoggingEnabled(kafkaEnabled);        
+        DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);        
         DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
 	}
 

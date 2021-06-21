@@ -134,6 +134,8 @@ global.instancename = dev-from-ide
 
 # DE4A Kafka settings
 de4a.kafka.enabled=true
+# Enables the standard logging separately of the Kafka messages - (default: true)
+de4a.kafka.logging.enabled=true
 # Enables Kafka connection via HTTP (Only enable HTTP mode if outbound TCP connections are blocked from your internal network)
 de4a.kafka.http.enabled=false
 
@@ -288,6 +290,8 @@ phase4.dump.outgoing.path=
 phase4.send.fromparty.id=egovlab
 # (string) (since 2.0.2) - the AS4 To/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
 phase4.send.toparty.id.type=urn:oasis:names:tc:ebcore:partyid-type:unregistered
+# (string) to party ID to be used for outgoing messages. Configure it in case of using Domibus without dynamic participant discovery or in the phase4 side in a mixed AS4 implementations phase4<->Domibus
+phase4.send.toparty.id=
 # (string) (since 2.0.2) - the AS4 From/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
 phase4.send.fromparty.id.type=urn:oasis:names:tc:ebcore:partyid-type:unregistered
 # (string) - an optional folder, where sent responses should be stored. If this property is not provided, they are not stored
