@@ -217,12 +217,17 @@ public class DomibusGatewayClient implements As4GatewayInterface {
                 final ICommonsList <Property> aProps = new CommonsArrayList <> (response.getInfo().getUserMessage().getMessageProperties().getProperty());
                 final Property aPropOS = aProps.findFirst (x -> x.getName ().equals (CAS4.ORIGINAL_SENDER));
                 final Property aPropFR = aProps.findFirst (x -> x.getName ().equals (CAS4.FINAL_RECIPIENT));
-                SimpleParticipantIdentifier receiver = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
-                        aPropFR.getType(), aPropFR.getValue());
-                messageOwner.setReceiverId(receiver.getURIEncoded());
-                SimpleParticipantIdentifier sender = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
-                        aPropOS.getType(), aPropOS.getValue());
-                messageOwner.setSenderId(sender.getURIEncoded());
+                if(ObjectUtils.isEmpty(aPropFR.getType())) {
+                    messageOwner.setReceiverId(aPropFR.getValue());
+                    messageOwner.setSenderId(aPropOS.getValue());
+                } else {
+                    SimpleParticipantIdentifier receiver = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
+                            aPropFR.getType(), aPropFR.getValue());
+                    messageOwner.setReceiverId(receiver.getURIEncoded());
+                    SimpleParticipantIdentifier sender = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
+                            aPropOS.getType(), aPropOS.getValue());
+                    messageOwner.setSenderId(sender.getURIEncoded());
+                }
                 return messageOwner;
             }
         } catch (NullPointerException | MessageException | IOException e) {
