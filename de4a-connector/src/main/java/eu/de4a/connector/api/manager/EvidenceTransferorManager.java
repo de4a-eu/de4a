@@ -204,7 +204,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
             payloads.add(payload);
             Element requestWrapper = new RegRepTransformer().wrapMessage(message, false);
             
-            as4Client.sendMessage(dataOwnerId, nodeInfo, requestWrapper, payloads, false);
+            as4Client.sendMessage(dataOwnerId, nodeInfo, requestWrapper, payloads, tagContentId);
             
             return true;
         } catch (NullPointerException | MEOutgoingException e) {

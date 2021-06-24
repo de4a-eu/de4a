@@ -11,7 +11,7 @@ import eu.toop.connector.api.rest.TCPayload;
 
 public interface As4GatewayInterface {
 	public void sendMessage(String sender, NodeInfo receiver, Element userRequest,
-			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException;
+			List<TCPayload> payloads, String msgTag) throws MEOutgoingException;
 
 	public void processResponseAs4(IncomingEDMResponse data);
 

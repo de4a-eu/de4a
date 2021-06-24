@@ -34,8 +34,6 @@ import eu.de4a.util.DOMUtils;
 import eu.de4a.util.FileUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.EMEProtocol;
-import eu.toop.connector.api.me.IMessageExchangeSPI;
-import eu.toop.connector.api.me.MessageExchangeManager;
 import eu.toop.connector.api.me.incoming.IncomingEDMResponse;
 import eu.toop.connector.api.me.model.MEMessage;
 import eu.toop.connector.api.me.model.MEPayload;
@@ -60,7 +58,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
     private OwnerMessageEventPublisher publisher;
 
 	public void sendMessage(String sender, NodeInfo receiver, Element requestUsuario,
-			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
+			List<TCPayload> payloads, String msgTag) throws MEOutgoingException {
 		final TCOutgoingMessage aOM = new TCOutgoingMessage();
 		{
 

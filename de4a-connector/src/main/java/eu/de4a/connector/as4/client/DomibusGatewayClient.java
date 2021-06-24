@@ -99,10 +99,9 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 
     @Override
     public void sendMessage(String sender, NodeInfo nodeInfo, Element requestUsuario,
-            List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
+            List<TCPayload> payloads, String msgTag) throws MEOutgoingException {
         String idMessageAttached = "cid:message";
-        String idCanonical = "cid:"
-                + (isRequest ? DE4AConstants.TAG_EVIDENCE_REQUEST : DE4AConstants.TAG_EVIDENCE_RESPONSE);
+        String idCanonical = "cid:" + msgTag;
 
         Messaging messageHeader = this.domibusMessageFactory.makeMessage(sender, nodeInfo.getParticipantIdentifier(),
                 nodeInfo.getDocumentIdentifier(), nodeInfo.getProcessIdentifier(),
