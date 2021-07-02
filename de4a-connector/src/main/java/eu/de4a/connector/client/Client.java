@@ -107,6 +107,7 @@ public class Client {
 	    if(DomibusGatewayClient.class.getSimpleName().equalsIgnoreCase(as4ClientBean)) {
 	        nodeInfo.setParticipantIdentifier(participantId);
 	        nodeInfo.setProcessIdentifier(messageType);
+	        nodeInfo.setDocumentIdentifier(documentTypeId);
 	        return nodeInfo;
 	    }
 	    

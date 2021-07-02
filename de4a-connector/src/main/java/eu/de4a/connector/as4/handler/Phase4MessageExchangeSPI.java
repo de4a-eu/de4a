@@ -264,8 +264,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
                                                                          .toPartyIDType (Phase4Config.getToPartyIDType ())
                                                                          .toPartyID (toPartyID)
                                                                          .toRole ("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder")
-                                                                         .useOriginalSenderFinalRecipientTypeAttr (false)
-                                                                         .useOriginalSenderFinalRecipientTypeAttr (false)
+                                                                         .useOriginalSenderFinalRecipientTypeAttr (true)
                                                                          .rawResponseConsumer (new RawResponseWriter ())
                                                                          .endpointDetailProvider (new AS4EndpointDetailProviderConstant (aRoutingInfo.getCertificate (),
                                                                                                                                          aRoutingInfo.getEndpointURL ()));

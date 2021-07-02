@@ -187,7 +187,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			payloads.add(p);
 			
-			as4Client.sendMessage(sender, nodeInfo, requestWrapper, payloads, true);
+			as4Client.sendMessage(sender, nodeInfo, requestWrapper, payloads, DE4AConstants.TAG_EVIDENCE_REQUEST);
 			
 			return true;
 		} catch (MEOutgoingException e) {

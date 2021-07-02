@@ -7,6 +7,7 @@ import java.util.List;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.util.ByteArrayDataSource;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -22,8 +23,11 @@ import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
 import com.helger.peppolid.simple.participant.SimpleParticipantIdentifier;
+import com.helger.phase4.CAS4;
 
 import eu.de4a.connector.api.manager.EvidenceTransferorManager;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
@@ -95,10 +99,9 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 
     @Override
     public void sendMessage(String sender, NodeInfo nodeInfo, Element requestUsuario,
-            List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
+            List<TCPayload> payloads, String msgTag) throws MEOutgoingException {
         String idMessageAttached = "cid:message";
-        String idCanonical = "cid:"
-                + (isRequest ? DE4AConstants.TAG_EVIDENCE_REQUEST : DE4AConstants.TAG_EVIDENCE_RESPONSE);
+        String idCanonical = "cid:" + msgTag;
 
         Messaging messageHeader = this.domibusMessageFactory.makeMessage(sender, nodeInfo.getParticipantIdentifier(),
                 nodeInfo.getDocumentIdentifier(), nodeInfo.getProcessIdentifier(),
@@ -210,14 +213,20 @@ public class DomibusGatewayClient implements As4GatewayInterface {
                 LOGGER.error("EvidenceRequest without requestId");
             } else {
                 messageOwner.setId(idrequest);
-                SimpleParticipantIdentifier receiver = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
-                        response.getInfo().getUserMessage().getPartyInfo().getTo().getPartyId().getType(), 
-                        response.getInfo().getUserMessage().getPartyInfo().getTo().getPartyId().getValue());
-                messageOwner.setReceiverId(receiver.getURIEncoded());
-                SimpleParticipantIdentifier sender = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
-                        response.getInfo().getUserMessage().getPartyInfo().getFrom().getPartyId().getType(), 
-                        response.getInfo().getUserMessage().getPartyInfo().getFrom().getPartyId().getValue());
-                messageOwner.setSenderId(sender.getURIEncoded());
+                final ICommonsList <Property> aProps = new CommonsArrayList <> (response.getInfo().getUserMessage().getMessageProperties().getProperty());
+                final Property aPropOS = aProps.findFirst (x -> x.getName ().equals (CAS4.ORIGINAL_SENDER));
+                final Property aPropFR = aProps.findFirst (x -> x.getName ().equals (CAS4.FINAL_RECIPIENT));
+                if(ObjectUtils.isEmpty(aPropFR.getType())) {
+                    messageOwner.setReceiverId(aPropFR.getValue());
+                    messageOwner.setSenderId(aPropOS.getValue());
+                } else {
+                    SimpleParticipantIdentifier receiver = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
+                            aPropFR.getType(), aPropFR.getValue());
+                    messageOwner.setReceiverId(receiver.getURIEncoded());
+                    SimpleParticipantIdentifier sender = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
+                            aPropOS.getType(), aPropOS.getValue());
+                    messageOwner.setSenderId(sender.getURIEncoded());
+                }
                 return messageOwner;
             }
         } catch (NullPointerException | MessageException | IOException e) {
