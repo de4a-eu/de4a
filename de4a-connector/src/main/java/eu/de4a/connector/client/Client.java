@@ -23,7 +23,6 @@ import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ISMLInfo;
 import com.helger.peppol.sml.SMLInfo;
@@ -50,7 +49,9 @@ import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.error.utils.ResponseErrorFactory;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.iem.jaxb.common.types.AckType;
@@ -66,7 +67,6 @@ import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.MessagesUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
@@ -111,9 +111,7 @@ public class Client {
 	        return nodeInfo;
 	    }
 	    
-		DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Requesting to SMP - "
-                + "ParticipantId: {0}, DocumentTypeId: {1}, MessageType: {2}", 
-                participantId, documentTypeId, messageType));		
+	    KafkaClientWrapper.sendInfo(LogMessages.LOG_SMP_REQ_SENT, participantId, documentTypeId, messageType);	
 		try {
 			// Requires the form iso6523-actorid-upis::9915:demo
 			final IParticipantIdentifier aPI = SimpleIdentifierFactory.INSTANCE
@@ -182,9 +180,8 @@ public class Client {
         }
         URIBuilder uriBuilder = buildURI(idkEndpoint, "There was an error creating URI from IDK endpoint", 
                 paths.toArray(new String[0]), new String[] {}, new String[] {});
-        
-        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request to IDK - "
-                + "URL: {0}", uriBuilder.toString()));
+
+        KafkaClientWrapper.sendInfo(LogMessages.LOG_IDK_REQ_SENT, uriBuilder.toString());
 
 		byte[] response = ErrorHandlerUtils.getRestObjectWithCatching(uriBuilder.toString(), true,
 		        new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), 
@@ -198,9 +195,8 @@ public class Client {
 	    URIBuilder uriBuilder = buildURI(idkEndpoint, "There was an error creating URI from IDK endpoint", 
                 new String[] {"provision"}, new String[] {"canonicalEvidenceTypeId", "dataOwnerId"}, 
                 new String[] {request.getCanonicalEvidenceTypeId(), request.getDataOwnerId().toLowerCase(Locale.ROOT)});
-	    
-	    DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request to IDK - "
-                + "URL: {0}", uriBuilder.toString()));
+
+	    KafkaClientWrapper.sendInfo(LogMessages.LOG_IDK_REQ_SENT, uriBuilder.toString());
         
         byte[] response = ErrorHandlerUtils.getRestObjectWithCatching(URLDecoder.decode(uriBuilder.toString(), StandardCharsets.UTF_8), 
                 true, new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.IDK), this.restTemplate);
@@ -244,11 +240,9 @@ public class Client {
     		RequestTransferEvidenceUSIDTType requestUSIDT = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
     		        .conversionDocWithCatching(DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
     		        requestDoc, false, true, exception);
-    
-            DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending RequestForwardEvidence to the Data Evaluator - "
-                    + "RequestId: {0}, DataEvaluatorId: {1}, DataOwnerId: {2}, Endpoint: {3}",
-                    requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
-                    requestUSIDT.getDataOwner().getAgentUrn(), endpoint));
+    		
+    		KafkaClientWrapper.sendInfo(LogMessages.LOG_REQ_DE, requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
+                    requestUSIDT.getDataOwner().getAgentUrn(), endpoint);
     		
     		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
     		byte[] request = (byte[]) ErrorHandlerUtils.conversionBytesWithCatching(
@@ -264,23 +258,27 @@ public class Client {
            return AckType.OK.equals(responseObj.getAck());
 		} catch(ConnectorException e) {
 		    String errorMsg = ResponseErrorFactory.getHandlerFromClassException(e.getClass()).getMessage(e);
-		    DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+		    KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_UNEXPECTED, errorMsg);
 		}
 		return false;
 	}
 
 	public Object sendEvidenceRequest(RequestTransferEvidenceUSIIMDRType evidenceRequest, String endpoint,
             boolean isUsi) {
-	    String requestType = "RequestExtractEvidence" + (isUsi ? " USI" : " IM");
-
-        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending {0} to the Data Owner - "
-                + "RequestId: {1}, CanonicalEvidenceType: {2}, DataEvaluatorId: {3}, DataOwnerId: {4}, "
-                + "Endpoint: {5}", requestType, evidenceRequest.getRequestId(), evidenceRequest.getCanonicalEvidenceTypeId(),
-                evidenceRequest.getDataEvaluator().getAgentUrn(), evidenceRequest.getDataOwner().getAgentUrn(), endpoint));
+        String requestType;
+        LogMessages logMessage;
+        if(isUsi) {
+            requestType = "requestExtractEvidence" + "USI";
+            logMessage = LogMessages.LOG_USI_REQ_PROC;
+        } else {
+            requestType = "requestExtractEvidence" + "IM";
+            logMessage = LogMessages.LOG_IM_REQ_PROC;
+        }
+        KafkaClientWrapper.sendInfo(logMessage, "Processing " + requestType, evidenceRequest.getRequestId(), evidenceRequest.getCanonicalEvidenceTypeId(),
+                evidenceRequest.getDataEvaluator().getAgentUrn(), evidenceRequest.getDataOwner().getAgentUrn(), endpoint);
         
-        String path = (isUsi ? "requestExtractEvidenceUSI" : "requestExtractEvidenceIM");
         URIBuilder uriBuilder = buildURI(endpoint, "There was an error creating URI from owner endpoint: {}", 
-                new String[] {path}, new String[] {}, new String[] {});
+                new String[] {requestType}, new String[] {}, new String[] {});
 
         ConnectorException exception;
         if (!isUsi) {
@@ -331,7 +329,7 @@ public class Client {
                 }
             }
 	    } catch (NullPointerException | URISyntaxException e) {
-            DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format(errorMsg, endpoint));
+	        KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_UNEXPECTED, MessageFormat.format(errorMsg, endpoint));
             return new URIBuilder();
         }
 	    

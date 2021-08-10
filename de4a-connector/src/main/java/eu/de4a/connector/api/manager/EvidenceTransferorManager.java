@@ -16,7 +16,6 @@ import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.helger.commons.error.level.EErrorLevel;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
 
@@ -33,8 +32,10 @@ import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.model.MessageKeys;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.error.utils.ResponseErrorFactory;
 import eu.de4a.connector.model.OwnerAddresses;
 import eu.de4a.connector.model.RequestorRequest;
@@ -49,7 +50,6 @@ import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.de4a.util.MessagesUtils;
@@ -98,9 +98,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 // TODO if as4 message DT-DR failed, what is the approach. retries?
                 if (!sendResponseMessage(req.getDataEvaluator().getAgentUrn(),req.getDataOwner().getAgentUrn(),
                         req.getCanonicalEvidenceTypeId(), docResponse.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
-                    String errorMsg = MessageFormat.format("Error sending ResponseTransferEvidence to Data Requestor via AS4 gateway - "
-                            + "RequestId: {0}", req.getRequestId());
-                    DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+                    KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_RESP_SENDING, req.getRequestId());
                 }
             } else {
                 req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
@@ -116,10 +114,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
                     Document doc = DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE).getAsDocument(reqUSIDT);
                     //An error sending request to DO occurs. The error is sending back to the DE
                     if(!sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getDataOwner().getAgentUrn(), req.getCanonicalEvidenceTypeId(), 
-                            doc.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
-                        String errorMsg = MessageFormat.format("Error sending message to Data Requestor via AS4 gateway - "
-                                + "RequestId: {0}", req.getRequestId());                
-                        DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+                            doc.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {  
+                        KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_MSG_SENDING, req.getRequestId());
                     }
                 }
             }
@@ -154,17 +150,17 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 .withModule(ExternalModuleError.CONNECTOR_DT);
         RequestorRequest usirequest = requestorRequestRepository.findById(response.getId()).orElse(null);
         if (usirequest == null) {
-            String msgError = MessageFormat.format("The corresponding request to the received response is not found on database - "
-                    + "RequestId: {0}", response.getId());
-            DE4AKafkaClient.send(EErrorLevel.WARN, "Processing RequestTransferEvidenceUSIDT - " + msgError);
+            String msgError = new MessageUtils(LogMessages.LOG_ERROR_AS4_RESP_RECEIPT.getKey(), 
+                    new Object[] {response.getId()}).value();
+            KafkaClientWrapper.sendWarn(LogMessages.LOG_ERROR_AS4_RESP_RECEIPT, response.getId());
             throw ex.withFamily(FamilyErrorType.SAVING_DATA_ERROR).withMessageArg(msgError);
         } else {
             try {
                 if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getDataOwnerId(), usirequest.getCanonicalEvidenceTypeId(), 
                         response.getMessage(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
-                    String errorMsg = MessageFormat.format("Error sending message to Data Requestor via AS4 gateway - "
-                            + "RequestId: {0}", response.getId());                
-                    DE4AKafkaClient.send(EErrorLevel.ERROR, errorMsg);
+                    String errorMsg = MessageFormat.format(new MessageUtils(LogMessages.LOG_ERROR_AS4_MSG_SENDING.getKey()).value(), 
+                            response.getId());                
+                    KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_MSG_SENDING, response.getId());
                     
                     throw ex.withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION)
                         .withModule(ExternalModuleError.CONNECTOR_DR).withMessageArg(errorMsg);
@@ -192,9 +188,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
             }
             
             NodeInfo nodeInfo = client.getNodeInfo(receiverId, docTypeID, true, message);
-            DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending response message via AS4 gateway - "
-                    + "DataEvaluatorId: {0}, Message tag: {1}, CanonicalEvidenceType: {2}", 
-                    receiverId, tagContentId, docTypeID));
+            
+            KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_RESP_SENT, receiverId, tagContentId, docTypeID);
             
             List<TCPayload> payloads = new ArrayList<>();
             TCPayload payload = new TCPayload();
@@ -220,13 +215,11 @@ public class EvidenceTransferorManager extends EvidenceManager {
     }
     
     private OwnerAddresses getOwnerAddress(String dataOwnerId, ConnectorException ex) {
-        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Looking for Data Owner address - "
-                + "DataOwnerId: {0}", dataOwnerId));
+        KafkaClientWrapper.sendInfo(LogMessages.LOG_OWNER_LOOKUP, dataOwnerId);
         
         OwnerAddresses ownerAddress = agentsLocator.lookupOwnerAddress(dataOwnerId);
         if (ownerAddress == null) {
-            DE4AKafkaClient.send(EErrorLevel.ERROR,
-                    MessageFormat.format("Data Owner address not found - DataOwnerId: {0}", dataOwnerId));
+            KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_OWNER_LOOKUP, dataOwnerId);
 
             throw ex.withFamily(FamilyErrorType.SAVING_DATA_ERROR).withLayer(LayerError.CONFIGURATION)
                     .withMessageArg(new MessageUtils(MessageKeys.ERROR_OWNER_NOT_FOUND, new Object[] { dataOwnerId }));
