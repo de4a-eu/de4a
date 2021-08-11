@@ -212,6 +212,7 @@ ssl.keystore.password= #(Private key password)
 ssl.truststore.path= #(JKS truststore)
 ssl.truststore.password= #(Truststore password)
 ```
+Eventually, due to your environment configuration and structure, you need to disabled the SSL context property, in that case, you should configure the corresponding JVM parameters to specify the truststore, keystore, etc. or the further actions depending of your environment configuration.
 #### Kafka configuration `application.properties`
 In order to send log messages to a kafka server, configure the following parameters:
 ```properties
