@@ -232,7 +232,7 @@ de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
 toop.tracker.enabled = false
 ```
 **IMPORTANT** - If your server has no access to external domains, the HTTP kafka and proxy configuration should be enabled.
-To enable HTTP kafka log producer, you only need to set the property to true `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**
+To enable HTTP kafka log producer, you only need to set the property to true `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**  
 It is important to mention the property `de4a.kafka.logging.enabled`, used to enable the file log printing for each kafka message sent, that property could be enabled even when the `de4a.kafka.enabled=false`, just for write the log at the different appenders configured in the log4j2 configuration file.
 
 #### SMP properties `application.properties`
