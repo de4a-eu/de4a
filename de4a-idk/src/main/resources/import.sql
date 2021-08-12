@@ -36,7 +36,7 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (10, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 10);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (11, 'BirthCertificate', 'nuts0', 'LU', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (11, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9999:lu000000025', 'CENTRE DES TECHNOLOGIES DE L'INFORMATION DE L'ETAT (CTIE)', 11);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (11, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9999:lu000000025', 'CENTRE DES TECHNOLOGIES DE L''INFORMATION DE L''ETAT (CTIE)', 11);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (11, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 11);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (12, 'DomicileRegistrationEvidence', 'nuts0', 'PT', null, null);
@@ -56,7 +56,7 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (15, 'ip', null, 15);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (16, 'DeathCertificate', 'nuts0', 'LU', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (16, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9999:lu000000025', 'CENTRE DES TECHNOLOGIES DE L'INFORMATION DE L'ETAT (CTIE)', 16);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (16, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9999:lu000000025', 'CENTRE DES TECHNOLOGIES DE L''INFORMATION DE L''ETAT (CTIE)', 16);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (16, 'ip', null, 16);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (17, 'MarriageEvidence', 'nuts0', 'ES', null, null);
@@ -72,7 +72,7 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (19, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 19);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (20, 'MarriageEvidence', 'nuts0', 'LU', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (20, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9999:lu000000025', 'CENTRE DES TECHNOLOGIES DE L'INFORMATION DE L'ETAT (CTIE)', 20);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (20, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9999:lu000000025', 'CENTRE DES TECHNOLOGIES DE L''INFORMATION DE L''ETAT (CTIE)', 20);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (20, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 20);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (21, 'DomicileRegistrationEvidence', 'nuts0', 'ES', null, null);
