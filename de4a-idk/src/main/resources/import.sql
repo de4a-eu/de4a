@@ -41,7 +41,7 @@ INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES 
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (12, 'DomicileRegistrationEvidence', 'nuts0', 'PT', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (12, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9999:pt000000026', 'AGENCIA PARA A MODERNIZACAO ADMINISTRATIVA IP', 12);
-INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (12, 'ip', null, 12);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (12, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 12);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (13, 'DeathCertificate', 'nuts0', 'ES', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (13, 'ES', 'España', 'iso6523-actorid-upis::9999:e00003901', 'Ministerio de Justicia', 13);
