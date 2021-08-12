@@ -7,9 +7,9 @@
 <spring:eval expression="@environment.getProperty('de4a.kafka.url')" var="kafkaUrl" />
 <spring:eval expression="@environment.getProperty('smp.endpoint')" var="smpEndpoint" />
 <spring:eval expression="@environment.getProperty('idk.endpoint')" var="idkEndpoint" />
-<spring:eval expression="@environment.getProperty('phase4.send.toparty.id.type')" var="phase4SendToParty" />
-<spring:eval expression="@environment.getProperty('phase4.send.fromparty.id.type')" var="phase4SendFromParty" />
-<spring:eval expression="@environment.getProperty('toop.mem.implementation')" var="toopImpl" />
+<spring:eval expression="@environment.getProperty('smpclient.truststore.path')" var="smpTruststore" />
+<spring:eval expression="@environment.getProperty('phase4.keystore.path')" var="phase4Keystore" />
+<spring:eval expression="@environment.getProperty('phase4.truststore.path')" var="phase4Truststore" />
 <spring:eval expression="@environment.getProperty('as4.gateway.implementation.bean')" var="as4GatewayBean" />
 
 
@@ -87,10 +87,10 @@
 	<h4 class="param-name">de4a.kafka.topic: <span class="param-value value">${empty kafkaTopic ? 'not-set' : kafkaTopic}</span></h4><br>
 	<h4 class="param-name">smp.endpoint: <span class="param-value value">${empty smpEndpoint ? 'not-set' : smpEndpoint}</span></h4>
 	<h4 class="param-name">idk.endpoint: <span class="param-value value">${empty idkEndpoint ? 'not-set' : idkEndpoint}</span></h4><br>
-	<h4 class="param-name">phase4.send.toparty.id.type: <span class="param-value value">${empty phase4SendToParty ? 'not-set' : phase4SendToParty}</span></h4>
-	<h4 class="param-name">phase4.send.fromparty.id.type: <span class="param-value value">${empty phase4SendFromParty ? 'not-set' : phase4SendFromParty}</span></h4>
-	<h4 class="param-name">toop.mem.implementation: <span class="param-value value">${empty toopImpl ? 'not-set' : toopImpl}</span></h4>
-	<h4 class="param-name">as4.gateway.implementation.bean: <span class="param-value value">${empty as4GatewayBean ? 'not-set' : as4GatewayBean}</span></h4>
+	<h4 class="param-name">smpclient.truststore.path: <span class="param-value value">${empty smpTruststore ? 'not-set' : smpTruststore}</span></h4>
+	<h4 class="param-name">phase4.keystore.path: <span class="param-value value">${empty phase4Keystore ? 'not-set' : phase4Keystore}</span></h4>
+	<h4 class="param-name">phase4.truststore.path: <span class="param-value value">${empty phase4Truststore ? 'not-set' : phase4Truststore}</span></h4>
+    <h4 class="param-name">as4.gateway.implementation.bean: <span class="param-value value">${empty as4GatewayBean ? 'not-set' : as4GatewayBean}</span></h4>
 	<hr style="width: 40%;min-width:600px;margin-left:0; margin-top:25px;">
 	
 	<h4>Check out the system API on: <a href="./swagger-ui/">Connector Swagger API definition</a></h4>
