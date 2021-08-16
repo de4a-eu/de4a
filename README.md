@@ -33,7 +33,7 @@ idk/src/main/eu/idk/configuration/Conf.java
 
 ## de4a-connector
 #### `package`
-Checkout the technical documentation on [DE4A Connector - Installation and configuration](https://newrepository.atosresearch.eu/index.php/f/1059081)
+Checkout the technical documentation on [DE4A D5.5 First Release of DE4A Common Components v1.0.1](https://newrepository.atosresearch.eu/remote.php/webdav/DE4A-Project/06%20Workpackages/WP5%20Components%20design/D5.5%20First%20Release%20of%20DE4A%20Common%20Components/DE4A%20D5.5%20First%20Release%20of%20DE4A%20Common%20Components%20v1.0.1.docx)
 ### API doc
 Once you deploy a Connector instance, it will be able to access to Swagger UI browsing:
 ```sh
@@ -111,9 +111,10 @@ spring.messages.default_locale=en
 # Spring allowing override beans
 spring.main.allow-bean-definition-overriding=true
 
-# Servlet encoding
+# Charset encoding
 server.servlet.encoding.charset=UTF-8
-server.servlet.encoding.force-response=true
+server.servlet.encoding.enabled=true
+server.servlet.encoding.force=true
 
 # SSL context enabled (true|false)
 ssl.context.enabled=false
@@ -134,7 +135,7 @@ global.instancename = dev-from-ide
 
 # DE4A Kafka settings
 de4a.kafka.enabled=true
-# Enables the standard logging separately of the Kafka messages - (default: true)
+# Enables the standard logging separately of the Kafka messages. It is neccessary for print metrics messages - (default: true)
 de4a.kafka.logging.enabled=true
 # Enables Kafka connection via HTTP (Only enable HTTP mode if outbound TCP connections are blocked from your internal network)
 de4a.kafka.http.enabled=false
@@ -146,6 +147,9 @@ de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
 
 # Establish a topic on kafka tracker - Pattern: de4a-<country-code>-<partner-name> - Eg.: de4a-se-egovlab - (default: de4a-connector)
 de4a.kafka.topic=de4a-connector
+
+# Logging metrics messages prefix - Default: DE4A METRICS
+log.metrics.prefix=DE4A METRICS
 
 # toop legacy kafka properties (Do not touch)
 toop.tracker.enabled = false
@@ -208,11 +212,14 @@ ssl.keystore.password= #(Private key password)
 ssl.truststore.path= #(JKS truststore)
 ssl.truststore.password= #(Truststore password)
 ```
+Eventually, due to your environment configuration and structure, you need to disabled the SSL context property, in that case, you should configure the corresponding JVM parameters to specify the truststore, keystore, etc. or the further actions depending of your environment configuration.
 #### Kafka configuration `application.properties`
 In order to send log messages to a kafka server, configure the following parameters:
 ```properties
 # DE4A Kafka settings
 de4a.kafka.enabled=true
+# Enables the standard logging separately of the Kafka messages. It is neccessary for print metrics messages - (default: true)
+de4a.kafka.logging.enabled=true
 # Enables Kafka connection via HTTP (Only enable HTTP mode if outbound TCP connections are blocked from your internal network)
 de4a.kafka.http.enabled=false
 
@@ -225,7 +232,8 @@ de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
 toop.tracker.enabled = false
 ```
 **IMPORTANT** - If your server has no access to external domains, the HTTP kafka and proxy configuration should be enabled.
-To enable HTTP kafka log producer, you only need to set the property to true `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**
+To enable HTTP kafka log producer, you only need to set the property to true `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**  
+It is important to mention the property `de4a.kafka.logging.enabled`, used to enable the file log printing for each kafka message sent, that property could be enabled even when the `de4a.kafka.enabled=false`, just for write the log at the different appenders configured in the log4j2 configuration file.
 
 #### SMP properties `application.properties`
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
@@ -318,19 +326,27 @@ The configuration file bellow maintains the logging configuration where you can 
 **Important** - to correctly configure the path of log file. By default it is a relative path to catalina.base (Tomcat server) `${sys:catalina.base}/logs/connector.log`
 ```xml
 <RollingFile name="rollingFile"
-    fileName="${sys:catalina.base}/logs/connector.log"
-    filePattern="${sys:catalina.base}/logs/history/connector.%d{dd-MMM}.log.gz"
-    ignoreExceptions="false">
-    <PatternLayout>
-        <Pattern>>%d %p %C{1.} [%t] %m%n</Pattern>
-    </PatternLayout>
-    <Policies>
-        <OnStartupTriggeringPolicy />
-        <SizeBasedTriggeringPolicy size="30 MB" />
-    </Policies>
-    <DefaultRolloverStrategy max="5" />
+	fileName="${sys:catalina.base}/logs/connector.log"
+	filePattern="${sys:catalina.base}/logs/history/connector.%d{dd-MMM}.log.gz"
+	ignoreExceptions="false">
+	<PatternLayout>
+		<Pattern>>$${ctx:metrics:-}[%date{ISO8601}][%-5level][$${ctx:logcode:-}][DE4A-CONNECTOR][$${ctx:origin:-}][$${ctx:destiny:-}] %msg -- %location [%thread]%n</Pattern>
+	</PatternLayout>
+	<Policies>
+		<OnStartupTriggeringPolicy />
+		<SizeBasedTriggeringPolicy size="30 MB" />
+	</Policies>
+	<DefaultRolloverStrategy max="5" />
 </RollingFile>
 ```
+Also, in the `application.properties` there is another property related with the logging.
+```properties
+# Logging metrics messages prefix - Default: DE4A METRICS
+log.metrics.prefix=DE4A METRICS
+```
+It is used to include a prefix on each logging line written by the Kafka logging that could be useful to parse and filter the lines with metrics information.
+
+
 ## Starting up Connector
 Once you have all configuration parameters well configured (if not, check the logs to find out the problem), it is time to deploy the component into an applications server.
 Once you have deployed the `war` file, there are several **checks to ensure that the deployment was successful**:

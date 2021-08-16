@@ -21,7 +21,9 @@ pipeline {
 
         stage('Build'){
             when {
-                branch 'master'
+                anyOf{
+                    branch 'master'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
+                }
             }
             agent {
                 docker {
@@ -42,26 +44,54 @@ pipeline {
                 branch 'master'
             }
             agent { label 'master' }
-            environment {
-                VERSION=readMavenPom().getVersion()
-            }
             steps {
                 script{
                     def img
                     if (env.BRANCH_NAME == 'master') {
                         dir('de4a-idk') {
-                            img = docker.build('de4a/mock-idk','.')
+                            env.VERSION = readMavenPom().getVersion()
+                            img = docker.build('de4a/mock-idk',".")
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
-                                img.push('$VERSION')
+                                img.push("${env.VERSION}")
                             }
                         }
                         dir('de4a-connector') {
+                            env.VERSION = readMavenPom().getVersion()
                             img = docker.build('de4a/connector','.')
                             docker.withRegistry('','docker-hub-token') {
                                 img.push('latest')
-                                img.push('$VERSION')
+                                img.push("${env.VERSION}")
                             }
+                        }
+                    }
+                }
+                sh 'docker system prune -f'
+            }
+        }
+
+        stage('Docker iteration'){
+            when {
+                branch pattern: 'iteration\\d+', comparator: 'REGEXP'
+            }
+            agent { label 'master' }
+            steps {
+                script{
+                    def img
+                    dir('de4a-idk') {
+                        env.VERSION = readMavenPom().getVersion()
+                        img = docker.build('de4a/mock-idk',".")
+                        docker.withRegistry('','docker-hub-token') {
+                            img.push("${env.BRANCH_NAME}")
+                            img.push("${env.VERSION}")
+                        }
+                    }
+                    dir('de4a-connector') {
+                        env.VERSION = readMavenPom().getVersion()
+                        img = docker.build('de4a/connector','.')
+                        docker.withRegistry('','docker-hub-token') {
+                            img.push("${env.BRANCH_NAME}")
+                            img.push("${env.VERSION}")
                         }
                     }
                 }
@@ -77,16 +107,14 @@ pipeline {
                     env.REPO=env.JOB_NAME.split('/')[1]
                     env.BR=env.JOB_NAME.split('/')[2]
                     env.ERRORLOG = sh returnStdout: true, script: "cat ${env.JENKINS_HOME}/jobs/${env.ORG}/jobs/${env.REPO}/branches/${env.BR}/builds/${BUILD_NUMBER}/log | grep -B 1 -A 5 '\\[ERROR\\]'"
-                    slackSend color: "danger", message: ":darth_maul: Build fail! :darth_maul:\nJob name: ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}\nGit Author: ${env.CHANGE_AUTHOR}, Branch: ${env.GIT_BRANCH}, ${env.GIT_URL}\nMaven [ERROR] log below:\n ${env.ERRORLOG}"
+                    slackSend color: "danger", message: ":darth_maul: Build fail! :darth_maul:\nJob name: ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}\nGit Author: ${env.CHANGE_AUTHOR}, Branch: ${env.BRANCH_NAME}, ${env.GIT_URL}\nMaven [ERROR] log below:\n ${env.ERRORLOG}"
                 }
             }
         }
         fixed {
             node('master') {
                 script {
-            //        if(currentBuild.getPreviousBuild() && currentBuild.getPreviousBuild().getResult().toString() != 'SUCCESS') {
-                        slackSend color: "good", message: ":baby-yoda: This is the way! :baby-yoda: \nJob name: ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}\nGit Author: ${env.CHANGE_AUTHOR}, Branch: ${env.GIT_BRANCH}, ${env.GIT_URL}\n"
-             //       }
+                        slackSend color: "good", message: ":baby-yoda: This is the way! :baby-yoda: \nJob name: ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}\nGit Author: ${env.CHANGE_AUTHOR}, Branch: ${env.BRANCH_NAME}, ${env.GIT_URL}\n"
                 }
             }
         }
