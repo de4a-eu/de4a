@@ -1,6 +1,5 @@
 package eu.de4a.connector.api.manager;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -17,7 +16,6 @@ import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.helger.commons.error.level.EErrorLevel;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
@@ -34,7 +32,9 @@ import eu.de4a.connector.error.handler.ResponseTransferEvidenceExceptionHandler;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
@@ -44,7 +44,6 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
@@ -175,9 +174,8 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		    }
 		    
 		    NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false, userMessage);
-			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request message via AS4 gateway - "
-                    + "DataEvaluatorId: {0}, DataOwnerId: {1}, CanonicalEvidenceType: {2}",
-                    sender, dataOwnerId, canonicalEvidenceTypeId));
+	        
+	        KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_REQ_SENT, sender, dataOwnerId, canonicalEvidenceTypeId);
 			
 			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();

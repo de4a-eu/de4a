@@ -7,15 +7,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
-import com.helger.commons.error.level.EErrorLevel;
 import com.helger.phase4.attachment.WSS4JAttachment;
 
 import eu.de4a.connector.as4.client.Phase4GatewayClient;
 import eu.de4a.connector.as4.owner.MessageRequestOwner;
 import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
+import eu.de4a.connector.error.model.LogMessages;
+import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.mem.phase4.servlet.EdmRequestWrapper;
+import eu.de4a.connector.service.spring.MessageUtils;
 import eu.de4a.exception.MessageException;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.me.incoming.IMEIncomingHandler;
@@ -46,9 +47,8 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
         WSS4JAttachment attached = edmwrapper.getAttacheds().stream()
                 .filter(e -> e.getId().equals(DE4AConstants.TAG_EVIDENCE_REQUEST)).findFirst().orElse(null);
         if (attached == null) {
-            String err = "RequestTransferEvidence not found on AS4 incomming message";
-            DE4AKafkaClient.send(EErrorLevel.ERROR, err);
-            throw new MEIncomingException(err);
+            KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_MSG_INVALID);
+            throw new MEIncomingException(new MessageUtils(LogMessages.LOG_ERROR_AS4_MSG_INVALID.getKey()).value());
         }
         Document evidenceRequest = DOMUtils.newDocumentFromInputStream(attached.getSourceStream());
         try {          
@@ -59,11 +59,9 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
             messageOwner.setSenderId(aRequest.getMetadata().getSenderID().getURIEncoded());
             messageOwner.setReceiverId(aRequest.getMetadata().getReceiverID().getURIEncoded());
 
-            DE4AKafkaClient.send(EErrorLevel.INFO, "Processing the request received via AS4 gateway - RequestId: " 
-                    + messageOwner.getId());
+            KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_REQ_RECEIPT, messageOwner.getId());
         } catch (MessageException e) {
-            DE4AKafkaClient.send(EErrorLevel.ERROR, "Error processing incoming request from AS4 gateway: " 
-                    + e.getMessage());
+            KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_REQ_INCOMING, e.getMessage());
         }
         publisher.publishCustomEvent(messageOwner);
     }

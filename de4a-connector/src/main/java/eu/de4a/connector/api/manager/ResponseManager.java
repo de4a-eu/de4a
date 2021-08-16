@@ -23,15 +23,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.helger.commons.error.level.EErrorLevel;
-
 import eu.de4a.connector.as4.client.ResponseWrapper;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.model.EvaluatorAddresses;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.model.EvaluatorRequestData;
@@ -42,7 +42,6 @@ import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 
@@ -65,14 +64,11 @@ public class ResponseManager {
 	public void processAS4Response(ResponseWrapper response) {
 		String id = response.getId();
 		
-		String logMsg = MessageFormat.format("Processing the response received via AS4 gateway - RequestId: {0}", id);
-        DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+		KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_RESP_RECEIPT, id);
 		
 		EvaluatorRequest evaluatorinfo = evaluatorRequestRepository.findById(id).orElse(null);
 		if (evaluatorinfo == null) {
-		    logMsg = MessageFormat.format("The corresponding request to the received response is not found on database "
-		            + "- RequestId: {0}", id);
-			DE4AKafkaClient.send(EErrorLevel.ERROR, logMsg);
+		    KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_RESP_RECEIPT, id);
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
@@ -85,9 +81,7 @@ public class ResponseManager {
                     client.pushEvidence(evaluatorAddress.getEndpoint(), doc);
                 } else {
                     //TODO in this case, how DE or DO is advised of the situation?
-                    DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format("RequestForwardEvidence has not been sent, "
-                            + "unkown Data Evaluator endpoint - RequestId: {0}, DataEvaluatorId: {1}", id, 
-                            evaluatorinfo.getIdevaluator()));
+                    KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_UNKNOWN_DE, id, evaluatorinfo.getIdevaluator());
                 }
             }
 		}

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -81,6 +82,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
     @Value("#{'${domibus.endpoint.jvm:${domibus.endpoint:}}'}")
     private String domibusEndpoint;
 
+    @Async
     @Scheduled(fixedRate = 2000)
     public void lookUpPendingMessage() {
         if (nameAs4Gateway.equalsIgnoreCase(DomibusGatewayClient.class.getSimpleName())) {
