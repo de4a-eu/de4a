@@ -23,19 +23,19 @@ INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvi
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (7, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9999:pt990000101', 'Instituto Superior Técnico, Universidade de Lisboa', 7);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (7, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 7);
 
-INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (8, 'BirthCertificate', 'nuts0', 'ES', null, null);
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (8, 'BirthEvidence', 'nuts0', 'ES', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (8, 'ES', 'España', 'iso6523-actorid-upis::9999:e00003901', 'Ministerio de Justicia', 8);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (8, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 8);
 
-INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (9, 'BirthCertificate', 'nuts0', 'RO', null, null);
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (9, 'BirthEvidence', 'nuts0', 'RO', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (9, 'RO', 'ROMÂNIA', 'iso6523-actorid-upis::9999:ro000000005', 'MINISTERUL AFACERILOR INTERNE (MoAI)', 9);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (9, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 9);
 
-INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (10, 'BirthCertificate', 'nuts0', 'SI', null, null);
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (10, 'BirthEvidence', 'nuts0', 'SI', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (10, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9999:si990000105', 'Ministrstvo za notranje zadeve', 10);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (10, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 10);
 
-INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (11, 'BirthCertificate', 'nuts0', 'LU', null, null);
+INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (11, 'BirthEvidence', 'nuts0', 'LU', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (11, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9999:lu000000025', 'CENTRE DES TECHNOLOGIES DE L''INFORMATION DE L''ETAT (CTIE)', 11);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (11, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 11);
 
