@@ -92,7 +92,7 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (24, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 24);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (25, 'HigherEducationDiploma', 'nuts0', 'ES', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (25, 'ES', 'España', 'iso6523-actorid-upis::9921:esq6250003h', 'Universitat Jaume I de Castellon', 25);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (25, 'ES', 'España', 'iso6523-actorid-upis::9999:ess2833002e', '(MPTFP-SGAD) Secretaría General de Administración Digital', 25);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (25, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 25);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (26, 'HigherEducationDiploma', 'nuts0', 'SI', null, null);
