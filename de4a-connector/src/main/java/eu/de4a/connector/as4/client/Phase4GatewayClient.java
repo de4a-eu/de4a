@@ -139,8 +139,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 	public void processResponseAs4(IncomingEDMResponse responseas4) {		
 		ConnectorException ex = new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
             .withFamily(FamilyErrorType.CONVERSION_ERROR)
-            .withModule(ExternalModuleError.CONNECTOR_DR)
-            .withHttpStatus(HttpStatus.OK);
+            .withModule(ExternalModuleError.CONNECTOR_DR);
 		
 		ResponseWrapper responsewrapper = new ResponseWrapper(context);
 		responseas4.getAllAttachments().forEachValue(a -> {

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -45,6 +46,7 @@ import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceUSIException;
 import eu.de4a.connector.error.exceptions.ResponseForwardEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationException;
+import eu.de4a.connector.error.exceptions.ResponseUSIRedirectUserException;
 import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
@@ -56,6 +58,7 @@ import eu.de4a.connector.error.utils.ResponseErrorFactory;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.iem.jaxb.common.types.AckType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
+import eu.de4a.iem.jaxb.common.types.RedirectUserType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
@@ -241,8 +244,9 @@ public class Client {
     		        .conversionDocWithCatching(DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE), 
     		        requestDoc, false, true, exception);
     		
-    		KafkaClientWrapper.sendInfo(LogMessages.LOG_REQ_DE, requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
-                    requestUSIDT.getDataOwner().getAgentUrn(), endpoint);
+    		KafkaClientWrapper.sendInfo(LogMessages.LOG_REQ_DE, RequestTransferEvidenceUSIDTType.class.getSimpleName(), 
+    		        requestUSIDT.getRequestId(), requestUSIDT.getDataEvaluator().getAgentUrn(), 
+    		        requestUSIDT.getDataOwner().getAgentUrn(), endpoint);
     		
     		RequestForwardEvidenceType requestForward = MessagesUtils.transformRequestTransferUSIDT(requestUSIDT);
     		byte[] request = (byte[]) ErrorHandlerUtils.conversionBytesWithCatching(
@@ -261,6 +265,29 @@ public class Client {
 		    KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_UNEXPECTED, errorMsg);
 		}
 		return false;
+	}
+	
+	public boolean pushRedirectUserMsg(String endpoint, Document requestDoc) {
+	    ConnectorException exception = new ResponseUSIRedirectUserException().withHttpStatus(HttpStatus.BAD_REQUEST);
+	    DE4AMarshaller<RedirectUserType> marshaller = DE4AMarshaller.deUsiRedirectUserMarshaller();
+	    URIBuilder uriBuilder = buildURI(endpoint, "Error building URI from Data Evaluator endpoint: {}", 
+                new String[] {"usiRedirectUser"}, new String[] {}, new String[] {});
+	    
+	    RedirectUserType redirectUserMsg = (RedirectUserType) ErrorHandlerUtils
+                .conversionBytesWithCatching(marshaller, requestDoc, false, true, 
+                        exception.withModule(ExternalModuleError.CONNECTOR_DR));
+	    
+	    KafkaClientWrapper.sendInfo(LogMessages.LOG_REQ_DE, "RedirectUser", 
+	            redirectUserMsg.getRequestId(), redirectUserMsg.getDataEvaluator().getAgentUrn(), "N/A", endpoint);
+	    
+	    byte[] response = ErrorHandlerUtils.postRestObjectWithCatching(uriBuilder.toString(), 
+	            marshaller.getAsBytes(redirectUserMsg), 
+                false, exception.withModule(ExternalModuleError.DATA_EVALUATOR), this.restTemplate);
+	    
+	    ResponseErrorType responseObj = (ResponseErrorType) ErrorHandlerUtils.conversionBytesWithCatching(
+                DE4AMarshaller.deUsiResponseMarshaller(), response, false, false, exception);
+        
+        return AckType.OK.equals(responseObj.getAck());
 	}
 
 	public Object sendEvidenceRequest(RequestTransferEvidenceUSIIMDRType evidenceRequest, String endpoint,

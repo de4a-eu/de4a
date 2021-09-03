@@ -2,6 +2,8 @@ package eu.de4a.connector.api;
 
 import java.io.InputStream;
 
+import javax.validation.Valid;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -29,5 +31,18 @@ public interface ResponseApi {
 					content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
 	})
 	public ResponseEntity<byte[]> requestTransferEvidenceUSIDT(@ApiParam(hidden = true) InputStream request);
+	
+	@ApiOperation(value = "Receive RedirectUser message - USI pattern",
+            consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "request", required = true,
+            dataType = "eu.de4a.iem.jaxb.common.types.RedirectUserType",
+            paramType = "body")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ResponseErrorType.class)))
+    })
+    public ResponseEntity<byte[]> redirectUserUsi(@Valid @ApiParam(hidden = true) InputStream request);
 
 }

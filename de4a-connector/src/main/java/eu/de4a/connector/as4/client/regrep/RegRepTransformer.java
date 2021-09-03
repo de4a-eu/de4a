@@ -88,8 +88,7 @@ public class RegRepTransformer {
 			throw new ConnectorException()
 			    .withFamily(FamilyErrorType.CONVERSION_ERROR)
 			    .withLayer(LayerError.INTERNAL_FAILURE)
-			    .withMessageArg(error)
-			    .withHttpStatus(HttpStatus.OK);
+			    .withMessageArg(error);
 		}
 
 	}

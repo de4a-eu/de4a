@@ -39,13 +39,12 @@ public class ErrorHandlerUtils {
                 .withFamily(FamilyErrorType.ERROR_RESPONSE) 
                 .withModule(ex.getModule())
                 .withMessageArg(MessageFormat.format("Failed or empty response received {0}", response))
-                .withRequest(ex.getRequest())
-                .withHttpStatus(HttpStatus.OK);
+                .withRequest(ex.getRequest());
             if(throwException) {
                 throw exception;
             }
             return new ResponseEntity<>((byte[]) ResponseErrorFactory.getHandlerFromClassException(
-                    ex.getClass()).getResponseError(exception, true), HttpStatus.OK);
+                    ex.getClass()).getResponseError(exception, true), HttpStatus.BAD_REQUEST);
         }
         return response;
     }
@@ -62,8 +61,7 @@ public class ErrorHandlerUtils {
             }
             ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
                     .withFamily(FamilyErrorType.CONNECTION_ERROR)
-                    .withMessageArg(e.getMessage())
-                    .withHttpStatus(HttpStatus.OK);
+                    .withMessageArg(e.getMessage());
             if(throwException) {
                 throw exception;
             }
@@ -86,8 +84,7 @@ public class ErrorHandlerUtils {
             }
             ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
                 .withFamily(FamilyErrorType.CONNECTION_ERROR)
-                .withMessageArg(e.getMessage())
-                .withHttpStatus(HttpStatus.OK);
+                .withMessageArg(e.getMessage());
             if(throwException) {
                 throw exception;
             }
@@ -103,8 +100,7 @@ public class ErrorHandlerUtils {
         Object returnObj = null;
         String errorMsg = "Object received is not valid, check the structure";
         ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
-                .withLayer(LayerError.INTERNAL_FAILURE)
-                .withHttpStatus(HttpStatus.OK);
+                .withLayer(LayerError.INTERNAL_FAILURE);
         marshaller.readExceptionCallbacks().set(e -> {
             if(!ObjectUtils.isEmpty(e.getLinkedException()))
                 ex.withMessageArg(e.getLinkedException().getMessage());
@@ -145,6 +141,8 @@ public class ErrorHandlerUtils {
                 retObj = marshaller.read((InputStream) obj);
             } else if(obj instanceof byte[]) {
                 retObj = marshaller.read((byte[]) obj);
+            } else if(obj instanceof Document) {
+                retObj = marshaller.read((Document) obj);
             } else {
                 retObj = null;
             }
@@ -158,8 +156,7 @@ public class ErrorHandlerUtils {
         Object returnObj = null;
         String errorMsg = "Object received is not valid, check the structure";
         ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
-                .withFamily(FamilyErrorType.CONVERSION_ERROR)
-                .withHttpStatus(HttpStatus.OK);
+                .withFamily(FamilyErrorType.CONVERSION_ERROR);
         marshaller.readExceptionCallbacks().set(e -> {
             if(!ObjectUtils.isEmpty(e.getLinkedException()))
                 ex.withMessageArg(e.getLinkedException().getMessage());
