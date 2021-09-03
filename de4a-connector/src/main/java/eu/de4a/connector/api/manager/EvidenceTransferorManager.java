@@ -76,16 +76,17 @@ public class EvidenceTransferorManager extends EvidenceManager {
         }
         ResponseTransferEvidenceType responseTransferEvidenceType = null;
         RequestTransferEvidenceUSIIMDRType req = null;
-        ConnectorException ex = new OwnerException().withModule(ExternalModuleError.CONNECTOR_DT)
-                .withHttpStatus(HttpStatus.OK);
+        ConnectorException ex = new OwnerException().withModule(ExternalModuleError.CONNECTOR_DT);
         try {
-            OwnerAddresses ownerAddress = getOwnerAddress(request.getReceiverId(), ex);
+            OwnerAddresses ownerAddress = null;
             RequestorRequest requestorReq = new RequestorRequest();
             if(!DE4AConstants.NAMESPACE_USI.equals(request.getMessage().getNamespaceURI())) {
                 req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
                         .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(),
                                 request.getMessage().getOwnerDocument(), false, false,
                                 new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
+                ex.setRequest(req);
+                ownerAddress = getOwnerAddress(request.getReceiverId(), ex);
                 
                 requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
@@ -104,6 +105,9 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
                         DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage().getOwnerDocument(), false, 
                         true, new ResponseTransferEvidenceUSIException().withModule(ExternalModuleError.CONNECTOR_DT));
+                ex.setRequest(req);
+                ownerAddress = getOwnerAddress(request.getReceiverId(), ex);
+                
                 requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
                 
@@ -139,7 +143,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
         }
     }
 
-    public void queueMessageResponse(MessageResponseOwner response) {
+    public void queueMessageResponse(MessageResponseOwner response, String tag) {
         logger.info("Queued response from owner USI pattern - RequestId: {}, DataEvaluatorId: {}, DataOwnerId: {}", 
                 response.getId(), response.getDataEvaluatorId(), response.getDataOwnerId());
         if (logger.isDebugEnabled()) {          
@@ -157,7 +161,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
         } else {
             try {
                 if(!sendResponseMessage(usirequest.getSenderId(), usirequest.getDataOwnerId(), usirequest.getCanonicalEvidenceTypeId(), 
-                        response.getMessage(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {
+                        response.getMessage(), tag)) {
                     String errorMsg = MessageFormat.format(new MessageUtils(LogMessages.LOG_ERROR_AS4_MSG_SENDING.getKey()).value(), 
                             response.getId());                
                     KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_MSG_SENDING, response.getId());

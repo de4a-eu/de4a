@@ -10,6 +10,8 @@ public enum LogMessages {
             ExternalModuleError.CONNECTOR_DR, ExternalModuleError.CONNECTOR_DT),
     LOG_USI_REQ_PROC("log.request.receipt.imusi", "02", LogMessageTypes.SERVICES, 
             ExternalModuleError.CONNECTOR_DR, ExternalModuleError.CONNECTOR_DT),
+    LOG_USI_RED_USER("log.request.receipt.imusi", "03", LogMessageTypes.SERVICES, 
+            ExternalModuleError.CONNECTOR_DR, ExternalModuleError.CONNECTOR_DT),
     LOG_USI_DT_REQ_RECEIPT("log.request.receipt.usidt", "03", LogMessageTypes.SERVICES, 
             ExternalModuleError.DATA_OWNER, ExternalModuleError.CONNECTOR_DT),
     LOG_IDK_REQ_RECEIPT("log.request.receipt.idk", "04", LogMessageTypes.SERVICES, 

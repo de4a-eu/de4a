@@ -12,6 +12,7 @@ import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationExcept
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIException;
+import eu.de4a.connector.error.exceptions.ResponseUSIRedirectUserException;
 import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.handler.GenericExceptionHandler;
@@ -39,6 +40,7 @@ public class ResponseErrorFactory {
         handlers.put(ResponseForwardEvidenceException.class, new ResponseErrorExceptionHandler());
         handlers.put(ResponseExtractEvidenceException.class, new ResponseExtractEvidenceExceptionHandler());
         handlers.put(OwnerException.class, new ResponseTransferEvidenceExceptionHandler());
+        handlers.put(ResponseUSIRedirectUserException.class, new ResponseErrorExceptionHandler());
 	}
 	public static byte[] getResponseError(ConnectorException ex) {
 		return (byte[]) handlers.get(ex.getClass()).getResponseError(ex, true);

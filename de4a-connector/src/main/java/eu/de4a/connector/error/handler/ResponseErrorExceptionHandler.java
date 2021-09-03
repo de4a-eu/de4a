@@ -5,6 +5,7 @@ import eu.de4a.connector.error.exceptions.ResponseExtractEvidenceUSIException;
 import eu.de4a.connector.error.exceptions.ResponseForwardEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIException;
+import eu.de4a.connector.error.exceptions.ResponseUSIRedirectUserException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
@@ -21,6 +22,8 @@ public class ResponseErrorExceptionHandler extends ConnectorExceptionHandler {
             } else if(ex instanceof ResponseForwardEvidenceException) {
                 return DE4AMarshaller.deUsiResponseMarshaller().getAsBytes(response);
             } else if(ex instanceof ResponseTransferEvidenceUSIException) {
+                return DE4AMarshaller.drUsiResponseMarshaller().getAsBytes(response);
+            } else if(ex instanceof ResponseUSIRedirectUserException) {
                 return DE4AMarshaller.drUsiResponseMarshaller().getAsBytes(response);
             } else if(ex instanceof ResponseTransferEvidenceUSIDTException) {
                 return DE4AMarshaller.dtUsiResponseMarshaller().getAsBytes(response);

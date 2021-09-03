@@ -145,8 +145,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
         
         ConnectorException ex = new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
             .withFamily(FamilyErrorType.CONVERSION_ERROR)
-            .withModule(ExternalModuleError.CONNECTOR_DR)
-            .withHttpStatus(HttpStatus.OK);
+            .withModule(ExternalModuleError.CONNECTOR_DR);
         
         ResponseWrapper responsewrapper = new ResponseWrapper(context);
         try {

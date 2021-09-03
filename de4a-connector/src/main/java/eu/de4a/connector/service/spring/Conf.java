@@ -80,6 +80,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import eu.de4a.config.DataSourceConf;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
+import eu.de4a.iem.jaxb.common.types.RedirectUserType;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
@@ -171,7 +172,8 @@ public class Conf implements WebMvcConfigurer {
 						typeResolver.resolve(RequestForwardEvidenceType.class),
 						typeResolver.resolve(RequestLookupRoutingInformationType.class),
 						typeResolver.resolve(ResponseLookupRoutingInformationType.class),
-				        typeResolver.resolve(RequestTransferEvidenceUSIDTType.class))
+				        typeResolver.resolve(RequestTransferEvidenceUSIDTType.class),
+				        typeResolver.resolve(RedirectUserType.class))
 				.apiInfo(apiInfo());
 	}
 
@@ -179,7 +181,7 @@ public class Conf implements WebMvcConfigurer {
 		return new ApiInfoBuilder()
 			.title("DE4A - Connector")
 			.description("DE4A Connector component - eDelivery Exchange")
-			.version("0.1.1")
+			.version("0.2.0")
 			.termsOfServiceUrl("http://www.de4a.eu")
 			.licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
 			.license("APACHE2")

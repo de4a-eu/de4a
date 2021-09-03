@@ -78,7 +78,12 @@ public class ResponseManager {
                 if (!ObjectUtils.isEmpty(evaluatorAddress)) {
                     // Send RequestForwardEvidence to evaluator - USI pattern
                     Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
-                    client.pushEvidence(evaluatorAddress.getEndpoint(), doc);
+                    if(doc != null) {
+                        client.pushEvidence(evaluatorAddress.getEndpoint(), doc);
+                    } else {
+                        doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_REDIRECT_USER);
+                        client.pushRedirectUserMsg(evaluatorAddress.getEndpoint(), doc);
+                    }
                 } else {
                     //TODO in this case, how DE or DO is advised of the situation?
                     KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_UNKNOWN_DE, id, evaluatorinfo.getIdevaluator());
@@ -139,8 +144,7 @@ public class ResponseManager {
 		    .withFamily(FamilyErrorType.SAVING_DATA_ERROR)
 		    .withModule(ExternalModuleError.NONE)
 		    .withMessageArg(MessageFormat.format("Response {0} not found on database", id))
-		    .withRequest(DE4AMarshaller.drImRequestMarshaller().read(request))
-		    .withHttpStatus(HttpStatus.OK);
+		    .withRequest(DE4AMarshaller.drImRequestMarshaller().read(request));
 	}
 
 	private Document getDocumentFromAttached(List<EvaluatorRequestData> filesAttached,
