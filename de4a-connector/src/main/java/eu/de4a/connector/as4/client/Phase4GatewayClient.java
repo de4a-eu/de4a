@@ -19,6 +19,7 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.commons.mime.MimeTypeParserException;
 import com.helger.commons.string.StringHelper;
 
+import eu.de4a.connector.as4.handler.Phase4MessageExchangeSPI;
 import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
@@ -33,8 +34,6 @@ import eu.de4a.util.DOMUtils;
 import eu.de4a.util.FileUtils;
 import eu.toop.connector.api.TCIdentifierFactory;
 import eu.toop.connector.api.me.EMEProtocol;
-import eu.toop.connector.api.me.IMessageExchangeSPI;
-import eu.toop.connector.api.me.MessageExchangeManager;
 import eu.toop.connector.api.me.incoming.IncomingEDMResponse;
 import eu.toop.connector.api.me.model.MEMessage;
 import eu.toop.connector.api.me.model.MEPayload;
@@ -59,7 +58,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
     private OwnerMessageEventPublisher publisher;
 
 	public void sendMessage(String sender, NodeInfo receiver, Element requestUsuario,
-			List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
+			List<TCPayload> payloads, String msgTag) throws MEOutgoingException {
 		final TCOutgoingMessage aOM = new TCOutgoingMessage();
 		{
 
@@ -133,15 +132,14 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 				throw new MEOutgoingException("Invalid parsing MimeType: " + e.getMessage());
 			}
 		}
-		IMessageExchangeSPI aMEM = MessageExchangeManager.getConfiguredImplementation();
+		Phase4MessageExchangeSPI aMEM = new Phase4MessageExchangeSPI();
 		aMEM.sendOutgoing(aRoutingInfo, aMessage.build());
 	}
 
 	public void processResponseAs4(IncomingEDMResponse responseas4) {		
 		ConnectorException ex = new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
             .withFamily(FamilyErrorType.CONVERSION_ERROR)
-            .withModule(ExternalModuleError.CONNECTOR_DR)
-            .withHttpStatus(HttpStatus.OK);
+            .withModule(ExternalModuleError.CONNECTOR_DR);
 		
 		ResponseWrapper responsewrapper = new ResponseWrapper(context);
 		responseas4.getAllAttachments().forEachValue(a -> {

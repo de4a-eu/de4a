@@ -7,6 +7,7 @@ import java.util.List;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.util.ByteArrayDataSource;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -16,19 +17,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
 import com.helger.peppolid.simple.participant.SimpleParticipantIdentifier;
+import com.helger.phase4.CAS4;
 
 import eu.de4a.connector.api.manager.EvidenceTransferorManager;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.connector.as4.domibus.soap.DomibusException;
-import eu.de4a.connector.as4.domibus.soap.MessageFactory;
+import eu.de4a.connector.as4.domibus.soap.DomibusMessageFactory;
 import eu.de4a.connector.as4.domibus.soap.ResponseAndHeader;
 import eu.de4a.connector.as4.domibus.soap.auto.LargePayloadType;
 import eu.de4a.connector.as4.domibus.soap.auto.ListPendingMessagesResponse;
@@ -62,6 +67,8 @@ public class DomibusGatewayClient implements As4GatewayInterface {
     @Autowired
     private DomibusClientWS domibusClientWS;
     @Autowired
+    private DomibusMessageFactory domibusMessageFactory;
+    @Autowired
     private DomibusRequestRepository domibusRequestRepository;
     @Autowired
     private EvidenceTransferorManager evidenceTransferorManager;
@@ -75,6 +82,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
     @Value("#{'${domibus.endpoint.jvm:${domibus.endpoint:}}'}")
     private String domibusEndpoint;
 
+    @Async
     @Scheduled(fixedRate = 2000)
     public void lookUpPendingMessage() {
         if (nameAs4Gateway.equalsIgnoreCase(DomibusGatewayClient.class.getSimpleName())) {
@@ -93,12 +101,11 @@ public class DomibusGatewayClient implements As4GatewayInterface {
 
     @Override
     public void sendMessage(String sender, NodeInfo nodeInfo, Element requestUsuario,
-            List<TCPayload> payloads, boolean isRequest) throws MEOutgoingException {
+            List<TCPayload> payloads, String msgTag) throws MEOutgoingException {
         String idMessageAttached = "cid:message";
-        String idCanonical = "cid:"
-                + (isRequest ? DE4AConstants.TAG_EVIDENCE_REQUEST : DE4AConstants.TAG_EVIDENCE_RESPONSE);
+        String idCanonical = "cid:" + msgTag;
 
-        Messaging messageHeader = MessageFactory.makeMessage(sender, nodeInfo.getParticipantIdentifier(),
+        Messaging messageHeader = this.domibusMessageFactory.makeMessage(sender, nodeInfo.getParticipantIdentifier(),
                 nodeInfo.getDocumentIdentifier(), nodeInfo.getProcessIdentifier(),
                 getAttachments(idMessageAttached, idCanonical));
 
@@ -133,41 +140,39 @@ public class DomibusGatewayClient implements As4GatewayInterface {
         }
     }
 
-    public void processResponseAs4(IncomingEDMResponse responseas4) {
+    public void processResponseAs4(byte[] inputBytes, String contentType, String contentTag) {
         LOGGER.debug("Processing AS4 response...");
         
         ConnectorException ex = new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
             .withFamily(FamilyErrorType.CONVERSION_ERROR)
-            .withModule(ExternalModuleError.CONNECTOR_DR)
-            .withHttpStatus(HttpStatus.OK);
+            .withModule(ExternalModuleError.CONNECTOR_DR);
         
         ResponseWrapper responsewrapper = new ResponseWrapper(context);
-        responseas4.getAllAttachments().forEachValue(a -> {
-            try {
-                responsewrapper.addAttached(
-                        FileUtils.getMultipart(a.getContentID().replace("cid:", ""), a.getMimeTypeString(), a.getData().bytes()));
-            } catch (IOException e) {
-                LOGGER.error("Error attaching files to response wrapper", e);
+        try {
+            responsewrapper.addAttached(
+                    FileUtils.getMultipart(contentTag, contentType, inputBytes));
+        } catch (IOException e) {
+            LOGGER.error("Error attaching files to response wrapper", e);
+        }
+        Document evidence = null;
+        String requestId = "";
+        try {
+            evidence = DOMUtils.byteToDocument(inputBytes);
+            requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, evidence.getDocumentElement());
+        } catch (MessageException e1) {
+            String errorMsg = "Error managing evidence DOM on AS4 response";
+            LOGGER.error(errorMsg, e1);
+            if(contentTag != null && 
+                    contentTag.equals(DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
+                throw (ResponseTransferEvidenceException) ex.withMessageArg(errorMsg);
+            } else {
+                throw (ResponseTransferEvidenceUSIDTException) ex.withMessageArg(errorMsg);
             }
-            Document evidence = null;
-            String requestId = "";
-            try {
-                evidence = DOMUtils.byteToDocument(a.getData().bytes());
-                requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, evidence.getDocumentElement());
-            } catch (MessageException e1) {
-                String errorMsg = "Error managing evidence DOM on AS4 response";
-                LOGGER.error(errorMsg, e1);
-                if(a.getContentID() != null && 
-                        a.getContentID().contains(DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
-                    throw (ResponseTransferEvidenceException) ex.withMessageArg(errorMsg);
-                } else {
-                    throw (ResponseTransferEvidenceUSIDTException) ex.withMessageArg(errorMsg);
-                }
-            }
-            responsewrapper.setTagDataId(a.getContentID());
-            responsewrapper.setId(requestId);
-            responsewrapper.setResponseDocument(evidence);
-        });
+        }
+        responsewrapper.setTagDataId(contentTag);
+        responsewrapper.setId(requestId);
+        responsewrapper.setResponseDocument(evidence);
+            
         publisher.publishCustomEvent(responsewrapper);
     }
 
@@ -209,14 +214,20 @@ public class DomibusGatewayClient implements As4GatewayInterface {
                 LOGGER.error("EvidenceRequest without requestId");
             } else {
                 messageOwner.setId(idrequest);
-                SimpleParticipantIdentifier receiver = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
-                        response.getInfo().getUserMessage().getPartyInfo().getTo().getPartyId().getType(), 
-                        response.getInfo().getUserMessage().getPartyInfo().getTo().getPartyId().getValue());
-                messageOwner.setReceiverId(receiver.getURIEncoded());
-                SimpleParticipantIdentifier sender = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
-                        response.getInfo().getUserMessage().getPartyInfo().getFrom().getPartyId().getType(), 
-                        response.getInfo().getUserMessage().getPartyInfo().getFrom().getPartyId().getValue());
-                messageOwner.setSenderId(sender.getURIEncoded());
+                final ICommonsList <Property> aProps = new CommonsArrayList <> (response.getInfo().getUserMessage().getMessageProperties().getProperty());
+                final Property aPropOS = aProps.findFirst (x -> x.getName ().equals (CAS4.ORIGINAL_SENDER));
+                final Property aPropFR = aProps.findFirst (x -> x.getName ().equals (CAS4.FINAL_RECIPIENT));
+                if(ObjectUtils.isEmpty(aPropFR.getType())) {
+                    messageOwner.setReceiverId(aPropFR.getValue());
+                    messageOwner.setSenderId(aPropOS.getValue());
+                } else {
+                    SimpleParticipantIdentifier receiver = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
+                            aPropFR.getType(), aPropFR.getValue());
+                    messageOwner.setReceiverId(receiver.getURIEncoded());
+                    SimpleParticipantIdentifier sender = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(
+                            aPropOS.getType(), aPropOS.getValue());
+                    messageOwner.setSenderId(sender.getURIEncoded());
+                }
                 return messageOwner;
             }
         } catch (NullPointerException | MessageException | IOException e) {
@@ -231,11 +242,37 @@ public class DomibusGatewayClient implements As4GatewayInterface {
             RetrieveMessageResponse message = response.getMessage();
 
             message.getPayload().stream()
-                    .filter(p -> p.getPayloadId().contains(DE4AConstants.TAG_EVIDENCE_REQUEST)).findFirst()
-                    .ifPresentOrElse((value) -> evidenceTransferorManager.queueMessage(buildMessageOwner(value, response)), 
+                    .filter(p -> p.getPayloadId().contains(DE4AConstants.TAG_EVIDENCE_REQUEST) 
+                                || p.getPayloadId().contains(DE4AConstants.TAG_EVIDENCE_RESPONSE)).findFirst()
+                        .ifPresentOrElse(value -> processMessage(value, response), 
                             () -> LOGGER.error("EvidenceRequest not found!"));
         } else {
             LOGGER.error("Error getting message from Domibus. requestId = {}", requestId);
         }
+    }
+    
+    private void processMessage(LargePayloadType payload, ResponseAndHeader message) {
+        String contentTag = payload.getPayloadId().replace("cid:", "");
+        boolean isRequest = contentTag.equals(DE4AConstants.TAG_EVIDENCE_REQUEST);
+        
+        if(isRequest) {
+            evidenceTransferorManager.queueMessage(buildMessageOwner(payload, message));
+        } else {
+            byte[] targetArray = null;
+            try {
+                targetArray = IOUtils.toByteArray(payload.getValue().getDataSource().getInputStream());
+                if (targetArray != null && Base64.isBase64(targetArray)) {
+                    targetArray = Base64.decodeBase64(targetArray);
+                }    
+                processResponseAs4(targetArray, payload.getContentType(), contentTag);                
+            } catch (IOException e) {
+                LOGGER.error("Error retrieving bytes from domibus response", e);
+            }
+        }
+    }
+
+    @Override
+    public void processResponseAs4(IncomingEDMResponse data) {
+        //do nothing        
     }
 }

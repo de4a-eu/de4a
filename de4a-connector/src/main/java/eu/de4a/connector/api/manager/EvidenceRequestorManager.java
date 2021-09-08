@@ -1,6 +1,5 @@
 package eu.de4a.connector.api.manager;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -11,14 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.helger.commons.error.level.EErrorLevel;
+import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
 
@@ -34,7 +32,9 @@ import eu.de4a.connector.error.handler.ResponseTransferEvidenceExceptionHandler;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
@@ -44,7 +44,6 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
@@ -67,23 +66,22 @@ public class EvidenceRequestorManager extends EvidenceManager {
 	private ResponseManager responseManager;
 
 	public ResponseLookupRoutingInformationType manageRequest(RequestLookupRoutingInformationType request) {
-		ResponseLookupRoutingInformationType response = new ResponseLookupRoutingInformationType();
-
-		if (request != null && !ObjectUtils.isEmpty(request.getCanonicalEvidenceTypeId())) {
+		final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
+                .parseDocumentTypeIdentifier(request.getCanonicalEvidenceTypeId());
+		if (aDTI != null && aDTI.hasScheme() && aDTI.hasValue()) {
+		    request.setCanonicalEvidenceTypeId(aDTI.getValue());
 			if (ObjectUtils.isEmpty(request.getDataOwnerId())) {
 				return client.getSources(request);
 			} else {
 				return client.getProvisions(request);
 			}
 		} else {
-		    new ResponseLookupRoutingInformationExceptionHandler().buildResponse(
+		    return new ResponseLookupRoutingInformationExceptionHandler().buildResponse(
                     new ResponseLookupRoutingInformationException().withFamily(FamilyErrorType.MISSING_REQUIRED_ARGUMENTS)
                         .withLayer(LayerError.INTERNAL_FAILURE)
                         .withModule(ExternalModuleError.IDK)
-                        .withMessageArg("CanonicalEvidenceTypeId is missing")
-                        .withHttpStatus(HttpStatus.OK));
+                        .withMessageArg("CanonicalEvidenceTypeId is missing or has incorrect format"));
 		}
-		return response;
 	}
 
 	public ResponseErrorType manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
@@ -101,8 +99,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
                     new ResponseTransferEvidenceUSIException().withFamily(e.getFamily())
                         .withLayer(e.getLayer())
                         .withModule(e.getModule())
-                        .withMessageArgs(e.getArgs())
-                        .withHttpStatus(HttpStatus.OK));
+                        .withMessageArgs(e.getArgs()));
         }
 		return DE4AResponseDocumentHelper.createResponseError(false);
 	}
@@ -118,8 +115,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
                         .withFamily(e.getFamily())
                         .withModule(e.getModule())
                         .withMessageArgs(e.getArgs())
-                        .withRequest(request)
-                        .withHttpStatus(HttpStatus.OK));
+                        .withRequest(request));
         }
 	}
 
@@ -178,9 +174,8 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		    }
 		    
 		    NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false, userMessage);
-			DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("Sending request message via AS4 gateway - "
-                    + "DataEvaluatorId: {0}, DataOwnerId: {1}, CanonicalEvidenceType: {2}",
-                    sender, dataOwnerId, canonicalEvidenceTypeId));
+	        
+	        KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_REQ_SENT, sender, dataOwnerId, canonicalEvidenceTypeId);
 			
 			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();
@@ -190,7 +185,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
 			payloads.add(p);
 			
-			as4Client.sendMessage(sender, nodeInfo, requestWrapper, payloads, true);
+			as4Client.sendMessage(sender, nodeInfo, requestWrapper, payloads, DE4AConstants.TAG_EVIDENCE_REQUEST);
 			
 			return true;
 		} catch (MEOutgoingException e) {
@@ -207,8 +202,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		    throw new ConnectorException().withLayer(LayerError.INTERNAL_FAILURE)
 		        .withFamily(FamilyErrorType.CONVERSION_ERROR)
 		        .withModule(ExternalModuleError.CONNECTOR_DR)
-		        .withMessageArg(msgE.getMessage())
-		        .withHttpStatus(HttpStatus.OK);
+		        .withMessageArg(msgE.getMessage());
 		}
 	}
 

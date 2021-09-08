@@ -1,7 +1,6 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
-import java.text.MessageFormat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +13,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.helger.commons.error.level.EErrorLevel;
-
 import eu.de4a.connector.api.RequestApi;
 import eu.de4a.connector.api.manager.EvidenceRequestorManager;
 import eu.de4a.connector.error.exceptions.ConnectorException;
@@ -23,7 +20,9 @@ import eu.de4a.connector.error.exceptions.ResponseLookupRoutingInformationExcept
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIException;
 import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
@@ -33,7 +32,6 @@ import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 
 @Controller
 @Validated
@@ -56,10 +54,9 @@ public class RequestController implements RequestApi {
 	    RequestLookupRoutingInformationType reqObj = (RequestLookupRoutingInformationType) ErrorHandlerUtils
                 .conversionBytesWithCatching(DE4AMarshaller.idkRequestLookupRoutingInformationMarshaller(), request, false, true, 
                 new ResponseLookupRoutingInformationException().withModule(ExternalModuleError.CONNECTOR_DR));
-	    
-	    DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("RequestLookupRoutingInformation message received - "
-	            + "CanonicalEvidenceType: {0}, CountryCode: {1}, DataOwnerId: {2}", reqObj.getCanonicalEvidenceTypeId(),
-	            reqObj.getCountryCode(), reqObj.getDataOwnerId()));
+	    	    
+	    KafkaClientWrapper.sendInfo(LogMessages.LOG_IDK_REQ_RECEIPT, reqObj.getCanonicalEvidenceTypeId(),
+                reqObj.getCountryCode(), reqObj.getDataOwnerId());
 	    
 		ResponseLookupRoutingInformationType response = evidenceRequestorManager.manageRequest(reqObj);
 		var respMarshaller = DE4AMarshaller.idkResponseLookupRoutingInformationMarshaller();
@@ -95,11 +92,19 @@ public class RequestController implements RequestApi {
                 .conversionBytesWithCatching(marshaller, request, false, true, 
                 ex.withModule(ExternalModuleError.CONNECTOR_DR));
 	    
-        String requestType = "RequestTransferEvidence" + (isUsi ? "USI" : "IM");
-        DE4AKafkaClient.send(EErrorLevel.INFO, MessageFormat.format("{0} message received - "
-                + "RequestId: {1}, CanonicalEvidenceType: {2}, DataEvaluator: {3}, DataOwner: {4}", 
-                requestType, reqObj.getRequestId(), reqObj.getCanonicalEvidenceTypeId(), 
-                reqObj.getDataEvaluator().getAgentUrn(), reqObj.getDataOwner().getAgentUrn()));
+	    LogMessages.LOG_USI_REQ_RECEIPT.getKey();
+	    LogMessages.LOG_IM_REQ_RECEIPT.getKey();
+	    String requestType;
+	    LogMessages logMessage;
+	    if(isUsi) {
+	        requestType = "requestTransferEvidence" + "USI";
+	        logMessage = LogMessages.LOG_USI_REQ_RECEIPT;
+	    } else {
+	        requestType = "requestTransferEvidence" + "IM";
+	        logMessage = LogMessages.LOG_IM_REQ_RECEIPT;
+	    }
+        KafkaClientWrapper.sendInfo(logMessage, requestType, reqObj.getRequestId(), reqObj.getCanonicalEvidenceTypeId(), 
+                reqObj.getDataEvaluator().getAgentUrn(), reqObj.getDataOwner().getAgentUrn());
         
         saveEvaluatorRequest(reqObj, isUsi);        
         return reqObj;

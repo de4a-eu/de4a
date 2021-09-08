@@ -80,6 +80,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import eu.de4a.config.DataSourceConf;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
+import eu.de4a.iem.jaxb.common.types.RedirectUserType;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
@@ -149,6 +150,8 @@ public class Conf implements WebMvcConfigurer {
 	
 	@Value("${de4a.kafka.enabled:false}")
 	private boolean kafkaEnabled;
+	@Value("${de4a.kafka.logging.enabled:true}")
+	private boolean kafkaLoggingEnabled;
     @Value("${de4a.kafka.http.enabled:false}")
     private boolean kafkaHttp;
     @Value("${de4a.kafka.url:#{null}}")
@@ -169,7 +172,8 @@ public class Conf implements WebMvcConfigurer {
 						typeResolver.resolve(RequestForwardEvidenceType.class),
 						typeResolver.resolve(RequestLookupRoutingInformationType.class),
 						typeResolver.resolve(ResponseLookupRoutingInformationType.class),
-				        typeResolver.resolve(RequestTransferEvidenceUSIDTType.class))
+				        typeResolver.resolve(RequestTransferEvidenceUSIDTType.class),
+				        typeResolver.resolve(RedirectUserType.class))
 				.apiInfo(apiInfo());
 	}
 
@@ -177,7 +181,7 @@ public class Conf implements WebMvcConfigurer {
 		return new ApiInfoBuilder()
 			.title("DE4A - Connector")
 			.description("DE4A Connector component - eDelivery Exchange")
-			.version("0.1.1")
+			.version("0.2.0")
 			.termsOfServiceUrl("http://www.de4a.eu")
 			.licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
 			.license("APACHE2")
@@ -371,7 +375,7 @@ public class Conf implements WebMvcConfigurer {
         if(kafkaHttp) {
             DE4AKafkaSettings.setHttpClientSetting(this.httpSettings);
         }
-        DE4AKafkaSettings.setLoggingEnabled(kafkaEnabled);        
+        DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);        
         DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
 	}
 

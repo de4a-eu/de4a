@@ -4,15 +4,16 @@
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
 			<!-- Location may be an issue when async logging is used! -->
+            <!-- DE4A Metrics pattern [prefix][timestamp][Level][Error/Log Code][UC#][Origin][Destiny][Message] -->
             <PatternLayout
-				pattern="[DE4A-CONNECTOR][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
+				pattern="$${ctx:metrics:-}[%date{ISO8601}][%-5level][$${ctx:logcode:-}][DE4A-CONNECTOR][$${ctx:origin:-}][$${ctx:destiny:-}] %msg -- %location [%thread]%n" />
         </Console>
         <RollingFile name="rollingFile"
 			fileName="${sys:catalina.base}/logs/connector.log"
 			filePattern="${sys:catalina.base}/logs/history/connector.%d{dd-MMM}.log.gz"
 			ignoreExceptions="false">
             <PatternLayout>
-                <Pattern>>%d %p %C{1.} [%t] %m%n</Pattern>
+                <Pattern>>$${ctx:metrics:-}[%date{ISO8601}][%-5level][$${ctx:logcode:-}][DE4A-CONNECTOR][$${ctx:origin:-}][$${ctx:destiny:-}] %msg -- %location [%thread]%n</Pattern>
             </PatternLayout>
             <Policies>
                 <OnStartupTriggeringPolicy />

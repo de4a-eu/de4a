@@ -39,35 +39,33 @@ public class ErrorHandlerUtils {
                 .withFamily(FamilyErrorType.ERROR_RESPONSE) 
                 .withModule(ex.getModule())
                 .withMessageArg(MessageFormat.format("Failed or empty response received {0}", response))
-                .withRequest(ex.getRequest())
-                .withHttpStatus(HttpStatus.OK);
+                .withRequest(ex.getRequest());
             if(throwException) {
                 throw exception;
             }
             return new ResponseEntity<>((byte[]) ResponseErrorFactory.getHandlerFromClassException(
-                    ex.getClass()).getResponseError(exception, true), HttpStatus.OK);
+                    ex.getClass()).getResponseError(exception, true), HttpStatus.BAD_REQUEST);
         }
         return response;
     }
     
-    public static String getRestObjectWithCatching(String url, boolean throwException,
+    public static byte[] getRestObjectWithCatching(String url, boolean throwException,
             ConnectorException ex, RestTemplate restTemplate) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8)); 
         try {
-            return restTemplate.getForObject(url, String.class);
+            return restTemplate.getForObject(url, byte[].class);
         } catch(RestClientException e) {
             if(logger.isDebugEnabled()) {
                 logger.debug("There was an error on HTTP client GET connection", e);
             }
             ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
                     .withFamily(FamilyErrorType.CONNECTION_ERROR)
-                    .withMessageArg(e.getMessage())
-                    .withHttpStatus(HttpStatus.OK);
+                    .withMessageArg(e.getMessage());
             if(throwException) {
                 throw exception;
             }
-            return (String) ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+            return (byte[]) ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
                     .getResponseError(exception, true);
         }
     }
@@ -86,8 +84,7 @@ public class ErrorHandlerUtils {
             }
             ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
                 .withFamily(FamilyErrorType.CONNECTION_ERROR)
-                .withMessageArg(e.getMessage())
-                .withHttpStatus(HttpStatus.OK);
+                .withMessageArg(e.getMessage());
             if(throwException) {
                 throw exception;
             }
@@ -99,18 +96,17 @@ public class ErrorHandlerUtils {
     }
     
     public static <T> Object conversionBytesWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
-            boolean objToStr, boolean throwException, ConnectorException ex) {
+            boolean objToBytes, boolean throwException, ConnectorException ex) {
         Object returnObj = null;
         String errorMsg = "Object received is not valid, check the structure";
         ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
-                .withLayer(LayerError.INTERNAL_FAILURE)
-                .withHttpStatus(HttpStatus.OK);
+                .withLayer(LayerError.INTERNAL_FAILURE);
         marshaller.readExceptionCallbacks().set(e -> {
             if(!ObjectUtils.isEmpty(e.getLinkedException()))
                 ex.withMessageArg(e.getLinkedException().getMessage());
         });
         try {
-            returnObj = getObjectTypeFromObject(marshaller, obj, objToStr);
+            returnObj = getObjectTypeFromObject(marshaller, obj, objToBytes);
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {
                 logger.debug(errorMsg, e);
@@ -119,7 +115,7 @@ public class ErrorHandlerUtils {
                 throw exception.withMessageArg(e.getMessage());
             }
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
-                    .getResponseError(exception.withMessageArg(e.getMessage()), objToStr);
+                    .getResponseError(exception.withMessageArg(e.getMessage()), objToBytes);
         }
         if(returnObj == null) {            
             exception.withMessageArg(ex.getArgs());
@@ -127,17 +123,17 @@ public class ErrorHandlerUtils {
                 throw exception;
             }
             return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
-                    .getResponseError(exception, objToStr);
+                    .getResponseError(exception, objToBytes);
         }
         return returnObj;
     }
     
     @SuppressWarnings("unchecked")
     private static <T> Object getObjectTypeFromObject(DE4AMarshaller<T> marshaller, Object obj, 
-            boolean objToStr) {
+            boolean objToBytes) {
         Object retObj;
-        if(objToStr) {
-            retObj = marshaller.getAsString((T) obj);
+        if(objToBytes) {
+            retObj = marshaller.getAsBytes((T) obj);
         } else {
             if(obj instanceof String) {
                 retObj = marshaller.read((String) obj);
@@ -145,6 +141,8 @@ public class ErrorHandlerUtils {
                 retObj = marshaller.read((InputStream) obj);
             } else if(obj instanceof byte[]) {
                 retObj = marshaller.read((byte[]) obj);
+            } else if(obj instanceof Document) {
+                retObj = marshaller.read((Document) obj);
             } else {
                 retObj = null;
             }
@@ -158,8 +156,7 @@ public class ErrorHandlerUtils {
         Object returnObj = null;
         String errorMsg = "Object received is not valid, check the structure";
         ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
-                .withFamily(FamilyErrorType.CONVERSION_ERROR)
-                .withHttpStatus(HttpStatus.OK);
+                .withFamily(FamilyErrorType.CONVERSION_ERROR);
         marshaller.readExceptionCallbacks().set(e -> {
             if(!ObjectUtils.isEmpty(e.getLinkedException()))
                 ex.withMessageArg(e.getLinkedException().getMessage());
