@@ -2,13 +2,11 @@ package eu.de4a.connector.error.exceptions;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
-
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 
 public class ConnectorException extends RuntimeException {
     private static final long serialVersionUID = 1L;
@@ -92,7 +90,7 @@ public class ConnectorException extends RuntimeException {
         return request;
     }
 
-    public void setRequest(RequestTransferEvidenceUSIIMDRType request) {
+    public void setRequest(RequestExtractEvidenceType request) {
         this.request = request;
     }
 

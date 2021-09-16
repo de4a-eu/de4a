@@ -1,7 +1,6 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-
 import eu.de4a.connector.api.RequestApi;
 import eu.de4a.connector.api.manager.EvidenceRequestorManager;
 import eu.de4a.connector.error.exceptions.ConnectorException;
@@ -25,8 +23,8 @@ import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
@@ -67,7 +65,7 @@ public class RequestController implements RequestApi {
             consumes = MediaType.APPLICATION_XML_VALUE)
 	public ResponseEntity<byte[]> requestTransferEvidenceUSI(InputStream request) {
 	    
-	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drUsiRequestMarshaller(), 
+	  RequestExtractEvidenceType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drUsiRequestMarshaller(), 
                 request, true, new ResponseTransferEvidenceUSIException());
 
 		ResponseErrorType response = evidenceRequestorManager.manageRequestUSI(reqObj);		
@@ -78,7 +76,7 @@ public class RequestController implements RequestApi {
             consumes = MediaType.APPLICATION_XML_VALUE)
 	public ResponseEntity<byte[]> requestTransferEvidenceIM(InputStream request) {
 		
-	    RequestTransferEvidenceUSIIMDRType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(),
+	  RequestExtractEvidenceType reqObj = processIncommingEvidenceReq(DE4AMarshaller.drImRequestMarshaller(),
 	            request, false, new ResponseTransferEvidenceException());
 		
 		ResponseTransferEvidenceType response = evidenceRequestorManager.manageRequestIM(reqObj);
@@ -86,9 +84,9 @@ public class RequestController implements RequestApi {
 				.getAsBytes(response));
 	}
 	
-	private <T> RequestTransferEvidenceUSIIMDRType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, InputStream request,
+	private <T> RequestExtractEvidenceType processIncommingEvidenceReq(DE4AMarshaller<T> marshaller, InputStream request,
 	        boolean isUsi, ConnectorException ex) {	    
-	    RequestTransferEvidenceUSIIMDRType reqObj = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
+	  RequestExtractEvidenceType reqObj = (RequestExtractEvidenceType) ErrorHandlerUtils
                 .conversionBytesWithCatching(marshaller, request, false, true, 
                 ex.withModule(ExternalModuleError.CONNECTOR_DR));
 	    
@@ -110,7 +108,7 @@ public class RequestController implements RequestApi {
         return reqObj;
 	}
 	
-	private void saveEvaluatorRequest(RequestTransferEvidenceUSIIMDRType request, boolean isUsi) {
+	private void saveEvaluatorRequest(RequestExtractEvidenceType request, boolean isUsi) {
 	    EvaluatorRequest entity = new EvaluatorRequest();
         entity.setIdevaluator(request.getDataEvaluator().getAgentUrn());
         entity.setIdrequest(request.getRequestId());

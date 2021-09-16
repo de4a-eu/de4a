@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +13,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
-
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.error.exceptions.ConnectorException;
@@ -37,8 +33,8 @@ import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
@@ -84,7 +80,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		}
 	}
 
-	public ResponseErrorType manageRequestUSI(RequestTransferEvidenceUSIIMDRType request) {
+	public ResponseErrorType manageRequestUSI(RequestExtractEvidenceType request) {
 	    Document doc = (Document) ErrorHandlerUtils.conversionDocWithCatching(DE4AMarshaller.drUsiRequestMarshaller(), 
 	            request, true, true, new ResponseTransferEvidenceUSIException()
 	                                        .withModule(ExternalModuleError.CONNECTOR_DR)
@@ -104,7 +100,7 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		return DE4AResponseDocumentHelper.createResponseError(false);
 	}
 
-	public ResponseTransferEvidenceType manageRequestIM(RequestTransferEvidenceUSIIMDRType request) {
+	public ResponseTransferEvidenceType manageRequestIM(RequestExtractEvidenceType request) {
 		Document doc = DE4AMarshaller.drImRequestMarshaller().getAsDocument(request);
 		try {
             return handleRequestTransferEvidence(request.getDataEvaluator().getAgentUrn(), request.getDataOwner().getAgentUrn(), 

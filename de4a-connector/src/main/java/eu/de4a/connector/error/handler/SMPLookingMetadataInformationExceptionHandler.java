@@ -1,11 +1,10 @@
 package eu.de4a.connector.error.handler;
 
 import org.w3c.dom.Element;
-
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.exceptions.SMPLookingMetadataInformationException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
@@ -28,7 +27,7 @@ public class SMPLookingMetadataInformationExceptionHandler  extends ConnectorExc
 	public ResponseTransferEvidenceType buildResponse(ConnectorException ex) {
 	    SMPLookingMetadataInformationException exsmp = (SMPLookingMetadataInformationException) ex;
         Element requestEl=exsmp.getUserMessage();
-        RequestTransferEvidenceUSIIMDRType request=DE4AMarshaller.drImRequestMarshaller().read(DOMUtils.documentToString(requestEl.getOwnerDocument()));
+        RequestExtractEvidenceType request=DE4AMarshaller.drImRequestMarshaller().read(DOMUtils.documentToString(requestEl.getOwnerDocument()));
         ResponseTransferEvidenceType response =DE4AResponseDocumentHelper.createResponseTransferEvidence(request);
         ErrorListType errorList = new ErrorListType();  
         String msg=getMessage(ex ) ;
