@@ -40,7 +40,7 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (11, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 11);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (12, 'DomicileRegistrationEvidence', 'nuts0', 'PT', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (12, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt000000026', 'AGENCIA PARA A MODERNIZACAO ADMINISTRATIVA IP', 12);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (12, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt000000026', '(AMA IP) Agencia para a Modernizacao Administrativa IP (Administration Modernization Agency)', 12);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (12, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 12);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (13, 'DeathCertificate', 'nuts0', 'ES', null, null);
@@ -100,9 +100,9 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (26, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 26);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (27, 'BirthEvidence', 'nuts0', 'PT', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (27, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt000000026', 'AGENCIA PARA A MODERNIZACAO ADMINISTRATIVA IP', 27);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (27, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt000000026', '(AMA IP) Agencia para a Modernizacao Administrativa IP (Administration Modernization Agency)', 27);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (27, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 27);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (28, 'MarriageEvidence', 'nuts0', 'PT', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (28, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt000000026', 'AGENCIA PARA A MODERNIZACAO ADMINISTRATIVA IP', 28);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (28, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt000000026', '(AMA IP) Agencia para a Modernizacao Administrativa IP (Administration Modernization Agency)', 28);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (28, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 28);
