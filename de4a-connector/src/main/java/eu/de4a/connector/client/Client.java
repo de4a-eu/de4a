@@ -59,12 +59,10 @@ import eu.de4a.connector.model.smp.NodeInfo;
 import eu.de4a.iem.jaxb.common.types.AckType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
 import eu.de4a.iem.jaxb.common.types.RedirectUserType;
-import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
-import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceUSIType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
@@ -290,7 +288,7 @@ public class Client {
         return AckType.OK.equals(responseObj.getAck());
 	}
 
-	public Object sendEvidenceRequest(RequestTransferEvidenceUSIIMDRType evidenceRequest, String endpoint,
+	public Object sendEvidenceRequest(RequestExtractEvidenceType evidenceRequest, String endpoint,
             boolean isUsi) {
         String requestType;
         LogMessages logMessage;
@@ -309,7 +307,7 @@ public class Client {
 
         ConnectorException exception;
         if (!isUsi) {
-            RequestExtractEvidenceIMType requestExtractEvidence = MessagesUtils
+            RequestExtractEvidenceType requestExtractEvidence = MessagesUtils
                     .transformRequestToOwnerIM(evidenceRequest);
             exception = new ResponseExtractEvidenceException()
                     .withModule(ExternalModuleError.DATA_OWNER)
@@ -324,7 +322,7 @@ public class Client {
             return MessagesUtils.transformResponseTransferEvidence(responseExtractEvidenceType, 
                     evidenceRequest);
         } else {
-            RequestExtractEvidenceUSIType requestExtractEvidence = MessagesUtils
+          RequestExtractEvidenceType requestExtractEvidence = MessagesUtils
                     .transformRequestToOwnerUSI(evidenceRequest);
             
             exception = new ResponseExtractEvidenceUSIException()
