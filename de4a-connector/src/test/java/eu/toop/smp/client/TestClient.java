@@ -27,8 +27,9 @@ public class TestClient {
 	private Client client;
 	
 	@Test
+	@Ignore("Not run on Jenkins")
 	public void testSmpNode() {
-		NodeInfo info=client.getNodeInfo("9999:egov","urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration", true, null);
+		NodeInfo info=client.getNodeInfo("9991:at000000271","urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration", true, null);
 		assertNotNull(info);
 		assertEquals("https://de4a-dev-connector.egovlab.eu/phase4", info.getEndpointURI ());
 	}
