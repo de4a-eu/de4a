@@ -2,7 +2,7 @@ package eu.de4a.connector.error.handler;
 
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
@@ -26,7 +26,7 @@ public class ResponseExtractEvidenceExceptionHandler extends ConnectorExceptionH
         String msg = getMessage(ex);
         errorList.addError(DE4AResponseDocumentHelper.createError(ex.buildCode(), msg));
         ResponseExtractEvidenceType response = DE4AResponseDocumentHelper.createResponseExtractEvidence(
-                MessagesUtils.transformRequestToOwnerIM((RequestTransferEvidenceUSIIMDRType) ex.getRequest()));
+                MessagesUtils.transformRequestToOwnerIM((RequestExtractEvidenceType) ex.getRequest()));
         response.setErrorList(errorList);
         return response;
     }

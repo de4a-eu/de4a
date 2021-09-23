@@ -2,7 +2,7 @@ package eu.de4a.connector.error.handler;
 
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
@@ -25,7 +25,7 @@ public class ResponseTransferEvidenceExceptionHandler extends ConnectorException
         ErrorListType errorList = new ErrorListType();
         String msg = getMessage(ex);
         errorList.addError(DE4AResponseDocumentHelper.createError(ex.buildCode(), msg));
-        return MessagesUtils.getErrorResponseFromRequest((RequestTransferEvidenceUSIIMDRType) ex.getRequest(), errorList);
+        return MessagesUtils.getErrorResponseFromRequest((RequestExtractEvidenceType) ex.getRequest(), errorList);
     }
 
 }
