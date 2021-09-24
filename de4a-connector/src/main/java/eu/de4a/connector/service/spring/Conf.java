@@ -305,7 +305,7 @@ public class Conf implements WebMvcConfigurer {
 			keyStore.load(fis, keyStorePassword.toCharArray());
 
 			return SSLContextBuilder.create().loadKeyMaterial(keyStore, keyStorePassword.toCharArray())
-					.setProtocol("TLSv1.2").loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray())
+					.setProtocol("TLSv1.2,TLSv1.3").loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray())
 					.build();
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
