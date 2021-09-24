@@ -1,5 +1,5 @@
 
-# DE4A - CONNECTOR
+# DE4A - CONNECTOR `Iteration 2`
 Connector component. Check out following instructions and descriptions.
 
 ## de4a-commons
