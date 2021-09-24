@@ -15,11 +15,9 @@ import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
-
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -72,19 +70,17 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
-
 import com.fasterxml.classmate.TypeResolver;
 import com.helger.httpclient.HttpClientSettings;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 import eu.de4a.config.DataSourceConf;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
 import eu.de4a.iem.jaxb.common.types.RedirectUserType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
@@ -166,7 +162,7 @@ public class Conf implements WebMvcConfigurer {
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("eu"))
 				.paths(PathSelectors.any()).build()
-				.additionalModels(typeResolver.resolve(RequestTransferEvidenceUSIIMDRType.class),
+				.additionalModels(typeResolver.resolve(RequestExtractEvidenceType.class),
 						typeResolver.resolve(ResponseTransferEvidenceType.class),
 						typeResolver.resolve(ResponseErrorType.class),
 						typeResolver.resolve(RequestForwardEvidenceType.class),

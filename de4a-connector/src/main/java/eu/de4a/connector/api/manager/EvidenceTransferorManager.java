@@ -4,21 +4,16 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
-
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
 import eu.de4a.connector.as4.owner.MessageRequestOwner;
 import eu.de4a.connector.as4.owner.MessageResponseOwner;
@@ -44,8 +39,8 @@ import eu.de4a.connector.model.utils.AgentsLocator;
 import eu.de4a.connector.repository.RequestorRequestRepository;
 import eu.de4a.connector.service.spring.MessageUtils;
 import eu.de4a.exception.MessageException;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
@@ -75,13 +70,13 @@ public class EvidenceTransferorManager extends EvidenceManager {
             logger.debug(DOMUtils.documentToString(request.getMessage().getOwnerDocument()));
         }
         ResponseTransferEvidenceType responseTransferEvidenceType = null;
-        RequestTransferEvidenceUSIIMDRType req = null;
+        RequestExtractEvidenceType req = null;
         ConnectorException ex = new OwnerException().withModule(ExternalModuleError.CONNECTOR_DT);
         try {
             OwnerAddresses ownerAddress = null;
             RequestorRequest requestorReq = new RequestorRequest();
             if(!DE4AConstants.NAMESPACE_USI.equals(request.getMessage().getNamespaceURI())) {
-                req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
+                req = (RequestExtractEvidenceType) ErrorHandlerUtils
                         .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(),
                                 request.getMessage().getOwnerDocument(), false, false,
                                 new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
@@ -102,7 +97,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
                     KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_RESP_SENDING, req.getRequestId());
                 }
             } else {
-                req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils.conversionDocWithCatching(
+                req = (RequestExtractEvidenceType) ErrorHandlerUtils.conversionDocWithCatching(
                         DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage().getOwnerDocument(), false, 
                         true, new ResponseTransferEvidenceUSIException().withModule(ExternalModuleError.CONNECTOR_DT));
                 ex.setRequest(req);
