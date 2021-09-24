@@ -40,7 +40,7 @@ Once you deploy a Connector instance, it will be able to access to Swagger UI br
 http://connector-endpoint:port/swagger-ui/
 ```
 Even so, the API definition is published at:
-[Public Swagger API Connector](https://app.swaggerhub.com/apis/de4a/Connector/0.1.1)
+[Public Swagger API Connector](https://app.swaggerhub.com/apis/de4a/Connector/0.2.0)
 
 
 
