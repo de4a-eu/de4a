@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.List;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -87,7 +88,7 @@ public class Phase4GatewayClient implements As4GatewayInterface {
 				throw new MEOutgoingException(error);
 			}
 			aPayload.setMimeType(CMimeType.APPLICATION_XML.getAsString());
-			aPayload.setContentID("message");
+			aPayload.setContentID(msgTag);
 			aOM.addPayload(aPayload);
 			if (payloads != null) {
 				payloads.forEach(p -> {
@@ -142,30 +143,30 @@ public class Phase4GatewayClient implements As4GatewayInterface {
             .withModule(ExternalModuleError.CONNECTOR_DR);
 		
 		ResponseWrapper responsewrapper = new ResponseWrapper(context);
-		responseas4.getAllAttachments().forEachValue(a -> {
-			try {
-				responsewrapper.addAttached(FileUtils.getMultipart(a.getContentID(), a.getMimeTypeString(), a.getData().bytes()));
-			} catch (IOException e) {
-				LOGGER.error("Error attaching files to response wrapper", e);
-			}
-			Document evidence = null;
-			String requestId = "";
-			try {
-				evidence = DOMUtils.byteToDocument(a.getData().bytes());
-				requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, evidence.getDocumentElement());
-			} catch (MessageException e1) {
-			    String errorMsg = "Error managing evidence DOM on AS4 response";
-				LOGGER.error(errorMsg, e1);
-			    if(DE4AConstants.TAG_EVIDENCE_RESPONSE.equals(a.getContentID())) {
-			        throw (ResponseTransferEvidenceException) ex.withMessageArg(errorMsg);
-                } else {
-                    throw (ResponseTransferEvidenceUSIDTException) ex.withMessageArg(errorMsg);
-                }
-			}
-			responsewrapper.setTagDataId(a.getContentID());
-			responsewrapper.setId(requestId);
-			responsewrapper.setResponseDocument(evidence);
-		});
+		MEPayload payload = responseas4.getAllAttachments().getFirstValue();
+		if(payload == null) return;
+		try {
+			responsewrapper.addAttached(FileUtils.getMultipart(payload.getContentID(), 
+			        payload.getMimeTypeString(), payload.getData().bytes()));
+		} catch (IOException e) {
+			LOGGER.error("Error attaching files to the response wrapper", e);
+		}
+		Document docRequest = null;
+		try {
+		    Document evidence = DOMUtils.byteToDocument(payload.getData().bytes());
+			docRequest = DOMUtils.newDocumentFromNode(evidence.getDocumentElement(), payload.getContentID());
+		} catch (MessageException | ParserConfigurationException e1) {
+		    String errorMsg = "Error managing evidence DOM on AS4 response";
+			LOGGER.error(errorMsg, e1);
+		    if(DE4AConstants.TAG_EVIDENCE_RESPONSE.equals(payload.getContentID())) {
+		        throw (ResponseTransferEvidenceException) ex.withMessageArg(errorMsg);
+            } else {
+                throw (ResponseTransferEvidenceUSIDTException) ex.withMessageArg(errorMsg);
+            }
+		}
+		responsewrapper.setTagDataId(payload.getContentID());
+		responsewrapper.setId(responseas4.getResponse().getRequestID());
+		responsewrapper.setResponseDocument(docRequest);
 		publisher.publishCustomEvent(responsewrapper);
 	}
 

@@ -1,13 +1,10 @@
 package eu.de4a.connector.api.manager;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
@@ -49,7 +46,6 @@ import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 import eu.de4a.util.MessagesUtils;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
-import eu.toop.connector.api.rest.TCPayload;
 
 @Component
 public class EvidenceTransferorManager extends EvidenceManager {
@@ -78,7 +74,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
             if(!DE4AConstants.NAMESPACE_USI.equals(request.getMessage().getNamespaceURI())) {
                 req = (RequestExtractEvidenceType) ErrorHandlerUtils
                         .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(),
-                                request.getMessage().getOwnerDocument(), false, false,
+                                request.getMessage(), false, false,
                                 new ResponseTransferEvidenceException().withModule(ExternalModuleError.CONNECTOR_DT));
                 ex.setRequest(req);
                 ownerAddress = getOwnerAddress(request.getReceiverId(), ex);
@@ -98,7 +94,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 }
             } else {
                 req = (RequestExtractEvidenceType) ErrorHandlerUtils.conversionDocWithCatching(
-                        DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage().getOwnerDocument(), false, 
+                        DE4AMarshaller.drUsiRequestMarshaller(), request.getMessage(), false, 
                         true, new ResponseTransferEvidenceUSIException().withModule(ExternalModuleError.CONNECTOR_DT));
                 ex.setRequest(req);
                 ownerAddress = getOwnerAddress(request.getReceiverId(), ex);
@@ -113,7 +109,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
                     Document doc = DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE).getAsDocument(reqUSIDT);
                     //An error sending request to DO occurs. The error is sending back to the DE
                     if(!sendResponseMessage(req.getDataEvaluator().getAgentUrn(), req.getDataOwner().getAgentUrn(), req.getCanonicalEvidenceTypeId(), 
-                            doc.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT)) {  
+                            doc.getDocumentElement(), DE4AConstants.TAG_EVIDENCE_REQUEST)) {  
                         KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_MSG_SENDING, req.getRequestId());
                     }
                 }
@@ -127,7 +123,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
 
         } catch (ConnectorException e) {
             responseTransferEvidenceType = (ResponseTransferEvidenceType) ResponseErrorFactory
-                    .getHandlerFromClassException(ex.getClass()).buildResponse(ex);
+                    .getHandlerFromClassException(ex.getClass()).buildResponse(e.withRequest(ex.getRequest()));
 
             if (req == null || !sendResponseMessage(request.getSenderId(), request.getReceiverId(),
                     req.getCanonicalEvidenceTypeId(), DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
@@ -188,17 +184,10 @@ public class EvidenceTransferorManager extends EvidenceManager {
             
             NodeInfo nodeInfo = client.getNodeInfo(receiverId, docTypeID, true, message);
             
-            KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_RESP_SENT, receiverId, tagContentId, docTypeID);
+            KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_RESP_SENT, rPI.getURIEncoded(), tagContentId, docTypeID);
             
-            List<TCPayload> payloads = new ArrayList<>();
-            TCPayload payload = new TCPayload();
-            payload.setContentID(tagContentId);
-            payload.setValue(DOMUtils.documentToByte(message.getOwnerDocument()));
-            payload.setMimeType(MediaType.APPLICATION_XML_VALUE);
-            payloads.add(payload);
-            Element requestWrapper = new RegRepTransformer().wrapMessage(message, false);
-            
-            as4Client.sendMessage(dataOwnerId, nodeInfo, requestWrapper, payloads, tagContentId);
+            Element requestWrapper = new RegRepTransformer().wrapMessage(message, tagContentId, false);            
+            as4Client.sendMessage(dataOwnerId, nodeInfo, requestWrapper, null, tagContentId);
             
             return true;
         } catch (NullPointerException | MEOutgoingException e) {

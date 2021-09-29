@@ -297,4 +297,21 @@ public class DOMUtils
       return null;
     }
   }
+
+  public static Document newDocumentFromNode(Element element, String nodeName) 
+          throws ParserConfigurationException {
+      NodeList nodes = element.getOwnerDocument().getDocumentElement()
+              .getElementsByTagNameNS("*", nodeName);
+
+      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+      Document newXmlDocument = factory.newDocumentBuilder().newDocument();
+      Element root = (Element) nodes.item(0);
+      Node copyNode = newXmlDocument.importNode(root, true);
+      newXmlDocument.appendChild(copyNode);
+
+      return newXmlDocument;
+  }
 }

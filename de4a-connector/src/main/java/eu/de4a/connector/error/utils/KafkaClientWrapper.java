@@ -23,6 +23,7 @@ public class KafkaClientWrapper {
     private static final String DESTINY_TAG = "destiny";
     private static final String LOG_CODE_TAG = "logcode";
     private static final String METRICS_TAG = "metrics";
+    private static final String METRICS_ENABLED_TAG = "metrics.enabled";
     
     private KafkaClientWrapper() {
         //empty private constructor
@@ -55,11 +56,14 @@ public class KafkaClientWrapper {
         ThreadContext.put(ORIGIN_TAG, logMessage.getOrigin().getLabel());
         ThreadContext.put(DESTINY_TAG, logMessage.getDestiny().getLabel());
         ThreadContext.put(METRICS_TAG, metricsPrefix + " >> ");
+        ThreadContext.put(METRICS_ENABLED_TAG, "true");
         ThreadContext.put(LOG_CODE_TAG, logMessage.getLogCode());
         
         DE4AKafkaClient.send(level, msg);
         
         ThreadContext.clearAll();
+        
+        ThreadContext.put(METRICS_ENABLED_TAG, "false");
     }
 
 }

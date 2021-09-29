@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.helger.phase4.attachment.WSS4JAttachment;
 
@@ -51,11 +53,10 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler{
             throw new MEIncomingException(new MessageUtils(LogMessages.LOG_ERROR_AS4_MSG_INVALID.getKey()).value());
         }
         Document evidenceRequest = DOMUtils.newDocumentFromInputStream(attached.getSourceStream());
-        try {          
-            messageOwner.setMessage(evidenceRequest.getDocumentElement());
-            messageOwner.setId(DOMUtils.getValueFromXpath(
-                    String.format(DE4AConstants.XPATH_REQUEST_ID, DE4AConstants.TAG_EVIDENCE_REQUEST),
-                    evidenceRequest.getDocumentElement()));
+        try {
+            Node nodeRequest = DOMUtils.getNodeFromXpath(DE4AConstants.XPATH_EVIDENCE_REQUEST, evidenceRequest.getDocumentElement());
+            messageOwner.setMessage((Element) nodeRequest);
+            messageOwner.setId(edmwrapper.getRequest().getRequestID());
             messageOwner.setSenderId(aRequest.getMetadata().getSenderID().getURIEncoded());
             messageOwner.setReceiverId(aRequest.getMetadata().getReceiverID().getURIEncoded());
 

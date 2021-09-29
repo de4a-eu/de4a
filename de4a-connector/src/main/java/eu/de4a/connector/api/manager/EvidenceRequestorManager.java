@@ -1,14 +1,11 @@
 package eu.de4a.connector.api.manager;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
@@ -41,9 +38,7 @@ import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 import eu.de4a.util.DE4AConstants;
-import eu.de4a.util.DOMUtils;
 import eu.toop.connector.api.me.outgoing.MEOutgoingException;
-import eu.toop.connector.api.rest.TCPayload;
 
 @Component
 public class EvidenceRequestorManager extends EvidenceManager {
@@ -171,17 +166,10 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		    
 		    NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false, userMessage);
 	        
-	        KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_REQ_SENT, sender, dataOwnerId, canonicalEvidenceTypeId);
+	        KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_REQ_SENT, sPI.getURIEncoded(), doPI.getURIEncoded(), canonicalEvidenceTypeId);
 			
-			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
-			List<TCPayload> payloads = new ArrayList<>();
-			TCPayload p = new TCPayload();
-			p.setContentID(DE4AConstants.TAG_EVIDENCE_REQUEST);
-			p.setMimeType(MediaType.APPLICATION_XML_VALUE);
-			p.setValue(DOMUtils.documentToByte(userMessage.getOwnerDocument()));
-			payloads.add(p);
-			
-			as4Client.sendMessage(sender, nodeInfo, requestWrapper, payloads, DE4AConstants.TAG_EVIDENCE_REQUEST);
+			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, DE4AConstants.TAG_EVIDENCE_REQUEST, true);			
+			as4Client.sendMessage(sender, nodeInfo, requestWrapper, null, DE4AConstants.TAG_EVIDENCE_REQUEST);
 			
 			return true;
 		} catch (MEOutgoingException e) {

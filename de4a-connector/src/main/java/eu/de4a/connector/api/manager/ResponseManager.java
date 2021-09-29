@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,17 +71,15 @@ public class ResponseManager {
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
-			List<EvaluatorRequestData> responseData = saveData(response, evaluatorinfo);
+			saveData(response, evaluatorinfo);
             if (evaluatorinfo.isUsi()) {
                 EvaluatorAddresses evaluatorAddress = agentsLocator.lookupEvaluatorAddress(evaluatorinfo.getIdevaluator());
                 if (!ObjectUtils.isEmpty(evaluatorAddress)) {
                     // Send RequestForwardEvidence to evaluator - USI pattern
-                    Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
-                    if(doc != null) {
-                        client.pushEvidence(evaluatorAddress.getEndpoint(), doc);
-                    } else {
-                        doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_REDIRECT_USER);
-                        client.pushRedirectUserMsg(evaluatorAddress.getEndpoint(), doc);
+                    if(DE4AConstants.TAG_EVIDENCE_REQUEST.equals(response.getTagDataId())) {
+                        client.pushEvidence(evaluatorAddress.getEndpoint(), response.getResponseDocument());
+                    } else if(DE4AConstants.TAG_REDIRECT_USER.equals(response.getTagDataId())) {
+                        client.pushRedirectUserMsg(evaluatorAddress.getEndpoint(), response.getResponseDocument());
                     }
                 } else {
                     //TODO in this case, how DE or DO is advised of the situation?

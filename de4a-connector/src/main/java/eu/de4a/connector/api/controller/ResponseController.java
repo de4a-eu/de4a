@@ -47,7 +47,7 @@ public class ResponseController implements ResponseApi {
 	    KafkaClientWrapper.sendInfo(LogMessages.LOG_USI_DT_REQ_RECEIPT, reqObj.getRequestId());
 	    
 		return processResponseUsiMsg(marshaller, reqObj, reqObj.getRequestId(), reqObj.getDataEvaluator().getAgentUrn(), 
-		        reqObj.getDataOwner().getAgentUrn(), DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
+		        reqObj.getDataOwner().getAgentUrn(), DE4AConstants.TAG_EVIDENCE_REQUEST);
 	}
 	
 	@PostMapping(value = "/usiRedirectUser", produces = MediaType.APPLICATION_XML_VALUE, 
