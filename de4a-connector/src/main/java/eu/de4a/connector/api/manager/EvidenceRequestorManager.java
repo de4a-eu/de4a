@@ -5,7 +5,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,7 +174,8 @@ public class EvidenceRequestorManager extends EvidenceManager {
 		    
 		    NodeInfo nodeInfo = client.getNodeInfo(dataOwnerId, canonicalEvidenceTypeId, false, userMessage);
 	        
-	        KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_REQ_SENT, sender, dataOwnerId, canonicalEvidenceTypeId);
+	        KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_REQ_SENT, sPI.getURIEncoded(), doPI.getURIEncoded(), 
+	                canonicalEvidenceTypeId);
 			
 			Element requestWrapper = new RegRepTransformer().wrapMessage(userMessage, true);
 			List<TCPayload> payloads = new ArrayList<>();

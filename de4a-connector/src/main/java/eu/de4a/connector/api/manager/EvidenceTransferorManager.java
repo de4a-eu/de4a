@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +172,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
         }
     }
 
-    public boolean sendResponseMessage(String receiverId, String dataOwnerId, String docTypeID, Element message, String tagContentId) {
+    public boolean sendResponseMessage(String receiverId, String dataOwnerId, String docTypeID, 
+            Element message, String tagContentId) {
         String errorMsg;
         try {
             IParticipantIdentifier doPI = SimpleIdentifierFactory.INSTANCE
@@ -189,7 +189,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
             
             NodeInfo nodeInfo = client.getNodeInfo(receiverId, docTypeID, true, message);
             
-            KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_RESP_SENT, receiverId, tagContentId, docTypeID);
+            KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_RESP_SENT, rPI.getURIEncoded(), tagContentId, docTypeID);
             
             List<TCPayload> payloads = new ArrayList<>();
             TCPayload payload = new TCPayload();
