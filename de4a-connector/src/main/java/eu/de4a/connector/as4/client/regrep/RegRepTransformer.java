@@ -51,7 +51,7 @@ public class RegRepTransformer {
 
 	public Element wrapMessage(Element canonical, String messageTag, boolean isRequest) throws MessageException {
 
-		try {
+		try (OutputStream xmlFile = new ByteArrayOutputStream()) {
 			String template = (isRequest ? REQUEST_TEMPLATE : RESPONSE_TEMPLATE);
 			log.debug("Wrapping canonical request as RegRep message");
 			TransformerFactory factory = TransformerFactory.newInstance();
@@ -60,8 +60,7 @@ public class RegRepTransformer {
 			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 			InputStream inputStreamPlantilla = this.getClass().getClassLoader().getResourceAsStream(template);
 			Source xslDoc = new StreamSource(inputStreamPlantilla);
-			Source src = new DOMSource();
-			OutputStream xmlFile = new ByteArrayOutputStream();
+			Source src = new DOMSource();			
 			Transformer transformerxsl = factory.newTransformer(xslDoc);
 
 			fillParameter(transformerxsl, REQUEST_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, canonical));
@@ -82,7 +81,7 @@ public class RegRepTransformer {
             fillParameter(transformerxsl, MESSAGE_TAG, messageTag);
 			transformerxsl.setOutputProperty(OutputKeys.ENCODING, DEFAULT_ENCODING);
 			transformerxsl.transform(src, new StreamResult(xmlFile));
-			xmlFile.close();
+
 			String xmlespecificos = ((ByteArrayOutputStream) xmlFile).toString();			
 			Document docFinal = DOMUtils.stringToDocument(xmlespecificos);
 
@@ -111,10 +110,14 @@ public class RegRepTransformer {
 		return sdf.format(new Date());
 	}
 	
-	private void copyNode(Document doc, String nodeName, Element newNode) {
+	private void copyNode(Document doc, String nodeName, Element newNode) 
+	        throws Exception {
 	    Node copyNode = doc.importNode(newNode, true);
 	    NodeList nodeList = doc.getElementsByTagName(nodeName);
-	    Node oldNode = nodeList.item(0);	    
+	    Node oldNode = nodeList.item(0);
+	    if(oldNode == null) {
+	        throw new Exception("Node: " + nodeName + " - does not exists at the XML Document");
+	    }
 	    oldNode.getParentNode().replaceChild(copyNode, oldNode);
 	}
 
