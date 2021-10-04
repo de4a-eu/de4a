@@ -81,6 +81,12 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 
                 requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
+                requestorReq.setIdrequest(request.getId());
+                requestorReq.setEvidenceServiceUri(request.getReceiverId());
+                requestorReq.setSenderId(request.getSenderId());
+                requestorReq.setDone(false);
+                requestorRequestRepository.save(requestorReq);
+                
                 responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(req,
                         ownerAddress.getEndpoint(), false);
                 Document docResponse = (Document) ErrorHandlerUtils.conversionDocWithCatching(
@@ -101,6 +107,11 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 
                 requestorReq.setCanonicalEvidenceTypeId(req.getCanonicalEvidenceTypeId());
                 requestorReq.setDataOwnerId(req.getDataOwner().getAgentUrn());
+                requestorReq.setIdrequest(request.getId());
+                requestorReq.setEvidenceServiceUri(request.getReceiverId());
+                requestorReq.setSenderId(request.getSenderId());
+                requestorReq.setDone(false);
+                requestorRequestRepository.save(requestorReq);
                 
                 ResponseErrorType response = (ResponseErrorType) client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
                 
@@ -114,13 +125,6 @@ public class EvidenceTransferorManager extends EvidenceManager {
                     }
                 }
             }
-            // Save request information
-            requestorReq.setIdrequest(request.getId());
-            requestorReq.setEvidenceServiceUri(request.getReceiverId());
-            requestorReq.setSenderId(request.getSenderId());
-            requestorReq.setDone(false);
-            requestorRequestRepository.save(requestorReq);
-
         } catch (ConnectorException e) {
             responseTransferEvidenceType = (ResponseTransferEvidenceType) ResponseErrorFactory
                     .getHandlerFromClassException(ex.getClass()).buildResponse(e.withRequest(ex.getRequest()));

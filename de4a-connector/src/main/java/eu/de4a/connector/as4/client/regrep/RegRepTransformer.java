@@ -111,12 +111,12 @@ public class RegRepTransformer {
 	}
 	
 	private void copyNode(Document doc, String nodeName, Element newNode) 
-	        throws Exception {
+	        throws NullPointerException {
 	    Node copyNode = doc.importNode(newNode, true);
 	    NodeList nodeList = doc.getElementsByTagName(nodeName);
 	    Node oldNode = nodeList.item(0);
 	    if(oldNode == null) {
-	        throw new Exception("Node: " + nodeName + " - does not exists at the XML Document");
+	        throw new NullPointerException("Node: " + nodeName + " - does not exists at the XML Document");
 	    }
 	    oldNode.getParentNode().replaceChild(copyNode, oldNode);
 	}
