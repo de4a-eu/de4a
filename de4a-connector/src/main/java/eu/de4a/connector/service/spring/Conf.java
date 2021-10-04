@@ -30,6 +30,7 @@ import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
+import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -237,7 +238,8 @@ public class Conf implements WebMvcConfigurer {
 				SSLConnectionSocketFactory factory;
 				if (sslContextEnabled) {
 				    SSLContext sslContext = sslContext();
-					factory = new SSLConnectionSocketFactory(sslContext);
+					factory = new SSLConnectionSocketFactory(sslContext, new String[] {"TLSv1.2", "TLSv1.3"},
+					        null, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 					httpSettings.setSSLContext(sslContext);
 				} else {
 					factory = new SSLConnectionSocketFactory(sslContextTrustAll());
@@ -305,7 +307,7 @@ public class Conf implements WebMvcConfigurer {
 			keyStore.load(fis, keyStorePassword.toCharArray());
 
 			return SSLContextBuilder.create().loadKeyMaterial(keyStore, keyStorePassword.toCharArray())
-					.setProtocol("TLSv1.2").loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray())
+					.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray())
 					.build();
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
@@ -373,6 +375,8 @@ public class Conf implements WebMvcConfigurer {
         }
         DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);        
         DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
+        
+        ThreadContext.put("metrics.enabled", "false");
 	}
 
 	@Bean

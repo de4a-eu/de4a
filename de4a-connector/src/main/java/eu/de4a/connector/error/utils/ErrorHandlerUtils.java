@@ -15,6 +15,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.FamilyErrorType;
@@ -165,7 +166,7 @@ public class ErrorHandlerUtils {
             if(objToDoc) {
                 returnObj = marshaller.getAsDocument((T) obj);
             } else {
-                returnObj = marshaller.read((Document) obj);
+                returnObj = marshaller.read((Node) obj);
             }
         } catch(Exception e) {
             if(logger.isDebugEnabled()) {

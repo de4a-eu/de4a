@@ -1,8 +1,11 @@
+<%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
+<%@ taglib uri = "http://java.sun.com/jsp/jstl/functions" prefix = "fn" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <spring:eval expression="@environment.getProperty('ssl.context.enabled') == 'true'" var="sslContextEnabled" />
 <spring:eval expression="@environment.getProperty('http.proxy.enabled') == 'true'" var="httpProxyEnabled" />
 <spring:eval expression="@environment.getProperty('de4a.kafka.enabled') == 'true'" var="kafkaEnabled" />
 <spring:eval expression="@environment.getProperty('de4a.kafka.http.enabled') == 'true'" var="kafkaHttpEnabled" />
+<spring:eval expression="@environment.getProperty('de4a.kafka.logging.enabled') == 'true'" var="kafkaLogginEnabled" />
 <spring:eval expression="@environment.getProperty('de4a.kafka.topic')" var="kafkaTopic" />
 <spring:eval expression="@environment.getProperty('de4a.kafka.url')" var="kafkaUrl" />
 <spring:eval expression="@environment.getProperty('smp.endpoint')" var="smpEndpoint" />
@@ -82,14 +85,18 @@
 	<h4 class="param-name">ssl.context.enabled: <span class="param-value ${sslContextEnabled ? ' value-true' : ' value-false'}">${sslContextEnabled}</span></h4>
 	<h4 class="param-name">http.proxy.enabled: <span class="param-value ${httpProxyEnabled ? ' value-true' : ' value-false'}">${httpProxyEnabled}</span></h4><br>
 	<h4 class="param-name">de4a.kafka.enabled: <span class="param-value ${kafkaEnabled ? ' value-true' : ' value-false'}">${kafkaEnabled}</span></h4>
+	<h4 class="param-name">de4a.kafka.logging.enabled: <span class="param-value ${kafkaLogginEnabled ? ' value-true' : ' value-false'}">${kafkaLogginEnabled}</span></h4>
 	<h4 class="param-name">de4a.kafka.http.enabled: <span class="param-value ${kafkaHttpEnabled ? ' value-true' : ' value-false'}">${kafkaHttpEnabled}</span></h4>
 	<h4 class="param-name">de4a.kafka.url: <span class="param-value value">${empty kafkaUrl ? 'not-set' : kafkaUrl}</span></h4>
 	<h4 class="param-name">de4a.kafka.topic: <span class="param-value value">${empty kafkaTopic ? 'not-set' : kafkaTopic}</span></h4><br>
 	<h4 class="param-name">smp.endpoint: <span class="param-value value">${empty smpEndpoint ? 'not-set' : smpEndpoint}</span></h4>
 	<h4 class="param-name">idk.endpoint: <span class="param-value value">${empty idkEndpoint ? 'not-set' : idkEndpoint}</span></h4><br>
-	<h4 class="param-name">smpclient.truststore.path: <span class="param-value value">${empty smpTruststore ? 'not-set' : smpTruststore}</span></h4>
-	<h4 class="param-name">phase4.keystore.path: <span class="param-value value">${empty phase4Keystore ? 'not-set' : phase4Keystore}</span></h4>
-	<h4 class="param-name">phase4.truststore.path: <span class="param-value value">${empty phase4Truststore ? 'not-set' : phase4Truststore}</span></h4>
+	<c:set value="${fn:split(smpTruststore,'/')}" var="separatorPosition" />
+	<h4 class="param-name">smpclient.truststore: <span class="param-value value">${empty smpTruststore ? 'not-set' : separatorPosition[fn:length(separatorPosition)-1]}</span></h4>
+	<c:set value="${fn:split(phase4Keystore,'/')}" var="separatorPosition1" />
+	<h4 class="param-name">phase4.keystore: <span class="param-value value">${empty phase4Keystore ? 'not-set' : separatorPosition1[fn:length(separatorPosition1)-1]}</span></h4>
+	<c:set value="${fn:split(phase4Truststore,'/')}" var="separatorPosition2" />
+	<h4 class="param-name">phase4.truststore: <span class="param-value value">${empty phase4Truststore ? 'not-set' : separatorPosition2[fn:length(separatorPosition2)-1]}</span></h4>
     <h4 class="param-name">as4.gateway.implementation.bean: <span class="param-value value">${empty as4GatewayBean ? 'not-set' : as4GatewayBean}</span></h4>
 	<hr style="width: 40%;min-width:600px;margin-left:0; margin-top:25px;">
 	

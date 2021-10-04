@@ -7,6 +7,7 @@ import java.util.List;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.util.ByteArrayDataSource;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -102,17 +102,16 @@ public class DomibusGatewayClient implements As4GatewayInterface {
     @Override
     public void sendMessage(String sender, NodeInfo nodeInfo, Element requestUsuario,
             List<TCPayload> payloads, String msgTag) throws MEOutgoingException {
-        String idMessageAttached = "cid:message";
         String idCanonical = "cid:" + msgTag;
 
         Messaging messageHeader = this.domibusMessageFactory.makeMessage(sender, nodeInfo.getParticipantIdentifier(),
                 nodeInfo.getDocumentIdentifier(), nodeInfo.getProcessIdentifier(),
-                getAttachments(idMessageAttached, idCanonical));
+                getAttachments(idCanonical));
 
         List<LargePayloadType> bodies = new ArrayList<>();
         LargePayloadType payload = new LargePayloadType();
         payload.setContentType(MediaType.APPLICATION_XML_VALUE);
-        payload.setPayloadId(idMessageAttached);
+        payload.setPayloadId(idCanonical);
         DataSource source = null;
         try {
             source = new ByteArrayDataSource(DOMUtils.documentToByte(requestUsuario.getOwnerDocument()),
@@ -154,12 +153,13 @@ public class DomibusGatewayClient implements As4GatewayInterface {
         } catch (IOException e) {
             LOGGER.error("Error attaching files to response wrapper", e);
         }
-        Document evidence = null;
+        Document docRequest = null;
         String requestId = "";
         try {
-            evidence = DOMUtils.byteToDocument(inputBytes);
-            requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, evidence.getDocumentElement());
-        } catch (MessageException e1) {
+            Document evidence = DOMUtils.byteToDocument(inputBytes);            
+            docRequest = DOMUtils.newDocumentFromNode(evidence.getDocumentElement(), contentTag);
+            requestId = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, docRequest.getDocumentElement());
+        } catch (MessageException | ParserConfigurationException e1) {
             String errorMsg = "Error managing evidence DOM on AS4 response";
             LOGGER.error(errorMsg, e1);
             if(contentTag != null && 
@@ -171,17 +171,15 @@ public class DomibusGatewayClient implements As4GatewayInterface {
         }
         responsewrapper.setTagDataId(contentTag);
         responsewrapper.setId(requestId);
-        responsewrapper.setResponseDocument(evidence);
+        responsewrapper.setResponseDocument(docRequest);
             
         publisher.publishCustomEvent(responsewrapper);
     }
 
-    private List<PartInfo> getAttachments(String idMessageAttached, String idCanonical) {
+    private List<PartInfo> getAttachments(String idCanonical) {
         List<PartInfo> attachments = new ArrayList<>();
         PartInfo partInfo = new PartInfo();
-        PartInfo partInfo2 = new PartInfo();
-        partInfo.setHref(idMessageAttached);
-        partInfo2.setHref(idCanonical);
+        partInfo.setHref(idCanonical);
 
         Property prop = new Property();
         prop.setName("MimeType");
@@ -190,9 +188,7 @@ public class DomibusGatewayClient implements As4GatewayInterface {
         PartProperties props = new PartProperties();
         props.getProperty().add(prop);
         partInfo.setPartProperties(props);
-        partInfo2.setPartProperties(props);
         attachments.add(partInfo);
-        attachments.add(partInfo2);
 
         return attachments;
     }

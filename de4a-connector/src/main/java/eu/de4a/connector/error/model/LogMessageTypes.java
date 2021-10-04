@@ -2,7 +2,7 @@ package eu.de4a.connector.error.model;
 
 public enum LogMessageTypes {
     
-    SERVICES("Services", "1"),
+    SERVICES("Services", "01"),
     CLIENT("Client", "02"),
     AS4("AS4", "03"),
     ERROR("Error", "04");
