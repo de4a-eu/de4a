@@ -17,11 +17,11 @@ INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES 
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (6, 'HigherEducationDiploma', 'nuts0', 'SI', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (6, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si000000016', 'MINISTRSTVO ZA IZOBRAZEVANJE, ZNANOST IN SPORT (MIZS)', 6);
-INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (6, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 6);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (6, 'usip', 'https://b51-preview.test.medius.si/de4a/preview', 6);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (7, 'HigherEducationDiploma', 'nuts0', 'PT', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (7, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt990000101', 'Portuguese IST, University of Lisbon', 7);
-INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (7, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 7);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (7, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt000000026', '(AMA IP) Agencia para a Modernizacao Administrativa IP (Administration Modernization Agency)', 7);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (7, 'usip', 'http://129.159.202.64/pi-de4a-middleware/InboundMessages/RequestUserRedirection', 7);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (8, 'BirthEvidence', 'nuts0', 'ES', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (8, 'ES', 'España', 'iso6523-actorid-upis::9920:ess2833002e', '(MPTFP-SGAD) Secretaría General de Administración Digital', 8);
@@ -94,10 +94,6 @@ INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (25, 'HigherEducationDiploma', 'nuts0', 'ES', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (25, 'ES', 'España', 'iso6523-actorid-upis::9920:ess2833002e', '(MPTFP-SGAD) Secretaría General de Administración Digital', 25);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (25, 'usip', 'https://pre-as4gw-dt-de4a.redsara.es/de4a-pid-owner/welcome', 25);
-
-INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (26, 'HigherEducationDiploma', 'nuts0', 'SI', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (26, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si000000018', '(JSI) Institut Jozef Stefan', 26);
-INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (26, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 26);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (27, 'BirthEvidence', 'nuts0', 'PT', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (27, 'PT', 'PORTUGAL', 'iso6523-actorid-upis::9991:pt000000026', '(AMA IP) Agencia para a Modernizacao Administrativa IP (Administration Modernization Agency)', 27);
