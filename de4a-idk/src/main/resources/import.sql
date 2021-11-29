@@ -32,8 +32,8 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (9, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 9);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (10, 'BirthEvidence', 'nuts0', 'SI', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (10, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si990000105', 'Ministrstvo za notranje zadeve', 10);
-INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (10, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 10);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (10, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si000000016', 'Ministrstvo za notranje zadeve', 10);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (10, 'usip', 'https://b51-preview.test.medius.si/de4a/preview', 10);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (11, 'BirthEvidence', 'nuts0', 'LU', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (11, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9991:lu000000025', 'CENTRE DES TECHNOLOGIES DE L''INFORMATION DE L''ETAT (CTIE)', 11);
@@ -52,7 +52,7 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (14, 'ip', null, 14);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (15, 'DeathCertificate', 'nuts0', 'SI', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (15, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si990000105', 'Ministrstvo za notranje zadeve', 15);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (15, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si000000016', 'Ministrstvo za notranje zadeve', 15);
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (15, 'ip', null, 15);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (16, 'DeathCertificate', 'nuts0', 'LU', null, null);
@@ -68,8 +68,8 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (18, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 18);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (19, 'MarriageEvidence', 'nuts0', 'SI', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (19, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si990000105', 'Ministrstvo za notranje zadeve', 19);
-INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (19, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 19);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (19, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si000000016', 'Ministrstvo za notranje zadeve', 19);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (19, 'usip', 'https://b51-preview.test.medius.si/de4a/preview', 19);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (20, 'MarriageEvidence', 'nuts0', 'LU', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (20, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9991:lu000000025', 'CENTRE DES TECHNOLOGIES DE L''INFORMATION DE L''ETAT (CTIE)', 20);
@@ -84,8 +84,8 @@ INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPref
 INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (22, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 22);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (23, 'DomicileRegistrationEvidence', 'nuts0', 'SI', null, null);
-INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (23, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si990000105', 'Ministrstvo za notranje zadeve', 23);
-INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (23, 'usip', 'https://pre-smp-dr-de4a.redsara.es/de4a-mock-connector/preview/index', 23);
+INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (23, 'SI', 'SLOVENIJA', 'iso6523-actorid-upis::9991:si000000016', 'Ministrstvo za notranje zadeve', 23);
+INSERT INTO Provision (id, provisionType, redirectURL, id_provisionItem) VALUES (23, 'usip', 'https://b51-preview.test.medius.si/de4a/preview', 23);
 
 INSERT INTO Source (id, canonicalEvidenceTypeId, atulevel, countryCode, numProvisions, organisation) VALUES (24, 'DomicileRegistrationEvidence', 'nuts0', 'LU', null, null);
 INSERT INTO ProvisionItem (id, atuCode, AtuLatinName, dataOwnerId, DataOwnerPrefLabel, id_source) VALUES (24, 'LU', 'LUXEMBOURG', 'iso6523-actorid-upis::9991:lu000000025', 'CENTRE DES TECHNOLOGIES DE L''INFORMATION DE L''ETAT (CTIE)', 24);
