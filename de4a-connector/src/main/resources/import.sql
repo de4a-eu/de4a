@@ -40,6 +40,6 @@ INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-up
 INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-upis::9991:nl000000024', 'https://de4a-dev-mock.egovlab.eu/de1/usi/');
 INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-upis::9991:si000000016', 'https://de4a-dev-mock.egovlab.eu/de1/usi/');
 INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-upis::9991:si000000018', 'https://de4a-dev-mock.egovlab.eu/de1/usi/');
-INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-upis::9991:pt990000101', 'https://de4a-dev-mock.egovlab.eu/de1/usi/');
-INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-upis::9920:esq6250003h', 'https://de4a-dev-mock.egovlab.eu/de1/usi/');
+INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-upis::9991:pt990000101', 'https://de4a-portal.gsd.inesc-id.pt:8443/api/de/');
+INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-upis::9920:esq6250003h', 'https://ujiapps.uji.es/sdg/rest/services/');
 INSERT INTO evaluator_addresses (agentUrn, endpoint) VALUES ('iso6523-actorid-upis::9991:lu000000025', 'https://de4a-dev-mock.egovlab.eu/de1/usi/');
