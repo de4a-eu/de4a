@@ -23,6 +23,6 @@ public abstract class ConnectorExceptionHandler {
         }
     }
 
-    public abstract Object getResponseError(ConnectorException exception, boolean returnString);
+    public abstract Object getResponseError(ConnectorException exception, boolean returnBytes);
     public abstract Object buildResponse(ConnectorException exception);
 }

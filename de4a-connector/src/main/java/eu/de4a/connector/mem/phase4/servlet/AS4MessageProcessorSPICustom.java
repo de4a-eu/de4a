@@ -171,7 +171,6 @@ public class AS4MessageProcessorSPICustom implements IAS4ServletMessageProcessor
             // Response
             final ICommonsList <MEPayload> aAttachments = new CommonsArrayList <> ();
             for (final WSS4JAttachment aItem : aIncomingAttachments)
-              if (aItem != aMainPayload)
                 aAttachments.add (MEPayload.builder ()
                                            .mimeType (MimeTypeParser.safeParseMimeType (aItem.getMimeType ()))
                                            .contentID (aItem.getId ())

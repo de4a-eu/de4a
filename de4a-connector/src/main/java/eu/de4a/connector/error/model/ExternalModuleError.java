@@ -5,8 +5,8 @@ public enum ExternalModuleError {
     SMP("02", "SMP"), 
     CONNECTOR_DR("03", "CONNECTOR DR"), 
     CONNECTOR_DT("04", "CONNECTOR DT"),
-    DATA_OWNER("04", "DATA OWNER"), 
-    DATA_EVALUATOR("05", "DATA EVALUATOR"), 
+    DATA_OWNER("05", "DATA OWNER"), 
+    DATA_EVALUATOR("06", "DATA EVALUATOR"), 
     NONE("00", "NONE");
 
     private String id;

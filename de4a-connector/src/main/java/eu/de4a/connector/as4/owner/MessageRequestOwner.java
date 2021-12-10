@@ -1,15 +1,19 @@
 package eu.de4a.connector.as4.owner;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.w3c.dom.Element;
 
-public class MessageOwner {
-    private Element message;
+public class MessageRequestOwner extends ContextRefreshedEvent {
+    private static final long serialVersionUID = 1L;
+    
+    private transient Element message;
     private String id;
     private String senderId;
     private String receiverId;
-
-    public MessageOwner() {
-        super();
+    
+    public MessageRequestOwner(ApplicationContext context) {
+        super(context);
     }
 
     public Element getMessage() {

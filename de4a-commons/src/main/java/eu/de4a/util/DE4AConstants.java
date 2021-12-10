@@ -5,13 +5,16 @@ public class DE4AConstants {
 
 	public static final String TAG_EVIDENCE_REQUEST="RequestTransferEvidence";
 	public static final String TAG_EVIDENCE_REQUEST_DT="RequestTransferEvidenceUSIDT";
+	public static final String TAG_REDIRECT_USER="RedirectUser";
 	public static final String TAG_EXTRACT_EVIDENCE_REQUEST="RequestExtractEvidence";
 	public static final String TAG_EVIDENCE_RESPONSE="ResponseTransferEvidence";
 	public static final String TAG_FORWARD_EVIDENCE_REQUEST="RequestForwardEvidence";
 	public static final String TAG_EXTRACT_EVIDENCE_RESPONSE="ResponseExtractEvidence";
-	public static final String XPATH_EVIDENCE_RESPONSE="//*[local-name()='ResponseTransferEvidence']";
-	public static final String XPATH_EXTRACT_EVIDENCE_RESPONSE="//*[local-name()='ResponseExtractEvidence']";
 	public static final String TAG_NATIONAL_EVIDENCE_RESPONSE="NationalEvidenceResponse";
+	public static final String XPATH_ABSOLUTE_PARAM="//*[local-name()='%s']";
+	public static final String XPATH_EVIDENCE_RESPONSE="//*[local-name()='ResponseTransferEvidence']";
+	public static final String XPATH_EXTRACT_EVIDENCE_RESPONSE="//*[local-name()='ResponseExtractEvidence']";	
+	public static final String XPATH_EVIDENCE_REQUEST="//*[local-name()='RequestTransferEvidence']";
 	public static final String XPATH_REQUEST_ID="//*[local-name()='%s']/*[local-name()='RequestId']/text()";
 	public static final String XPATH_ID="//*[local-name()='RequestId']";
 	public static final String XPATH_EVIDENCE_DATA="//*[local-name()='EvidenceData']";
@@ -20,7 +23,7 @@ public class DE4AConstants {
 	public static final String XPATH_EVALUATOR_ID_NODE="//*[local-name()='DataEvaluator']/*[local-name()='id']";
 	public static final String XPATH_EVALUATOR_NAME_NODE="//*[local-name()='DataEvaluator']/*[local-name()='name']";
 	public static final String XPATH_OWNER_ID="//*[local-name()='DataOwner']/*[local-name()='AgentUrn']/text()";
-	public static final String XPATH_OWNER_NAME="//*[local-name()='DataOwner']/*[local-name()='Agent']/text()";
+	public static final String XPATH_OWNER_NAME="//*[local-name()='DataOwner']/*[local-name()='AgentName']/text()";
 	public static final String XPATH_OWNER_ID_NODE="//*[local-name()='DataOwner']/*[local-name()='id']";
 	public static final String XPATH_OWNER_NAME_NODE="//*[local-name()='DataOwner']/*[local-name()='name']";
 	public static final String XPATH_CANONICAL_EVICENCE_ID="//*[local-name()='CanonicalEvidenceTypeId']/text()";

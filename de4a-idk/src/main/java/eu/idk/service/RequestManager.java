@@ -4,20 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import eu.de4a.iem.jaxb.common.types.AtuLevelType;
 import eu.de4a.iem.jaxb.common.types.AvailableSourcesType;
-import eu.de4a.iem.jaxb.common.types.ParamSetsType;
-import eu.de4a.iem.jaxb.common.types.ParamType;
-import eu.de4a.iem.jaxb.common.types.ParamsType;
 import eu.de4a.iem.jaxb.common.types.ProvisionItemType;
 import eu.de4a.iem.jaxb.common.types.ProvisionItemsType;
-import eu.de4a.iem.jaxb.common.types.ProvisionType;
-import eu.de4a.iem.jaxb.common.types.ProvisionTypeType;
 import eu.de4a.iem.jaxb.common.types.SourceType;
-import eu.idk.model.ProvisionItem;
 import eu.idk.model.Source;
 
 @Component
@@ -49,33 +42,9 @@ public class RequestManager {
 				provisionItem.setAtuLatinName(x.getAtuLatinName());
 				provisionItem.setDataOwnerId(x.getDataOwnerId());
 				provisionItem.setDataOwnerPrefLabel(x.getDataOwnerPrefLabel());
-				ProvisionType provision = new ProvisionType();
-				extractProvision(provision, provisionItem,x);
+
 				provisionItems.addProvisionItem(provisionItem);
 			}
 		});
-	}
-
-	private void extractProvision(ProvisionType provision, ProvisionItemType provisionItemDst, ProvisionItem provisionItemOrg) {
-		if(provisionItemOrg.getProvision() != null) {
-			provision.setRedirectURL(provisionItemOrg.getProvision().getRedirectURL());
-			provision.setProvisionType(ProvisionTypeType.fromValue(provisionItemOrg.getProvision().getProvisionType()));
-			ParamsType params = new ParamsType();
-			if (!CollectionUtils.isEmpty(provisionItemOrg.getProvision().getParams())) {
-				provisionItemOrg.getProvision().getParams().stream().forEach(p -> {
-					ParamType param = new ParamType();
-					param.setTitle(p.getTitle());
-					ParamSetsType paramsSet = new ParamSetsType();
-					if (p.getParamsSet() != null) {
-						p.getParamsSet().stream().forEach(ps -> {
-							paramsSet.addParamSet(ps.getParamValue());
-						});
-					}
-					param.setParamSets(paramsSet);
-				});
-				provision.setParams(params);
-			}
-			provisionItemDst.setProvision(provision);
-		}
 	}
 }

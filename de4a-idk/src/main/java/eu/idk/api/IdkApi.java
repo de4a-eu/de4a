@@ -29,7 +29,7 @@ public interface IdkApi {
 
 			@ApiResponse(responseCode = "5XX", description = "Unexpected error") })
 	@GetMapping(value = "/ial/{canonicalEvidenceTypeId}/{countryCode}")
-	ResponseEntity<String> ialCanonicalEvidenceTypeIdCountryCodeGet(
+	ResponseEntity<byte[]> ialCanonicalEvidenceTypeIdCountryCodeGet(
 			@Parameter(in = ParameterIn.PATH, description = "evidence type with a canonical definition", required = true, schema = @Schema()) @PathVariable("canonicalEvidenceTypeId") String canonicalEvidenceTypeId,
 			@Pattern(regexp = "[A-Z][A-Z]") @Parameter(in = ParameterIn.PATH, description = "country of the available sources", required = true, schema = @Schema()) @PathVariable("countryCode") String countryCode);
 
@@ -41,7 +41,7 @@ public interface IdkApi {
 
 			@ApiResponse(responseCode = "5XX", description = "Unexpected error") })
 	@GetMapping(value = "/ial/{canonicalEvidenceTypeId}")
-	ResponseEntity<String> ialCanonicalEvidenceTypeIdGet(
+	ResponseEntity<byte[]> ialCanonicalEvidenceTypeIdGet(
 			@Parameter(in = ParameterIn.PATH, description = "evidence type with a canonical definition", required = true, schema = @Schema()) @PathVariable("canonicalEvidenceTypeId") String canonicalEvidenceTypeId);
 
 	@Operation(summary = "", description = "", tags = {})
@@ -54,7 +54,7 @@ public interface IdkApi {
 
 			@ApiResponse(responseCode = "5XX", description = "Unexpected error") })
 	@GetMapping(value = "/provision")
-	ResponseEntity<String> provisionGet(
+	ResponseEntity<byte[]> provisionGet(
 			@NotNull @Parameter(in = ParameterIn.QUERY, description = "evidence type with a canonical definition", required = true, schema = @Schema()) @Valid @RequestParam(value = "canonicalEvidenceTypeId", required = true) String canonicalEvidenceTypeId,
 			@NotNull @Pattern(regexp = "iso6523-actorid-upis::[0-9][0-9][0-9][0-9]:.+") @Parameter(in = ParameterIn.QUERY, description = "country of the available sources", required = true, schema = @Schema()) @Valid @RequestParam(value = "dataOwnerId", required = true) String dataOwnerId);
 

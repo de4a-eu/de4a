@@ -15,11 +15,9 @@ import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
-
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -32,6 +30,7 @@ import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
+import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +49,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -73,18 +71,17 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
-
 import com.fasterxml.classmate.TypeResolver;
 import com.helger.httpclient.HttpClientSettings;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 import eu.de4a.config.DataSourceConf;
 import eu.de4a.connector.as4.domibus.soap.DomibusClientWS;
+import eu.de4a.iem.jaxb.common.types.RedirectUserType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestForwardEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
@@ -150,6 +147,8 @@ public class Conf implements WebMvcConfigurer {
 	
 	@Value("${de4a.kafka.enabled:false}")
 	private boolean kafkaEnabled;
+	@Value("${de4a.kafka.logging.enabled:true}")
+	private boolean kafkaLoggingEnabled;
     @Value("${de4a.kafka.http.enabled:false}")
     private boolean kafkaHttp;
     @Value("${de4a.kafka.url:#{null}}")
@@ -164,13 +163,14 @@ public class Conf implements WebMvcConfigurer {
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("eu"))
 				.paths(PathSelectors.any()).build()
-				.additionalModels(typeResolver.resolve(RequestTransferEvidenceUSIIMDRType.class),
+				.additionalModels(typeResolver.resolve(RequestExtractEvidenceType.class),
 						typeResolver.resolve(ResponseTransferEvidenceType.class),
 						typeResolver.resolve(ResponseErrorType.class),
 						typeResolver.resolve(RequestForwardEvidenceType.class),
 						typeResolver.resolve(RequestLookupRoutingInformationType.class),
 						typeResolver.resolve(ResponseLookupRoutingInformationType.class),
-				        typeResolver.resolve(RequestTransferEvidenceUSIDTType.class))
+				        typeResolver.resolve(RequestTransferEvidenceUSIDTType.class),
+				        typeResolver.resolve(RedirectUserType.class))
 				.apiInfo(apiInfo());
 	}
 
@@ -178,7 +178,7 @@ public class Conf implements WebMvcConfigurer {
 		return new ApiInfoBuilder()
 			.title("DE4A - Connector")
 			.description("DE4A Connector component - eDelivery Exchange")
-			.version("0.1.1")
+			.version("0.2.0")
 			.termsOfServiceUrl("http://www.de4a.eu")
 			.licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
 			.license("APACHE2")
@@ -228,10 +228,7 @@ public class Conf implements WebMvcConfigurer {
 	public RestTemplate restTemplate() {
 		HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
 				httpClient()); 
-		RestTemplate restTemplate = new RestTemplate(httpComponentsClientHttpRequestFactory);
-		restTemplate.getMessageConverters()
-        .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-		return restTemplate;
+		return new RestTemplate(httpComponentsClientHttpRequestFactory);
 	}
 
 	public HttpClient httpClient() {
@@ -241,7 +238,8 @@ public class Conf implements WebMvcConfigurer {
 				SSLConnectionSocketFactory factory;
 				if (sslContextEnabled) {
 				    SSLContext sslContext = sslContext();
-					factory = new SSLConnectionSocketFactory(sslContext);
+					factory = new SSLConnectionSocketFactory(sslContext, new String[] {"TLSv1.2", "TLSv1.3"},
+					        null, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 					httpSettings.setSSLContext(sslContext);
 				} else {
 					factory = new SSLConnectionSocketFactory(sslContextTrustAll());
@@ -309,7 +307,7 @@ public class Conf implements WebMvcConfigurer {
 			keyStore.load(fis, keyStorePassword.toCharArray());
 
 			return SSLContextBuilder.create().loadKeyMaterial(keyStore, keyStorePassword.toCharArray())
-					.setProtocol("TLSv1.2").loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray())
+					.loadTrustMaterial(new File(trustStore), trustStorePassword.toCharArray())
 					.build();
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException
 				| KeyManagementException | UnrecoverableKeyException e) {
@@ -375,8 +373,10 @@ public class Conf implements WebMvcConfigurer {
         if(kafkaHttp) {
             DE4AKafkaSettings.setHttpClientSetting(this.httpSettings);
         }
-        DE4AKafkaSettings.setLoggingEnabled(kafkaEnabled);        
+        DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);        
         DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
+        
+        ThreadContext.put("metrics.enabled", "false");
 	}
 
 	@Bean

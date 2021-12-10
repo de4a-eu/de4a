@@ -10,7 +10,7 @@
     <artifactId>de4a-connector</artifactId>
     <packaging>war</packaging>
     <name>de4a-connector</name>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <url>http://maven.apache.org</url>
     <dependencies>
         <dependency>
@@ -146,23 +146,23 @@
             <artifactId>springfox-swagger-ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.toop</groupId>
+            <groupId>com.helger.toop</groupId>
             <artifactId>tc-web-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.toop</groupId>
+            <groupId>com.helger.toop</groupId>
             <artifactId>tc-mem-external</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.toop</groupId>
+            <groupId>com.helger.toop</groupId>
             <artifactId>tc-main</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.toop</groupId>
+            <groupId>com.helger.toop</groupId>
             <artifactId>tc-mem-phase4</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.toop</groupId>
+            <groupId>com.helger.toop</groupId>
             <artifactId>tc-api</artifactId>
         </dependency>
         <dependency>
@@ -170,7 +170,7 @@
             <artifactId>ph-oton-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.toop</groupId>
+            <groupId>com.helger.toop</groupId>
             <artifactId>toop-edm</artifactId>
         </dependency>
         <dependency>

@@ -8,13 +8,11 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,24 +22,25 @@ import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.helger.commons.error.level.EErrorLevel;
-
 import eu.de4a.connector.as4.client.ResponseWrapper;
 import eu.de4a.connector.client.Client;
 import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceException;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
+import eu.de4a.connector.error.utils.KafkaClientWrapper;
+import eu.de4a.connector.model.EvaluatorAddresses;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.model.EvaluatorRequestData;
+import eu.de4a.connector.model.utils.AgentsLocator;
 import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.kafkaclient.DE4AKafkaClient;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;
 
@@ -56,41 +55,35 @@ public class ResponseManager {
 	private EvaluatorRequestRepository evaluatorRequestRepository;
 	@Autowired
 	private EvaluatorRequestDataRepository evaluatorRequestDataRepository;
+	@Autowired
+	private AgentsLocator agentsLocator;
 	@PersistenceContext
     private EntityManager entityManager;
 
-	@Transactional(isolation = Isolation.SERIALIZABLE)
-	@AfterReturning(pointcut = "execution(* *.processResponseAs4(..))", returning = "retVal")
-	public void cathResponseFromMultipleAs4(Object retVal) {
-		ResponseWrapper response = (ResponseWrapper) retVal;
+	public void processAS4Response(ResponseWrapper response) {
 		String id = response.getId();
 		
-		String logMsg = MessageFormat.format("Processing the response received via AS4 gateway - RequestId: {0}", id);
-        DE4AKafkaClient.send(EErrorLevel.INFO, logMsg);
+		KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_RESP_RECEIPT, id);
 		
 		EvaluatorRequest evaluatorinfo = evaluatorRequestRepository.findById(id).orElse(null);
 		if (evaluatorinfo == null) {
-		    logMsg = MessageFormat.format("The corresponding request to the received response is not found on database "
-		            + "- RequestId: {0}", id);
-			DE4AKafkaClient.send(EErrorLevel.ERROR, logMsg);
+		    KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_AS4_RESP_RECEIPT, id);
 		} else {
 			evaluatorinfo.setDone(true);
 			evaluatorRequestRepository.save(evaluatorinfo);
-			List<EvaluatorRequestData> responseData = saveData(response, evaluatorinfo);
+			saveData(response, evaluatorinfo);
             if (evaluatorinfo.isUsi()) {
-                // TODO USI pattern depends on redirectURL of DataEvaluator setted on the request
-                // to perform the way back once the response is received by Connector
-                // temporary solution until the final solution will be defined
-                if (!ObjectUtils.isEmpty(evaluatorinfo.getUrlreturn())) {
+                EvaluatorAddresses evaluatorAddress = agentsLocator.lookupEvaluatorAddress(evaluatorinfo.getIdevaluator());
+                if (!ObjectUtils.isEmpty(evaluatorAddress)) {
                     // Send RequestForwardEvidence to evaluator - USI pattern
-                    Document doc = getDocumentFromAttached(responseData, DE4AConstants.TAG_EVIDENCE_REQUEST_DT);
-                    client.pushEvidence(evaluatorinfo.getUrlreturn(), doc);
+                    if(DE4AConstants.TAG_EVIDENCE_REQUEST.equals(response.getTagDataId())) {
+                        client.pushEvidence(evaluatorAddress.getEndpoint(), response.getResponseDocument());
+                    } else if(DE4AConstants.TAG_REDIRECT_USER.equals(response.getTagDataId())) {
+                        client.pushRedirectUserMsg(evaluatorAddress.getEndpoint(), response.getResponseDocument());
+                    }
                 } else {
                     //TODO in this case, how DE or DO is advised of the situation?
-                    // turn redirectURL into a mandatory field?
-                    DE4AKafkaClient.send(EErrorLevel.ERROR, MessageFormat.format("RequestForwardEvidence has not been sent, "
-                            + "unkown Data Evaluator endpoint - RequestId: {0}, DataEvaluatorId: {1}", id, 
-                            evaluatorinfo.getIdevaluator()));
+                    KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_UNKNOWN_DE, id, evaluatorinfo.getIdevaluator());
                 }
             }
 		}
@@ -148,8 +141,7 @@ public class ResponseManager {
 		    .withFamily(FamilyErrorType.SAVING_DATA_ERROR)
 		    .withModule(ExternalModuleError.NONE)
 		    .withMessageArg(MessageFormat.format("Response {0} not found on database", id))
-		    .withRequest(DE4AMarshaller.drImRequestMarshaller().read(request))
-		    .withHttpStatus(HttpStatus.OK);
+		    .withRequest(DE4AMarshaller.drImRequestMarshaller().read(request));
 	}
 
 	private Document getDocumentFromAttached(List<EvaluatorRequestData> filesAttached,

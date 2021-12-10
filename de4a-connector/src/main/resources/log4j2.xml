@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Configuration status="debug" strict="true">
+<Configuration status="debug" strict="true">    
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
-			<!-- Location may be an issue when async logging is used! -->
+            <!-- Location may be an issue when async logging is used! -->
+            <!-- DE4A Metrics pattern [prefix][timestamp][Level][Error/Log Code][UC#][Origin][Destiny][Message] -->
             <PatternLayout
-				pattern="[DE4A-CONNECTOR][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
+                pattern="[DE4A-CONNECTOR][%date{ISO8601}][%-5level] %msg -- %location [%thread]%n" />
         </Console>
         <RollingFile name="rollingFile"
-			fileName="${sys:catalina.base}/logs/connector.log"
-			filePattern="${sys:catalina.base}/logs/history/connector.%d{dd-MMM}.log.gz"
-			ignoreExceptions="false">
+            fileName="${sys:catalina.base}/logs/connector.log"
+            filePattern="${sys:catalina.base}/logs/history/connector.%d{dd-MMM}.log.gz"
+            ignoreExceptions="false">
             <PatternLayout>
-                <Pattern>>%d %p %C{1.} [%t] %m%n</Pattern>
+                <Pattern>>[%date{ISO8601}][%-5level] %msg -- %location [%thread]%n</Pattern>
             </PatternLayout>
             <Policies>
                 <OnStartupTriggeringPolicy />
@@ -20,6 +21,25 @@
             </Policies>
             <DefaultRolloverStrategy max="5" />
         </RollingFile>
+        <RollingFile name="metricsFile"
+            fileName="${sys:catalina.base}/logs/metrics-connector.log"
+            filePattern="${sys:catalina.base}/logs/history/metrics-connector.%d{dd-MMM}.log.gz"
+            ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>>$${ctx:metrics:-}[%date{ISO8601}][%-5level][$${ctx:logcode:-}][DE4A-CONNECTOR][$${ctx:origin:-}][$${ctx:destiny:-}] %msg -- %location [%thread]%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="30 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+        <Routing name="RouterMetrics">
+            <Routes pattern="${ctx:metrics.enabled}">
+                <Route ref="metricsFile" key="true" />
+                <Route ref="none" key="false" />
+            </Routes>
+        </Routing>
     </Appenders>
 
     <Loggers>
@@ -34,10 +54,15 @@
         <Logger name="eu" level="DEBUG" additivity="false">
             <AppenderRef ref="STDOUT" />
             <AppenderRef ref="rollingFile" />
+            <AppenderRef ref="RouterMetrics" />
+        </Logger>
+        <Logger name="eu" level="INFO" additivity="false">
+            <AppenderRef ref="RouterMetrics" />
         </Logger>
         <Root level="INFO">
             <AppenderRef ref="STDOUT" />
             <AppenderRef ref="rollingFile" />
+            <AppenderRef ref="RouterMetrics" />
         </Root>
     </Loggers>
 </Configuration>

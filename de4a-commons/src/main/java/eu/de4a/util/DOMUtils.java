@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -297,5 +296,22 @@ public class DOMUtils
       logger.error ("Error creating Transformer", e);
       return null;
     }
+  }
+
+  public static Document newDocumentFromNode(Element element, String nodeName) 
+          throws ParserConfigurationException {
+      NodeList nodes = element.getOwnerDocument().getDocumentElement()
+              .getElementsByTagNameNS("*", nodeName);
+
+      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+      Document newXmlDocument = factory.newDocumentBuilder().newDocument();
+      Element root = (Element) nodes.item(0);
+      Node copyNode = newXmlDocument.importNode(root, true);
+      newXmlDocument.appendChild(copyNode);
+
+      return newXmlDocument;
   }
 }
