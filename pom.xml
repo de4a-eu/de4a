@@ -31,7 +31,7 @@
         <jaxb.version>2.3.3</jaxb.version>
         <jakarta.activation.api>1.2.2</jakarta.activation.api>
         <jakarta.xml.bind.api.version>2.3.3</jakarta.xml.bind.api.version>
-        <log4j-api.version>2.14.1</log4j-api.version>
+        <log4j-api.version>2.15.0</log4j-api.version>
         <spring.version>5.3.5</spring.version>
         <spring.ws.version>3.0.10.RELEASE</spring.ws.version>
         <spring.boot.version>2.4.5</spring.boot.version>
@@ -47,7 +47,7 @@
         <axiom.version>1.2.22</axiom.version>
         <slf4j.version>1.7.30</slf4j.version>
         <logback.version>1.2.3</logback.version>
-        <log4j2.version>2.14.1</log4j2.version>
+        <log4j2.version>2.15.0</log4j2.version>
         <springfox-version>3.0.0</springfox-version>
         <h2.database.version>1.4.199</h2.database.version>
         <httpmime.version>4.3.1</httpmime.version>
@@ -282,7 +282,7 @@
 
     <build>
         <plugins>
-        <!-- 
+        <!--
             <plugin>
                 <groupId>org.ec4j.maven</groupId>
                 <artifactId>editorconfig-maven-plugin</artifactId>
