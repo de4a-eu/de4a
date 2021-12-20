@@ -16,7 +16,7 @@ pipeline {
                 }
             }
             steps {
-                sh 'mvn clean test sonar:sonar -Dsonar.host.url=https://de4a.simplegob.com/sonarqube -Dsonar.login=$SONAR_TOKEN'
+                sh 'mvn clean test sonar:sonar -Dsonar.host.url=https://de4a.simplegob.com/sonarqube -Dsonar.login=4bf75e31dae77693a787a6f68ebe1137b356f628'
             }
         }
 
