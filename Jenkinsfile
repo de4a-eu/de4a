@@ -16,7 +16,7 @@ pipeline {
                 }
             }
             steps {
-                sh 'mvn clean test sonar:sonar -Dsonar.host.url=http://sonarqube:9000/sonarqube -Dsonar.login=$SONAR_TOKEN'
+                sh 'mvn clean test sonar:sonar -Dsonar.host.url=https://de4a.simplegob.com/sonarqube -Dsonar.login=$SONAR_TOKEN'
             }
         }
 
