@@ -72,8 +72,8 @@ It is also possible to compile each package separately by browsing to the folder
 #### Package
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the IDK and Connector target paths will be created with their corresponding `war` files.
 
-#### de4a-commons `v0.1.3`
-[de4a-commons](https://github.com/de4a-wp5/de4a-commons) project is now on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
+#### de4a-commons `v0.1.11`
+[de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/iteration1) project is now on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
 
 #### Toop version `v2.1.2-SNAPSHOT`
 Due to the last changes on [de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/development) Toop-connector-ng version should be `2.1.2-SNAPSHOT`, so you may need to add following repo server on your maven settings
@@ -101,8 +101,8 @@ database.datasourceConf.jpaHibernate.namingStrategy=org.hibernate.cfg.ImprovedNa
 database.datasourceConf.jpaHibernate.showSql=true
 database.datasourceConf.jpaHibernate.formatSql=true
 
-# H2 in-memory database console port (default 21080)
-h2.console.port=21080
+# H2 in-memory database console port (just uncomment it under controlled circumstances)
+# h2.console.port=21080
 
 # i18n properties
 spring.messages.basename=messages/messages
@@ -224,9 +224,9 @@ de4a.kafka.logging.enabled=true
 de4a.kafka.http.enabled=false
 
 # Kafka server address (Eg.: de4a-dev-kafka.egovlab.eu:9092)
-de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
+de4a.kafka.url=de4a.simplegob.com:9092
 # Uncomment the following property and remove the above one if HTTP mode is enabled
-# de4a.kafka.url=https://de4a-dev-kafka.egovlab.eu
+# de4a.kafka.url=https://de4a.simplegob.com/kafka-rest/
 
 # toop legacy kafka properties (Do not touch)
 toop.tracker.enabled = false
@@ -351,12 +351,11 @@ It is used to include a prefix on each logging line written by the Kafka logging
 Once you have all configuration parameters well configured (if not, check the logs to find out the problem), it is time to deploy the component into an applications server.
 Once you have deployed the `war` file, there are several **checks to ensure that the deployment was successful**:
 - Open Swagger UI browsing: `http://host:port/swagger-ui/`
-	- Eg.: [eGovLab Connector](https://de4a-dev-connector.egovlab.eu/swagger-ui/)
+	- Eg.: [UM Connector](https://de4a-connector.informatika.uni-mb.si/swagger-ui/)
 - TOOP index page will be at root path: `http://host:port/`
-	- Eg.: [eGovLab Connector](https://de4a-dev-connector.egovlab.eu/)
+	- Eg.: [UM Connector](https://de4a-connector.informatika.uni-mb.si/)
 - The Connector will be able to process requests through the following interfaces:
 	- `/requestTransferEvidenceIM`
 	- `/requestTransferEvidenceUSI`
 	- `/lookupRoutingInformation`
 	- `/requestTransferEvidenceUSIDT`
-- Accessing to in-memory database: `http://host:h2.console.port/`
