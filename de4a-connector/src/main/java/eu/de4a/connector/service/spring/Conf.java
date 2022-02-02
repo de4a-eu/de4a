@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +57,6 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
@@ -113,12 +113,7 @@ public class Conf implements WebMvcConfigurer {
 	private DataSourceConf dataSourceConf = new DataSourceConf();
 	private HttpClient httpClient;
 	private HttpClientSettings httpSettings = new HttpClientSettings();
-
-	@Value("${h2.console.port.jvm:#{null}}")
-	private String h2ConsoleJvmPort;
 	
-	@Value("#{ '${h2.console.port}' == '' ? '21080' : '${h2.console.port}' }")
-	private String h2ConsolePort;
 
 	@Value("${ssl.context.enabled}")
 	private boolean sslContextEnabled;
@@ -195,10 +190,11 @@ public class Conf implements WebMvcConfigurer {
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
-	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
-		String port = ObjectUtils.isEmpty(h2ConsoleJvmPort) ? h2ConsolePort : h2ConsoleJvmPort;
-		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers",
-				"-ifNotExists", "-webDaemon", "-webPort", port);
+	@ConditionalOnProperty(prefix = "h2.console", name = "port")
+	public org.h2.tools.Server h2WebConsonleServer(@Value("${h2.console.port}") String h2ConsolePort) 
+	        throws SQLException {
+		return org.h2.tools.Server.createWebServer("-web", "-ifNotExists", "-webDaemon", 
+		        "-webPort", h2ConsolePort);
 	}
 
 	@Bean

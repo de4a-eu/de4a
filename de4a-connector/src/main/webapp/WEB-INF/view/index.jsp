@@ -33,29 +33,29 @@
         }
         .h1-title {
             color: #21739a;
-		    display: inline-block;
-		    border: 1px solid #ececec;
-		    padding-right: 7px;
-		    border-radius: 8px;
-		    background: #f7f7f7;
-		    margin-bottom: 0px;
-		    color: #21739a;
+            display: inline-block;
+            border: 1px solid #ececec;
+            padding-right: 7px;
+            border-radius: 8px;
+            background: #f7f7f7;
+            margin-bottom: 0px;
+            color: #21739a;
         }
         .de4a {
             background: #ffd89121;
-		    padding: 0px 5px;
-		    border-radius: 5px;
-		    border: 1px solid #ffd891;
-		    color: #2483bf;
+            padding: 0px 5px;
+            border-radius: 5px;
+            border: 1px solid #ffd891;
+            color: #2483bf;
         }
         .param-value {
-            font-weight: normal;		    
-		    font-family: 'Consolas';
-		    background: #eceaea;
-		    padding: 2px 2px;
-		    border: 1px solid #ccc;
-		    font-size: 14px;
-		    border-radius: 2px;
+            font-weight: normal;            
+            font-family: 'Consolas';
+            background: #eceaea;
+            padding: 2px 2px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            border-radius: 2px;
         }
         .value-true {
             color: #5aa20b;
@@ -79,20 +79,17 @@
     <br>
     <h3 style="margin-bottom: 5px;">System Parameters</h3>
     <hr style="width:40%;min-width:600px;margin-left:0;">
-	<h4 class="param-name">ssl.context.enabled: <span class="param-value ${sslContextEnabled ? ' value-true' : ' value-false'}">${sslContextEnabled}</span></h4>
-	<h4 class="param-name">http.proxy.enabled: <span class="param-value ${httpProxyEnabled ? ' value-true' : ' value-false'}">${httpProxyEnabled}</span></h4><br>
-	<h4 class="param-name">de4a.kafka.enabled: <span class="param-value ${kafkaEnabled ? ' value-true' : ' value-false'}">${kafkaEnabled}</span></h4>
-	<h4 class="param-name">de4a.kafka.http.enabled: <span class="param-value ${kafkaHttpEnabled ? ' value-true' : ' value-false'}">${kafkaHttpEnabled}</span></h4>
-	<h4 class="param-name">de4a.kafka.url: <span class="param-value value">${empty kafkaUrl ? 'not-set' : kafkaUrl}</span></h4>
-	<h4 class="param-name">de4a.kafka.topic: <span class="param-value value">${empty kafkaTopic ? 'not-set' : kafkaTopic}</span></h4><br>
-	<h4 class="param-name">smp.endpoint: <span class="param-value value">${empty smpEndpoint ? 'not-set' : smpEndpoint}</span></h4>
-	<h4 class="param-name">idk.endpoint: <span class="param-value value">${empty idkEndpoint ? 'not-set' : idkEndpoint}</span></h4><br>
-	<h4 class="param-name">smpclient.truststore.path: <span class="param-value value">${empty smpTruststore ? 'not-set' : smpTruststore}</span></h4>
-	<h4 class="param-name">phase4.keystore.path: <span class="param-value value">${empty phase4Keystore ? 'not-set' : phase4Keystore}</span></h4>
-	<h4 class="param-name">phase4.truststore.path: <span class="param-value value">${empty phase4Truststore ? 'not-set' : phase4Truststore}</span></h4>
+    <h4 class="param-name">ssl.context.enabled: <span class="param-value ${sslContextEnabled ? ' value-true' : ' value-false'}">${sslContextEnabled}</span></h4>
+    <h4 class="param-name">http.proxy.enabled: <span class="param-value ${httpProxyEnabled ? ' value-true' : ' value-false'}">${httpProxyEnabled}</span></h4><br>
+    <h4 class="param-name">de4a.kafka.enabled: <span class="param-value ${kafkaEnabled ? ' value-true' : ' value-false'}">${kafkaEnabled}</span></h4>
+    <h4 class="param-name">de4a.kafka.http.enabled: <span class="param-value ${kafkaHttpEnabled ? ' value-true' : ' value-false'}">${kafkaHttpEnabled}</span></h4>
+    <h4 class="param-name">de4a.kafka.url: <span class="param-value value">${empty kafkaUrl ? 'not-set' : kafkaUrl}</span></h4>
+    <h4 class="param-name">de4a.kafka.topic: <span class="param-value value">${empty kafkaTopic ? 'not-set' : kafkaTopic}</span></h4><br>
+    <h4 class="param-name">smp.endpoint: <span class="param-value value">${empty smpEndpoint ? 'not-set' : smpEndpoint}</span></h4>
+    <h4 class="param-name">idk.endpoint: <span class="param-value value">${empty idkEndpoint ? 'not-set' : idkEndpoint}</span></h4><br>
     <h4 class="param-name">as4.gateway.implementation.bean: <span class="param-value value">${empty as4GatewayBean ? 'not-set' : as4GatewayBean}</span></h4>
-	<hr style="width: 40%;min-width:600px;margin-left:0; margin-top:25px;">
-	
-	<h4>Check out the system API on: <a href="./swagger-ui/">Connector Swagger API definition</a></h4>
+    <hr style="width: 40%;min-width:600px;margin-left:0; margin-top:25px;">
+    
+    <h4>Check out the system API on: <a href="./swagger-ui/">Connector Swagger API definition</a></h4>
 </body>
 </html>
