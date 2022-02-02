@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 
 import org.h2.server.web.WebServlet;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -30,15 +31,15 @@ import com.zaxxer.hikari.HikariDataSource;
 public class Conf {
 
 	private DataSourceConf dataSourceConf = new DataSourceConf();
-
-	@Value("#{'${h2.console.port.jvm:${h2.console.port:21080}}'}")
-	private String h2ConsolePort;
-
+	
+	
 	@Bean(initMethod = "start", destroyMethod = "stop")
-	public org.h2.tools.Server h2WebConsonleServer() throws SQLException {
-		return org.h2.tools.Server.createWebServer("-web", "-webAllowOthers",
-				"-ifNotExists", "-webDaemon", "-webPort", h2ConsolePort);
-	}
+    @ConditionalOnProperty(prefix = "h2.console", name = "port")
+    public org.h2.tools.Server h2WebConsonleServer(@Value("${h2.console.port}") String h2ConsolePort) 
+            throws SQLException {
+        return org.h2.tools.Server.createWebServer("-web", "-ifNotExists", "-webDaemon", 
+                "-webPort", h2ConsolePort);
+    }
 
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource() {
