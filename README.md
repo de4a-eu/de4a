@@ -224,9 +224,9 @@ de4a.kafka.logging.enabled=true
 de4a.kafka.http.enabled=false
 
 # Kafka server address (Eg.: de4a-dev-kafka.egovlab.eu:9092)
-de4a.kafka.url=de4a-dev-kafka.egovlab.eu:9092
+de4a.kafka.url=de4a.simplegob.com:9092
 # Uncomment the following property and remove the above one if HTTP mode is enabled
-# de4a.kafka.url=https://de4a-dev-kafka.egovlab.eu
+# de4a.kafka.url=https://de4a.simplegob.com/kafka-rest/
 
 # toop legacy kafka properties (Do not touch)
 toop.tracker.enabled = false
@@ -351,9 +351,9 @@ It is used to include a prefix on each logging line written by the Kafka logging
 Once you have all configuration parameters well configured (if not, check the logs to find out the problem), it is time to deploy the component into an applications server.
 Once you have deployed the `war` file, there are several **checks to ensure that the deployment was successful**:
 - Open Swagger UI browsing: `http://host:port/swagger-ui/`
-	- Eg.: [eGovLab Connector](https://de4a-dev-connector.egovlab.eu/swagger-ui/)
+	- Eg.: [UM Connector](https://de4a-connector.informatika.uni-mb.si/swagger-ui/)
 - TOOP index page will be at root path: `http://host:port/`
-	- Eg.: [eGovLab Connector](https://de4a-dev-connector.egovlab.eu/)
+	- Eg.: [UM Connector](https://de4a-connector.informatika.uni-mb.si/)
 - The Connector will be able to process requests through the following interfaces:
 	- `/requestTransferEvidenceIM`
 	- `/requestTransferEvidenceUSI`
