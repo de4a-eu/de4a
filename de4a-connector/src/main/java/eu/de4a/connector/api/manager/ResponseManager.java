@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -31,12 +32,11 @@ import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.error.utils.KafkaClientWrapper;
-import eu.de4a.connector.model.EvaluatorAddresses;
 import eu.de4a.connector.model.EvaluatorRequest;
 import eu.de4a.connector.model.EvaluatorRequestData;
-import eu.de4a.connector.model.utils.AgentsLocator;
 import eu.de4a.connector.repository.EvaluatorRequestDataRepository;
 import eu.de4a.connector.repository.EvaluatorRequestRepository;
+import eu.de4a.connector.service.spring.AddressesProperties;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
@@ -55,10 +55,10 @@ public class ResponseManager {
 	private EvaluatorRequestRepository evaluatorRequestRepository;
 	@Autowired
 	private EvaluatorRequestDataRepository evaluatorRequestDataRepository;
-	@Autowired
-	private AgentsLocator agentsLocator;
 	@PersistenceContext
     private EntityManager entityManager;
+	@Autowired
+	private AddressesProperties addressesProperties;
 
 	public void processAS4Response(ResponseWrapper response) {
 		String id = response.getId();
@@ -73,13 +73,14 @@ public class ResponseManager {
 			evaluatorRequestRepository.save(evaluatorinfo);
 			saveData(response, evaluatorinfo);
             if (evaluatorinfo.isUsi()) {
-                EvaluatorAddresses evaluatorAddress = agentsLocator.lookupEvaluatorAddress(evaluatorinfo.getIdevaluator());
+                String evaluatorAddress = this.addressesProperties.getDataEvaluators()
+                        .get(evaluatorinfo.getIdevaluator());
                 if (!ObjectUtils.isEmpty(evaluatorAddress)) {
                     // Send RequestForwardEvidence to evaluator - USI pattern
                     if(DE4AConstants.TAG_EVIDENCE_REQUEST.equals(response.getTagDataId())) {
-                        client.pushEvidence(evaluatorAddress.getEndpoint(), response.getResponseDocument());
+                        client.pushEvidence(evaluatorAddress, response.getResponseDocument());
                     } else if(DE4AConstants.TAG_REDIRECT_USER.equals(response.getTagDataId())) {
-                        client.pushRedirectUserMsg(evaluatorAddress.getEndpoint(), response.getResponseDocument());
+                        client.pushRedirectUserMsg(evaluatorAddress, response.getResponseDocument());
                     }
                 } else {
                     //TODO in this case, how DE or DO is advised of the situation?

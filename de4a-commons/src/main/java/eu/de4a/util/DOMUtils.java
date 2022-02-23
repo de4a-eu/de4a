@@ -304,6 +304,7 @@ public class DOMUtils
               .getElementsByTagNameNS("*", nodeName);
 
       final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
       factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
       factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");

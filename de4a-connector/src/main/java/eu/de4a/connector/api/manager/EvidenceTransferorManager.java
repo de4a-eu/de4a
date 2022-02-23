@@ -2,6 +2,8 @@ package eu.de4a.connector.api.manager;
 
 import java.text.MessageFormat;
 import java.util.Locale;
+
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
 import eu.de4a.connector.as4.client.regrep.RegRepTransformer;
@@ -29,12 +32,11 @@ import eu.de4a.connector.error.model.MessageKeys;
 import eu.de4a.connector.error.utils.ErrorHandlerUtils;
 import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.error.utils.ResponseErrorFactory;
-import eu.de4a.connector.model.OwnerAddresses;
 import eu.de4a.connector.model.RequestorRequest;
 import eu.de4a.connector.model.smp.NodeInfo;
-import eu.de4a.connector.model.utils.AgentsLocator;
+import eu.de4a.connector.model.utils.MessageUtils;
 import eu.de4a.connector.repository.RequestorRequestRepository;
-import eu.de4a.connector.service.spring.MessageUtils;
+import eu.de4a.connector.service.spring.AddressesProperties;
 import eu.de4a.exception.MessageException;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
@@ -54,9 +56,9 @@ public class EvidenceTransferorManager extends EvidenceManager {
     @Autowired
     private Client client;
     @Autowired
-    private AgentsLocator agentsLocator;
-    @Autowired
     private RequestorRequestRepository requestorRequestRepository;
+    @Autowired
+    private AddressesProperties addressesProperties;
 
 
     public void queueMessage(MessageRequestOwner request) {
@@ -69,8 +71,8 @@ public class EvidenceTransferorManager extends EvidenceManager {
         RequestExtractEvidenceType req = null;
         ConnectorException ex = new OwnerException().withModule(ExternalModuleError.CONNECTOR_DT);
         try {
-            OwnerAddresses ownerAddress = null;
             RequestorRequest requestorReq = new RequestorRequest();
+            String ownerAddress = null;
             if(!DE4AConstants.NAMESPACE_USI.equals(request.getMessage().getNamespaceURI())) {
                 req = (RequestExtractEvidenceType) ErrorHandlerUtils
                         .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(),
@@ -88,7 +90,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 requestorRequestRepository.save(requestorReq);
                 
                 responseTransferEvidenceType = (ResponseTransferEvidenceType) client.sendEvidenceRequest(req,
-                        ownerAddress.getEndpoint(), false);
+                        ownerAddress, false);
                 Document docResponse = (Document) ErrorHandlerUtils.conversionDocWithCatching(
                         DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE),
                         responseTransferEvidenceType, true, false,
@@ -113,7 +115,7 @@ public class EvidenceTransferorManager extends EvidenceManager {
                 requestorReq.setDone(false);
                 requestorRequestRepository.save(requestorReq);
                 
-                ResponseErrorType response = (ResponseErrorType) client.sendEvidenceRequest(req, ownerAddress.getEndpoint(), true);
+                ResponseErrorType response = (ResponseErrorType) client.sendEvidenceRequest(req, ownerAddress, true);
                 
                 if(response != null && !ObjectUtils.isEmpty(response.getErrorList())) {
                     RequestTransferEvidenceUSIDTType reqUSIDT = MessagesUtils.getErrorRequestTransferEvidenceUSIDT(req, response.getErrorList());
@@ -206,10 +208,10 @@ public class EvidenceTransferorManager extends EvidenceManager {
         return false;
     }
     
-    private OwnerAddresses getOwnerAddress(String dataOwnerId, ConnectorException ex) {
+    private String getOwnerAddress(String dataOwnerId, ConnectorException ex) {
         KafkaClientWrapper.sendInfo(LogMessages.LOG_OWNER_LOOKUP, dataOwnerId);
         
-        OwnerAddresses ownerAddress = agentsLocator.lookupOwnerAddress(dataOwnerId);
+        String ownerAddress = this.addressesProperties.getDataOwners().get(dataOwnerId);
         if (ownerAddress == null) {
             KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_OWNER_LOOKUP, dataOwnerId);
 

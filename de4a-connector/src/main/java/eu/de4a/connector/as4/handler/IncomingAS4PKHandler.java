@@ -17,7 +17,7 @@ import eu.de4a.connector.as4.owner.OwnerMessageEventPublisher;
 import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.error.utils.KafkaClientWrapper;
 import eu.de4a.connector.mem.phase4.servlet.EdmRequestWrapper;
-import eu.de4a.connector.service.spring.MessageUtils;
+import eu.de4a.connector.model.utils.MessageUtils;
 import eu.de4a.exception.MessageException;
 import eu.de4a.util.DE4AConstants;
 import eu.de4a.util.DOMUtils;

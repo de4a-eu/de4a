@@ -1,4 +1,4 @@
-package eu.de4a.connector.service.spring;
+package eu.de4a.connector.model.utils;
 
 import java.util.Locale;
 

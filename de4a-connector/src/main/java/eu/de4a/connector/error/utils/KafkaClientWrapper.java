@@ -1,6 +1,8 @@
 package eu.de4a.connector.error.utils;
 
 
+import java.util.concurrent.CompletableFuture;
+
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -8,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.helger.commons.error.level.EErrorLevel;
 
 import eu.de4a.connector.error.model.LogMessages;
-import eu.de4a.connector.service.spring.MessageUtils;
+import eu.de4a.connector.model.utils.MessageUtils;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
 
 @Component
@@ -29,11 +31,6 @@ public class KafkaClientWrapper {
         //empty private constructor
     }
     
-    @Value("#{'${log.metrics.prefix:DE4A METRICS}'}")
-    public void setNameStatic(String prefix){
-        KafkaClientWrapper.metricsPrefix = prefix;
-    }
-    
     public static void sendInfo(LogMessages logMessage, Object...params) {         
         send(logMessage, EErrorLevel.INFO, params);
     }
@@ -50,7 +47,7 @@ public class KafkaClientWrapper {
         send(logMessage, EErrorLevel.ERROR, params);
     }
     
-    private static void send(LogMessages logMessage, EErrorLevel level, Object...params) {
+    private static CompletableFuture<Void> send(LogMessages logMessage, EErrorLevel level, Object...params) {
         String msg = new MessageUtils(logMessage.getKey(), params).value();
         
         ThreadContext.put(ORIGIN_TAG, logMessage.getOrigin().getLabel());
@@ -59,11 +56,12 @@ public class KafkaClientWrapper {
         ThreadContext.put(METRICS_ENABLED_TAG, "true");
         ThreadContext.put(LOG_CODE_TAG, logMessage.getLogCode());
         
-        DE4AKafkaClient.send(level, msg);
+        return CompletableFuture.runAsync(() -> DE4AKafkaClient.send(level, msg))
+            .thenRun(() -> {
+                ThreadContext.clearAll();            
+                ThreadContext.put(METRICS_ENABLED_TAG, "false");
+            });
         
-        ThreadContext.clearAll();
-        
-        ThreadContext.put(METRICS_ENABLED_TAG, "false");
     }
 
 }

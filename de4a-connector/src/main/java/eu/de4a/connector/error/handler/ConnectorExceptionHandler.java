@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.NoSuchMessageException;
 
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.service.spring.MessageUtils;
+import eu.de4a.connector.model.utils.MessageUtils;
 
 public abstract class ConnectorExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(ConnectorExceptionHandler.class);

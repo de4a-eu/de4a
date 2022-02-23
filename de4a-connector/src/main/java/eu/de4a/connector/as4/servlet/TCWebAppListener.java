@@ -1,9 +1,13 @@
 package eu.de4a.connector.as4.servlet;
+
+import java.util.Properties;
+
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.helger.phase4.mgr.MetaAS4Manager;
 import com.helger.photon.api.IAPIRegistry;
 import com.helger.photon.audit.AuditHelper;
 import com.helger.photon.audit.DoNothingAuditor;
@@ -25,6 +29,17 @@ public class TCWebAppListener extends WebAppListener
   public TCWebAppListener ()
   {
     setHandleStatisticsOnEnd (false);
+  }
+  
+  @Override
+  protected void logStartupInfo (@Nonnull final ServletContext aSC)
+  {
+    logLogo ();
+    logServerInfo (aSC);
+    logClassPath ();
+    logInitParameters (aSC);
+    logThirdpartyModules ();
+    logJMX ();
   }
 
   @Override
@@ -62,7 +77,20 @@ public class TCWebAppListener extends WebAppListener
 
     // Don't write audit logs
     AuditHelper.setAuditor (new DoNothingAuditor (LoggedInUserManager.getInstance ()));
+    
+    //Default implementation and DSD service for TOOP legacy
+    Properties props = System.getProperties();
+    props.setProperty("toop.mem.implementation", "phase4");
+    props.setProperty("toop.dsd.service.baseurl", "http://dsd.dev.exchange.toop.eu");
+    
+    TCConfig.getConfig().reloadAllResourceBasedConfigurationValues();
     TCInit.initGlobally (aSC, handler);
+    
+    // Set de4a1 profile as default
+    if(!"de4a1".equals(MetaAS4Manager.getProfileMgr().getDefaultProfile().getID())) {
+        MetaAS4Manager.getProfileMgr().setDefaultProfile(
+                MetaAS4Manager.getProfileMgr().getProfileOfID("de4a1"));
+    }
   }
 
   @Override

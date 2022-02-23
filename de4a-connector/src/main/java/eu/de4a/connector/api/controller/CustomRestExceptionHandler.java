@@ -29,7 +29,7 @@ import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.error.model.MessageKeys;
 import eu.de4a.connector.error.utils.ResponseErrorFactory;
-import eu.de4a.connector.service.spring.MessageUtils;
+import eu.de4a.connector.model.utils.MessageUtils;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
 import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
