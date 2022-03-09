@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ISMLInfo;
-import com.helger.peppol.sml.SMLInfo;
 import com.helger.peppol.smp.ESMPTransportProfile;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
@@ -82,10 +81,10 @@ public class Client {
 	@Value("${as4.gateway.implementation.bean}")
     private String as4ClientBean;
 	
+	@Autowired
+    private ISMLInfo smlConfig;
+	
 	private static final Logger logger = LoggerFactory.getLogger(Client.class);
-
-	private static final ISMLInfo SML_DE4A = new SMLInfo("de4a", "SML [DE4A]", "de4a.acc.edelivery.tech.ec.europa.eu.",
-			"https://acc.edelivery.tech.ec.europa.eu/edelivery-sml", true);
 
 	/**
 	 * Obtain service metadata info from SMP by participantId and envidenceTypeId
@@ -121,7 +120,7 @@ public class Client {
 					.parseDocumentTypeIdentifier(documentTypeId);
 			// Use explicit SMP or use DNS to resolve
 			final BDXRClientReadOnly aSMPClient = ObjectUtils.isEmpty(smpEndpoint)
-					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, SML_DE4A)
+					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, this.smlConfig)
 					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
 					
 		    logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());

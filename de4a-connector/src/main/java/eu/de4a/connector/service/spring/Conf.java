@@ -75,6 +75,8 @@ import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
 import com.fasterxml.classmate.TypeResolver;
 import com.helger.httpclient.HttpClientSettings;
+import com.helger.peppol.sml.ISMLInfo;
+import com.helger.peppol.sml.SMLInfo;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -196,6 +198,14 @@ public class Conf implements WebMvcConfigurer {
 		return org.h2.tools.Server.createWebServer("-web", "-ifNotExists", "-webDaemon", 
 		        "-webPort", h2ConsolePort);
 	}
+	
+	@Bean
+    public ISMLInfo smlConfig(@Value("${sml.service.id}") String id, 
+            @Value("${sml.displayname}") String displayName, @Value("${sml.dnszone}") String dnsZone,
+            @Value("${sml.managementservice.endpoint}") String managementService, 
+            @Value("${sml.certificate.required}") boolean isCertificateRequired ) {
+        return new SMLInfo(id, displayName, dnsZone, managementService, isCertificateRequired);
+    }
 
 	@Bean
 	public DomibusClientWS clienteWS() {
