@@ -16,7 +16,7 @@
         <dependency>
             <groupId>eu-de4a</groupId>
             <artifactId>de4a-commons</artifactId>
-            <version>${project.version}</version>
+            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <!-- DE4A GitHub commons project -->
         <dependency>
