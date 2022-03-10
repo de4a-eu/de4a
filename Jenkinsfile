@@ -50,14 +50,6 @@ pipeline {
                 script{
                     def img
                     if (env.BRANCH_NAME == 'master') {
-                        dir('de4a-idk') {
-                            env.VERSION = readMavenPom().getVersion()
-                            img = docker.build('de4a/mock-idk',".")
-                            docker.withRegistry('','docker-hub-token') {
-                                img.push('latest')
-                                img.push("${env.VERSION}")
-                            }
-                        }
                         dir('de4a-connector') {
                             env.VERSION = readMavenPom().getVersion()
                             img = docker.build('de4a/connector','.')
@@ -80,14 +72,6 @@ pipeline {
             steps {
                 script{
                     def img
-                    dir('de4a-idk') {
-                        env.VERSION = readMavenPom().getVersion()
-                        img = docker.build('de4a/mock-idk',".")
-                        docker.withRegistry('','docker-hub-token') {
-                            img.push("${env.BRANCH_NAME}")
-                            img.push("${env.VERSION}")
-                        }
-                    }
                     dir('de4a-connector') {
                         env.VERSION = readMavenPom().getVersion()
                         img = docker.build('de4a/connector','.')

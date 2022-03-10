@@ -13,15 +13,18 @@
     <version>0.2.0-SNAPSHOT</version>
     <url>http://maven.apache.org</url>
     <dependencies>
-        <dependency>
-            <groupId>eu-de4a</groupId>
-            <artifactId>de4a-commons</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- DE4A GitHub commons project -->
         <dependency>
             <groupId>eu.de4a</groupId>
             <artifactId>de4a-iem</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.de4a</groupId>
+            <artifactId>de4a-core-schemas</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.de4a.ial</groupId>
+            <artifactId>ial-api</artifactId>
         </dependency>
         <dependency>
             <groupId>eu.de4a</groupId>
@@ -40,17 +43,12 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Spring dependencies -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
         </dependency>
+        <!-- Spring dependencies -->
         <dependency>
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-core</artifactId>
@@ -110,20 +108,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-orm</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.glassfish.jaxb</groupId>
-                    <artifactId>jaxb-runtime</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
             <exclusions>
@@ -139,47 +123,38 @@
             <version>${springfox-version}</version>
         </dependency>
         <dependency>
-            <groupId>com.helger.toop</groupId>
-            <artifactId>tc-web-api</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.helger.toop</groupId>
-            <artifactId>tc-mem-external</artifactId>
+          <groupId>com.helger.dcng</groupId>
+          <artifactId>dcng-api</artifactId>
+          <version>0.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.helger.toop</groupId>
-            <artifactId>tc-main</artifactId>
+          <groupId>com.helger.dcng</groupId>
+          <artifactId>dcng-phase4</artifactId>
+          <version>0.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.helger.toop</groupId>
-            <artifactId>tc-mem-phase4</artifactId>
+          <groupId>com.helger.dcng</groupId>
+          <artifactId>dcng-core</artifactId>
+          <version>0.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.helger.toop</groupId>
-            <artifactId>tc-api</artifactId>
+          <groupId>com.helger.dcng</groupId>
+          <artifactId>dcng-web-api</artifactId>
+          <version>0.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.helger.photon</groupId>
-            <artifactId>ph-oton-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.helger.toop</groupId>
-            <artifactId>toop-edm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.helger.peppol</groupId>
-            <artifactId>peppol-smp-client</artifactId>
+          <groupId>com.helger.photon</groupId>
+          <artifactId>ph-oton-core</artifactId>
         </dependency>
         
         <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
         <dependency>
@@ -212,13 +187,6 @@
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.tomcat/juli -->
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>juli</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -228,34 +196,24 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.sun.xml.ws</groupId>
-                <artifactId>jaxws-maven-plugin</artifactId>
-                <version>2.3.3</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>wsimport</goal>
+                            <goal>repackage</goal>
                         </goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <bindingFiles>
-                        <bindingFile>${basedir}/src/main/jaxb/bindings-domibus.xjb</bindingFile>
-                    </bindingFiles>
-                    <wsdlDirectory>${project.basedir}/src/main/resources/domibus</wsdlDirectory>
-                    <wsdlFiles>
-                        <wsdlFile>domibus.wsdl</wsdlFile>
-                    </wsdlFiles>
-                    <wsdlLocation>/domibus/domibus.wsdl</wsdlLocation>
-                    <packageName>eu.de4a.connector.as4.domibus.soap.auto</packageName>
-                    <sourceDestDir>${basedir}/target/generated-sources/</sourceDestDir>
-                    <xnocompile>true</xnocompile>
-                    <xjcArgs>
-                        <xjcArg>-no-header</xjcArg>
-                    </xjcArgs>
-                </configuration>
-
-            </plugin>
+            </plugin>    
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>            
         </plugins>
         <finalName>de4a-connector</finalName>
     </build>

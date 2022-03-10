@@ -6,8 +6,6 @@ import java.util.List;
 
 import javax.xml.bind.UnmarshalException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,24 +22,24 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.error.model.MessageKeys;
-import eu.de4a.connector.error.utils.ResponseErrorFactory;
-import eu.de4a.connector.model.utils.MessageUtils;
-import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ResponseErrorType;
-import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
+import eu.de4a.connector.utils.MessageUtils;
+import eu.de4a.iem.core.DE4AResponseDocumentHelper;
+import eu.de4a.iem.core.jaxb.common.ResponseErrorType;
+import lombok.extern.log4j.Log4j2;
 
 /**
- * Controller for handling BAD_REQUEST type errors for more concise messages
+ * Controller for handling type errors for more concise messages
  *
  */
 @ControllerAdvice
+@Log4j2
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(CustomRestExceptionHandler.class);
-
+    
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -50,16 +48,21 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = { ConnectorException.class })
-    protected ResponseEntity<Object> handleConnectorException(ConnectorException ex, WebRequest request) {
+    protected ResponseEntity<byte[]> handleConnectorException(ConnectorException ex, WebRequest request) {
+        log.error(ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-        return new ResponseEntity<>(ResponseErrorFactory.getResponseError(ex), headers, ex.getStatus());
+        return new ResponseEntity<>((byte[]) ConnectorExceptionHandler.getResponseError(ex, true), 
+                headers, ex.getStatus());
     }
 
     @ExceptionHandler(value = { Exception.class })
-    protected ResponseEntity<Object> handleExceptionUnknown(Exception ex, WebRequest request) {
-        return new ResponseEntity<>(ResponseErrorFactory.getGenericResponseError(ex), new HttpHeaders(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+    protected ResponseEntity<byte[]> handleExceptionUnknown(Exception ex, WebRequest request) {
+        log.error(ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
+        return new ResponseEntity<>(ConnectorExceptionHandler.getGenericResponseError(ex), 
+                headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -72,7 +75,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         List<String> args = new ArrayList<>();
         args.add(String.valueOf(ex.getContentType()));
         args.add(mediaTypes.toString());
-        String err = new MessageUtils(MessageKeys.ERROR_400_MIMETYPE, args.toArray()).value();
+        String err = MessageUtils.valueOf(MessageKeys.ERROR_400_MIMETYPE, args.toArray());
         return buildBadRequestError(err);
     }
 
@@ -82,9 +85,9 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         String error;
         if (ex.getCause() instanceof UnmarshalException) {
             String[] args = { ex.getMessage() };
-            error = new MessageUtils(MessageKeys.ERROR_400_UNMARSHALLING, args).value();
+            error = MessageUtils.valueOf(MessageKeys.ERROR_400_UNMARSHALLING, args);
         } else {
-            error = new MessageUtils(MessageKeys.ERROR_400_ARGS_REQUIRED, null).value();
+            error = MessageUtils.valueOf(MessageKeys.ERROR_400_ARGS_REQUIRED, null);
         }
         return buildBadRequestError(error);
     }
@@ -92,28 +95,28 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
-        logger.warn("REST service requested not found");
+        log.warn("REST service requested not found");
+
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-        String err = new MessageUtils(MessageKeys.ERROR_SERVICE_NOT_FOUND, 
-                new Object[] {((ServletWebRequest)request).getRequest().getRequestURI()}).value();
+        String err = MessageUtils.valueOf(MessageKeys.ERROR_SERVICE_NOT_FOUND,
+                new Object[] { ((ServletWebRequest) request).getRequest().getRequestURI() });
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
-        responseError.setErrorList(new ErrorListType());
         String code = LayerError.COMMUNICATIONS.getID() + ExternalModuleError.NONE.getId()
                 + FamilyErrorType.SERVICE_NOT_FOUND.getID();
-        responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));
+        responseError.addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.NOT_FOUND);
 
     }
 
     private ResponseEntity<Object> buildBadRequestError(String err) {
-        LOG.warn("REST Client BAD REQUEST-> {}", err);
+        log.warn("REST Client BAD REQUEST-> {}", err);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
-        responseError.setErrorList(new ErrorListType());
         String code = LayerError.COMMUNICATIONS.getID() + ExternalModuleError.NONE.getId()
                 + FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID();
-        responseError.getErrorList().addError(DE4AResponseDocumentHelper.createError(code, err));
+        responseError.addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, headers, HttpStatus.BAD_REQUEST);
     }
 }

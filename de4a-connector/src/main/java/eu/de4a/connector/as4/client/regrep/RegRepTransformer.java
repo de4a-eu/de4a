@@ -22,14 +22,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
-import eu.de4a.exception.MessageException;
-import eu.de4a.util.DE4AConstants;
-import eu.de4a.util.DOMUtils;
+import eu.de4a.connector.utils.DOMUtils;
 
-public class RegRepTransformer {
+public final class RegRepTransformer {
 	private static final Logger log = LoggerFactory.getLogger(RegRepTransformer.class);
 	private static final String REQUEST_TEMPLATE = "templates/regrep_req.xsl";
 	private static final String RESPONSE_TEMPLATE = "templates/regrep_resp.xsl";
@@ -48,8 +47,10 @@ public class RegRepTransformer {
 	private static final String MESSAGE_CONTENT_TAG = "MessageContent";
 
 	private static final String DEFAULT_ENCODING = "UTF-8";
+	
+	private RegRepTransformer() {}
 
-	public Element wrapMessage(Element canonical, String messageTag, boolean isRequest) throws MessageException {
+	public static Element wrapMessage(Element message, String messageTag, boolean isRequest) {
 
 		try (OutputStream xmlFile = new ByteArrayOutputStream()) {
 			String template = (isRequest ? REQUEST_TEMPLATE : RESPONSE_TEMPLATE);
@@ -58,26 +59,26 @@ public class RegRepTransformer {
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-			InputStream inputStreamPlantilla = this.getClass().getClassLoader().getResourceAsStream(template);
+			InputStream inputStreamPlantilla = RegRepTransformer.class.getClassLoader().getResourceAsStream(template);
 			Source xslDoc = new StreamSource(inputStreamPlantilla);
 			Source src = new DOMSource();			
 			Transformer transformerxsl = factory.newTransformer(xslDoc);
 
-			fillParameter(transformerxsl, REQUEST_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_ID, canonical));
+			fillParameter(transformerxsl, REQUEST_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_REQUEST_ID, message));
 			if(isRequest) {
-			    fillParameter(transformerxsl, CONSUMER_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EVALUATOR_ID, canonical));
-			    fillParameter(transformerxsl, CONSUMER_NAME, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EVALUATOR_NAME, canonical));
+			    fillParameter(transformerxsl, CONSUMER_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EVALUATOR_ID, message));
+			    fillParameter(transformerxsl, CONSUMER_NAME, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EVALUATOR_NAME, message));
 			} else {
-			    fillParameter(transformerxsl, PROVIDER_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_OWNER_ID, canonical));
-                fillParameter(transformerxsl, PROVIDER_NAME, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_OWNER_NAME, canonical));
+			    fillParameter(transformerxsl, PROVIDER_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_OWNER_ID, message));
+                fillParameter(transformerxsl, PROVIDER_NAME, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_OWNER_NAME, message));
 			}
 
-			fillParameter(transformerxsl, PERSONAL_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_DOC, canonical));
-			fillParameter(transformerxsl, FAMILY_NAME, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_SURNAME, canonical));
-			fillParameter(transformerxsl, GIVEN_NAME, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_NAME, canonical));
-			fillParameter(transformerxsl, BIRTH_DATE, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_BIRTHDATE, canonical));
+			fillParameter(transformerxsl, PERSONAL_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_DOC, message));
+			fillParameter(transformerxsl, FAMILY_NAME, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_SURNAME, message));
+			fillParameter(transformerxsl, GIVEN_NAME, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_NAME, message));
+			fillParameter(transformerxsl, BIRTH_DATE, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_EIDAS_BIRTHDATE, message));
             fillParameter(transformerxsl, CURRENT_TIME, getCurrentTime());
-            fillParameter(transformerxsl, EVIDENCE_TYPE_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_CANONICAL_EVICENCE_ID, canonical));
+            fillParameter(transformerxsl, EVIDENCE_TYPE_ID, DOMUtils.getValueFromXpath(DE4AConstants.XPATH_CANONICAL_EVICENCE_ID, message));
             fillParameter(transformerxsl, MESSAGE_TAG, messageTag);
 			transformerxsl.setOutputProperty(OutputKeys.ENCODING, DEFAULT_ENCODING);
 			transformerxsl.transform(src, new StreamResult(xmlFile));
@@ -85,7 +86,7 @@ public class RegRepTransformer {
 			String xmlespecificos = ((ByteArrayOutputStream) xmlFile).toString();			
 			Document docFinal = DOMUtils.stringToDocument(xmlespecificos);
 
-			copyNode(docFinal, MESSAGE_CONTENT_TAG, canonical);
+			copyNode(docFinal, MESSAGE_CONTENT_TAG, message);
 			
 			return docFinal.getDocumentElement();
 		} catch (Exception e) {
@@ -99,19 +100,18 @@ public class RegRepTransformer {
 
 	}
 
-	private void fillParameter(Transformer transformerxsl, String label, Object value) {
+	private static void fillParameter(Transformer transformerxsl, String label, Object value) {
 		if (value != null) {
 			transformerxsl.setParameter(label, value);
 		}
 	}
 
-	private String getCurrentTime() {
+	private static String getCurrentTime() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		return sdf.format(new Date());
 	}
 	
-	private void copyNode(Document doc, String nodeName, Element newNode) 
-	        throws NullPointerException {
+	private static void copyNode(Document doc, String nodeName, Element newNode) {
 	    Node copyNode = doc.importNode(newNode, true);
 	    NodeList nodeList = doc.getElementsByTagName(nodeName);
 	    Node oldNode = nodeList.item(0);
