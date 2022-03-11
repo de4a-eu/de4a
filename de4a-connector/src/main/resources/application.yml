@@ -7,181 +7,203 @@
 addresses:
     dataOwners:
         iso6523-actorid-upis::9999:ess2833002e-it2:
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9999:at000000271-it2:
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9999:nl990000106-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9999:se000000013-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9999:ro000000006-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9999:nl000000024-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9999:si000000016-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9999:pt990000101-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9999:pt000000026-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9920:ess2833002e-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9991:at000000271-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9991:nl990000106-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9991:se000000013-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9991:ro000000006-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9991:nl000000024-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9991:si000000016-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9991:pt990000101-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
         iso6523-actorid-upis::9991:pt000000026-it2: 
-            im: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            usi: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            lu: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
-            sn: https://pre-smp-dr-de4a.redsara.es/de4a-it2-mock-connector/
+            im: https://data-owner.com/im/
+            usi: https://data-owner.com/usi/
+            lu: https://data-owner.com/lu/
+            sn: https://data-owner.com/sn/
     dataEvaluators:
         iso6523-actorid-upis::9999:ess2833002e-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:at000000271-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:nl990000106-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:se000000013-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:ro000000006-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:nl000000024-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:si000000016-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:si000000018-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:pt990000101-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:esq6250003h-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9999:lu000000025-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9920:ess2833002e-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:at000000271-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:nl990000106-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:se000000013-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:ro000000006-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:nl000000024-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:si000000016-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:si000000018-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:pt990000101-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9920:esq6250003h-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
         iso6523-actorid-upis::9991:lu000000025-it1:
-            response: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            redirect: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
-            notification: https://de4a-demoui.informatika.uni-mb.si/de1/usi/
+            response: https://data-evaluator.com/response/
+            subscription_resp: https://data-evaluator.com/subscription-resp/
+            redirect: https://data-evaluator.com/redirect/
+            notification: https://data-evaluator.com/notification/
