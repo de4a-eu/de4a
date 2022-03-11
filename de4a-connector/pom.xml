@@ -129,22 +129,22 @@
         <dependency>
           <groupId>com.helger.dcng</groupId>
           <artifactId>dcng-api</artifactId>
-          <version>0.2.3-SNAPSHOT</version>
+          <version>0.2.2</version>
         </dependency>
         <dependency>
           <groupId>com.helger.dcng</groupId>
           <artifactId>dcng-phase4</artifactId>
-          <version>0.2.3-SNAPSHOT</version>
+          <version>0.2.2</version>
         </dependency>
         <dependency>
           <groupId>com.helger.dcng</groupId>
           <artifactId>dcng-core</artifactId>
-          <version>0.2.3-SNAPSHOT</version>
+          <version>0.2.2</version>
         </dependency>
         <dependency>
           <groupId>com.helger.dcng</groupId>
           <artifactId>dcng-web-api</artifactId>
-          <version>0.2.3-SNAPSHOT</version>
+          <version>0.2.2</version>
         </dependency>
         <dependency>
           <groupId>com.helger.photon</groupId>

@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -29,10 +30,13 @@ import com.helger.dcng.webapi.as4.ApiPostLookendAndSend;
 import com.helger.json.IJsonObject;
 import com.helger.json.JsonObject;
 
+import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.api.controller.EventController;
 import eu.de4a.connector.api.controller.RequestController;
 import eu.de4a.connector.api.controller.ResponseController;
 import eu.de4a.connector.api.controller.ServiceController;
+import eu.de4a.connector.config.AddressesProperties;
+import eu.de4a.connector.config.TestConf;
 import eu.de4a.connector.xml.MessagesHelper;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.EventNotificationType;
@@ -41,8 +45,9 @@ import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceUSIType;
 import lombok.extern.log4j.Log4j2;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@SpringBootTest(classes = {TestConf.class, AddressesProperties.class, StaticContextAccessor.class})
 @Log4j2
 @SuppressWarnings("unused")
 public class TestConnectorAPIs {

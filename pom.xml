@@ -63,14 +63,14 @@
             <dependency>
                 <groupId>eu.de4a</groupId>
                 <artifactId>de4a-commons-parent-pom</artifactId>
-                <version>0.2.1-SNAPSHOT</version>
+                <version>0.2.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
 			<dependency>
 				<groupId>eu.de4a.ial</groupId>
 				<artifactId>ial-parent-pom</artifactId>
-                <version>0.1.0-SNAPSHOT</version>
+                <version>0.1.0</version>
 				<type>pom</type>
                 <scope>import</scope>
 			</dependency>
