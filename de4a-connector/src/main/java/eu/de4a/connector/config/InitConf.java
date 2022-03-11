@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
 
 import org.apache.logging.log4j.ThreadContext;
@@ -114,6 +115,12 @@ public class InitConf implements ServletContextAware {
         // Create scopes
         WebScopeManager.onGlobalBegin (this.servletContext);
         DcngInit.initGlobally (this.servletContext, handler);
+    }
+	
+	
+	@PreDestroy
+    public void shutDownAS4() {
+        DcngInit.shutdownGlobally(this.servletContext);
     }
 
 	@Bean

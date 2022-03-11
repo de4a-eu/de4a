@@ -1,19 +1,20 @@
 package eu.de4a.connector.service;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -29,14 +30,19 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
+import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.api.service.DeliverService;
+import eu.de4a.connector.config.AddressesProperties;
+import eu.de4a.connector.config.TestConf;
 import eu.de4a.connector.error.exceptions.MessageException;
 import eu.de4a.connector.error.model.LogMessages;
 import eu.de4a.connector.utils.DOMUtils;
 
 @RunWith(SpringRunner.class)
+@TestPropertySource(locations = "classpath:application.yml")
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest(classes = {TestConf.class, AddressesProperties.class, StaticContextAccessor.class})
 public class TestConnectorServices {
 
     @Autowired
