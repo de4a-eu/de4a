@@ -43,9 +43,9 @@
         <javax.servlet.api.version>3.0.1</javax.servlet.api.version>
         <jstl.version>1.2</jstl.version>
         <axiom.version>1.2.22</axiom.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <logback.version>1.2.3</logback.version>
-        <log4j2.version>2.17.1</log4j2.version>
+        <log4j2.version>2.17.2</log4j2.version>
         <springfox-version>3.0.0</springfox-version>
         <h2.database.version>2.1.210</h2.database.version>
         <httpmime.version>4.3.1</httpmime.version>
