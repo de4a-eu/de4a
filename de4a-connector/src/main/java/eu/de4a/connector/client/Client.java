@@ -23,19 +23,24 @@ import org.w3c.dom.Element;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ISMLInfo;
 import com.helger.peppol.smp.ESMPTransportProfile;
+import com.helger.peppol.smp.ISMPTransportProfile;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.peppolid.factory.SimpleIdentifierFactory;
+import com.helger.peppolid.simple.process.SimpleProcessIdentifier;
 import com.helger.smpclient.bdxr1.BDXRClientReadOnly;
 import com.helger.smpclient.config.SMPClientConfiguration;
 import com.helger.smpclient.exception.SMPClientException;
 import com.helger.smpclient.url.BDXLURLProvider;
 import com.helger.smpclient.url.SMPDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
+import com.helger.xsds.bdxr.smp1.ProcessType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
 import eu.de4a.connector.as4.client.DomibusGatewayClient;
@@ -100,73 +105,70 @@ public class Client {
 	 * @return NodeInfo Service metadata
 	 */
 	public NodeInfo getNodeInfo(String participantId, String documentTypeId, boolean isReturnService, Element userMessage) {
-	    String messageType = (isReturnService ?  DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
-	    NodeInfo nodeInfo = new NodeInfo();
-	    
-	    if(DomibusGatewayClient.class.getSimpleName().equalsIgnoreCase(as4ClientBean)) {
-	        nodeInfo.setParticipantIdentifier(participantId);
-	        nodeInfo.setProcessIdentifier(messageType);
-	        nodeInfo.setDocumentIdentifier(documentTypeId);
-	        return nodeInfo;
-	    }
-	    
-	    KafkaClientWrapper.sendInfo(LogMessages.LOG_SMP_REQ_SENT, participantId, documentTypeId, messageType);	
-		try {
-			// Requires the form iso6523-actorid-upis::9915:demo
-			final IParticipantIdentifier aPI = SimpleIdentifierFactory.INSTANCE
-					.createParticipantIdentifier(TCIdentifierFactory.PARTICIPANT_SCHEME, participantId);
-			// Requires the form urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration
-			final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE
-					.parseDocumentTypeIdentifier(documentTypeId);
-			// Use explicit SMP or use DNS to resolve
-			final BDXRClientReadOnly aSMPClient = ObjectUtils.isEmpty(smpEndpoint)
-					? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, this.smlConfig)
-					: new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
-					
-		    logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());
-            logger.info("Configured SMP truststore: '{}'", SMPClientConfiguration.getTrustStorePath());
-			
-			final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
+    final String messageType = (isReturnService ? DE4AConstants.MESSAGE_TYPE_RESPONSE : DE4AConstants.MESSAGE_TYPE_REQUEST);
+    final NodeInfo nodeInfo = new NodeInfo();
 
-			if (signedServiceMetadata == null) {
-				String error="It is not possible to retrieve data from the SMP, either because of a "
-				        + "connection problem or because it does not exist.";
-				logger.error(error);
-				throw new SMPLookingMetadataInformationException( )
-                     .withUserMessage(userMessage)
-                     .withLayer(LayerError.COMMUNICATIONS)
-                     .withFamily(FamilyErrorType.CONNECTION_ERROR) 
-                     .withModule(ExternalModuleError.SMP)
-                     .withMessageArg(error);
-			}
-				 
-			nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata()
-			        .getServiceInformation().getParticipantIdentifierValue());
-            nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata()
-                    .getServiceInformation().getDocumentIdentifierValue());
-            
-			final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE
-					.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, messageType);
-			final EndpointType endpoint = BDXRClientReadOnly.getEndpoint(signedServiceMetadata, aProcID,
-					ESMPTransportProfile.TRANSPORT_PROFILE_BDXR_AS4);
-			if (endpoint != null) {
-				nodeInfo.setEndpointURI(endpoint.getEndpointURI());
-				nodeInfo.setCertificate(endpoint.getCertificate());
-				nodeInfo.setProcessIdentifier(messageType);
-			} else {
-			    throw new SMPClientException(MessageFormat.format("Endpoint data not found for ParticipantID: {0}, MessageType: {1}",
-			            participantId, messageType));
-			}
-		} catch (final SMPClientException | SMPDNSResolutionException ex) {
-            logger.error("Service metadata not found on SMP", ex);
-            throw new SMPLookingMetadataInformationException()
-                        .withUserMessage(userMessage)
-                        .withLayer(LayerError.COMMUNICATIONS)
-                        .withFamily(FamilyErrorType.CONNECTION_ERROR) 
-                        .withModule(ExternalModuleError.SMP)
-                        .withMessageArg(ex.getMessage());
-        }
-		return nodeInfo;
+    if (DomibusGatewayClient.class.getSimpleName().equalsIgnoreCase(as4ClientBean)) {
+      nodeInfo.setParticipantIdentifier(participantId);
+      nodeInfo.setProcessIdentifier(messageType);
+      nodeInfo.setDocumentIdentifier(documentTypeId);
+      return nodeInfo;
+    }
+
+    KafkaClientWrapper.sendInfo(LogMessages.LOG_SMP_REQ_SENT, participantId, documentTypeId, messageType);
+    try {
+      // Requires the form iso6523-actorid-upis::9915:demo
+      final IParticipantIdentifier aPI = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier(TCIdentifierFactory.PARTICIPANT_SCHEME, participantId);
+      // Requires the form urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration
+      final IDocumentTypeIdentifier aDTI = SimpleIdentifierFactory.INSTANCE.parseDocumentTypeIdentifier(documentTypeId);
+
+      logger.info("Trying SMP lookup for PI '" + aPI.getURIEncoded() + "' and document type ID '" + aDTI.getURIEncoded() + "'");
+      logger.info("Predefined SMP endpoint: '" + smpEndpoint + "'");
+      logger.info("Configured SMP type: '{}'", SMPClientConfiguration.getTrustStoreType());
+      logger.info("Configured SMP truststore: '{}'", SMPClientConfiguration.getTrustStorePath());
+
+      // Use explicit SMP or use DNS to resolve
+      final BDXRClientReadOnly aSMPClient =
+          ObjectUtils.isEmpty(smpEndpoint) ? new BDXRClientReadOnly(BDXLURLProvider.INSTANCE, aPI, this.smlConfig)
+              : new BDXRClientReadOnly(URLHelper.getAsURI(smpEndpoint));
+
+      final SignedServiceMetadataType signedServiceMetadata = aSMPClient.getServiceMetadataOrNull(aPI, aDTI);
+      if (signedServiceMetadata == null || 
+          signedServiceMetadata.getServiceMetadata() == null ||
+          signedServiceMetadata.getServiceMetadata().getServiceInformation() == null) {
+        final String error = "It is not possible to retrieve data from the SMP, either because of a "
+            + "connection problem or because it does not exist.";
+        logger.error(error);
+        throw new SMPLookingMetadataInformationException().withUserMessage(userMessage)
+            .withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR)
+            .withModule(ExternalModuleError.SMP).withMessageArg(error);
+      }
+
+      logger.info ("Successfully resolved SMP service information: " + signedServiceMetadata.getServiceMetadata().getServiceInformation());
+      nodeInfo.setParticipantIdentifier(signedServiceMetadata.getServiceMetadata().getServiceInformation().getParticipantIdentifierValue());
+      nodeInfo.setDocumentIdentifier(signedServiceMetadata.getServiceMetadata().getServiceInformation().getDocumentIdentifierValue());
+
+      final IProcessIdentifier aProcID = SimpleIdentifierFactory.INSTANCE.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, messageType);
+      final ISMPTransportProfile aTransportProfile = ESMPTransportProfile.TRANSPORT_PROFILE_BDXR_AS4; 
+      logger.info ("Trying to find SMP endpoint '" + aProcID.getURIEncoded() + "' and TP '" + aTransportProfile.getID() + "'");
+
+      final EndpointType endpoint = BDXRClientReadOnly.getEndpoint(signedServiceMetadata.getServiceMetadata(), aProcID, aTransportProfile);
+      if (endpoint != null) {
+        logger.info ("Successfully resolved SMP endpoint: " + endpoint);
+        nodeInfo.setEndpointURI(endpoint.getEndpointURI());
+        nodeInfo.setCertificate(endpoint.getCertificate());
+        nodeInfo.setProcessIdentifier(messageType);
+      } else {
+        throw new SMPClientException(MessageFormat
+            .format("Endpoint data not found for ParticipantID: {0}, MessageType: {1}", aPI.getURIEncoded(), aProcID.getURIEncoded()));
+      }
+    } catch (final SMPClientException | SMPDNSResolutionException ex) {
+      logger.error("Service metadata not found on SMP", ex);
+      throw new SMPLookingMetadataInformationException().withUserMessage(userMessage)
+          .withLayer(LayerError.COMMUNICATIONS).withFamily(FamilyErrorType.CONNECTION_ERROR)
+          .withModule(ExternalModuleError.SMP).withMessageArg(ex.getMessage());
+    }
+    return nodeInfo;
 	}
 
 	public ResponseLookupRoutingInformationType getSources(RequestLookupRoutingInformationType request) {

@@ -16,10 +16,10 @@ import eu.de4a.connector.service.spring.Conf;
 import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.iem.jaxb.common.types.ResponseLookupRoutingInformationType;
 
-@SpringBootTest(classes={Conf.class}, properties = {"smp.endpoint=https://de4a-smp.egovlab.eu/",
-        "idk.endpoint=https://de4a-dev-idk.egovlab.eu/",
+@SpringBootTest(classes={Conf.class}, properties = {"smp.endpoint=https://toop-smp.pprod.medius.si",
+        "idk.endpoint=https://de4a.redsara.es/idk-mock/",
 		"truststore.type=JKS",
-		"truststore.path=truststore/de4a-truststore-test-smp-pw-de4a.jks",
+		"truststore.path=truststore/de4a-truststore-smp-it2-pw-de4a.jks",
 		"truststore.password=de4a"})
 @RunWith(SpringRunner.class)
 public class TestClient {
@@ -33,6 +33,15 @@ public class TestClient {
 		assertNotNull(info);
 		assertEquals("https://de4a-dev-connector.egovlab.eu/phase4", info.getEndpointURI ());
 	}
+
+  @Test
+  @Ignore("Not run on Jenkins")
+  public void testRomania() {
+    // Search request
+    final NodeInfo info=client.getNodeInfo("9991:ro000000006","urn:de4a-eu:CanonicalEvidenceType::CompanyRegistration", false, null);
+    assertNotNull(info);
+    assertEquals("https://de4a.onrc.ro/de4a-connector/requestTransferEvidenceIM", info.getEndpointURI ());
+  }
 	
 	@Test
 	@Ignore("Endpoint connection problems")
