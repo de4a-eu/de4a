@@ -51,6 +51,10 @@
             <AppenderRef ref="STDOUT" />
             <AppenderRef ref="rollingFile" />
         </Logger>
+        <Logger name="com.helger" level="info" additivity="false">
+            <AppenderRef ref="STDOUT" />
+            <AppenderRef ref="rollingFile" />
+        </Logger>
         <Logger name="eu" level="DEBUG" additivity="false">
             <AppenderRef ref="STDOUT" />
             <AppenderRef ref="rollingFile" />
