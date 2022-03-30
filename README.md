@@ -174,10 +174,17 @@ smpclient.truststore.password = de4a
 
 # SML configuration
 sml.service.id = de4a
-sml.displayname = SML [DE4A]
-sml.dnszone = de4a.acc.edelivery.tech.ec.europa.eu.
-sml.managementservice.endpoint = https://acc.edelivery.tech.ec.europa.eu/edelivery-sml
 sml.certificate.required = true
+
+# SMK (test environment with test PKI)
+#sml.displayname = SMK [DE4A]
+#sml.dnszone = de4a.acc.edelivery.tech.ec.europa.eu.
+#sml.managementservice.endpoint = https://acc.edelivery.tech.ec.europa.eu/edelivery-sml
+
+# SML (production environment with production Telesec PKI)
+sml.displayname = SML [DE4A]
+sml.dnszone = de4a.edelivery.tech.ec.europa.eu.
+sml.managementservice.endpoint = https://edelivery.tech.ec.europa.eu/edelivery-sml
 
 # Spring As4 gateway  implementation bean(provided: phase4GatewayClient and domibusGatewayClient).Implements eu.toop.as4.client.As4GatewayInterface
 as4.gateway.implementation.bean=phase4GatewayClient
