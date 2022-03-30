@@ -22,9 +22,11 @@ SQL file with the inserts to set up the information provided by the service
 idk/src/main/resources/import.sql
 ```
 #### Properties
+
 ```sh
 idk/src/main/resources/application.properties
 ```
+
 #### Spring config
 
 ```sh
@@ -36,9 +38,11 @@ idk/src/main/eu/idk/configuration/Conf.java
 Checkout the technical documentation on [DE4A D5.5 First Release of DE4A Common Components v1.0.1](https://newrepository.atosresearch.eu/remote.php/webdav/DE4A-Project/06%20Workpackages/WP5%20Components%20design/D5.5%20First%20Release%20of%20DE4A%20Common%20Components/DE4A%20D5.5%20First%20Release%20of%20DE4A%20Common%20Components%20v1.0.1.docx)
 ### API doc
 Once you deploy a Connector instance, it will be able to access to Swagger UI browsing:
+
 ```sh
 http://connector-endpoint:port/swagger-ui/
 ```
+
 Even so, the API definition is published at:
 [Public Swagger API Connector](https://app.swaggerhub.com/apis/de4a/Connector/0.1.1)
 
@@ -47,27 +51,37 @@ Even so, the API definition is published at:
 ### Configuration
 #### Application properties
 Global application properties definitions:
+
 ```sh
 ~/de4a/de4a-connector/src/main/resources/application.properties
 ```
+
 #### Phase4 Properties
 TOOP and AS4 configuration properties
+
 ```sh
 ~/de4a/de4a-connector/src/main/resources/phase4.properties
 ```
+
 #### Spring config
+
 ```sh
 ~/de4a/de4a-connector/src/main/java/eu/de4a/connector/service/spring/Conf.java
 ```
+
 #### Logging config
+
 ```sh
 ~/de4a/de4a-connector/src/main/resources/log4j2.xml
 ```
+
 ## Installation
 You should be able to compile entire packages from the parent POM file:
+
 ```sh
 mvn clean install
 ```
+
 It is also possible to compile each package separately by browsing to the folder and running the command above.
 #### Package
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the IDK and Connector target paths will be created with their corresponding `war` files.
@@ -77,9 +91,11 @@ The compilation process will packaging the project into a `.war` file located on
 
 #### Toop version `v2.1.2-SNAPSHOT`
 Due to the last changes on [de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/development) Toop-connector-ng version should be `2.1.2-SNAPSHOT`, so you may need to add following repo server on your maven settings
+
 ```sh
 https://oss.sonatype.org/content/repositories/snapshots/
 ```
+
 ## Connector configuration guide
 For a correct configuration of the Connector, three main property files must be cosidered:
 - `application.properties`: main system configuration
@@ -264,11 +280,11 @@ To establish which SMP server will provide the Connector with metadata services,
 ```properties
 # SMP Client configuration stuff - Do not touch (default values)
 smpclient.truststore.type = JKS
-smpclient.truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
+smpclient.truststore.path = truststore/de4a-truststore-smp-it2-pw-de4a.jks
 smpclient.truststore.password = de4a
 ..........
 # External endpoints
-smp.endpoint=https://de4a-smp.egovlab.eu/
+#smp.endpoint=
 ```
 
 You can define there your SMP endpoint and truststore which will be used to validate the signature of the responses. - **Do not modify, all consortium SMPs should be validated with the default truststore**.
@@ -319,23 +335,24 @@ Parameters used by the built-in Phase4 module of the Connector. Set up the prope
 # (string) - the absolute path to a local directory to store data
 phase4.datapath=
 # (boolean) - enable or disable HTTP debugging for AS4 transmissions. The default value is false.
-phase4.debug.http=
+phase4.debug.http=false
 # (boolean) - enable or disable debug logging for incoming AS4 transmissions. The default value is false.
-phase4.debug.incoming=
+phase4.debug.incoming=false
 # (string) - an optional absolute directory path where the incoming AS4 messages should be dumped to. Disabled by default.
 phase4.dump.incoming.path=
 # (string) - an optional absolute directory path where the outgoing AS4 messages should be dumped to. Disabled by default.
 phase4.dump.outgoing.path=
 # (string) - the from party ID to be used for outgoing messages. Previous versions need to use toop.mem.as4.tc.partyid - starting from RC3 this property is still used as a fallback)
-phase4.send.fromparty.id=egovlab
-# (string) - the AS4 To/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
-phase4.send.toparty.id.type=urn:oasis:names:tc:ebcore:partyid-type:unregistered
-# (string) to party ID to be used for outgoing messages. Configure it in case of using Domibus without dynamic participant discovery or in the phase4 side in a mixed AS4 implementations phase4<->Domibus
+phase4.send.fromparty.id=
+# (string) - to party ID to be used for outgoing messages. Configure it in case of using Domibus without dynamic participant discovery or in the phase4 side in a mixed AS4 implementations phase4<->Domibus
 phase4.send.toparty.id=
+# (string) - the AS4 To/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
+phase4.send.toparty.id.type=
 # (string) - the AS4 From/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
-phase4.send.fromparty.id.type=urn:oasis:names:tc:ebcore:partyid-type:unregistered
+phase4.send.fromparty.id.type=
 # (string) - an optional folder, where sent responses should be stored. If this property is not provided, they are not stored
 phase4.send.response.folder=
+
 # (string) - the type of the keystore (either "JKS" or "PKCS12" - case insensitive) - defaults to JKS.
 phase4.keystore.type=
 # (string) - the path to the keystore (can be classpath relative or an absolute file)
@@ -346,12 +363,13 @@ phase4.keystore.password=
 phase4.keystore.key-alias=
 # (string) - the password to access the key in the keystore
 phase4.keystore.key-password=
+
 # (string) - the type of the truststore (either "JKS" or "PKCS12" - case insensitive) - defaults to JKS.
-phase4.truststore.type=
+phase4.truststore.type=JKS
 # (string) - the path to the truststore (can be classpath relative or an absolute file)
-phase4.truststore.path=
-# (string) -  the password to access the truststore
-phase4.truststore.password=
+phase4.truststore.path=truststore/de4a-truststore-as4-it2-pw-de4a.jks
+# (string) - the password to access the truststore
+phase4.truststore.password=de4a
 ```
 
 #### Logging configuration `log4j2.xml`
@@ -395,3 +413,11 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 	- `/requestTransferEvidenceUSI`
 	- `/lookupRoutingInformation`
 	- `/requestTransferEvidenceUSIDT`
+
+## News and Noteworthy
+
+* v0.1.3
+    * Changed the default trust stores to use the Production Telesec certificates (filenames `de4a-truststore-as4-it2-pw-de4a.jks` and `de4a-truststore-smp-it2-pw-de4a.jks)
+    * Changed the default configuration files to use the new truststore
+    * The SML configuration was changed to use the production SML instead of the testing SMK
+    * The logging around the SMP lookup was improved
