@@ -416,7 +416,7 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 ## News and Noteworthy
 
-* v0.1.3
+* v0.1.4 - 2022-03-30
     * Changed the default trust stores to use the Production Telesec certificates (filenames `de4a-truststore-as4-it2-pw-de4a.jks` and `de4a-truststore-smp-it2-pw-de4a.jks)
     * Changed the default configuration files to use the new truststore
     * The SML configuration was changed to use the production SML instead of the testing SMK
