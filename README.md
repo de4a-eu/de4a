@@ -87,6 +87,7 @@ For a correct configuration of the Connector, three main property files must be 
 - `log4j2.xml`: logging configuration
 
 Bellow, a working example of the `application.prperties` file:
+
 ```properties
 # Database properties
 database.datasourceConf.url=jdbc:h2:mem:testdb
@@ -203,14 +204,19 @@ as4.timeout.miliseconds=30000
 #http.proxyPort=${http.proxy.port}
 #http.nonProxyHosts=${http.proxy.non-proxy}
 ```
+
 From now on, we will explain the main and most critical configuration:
+
 #### SSL Context (not for AS4) `application.properties`
 You can configure secure HTTP connections from the Connector by setting the following property to `true`:
+
 ```properties
 # SSL context enabled (true|false)
 ssl.context.enabled=true
 ```
+
 In this case you should properly configure the following properties in order to create an SSL context for HTTP communications:
+
 ```properties
 # SSL configuration (optional when ssl.context.enables is false)
 ssl.keystore.type= #(JKS|PKCS12)
@@ -219,9 +225,11 @@ ssl.keystore.password= #(Private key password)
 ssl.truststore.path= #(JKS truststore)
 ssl.truststore.password= #(Truststore password)
 ```
+
 Eventually, due to your environment configuration and structure, you need to disabled the SSL context property, in that case, you should configure the corresponding JVM parameters to specify the truststore, keystore, etc. or the further actions depending of your environment configuration.
 #### Kafka configuration `application.properties`
 In order to send log messages to a kafka server, configure the following parameters:
+
 ```properties
 # DE4A Kafka settings
 de4a.kafka.enabled=true
@@ -238,12 +246,14 @@ de4a.kafka.url=de4a.simplegob.com:9092
 # toop legacy kafka properties (Do not touch)
 toop.tracker.enabled = false
 ```
+
 **IMPORTANT** - If your server has no access to external domains, the HTTP kafka and proxy configuration should be enabled.
 To enable HTTP kafka log producer, you only need to set the property to true `de4a.kafka.http.enabled=true` - **Also configure the proper endpoint in order to use HTTP connections**  
 It is important to mention the property `de4a.kafka.logging.enabled`, used to enable the file log printing for each kafka message sent, that property could be enabled even when the `de4a.kafka.enabled=false`, just for write the log at the different appenders configured in the log4j2 configuration file.
 
 #### SMP properties `application.properties`
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
+
 ```properties
 # SMP Client configuration stuff - Do not touch (default values)
 smpclient.truststore.type = JKS
@@ -253,9 +263,11 @@ smpclient.truststore.password = de4a
 # External endpoints
 smp.endpoint=https://de4a-smp.egovlab.eu/
 ```
+
 You can define there your SMP endpoint and truststore which will be used to validate the signature of the responses. - **Do not modify, all consortium SMPs should be validated with the default truststore**.
 
 #### AS4 - TOOP properties `application.properties`
+
 ```properties
 # What AS4 implementation to use?
 toop.mem.implementation = phase4
@@ -266,8 +278,10 @@ as4.gateway.implementation.bean=phase4GatewayClient
 # Domibus server endpoint
 # domibus.endpoint=
 ```
+
 #### Proxy properties
 Some environments may require perform proxy connections due to security policies or environment limitations¡. That is why the Connector allows to establish HTTP connections via proxy.
+
 ```properties
 # Properties to create the HTTP client connection through a proxy (optional)
 #http.proxy.enabled=
@@ -277,19 +291,23 @@ Some environments may require perform proxy connections due to security policies
 #http.proxyUsername=
 #http.proxyPassword=
 
-# Required renamed proxy configuration for BDXRClient (if needed, only uncomment)
-#http.proxyHost=${http.proxy.address}
-#http.proxyPort=${http.proxy.port}
-#http.nonProxyHosts=${http.proxy.non-proxy}
+# Required renamed proxy configuration for BDXRClient (if is needed, duplicate the values)
+#http.proxyHost=
+#http.proxyPort=
+#http.nonProxyHosts=
 ```
+
 In order to disable proxy configuration, you can either comment the properties or set up `enabled` property to false.
- ```properties
+
+```properties
 http.proxy.enabled=false
 ````
+
 **PLEASE NOTE** that in case that you enabled the property (`http.proxy.enabled=true`) above you should uncomment and set up the rest of them. Also uncomment properties regarding to BDXRClient
 
 #### Phase4 properties `phase4.properties`
 Parameters used by the built-in Phase4 module of the Connector. Set up the properties above following the commented indications. Some of them are filled in to clarify the content -- **Important** to consider if each property is optional or not (*check out the the in-line comments*).
+
 ```properties
 # (string) - the absolute path to a local directory to store data
 phase4.datapath=
@@ -297,17 +315,17 @@ phase4.datapath=
 phase4.debug.http=
 # (boolean) - enable or disable debug logging for incoming AS4 transmissions. The default value is false.
 phase4.debug.incoming=
-# (string) (since v2.0.0-rc3) - an optional absolute directory path where the incoming AS4 messages should be dumped to. Disabled by default.
+# (string) - an optional absolute directory path where the incoming AS4 messages should be dumped to. Disabled by default.
 phase4.dump.incoming.path=
-# (string) (since v2.0.0-rc3) - an optional absolute directory path where the outgoing AS4 messages should be dumped to. Disabled by default.
+# (string) - an optional absolute directory path where the outgoing AS4 messages should be dumped to. Disabled by default.
 phase4.dump.outgoing.path=
-# (string) (since v2.0.0-rc3) - the from party ID to be used for outgoing messages. Previous versions need to use toop.mem.as4.tc.partyid - starting from RC3 this property is still used as a fallback)
+# (string) - the from party ID to be used for outgoing messages. Previous versions need to use toop.mem.as4.tc.partyid - starting from RC3 this property is still used as a fallback)
 phase4.send.fromparty.id=egovlab
-# (string) (since 2.0.2) - the AS4 To/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
+# (string) - the AS4 To/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
 phase4.send.toparty.id.type=urn:oasis:names:tc:ebcore:partyid-type:unregistered
 # (string) to party ID to be used for outgoing messages. Configure it in case of using Domibus without dynamic participant discovery or in the phase4 side in a mixed AS4 implementations phase4<->Domibus
 phase4.send.toparty.id=
-# (string) (since 2.0.2) - the AS4 From/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
+# (string) - the AS4 From/PartyId/@type value. E.g. urn:oasis:names:tc:ebcore:partyid-type:unregistered
 phase4.send.fromparty.id.type=urn:oasis:names:tc:ebcore:partyid-type:unregistered
 # (string) - an optional folder, where sent responses should be stored. If this property is not provided, they are not stored
 phase4.send.response.folder=
@@ -328,9 +346,11 @@ phase4.truststore.path=
 # (string) -  the password to access the truststore
 phase4.truststore.password=
 ```
+
 #### Logging configuration `log4j2.xml`
 The configuration file bellow maintains the logging configuration where you can set the level of each appender, set up log file path, or even include more appenders or configuration.
 **Important** - to correctly configure the path of log file. By default it is a relative path to catalina.base (Tomcat server) `${sys:catalina.base}/logs/connector.log`
+
 ```xml
 <RollingFile name="rollingFile"
 	fileName="${sys:catalina.base}/logs/connector.log"
@@ -346,13 +366,15 @@ The configuration file bellow maintains the logging configuration where you can 
 	<DefaultRolloverStrategy max="5" />
 </RollingFile>
 ```
+
 Also, in the `application.properties` there is another property related with the logging.
+
 ```properties
 # Logging metrics messages prefix - Default: DE4A METRICS
 log.metrics.prefix=DE4A METRICS
 ```
-It is used to include a prefix on each logging line written by the Kafka logging that could be useful to parse and filter the lines with metrics information.
 
+It is used to include a prefix on each logging line written by the Kafka logging that could be useful to parse and filter the lines with metrics information.
 
 ## Starting up Connector
 Once you have all configuration parameters well configured (if not, check the logs to find out the problem), it is time to deploy the component into an applications server.
