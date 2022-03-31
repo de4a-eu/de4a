@@ -421,3 +421,12 @@ Once you have deployed the `war` file, there are several **checks to ensure that
     * Changed the default configuration files to use the new truststore
     * The SML configuration was changed to use the production SML instead of the testing SMK
     * The logging around the SMP lookup was improved
+
+## Building a release
+
+1. Make sure to update "News and Noteworthy" in this document. Commit and push it.
+1. Call `mvn clean install`
+1. Create a tag with the name `vX.Y.Z` where X is the major version, Y the minor version and Z the patch or micro version
+1. Push this tag to GitHub
+1. Create a new release on GitHub using the just created tag
+1. The Docker image is built and pushed automatically by a Jenkins job
