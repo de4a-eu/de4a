@@ -23,37 +23,37 @@
         <!-- Project encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
         <maven.compiler.release>11</maven.compiler.release>
+
+        <axiom.version>1.2.22</axiom.version>
         <commons.io.version>2.7</commons.io.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
-        <toop.version>2.1.2-SNAPSHOT</toop.version>
-        <jaxb.version>2.3.3</jaxb.version>
+        <h2.database.version>2.1.210</h2.database.version>
+        <httpclient.version>4.5.12</httpclient.version>
+        <httpmime.version>4.3.1</httpmime.version>
+        <jackson.databind.version>2.13.1</jackson.databind.version>
+        <jacoco.version>0.8.6</jacoco.version>
         <jakarta.activation.api>1.2.2</jakarta.activation.api>
         <jakarta.xml.bind.api.version>2.3.3</jakarta.xml.bind.api.version>
-        <spring.version>5.3.18</spring.version>
-        <spring.ws.version>3.0.10.RELEASE</spring.ws.version>
-        <spring.boot.version>2.6.6</spring.boot.version>
-        <jackson.databind.version>2.13.1</jackson.databind.version>
+        <javax.validation.api>2.0.1.Final</javax.validation.api>
+        <javax.servlet.api.version>3.0.1</javax.servlet.api.version>
+        <jaxb.version>2.3.3</jaxb.version>
         <jaxb.api.version>2.3.3</jaxb.api.version>
         <jaxb.core.version>2.3.3</jaxb.core.version>
         <jaxb2.maven.plugin>2.3.3</jaxb2.maven.plugin>
         <jaxen.version>1.2.0</jaxen.version>
-        <javax.validation.api>2.0.1.Final</javax.validation.api>
-        <javax.servlet.api.version>3.0.1</javax.servlet.api.version>
         <jstl.version>1.2</jstl.version>
-        <axiom.version>1.2.22</axiom.version>
-        <slf4j.version>1.7.36</slf4j.version>
         <logback.version>1.2.11</logback.version>
         <log4j2.version>2.17.2</log4j2.version>
-        <springfox-version>3.0.0</springfox-version>
-        <h2.database.version>2.1.210</h2.database.version>
-        <httpmime.version>4.3.1</httpmime.version>
-        <httpclient.version>4.5.12</httpclient.version>
-        <taglibs.standard.version>1.1.2</taglibs.standard.version>
         <saaj.impl.version>1.5.2</saaj.impl.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <spring.boot.version>2.6.6</spring.boot.version>
+        <spring.version>5.3.18</spring.version>
+        <spring.ws.version>3.0.12.RELEASE</spring.ws.version>
+        <springfox-version>3.0.0</springfox-version>
+        <taglibs.standard.version>1.1.2</taglibs.standard.version>
+        <toop.version>2.1.2-SNAPSHOT</toop.version>
         <xmlsec.version>2.2.3</xmlsec.version>
-        <jacoco.version>0.8.6</jacoco.version>
 
         <!-- Sonar/Jacoco -->
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -62,12 +62,31 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>eu.de4a</groupId>
-                <artifactId>de4a-commons-parent-pom</artifactId>
-                <version>0.1.3</version>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ws</groupId>
+                <artifactId>spring-ws-core</artifactId>
+                <version>${spring.ws.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <dependency>
                 <groupId>com.helger.phase4</groupId>
                 <artifactId>phase4-parent-pom</artifactId>
@@ -86,6 +105,13 @@
                 <groupId>eu.toop</groupId>
                 <artifactId>tc-parent-pom</artifactId>
                 <version>${toop.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>eu.de4a</groupId>
+                <artifactId>de4a-commons-parent-pom</artifactId>
+                <version>0.1.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -116,32 +142,6 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
                 <version>${log4j2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
-                <version>${spring.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.ws</groupId>
-                <artifactId>spring-ws-core</artifactId>
-                <version>${spring.ws.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
 
             <dependency>
