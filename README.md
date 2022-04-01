@@ -416,6 +416,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 ## News and Noteworthy
 
+* v0.1.5 - 2022-04-01 (no April 1st joke)
+    * Updated Spring and Spring Boot dependencies due to CVE-2022-22965 - details at https://tanzu.vmware.com/security/cve-2022-22965
 * v0.1.4 - 2022-03-30
     * Changed the default trust stores to use the Production Telesec certificates (filenames `de4a-truststore-as4-it2-pw-de4a.jks` and `de4a-truststore-smp-it2-pw-de4a.jks`)
     * Changed the default configuration files to use the new truststore
