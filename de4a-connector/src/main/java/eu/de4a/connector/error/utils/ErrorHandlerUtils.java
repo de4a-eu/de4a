@@ -154,15 +154,15 @@ public class ErrorHandlerUtils {
     
     @SuppressWarnings("unchecked")
     public static <T> Object conversionDocWithCatching(DE4AMarshaller<T> marshaller, Object obj, 
-            boolean objToDoc, boolean throwException, ConnectorException ex) {
+            boolean objToDoc, boolean throwException, ConnectorException baseEx) {
         Object returnObj = null;
         String errorMsg = "Object received is not valid, check the structure";
-        ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
+        ConnectorException exception = baseEx.withLayer(LayerError.INTERNAL_FAILURE)
                 .withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withHttpStatus(HttpStatus.OK);
         marshaller.readExceptionCallbacks().set(e -> {
-            if(!ObjectUtils.isEmpty(e.getLinkedException()))
-                ex.withMessageArg(e.getLinkedException().getMessage());
+            if(e.getLinkedException() != null)
+                baseEx.withMessageArg(e.getLinkedException().getMessage());
         });
         try {
             if(objToDoc) {
@@ -177,15 +177,15 @@ public class ErrorHandlerUtils {
             if(throwException) {
                 throw exception.withMessageArg(e.getMessage());
             }
-            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+            return ResponseErrorFactory.getHandlerFromClassException(baseEx.getClass())
                     .getResponseError(exception.withMessageArg(e.getMessage()), false);
         }
         if(returnObj == null) {
-            exception.withMessageArg(ex.getArgs());
+            exception.withMessageArg(baseEx.getArgs());
             if(throwException) {
                 throw exception.withMessageArg(errorMsg);
             }
-            return ResponseErrorFactory.getHandlerFromClassException(ex.getClass())
+            return ResponseErrorFactory.getHandlerFromClassException(baseEx.getClass())
                     .getResponseError(exception.withMessageArg(errorMsg), false);
         }
         return returnObj;

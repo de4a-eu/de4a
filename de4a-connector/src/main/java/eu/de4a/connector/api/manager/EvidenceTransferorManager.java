@@ -75,12 +75,13 @@ public class EvidenceTransferorManager extends EvidenceManager {
         }
         ResponseTransferEvidenceType responseTransferEvidenceType = null;
         RequestTransferEvidenceUSIIMDRType req = null;
-        ConnectorException ex = new OwnerException().withModule(ExternalModuleError.CONNECTOR_DT)
+        ConnectorException baseEx = new OwnerException().withModule(ExternalModuleError.CONNECTOR_DT)
                 .withHttpStatus(HttpStatus.OK);
         try {
-            OwnerAddresses ownerAddress = getOwnerAddress(request.getReceiverId(), ex);
+            OwnerAddresses ownerAddress = getOwnerAddress(request.getReceiverId(), baseEx);
             RequestorRequest requestorReq = new RequestorRequest();
             if(!DE4AConstants.NAMESPACE_USI.equals(request.getMessage().getNamespaceURI())) {
+                logger.warn ("Received message has the wrong namespace URI '"+request.getMessage().getNamespaceURI()+"'. Was expecting '"+DE4AConstants.NAMESPACE_USI+"'");
                 req = (RequestTransferEvidenceUSIIMDRType) ErrorHandlerUtils
                         .conversionDocWithCatching(DE4AMarshaller.drImRequestMarshaller(),
                                 request.getMessage().getOwnerDocument(), false, false,
@@ -125,11 +126,12 @@ public class EvidenceTransferorManager extends EvidenceManager {
             requestorReq.setDone(false);
             requestorRequestRepository.save(requestorReq);
 
-        } catch (ConnectorException e) {
+        } catch (ConnectorException ex) {
+            // Result may be null
             responseTransferEvidenceType = (ResponseTransferEvidenceType) ResponseErrorFactory
                     .getHandlerFromClassException(ex.getClass()).buildResponse(ex);
 
-            if (req == null || !sendResponseMessage(request.getSenderId(), request.getReceiverId(),
+            if (req == null || responseTransferEvidenceType == null || !sendResponseMessage(request.getSenderId(), request.getReceiverId(),
                     req.getCanonicalEvidenceTypeId(), DE4AMarshaller.drImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE)
                             .getAsDocument(responseTransferEvidenceType).getDocumentElement(),
                     DE4AConstants.TAG_EVIDENCE_RESPONSE)) {
@@ -214,14 +216,14 @@ public class EvidenceTransferorManager extends EvidenceManager {
         return false;
     }
     
-    private OwnerAddresses getOwnerAddress(String dataOwnerId, ConnectorException ex) {
+    private OwnerAddresses getOwnerAddress(String dataOwnerId, ConnectorException baseEx) {
         KafkaClientWrapper.sendInfo(LogMessages.LOG_OWNER_LOOKUP, dataOwnerId);
         
         OwnerAddresses ownerAddress = agentsLocator.lookupOwnerAddress(dataOwnerId);
         if (ownerAddress == null) {
             KafkaClientWrapper.sendError(LogMessages.LOG_ERROR_OWNER_LOOKUP, dataOwnerId);
 
-            throw ex.withFamily(FamilyErrorType.SAVING_DATA_ERROR).withLayer(LayerError.CONFIGURATION)
+            throw baseEx.withFamily(FamilyErrorType.SAVING_DATA_ERROR).withLayer(LayerError.CONFIGURATION)
                     .withMessageArg(new MessageUtils(MessageKeys.ERROR_OWNER_NOT_FOUND, new Object[] { dataOwnerId }));
         }
         return ownerAddress;

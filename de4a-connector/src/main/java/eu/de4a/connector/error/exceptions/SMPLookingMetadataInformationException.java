@@ -12,8 +12,4 @@ public class SMPLookingMetadataInformationException extends ConnectorException {
 	public Element getUserMessage() {
 		return userMessage;
 	}
-	public void setUserMessage(Element userMessage) {
-		this.userMessage = userMessage;
-	}
-	
 }
