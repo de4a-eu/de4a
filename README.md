@@ -416,6 +416,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 ## News and Noteworthy
 
+* v0.1.6 - 2022-04-27
+    * Fixing a `NullPointerException` in error case
 * v0.1.5 - 2022-04-01 (no April 1st joke)
     * Updated Spring and Spring Boot dependencies due to CVE-2022-22965 - details at https://tanzu.vmware.com/security/cve-2022-22965
 * v0.1.4 - 2022-03-30
