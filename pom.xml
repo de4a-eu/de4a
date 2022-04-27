@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.de4a</groupId>
     <artifactId>de4a-parent-pom</artifactId>
-    <version>0.1.6-SNAPSHOT</version>
+    <version>0.1.7-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>de4a-parent-pom</name>
     <description>Base POM to build the DE4A projects</description>
