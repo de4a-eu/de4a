@@ -61,27 +61,28 @@ public class RegRepTransformer {
 			InputStream inputStreamPlantilla = this.getClass().getClassLoader().getResourceAsStream(template);
 			Source xslDoc = new StreamSource(inputStreamPlantilla);
 			Source src = new DOMSource();
-			OutputStream xmlFile = new ByteArrayOutputStream();
-			Transformer transformerxsl = factory.newTransformer(xslDoc);
-			fillParameter(transformerxsl, CONSUMER_ID, DOMUtils.getValueFromXpath(XPATH_CONSUMER_ID, canonical));
-			fillParameter(transformerxsl, CONSUMER_NAME, DOMUtils.getValueFromXpath(XPATH_CONSUMER_NAME, canonical));
-			fillParameter(transformerxsl, PERSONAL_ID, DOMUtils.getValueFromXpath(XPATH_PERSONAL_ID, canonical));
-			fillParameter(transformerxsl, CURRENT_TIME, getCurrentTime());
-			fillParameter(transformerxsl, PROVIDER_ID, DOMUtils.getValueFromXpath(XPATH_PROVIDER_ID, canonical));
-			fillParameter(transformerxsl, PROVIDER_NAME, DOMUtils.getValueFromXpath(XPATH_PROVIDER_NAME, canonical));
-			transformerxsl.setOutputProperty(OutputKeys.ENCODING, DEFAULT_ENCODING);
-			transformerxsl.transform(src, new StreamResult(xmlFile));
-			xmlFile.close();
-			String xmlespecificos = ((ByteArrayOutputStream) xmlFile).toString();
-			DocumentBuilderFactory factoryDom = DocumentBuilderFactory.newInstance();
-			factoryDom.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			factoryDom.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			factoryDom.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-			factoryDom.setNamespaceAware(true);
-			DocumentBuilder builder = factoryDom.newDocumentBuilder();
-			Document docFinal = builder.parse(new InputSource(new StringReader(xmlespecificos)));
+			try (final ByteArrayOutputStream xmlFile = new ByteArrayOutputStream())
+			{
+  			Transformer transformerxsl = factory.newTransformer(xslDoc);
+  			fillParameter(transformerxsl, CONSUMER_ID, DOMUtils.getValueFromXpath(XPATH_CONSUMER_ID, canonical));
+  			fillParameter(transformerxsl, CONSUMER_NAME, DOMUtils.getValueFromXpath(XPATH_CONSUMER_NAME, canonical));
+  			fillParameter(transformerxsl, PERSONAL_ID, DOMUtils.getValueFromXpath(XPATH_PERSONAL_ID, canonical));
+  			fillParameter(transformerxsl, CURRENT_TIME, getCurrentTime());
+  			fillParameter(transformerxsl, PROVIDER_ID, DOMUtils.getValueFromXpath(XPATH_PROVIDER_ID, canonical));
+  			fillParameter(transformerxsl, PROVIDER_NAME, DOMUtils.getValueFromXpath(XPATH_PROVIDER_NAME, canonical));
+  			transformerxsl.setOutputProperty(OutputKeys.ENCODING, DEFAULT_ENCODING);
+  			transformerxsl.transform(src, new StreamResult(xmlFile));
+        String xmlespecificos = xmlFile.toString();
 
-			return docFinal.getDocumentElement();
+        DocumentBuilderFactory factoryDom = DocumentBuilderFactory.newInstance();
+        factoryDom.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factoryDom.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factoryDom.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        factoryDom.setNamespaceAware(true);
+        DocumentBuilder builder = factoryDom.newDocumentBuilder();
+        Document docFinal = builder.parse(new InputSource(new StringReader(xmlespecificos)));
+        return docFinal.getDocumentElement();
+			}
 		} catch (Exception e) {
 			String error = "Error building RegRep wrapped message";
 			log.error(error, e);
