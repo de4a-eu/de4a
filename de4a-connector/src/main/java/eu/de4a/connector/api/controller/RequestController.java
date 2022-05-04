@@ -18,7 +18,7 @@ import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
-import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.RequestEventSubscriptionType;
@@ -47,7 +47,7 @@ public class RequestController implements RequestAPI {
         // Unmarshalling and schema validation
         final RequestExtractMultiEvidenceUSIType requestObj = (RequestExtractMultiEvidenceUSIType)
                 APIRestUtils.conversionBytesWithCatching(marshaller,request, false, true,
-                        new ConnectorException().withModule(ExternalModuleError.CONNECTOR_DR));
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
 
         // Check if there are multiple evidence request
         final String docTypeID;
@@ -84,7 +84,7 @@ public class RequestController implements RequestAPI {
         // Unmarshalling and schema validation
         final RequestExtractMultiEvidenceIMType requestObj = (RequestExtractMultiEvidenceIMType)
                 APIRestUtils.conversionBytesWithCatching(marshaller,request, false, true,
-                        new ConnectorException().withModule(ExternalModuleError.CONNECTOR_DR));
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
 
         // Check if there are multiple evidence request
         final String docTypeID;
@@ -121,7 +121,7 @@ public class RequestController implements RequestAPI {
         // Unmarshalling and schema validation
         final RequestExtractMultiEvidenceLUType requestObj = (RequestExtractMultiEvidenceLUType)
                 APIRestUtils.conversionBytesWithCatching(marshaller,request, false, true,
-                        new ConnectorException().withModule(ExternalModuleError.CONNECTOR_DR));
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
 
         // Check if there are multiple evidence request
         final String docTypeID;
@@ -158,7 +158,7 @@ public class RequestController implements RequestAPI {
         // Unmarshalling and schema validation
         final RequestEventSubscriptionType requestObj = (RequestEventSubscriptionType)
                 APIRestUtils.conversionBytesWithCatching(marshaller,request, false, true,
-                        new ConnectorException().withModule(ExternalModuleError.CONNECTOR_DR));
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
 
         // Check if there are multiple evidence request
         final String docTypeID;

@@ -19,10 +19,10 @@ import com.helger.peppolid.factory.SimpleIdentifierFactory;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.ExternalModuleError;
-import eu.de4a.connector.error.model.FamilyErrorType;
-import eu.de4a.connector.error.model.LayerError;
-import eu.de4a.connector.error.model.LogMessages;
+import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.error.model.EFamilyErrorType;
+import eu.de4a.connector.error.model.ELayerError;
+import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 
@@ -63,7 +63,7 @@ public class AS4Service {
         a.setContentID(messageDTO.getContentID());
         aPayloads.add(a);
 
-        KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_MSG_SENT, sPI.getURIEncoded(),
+        KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_MSG_SENT, sPI.getURIEncoded(),
                 sPI.getURIEncoded(), messageDTO.getContentID());
 
         final IJsonObject aJson = ApiPostLookendAndSend.perform(sPI, rPI, aDocumentTypeID, aProcessID,
@@ -87,15 +87,15 @@ public class AS4Service {
                 aJson.getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
 
         // Base exception to be thrown
-        final ConnectorException ex = new ConnectorException().withLayer(LayerError.COMMUNICATIONS)
-                .withFamily(FamilyErrorType.AS4_ERROR_COMMUNICATION);
+        final ConnectorException ex = new ConnectorException().withLayer(ELayerError.COMMUNICATIONS)
+                .withFamily(EFamilyErrorType.AS4_ERROR_COMMUNICATION);
 
         if(!aJson.get(JSON_TAG_SUCCESS).getAsValue().getAsBoolean()) {
             //A problem occurs sending the AS4 message
             if(aJson.containsKey(JSON_TAG_EXCEPTION)) {
                 final String message = aJson.get(JSON_TAG_EXCEPTION).getAsObject()
                         .get(JSON_TAG_MESSAGE).getAsValue().getAsString();
-                throw ex.withModule(ExternalModuleError.AS4) .withMessageArg(message);
+                throw ex.withModule(EExternalModuleError.AS4) .withMessageArg(message);
             }
 
             final IJsonObject lookupResults = (IJsonObject) aJson.get(JSON_TAG_RESULT_LOOKUP);
@@ -107,10 +107,10 @@ public class AS4Service {
                                 .getAsValue().getAsString();
                     else
                         smpErrMsg = "Found no matching SMP service metadata";
-                    throw ex.withModule(ExternalModuleError.SMP) .withMessageArg(smpErrMsg);
+                    throw ex.withModule(EExternalModuleError.SMP) .withMessageArg(smpErrMsg);
             }
             if(!sendResults.get(JSON_TAG_SUCCESS).getAsValue().getAsBoolean())
-                    throw ex.withModule(ExternalModuleError.AS4)
+                    throw ex.withModule(EExternalModuleError.AS4)
                         .withMessageArg("Error with AS4 communications");
         }
     }

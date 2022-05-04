@@ -6,7 +6,7 @@ import org.w3c.dom.Document;
 
 import eu.de4a.connector.api.service.AS4Service;
 import eu.de4a.connector.dto.AS4MessageDTO;
-import eu.de4a.connector.error.model.LogMessages;
+import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 
@@ -33,7 +33,7 @@ public class APIManager {
             final AS4MessageDTO messageDTO, final String requestId, 
             final String kafkaMsg, final DE4ACoreMarshaller<T> marshaller) {
         
-        KafkaClientWrapper.sendInfo(LogMessages.LOG_REQ_RECEIPT, kafkaMsg, requestId, 
+        KafkaClientWrapper.sendInfo(ELogMessages.LOG_REQ_RECEIPT, kafkaMsg, requestId, 
                 messageDTO.getDocTypeId(), messageDTO.getSenderID(), messageDTO.getReceiverID());
         
         Document doc = marshaller.getAsDocument((T) requestObj);

@@ -4,38 +4,38 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.springframework.http.HttpStatus;
-import eu.de4a.connector.error.model.ExternalModuleError;
-import eu.de4a.connector.error.model.FamilyErrorType;
-import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.error.model.EFamilyErrorType;
+import eu.de4a.connector.error.model.ELayerError;
 
 public class ConnectorException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    private ExternalModuleError module;
-    private FamilyErrorType family;
-    private LayerError layer;
+    private EExternalModuleError module;
+    private EFamilyErrorType family;
+    private ELayerError layer;
     private HttpStatus status = HttpStatus.BAD_REQUEST;
     private String code;
     private List<Object> args;
 
     @Nullable
-    public ExternalModuleError getModule ()
+    public EExternalModuleError getModule ()
     {
         return module;
     }
 
 
-    public ConnectorException withModule(final ExternalModuleError module) {
+    public ConnectorException withModule(final EExternalModuleError module) {
         this.module = module;
         return this;
     }
 
-    public ConnectorException withLayer(final LayerError layer) {
+    public ConnectorException withLayer(final ELayerError layer) {
         this.layer = layer;
         return this;
     }
 
-    public ConnectorException withFamily(final FamilyErrorType family) {
+    public ConnectorException withFamily(final EFamilyErrorType family) {
         this.family = family;
         return this;
     }

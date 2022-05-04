@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import eu.de4a.connector.api.ServiceAPI;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.ExternalModuleError;
-import eu.de4a.connector.error.model.FamilyErrorType;
-import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.error.model.EFamilyErrorType;
+import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.connector.utils.APIRestUtils;
 
 @Controller
@@ -56,9 +56,9 @@ public class ServiceController implements ServiceAPI {
                 return ResponseEntity.ok(in.readAllBytes());
             }
         } catch (NullPointerException | IOException e) {
-            throw new ConnectorException().withFamily(FamilyErrorType.CONNECTION_ERROR)
-                .withLayer(LayerError.INTERNAL_FAILURE)
-                .withModule(ExternalModuleError.MOR)
+            throw new ConnectorException().withFamily(EFamilyErrorType.CONNECTION_ERROR)
+                .withLayer(ELayerError.INTERNAL_FAILURE)
+                .withModule(EExternalModuleError.MOR)
                 .withMessageArg("Error accessing/processing to remote MOR file from: " + this.morFileEndpoint)
                 .withHttpStatus(HttpStatus.NOT_FOUND);
         }

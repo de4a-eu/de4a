@@ -35,7 +35,7 @@ import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.config.AddressesProperties;
 import eu.de4a.connector.config.TestConf;
 import eu.de4a.connector.error.exceptions.MessageException;
-import eu.de4a.connector.error.model.LogMessages;
+import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.DOMUtils;
 
 @RunWith(SpringRunner.class)
@@ -76,7 +76,7 @@ public class TestConnectorServices {
             
             // Calling the tested method
             ResponseEntity<byte[]> response = this.deliverService.pushMessage(dReq, "iso6523-actorid-upis::9999:lu000000025", 
-                    "iso6523-actorid-upis::9999:test-sgad", LogMessages.LOG_REQ_DO);
+                    "iso6523-actorid-upis::9999:test-sgad", ELogMessages.LOG_REQ_DO);
         
             assertEquals(HttpStatus.OK, response.getStatusCode());
             

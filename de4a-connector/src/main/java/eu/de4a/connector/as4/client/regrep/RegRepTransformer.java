@@ -24,8 +24,8 @@ import org.w3c.dom.NodeList;
 
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.FamilyErrorType;
-import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.EFamilyErrorType;
+import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.connector.utils.DOMUtils;
 
 public final class RegRepTransformer {
@@ -93,8 +93,8 @@ public final class RegRepTransformer {
 			String error = "Error building RegRep wrapped message";
 			LOGGER.error(error, e);
 			throw new ConnectorException()
-			    .withFamily(FamilyErrorType.CONVERSION_ERROR)
-			    .withLayer(LayerError.INTERNAL_FAILURE)
+			    .withFamily(EFamilyErrorType.CONVERSION_ERROR)
+			    .withLayer(ELayerError.INTERNAL_FAILURE)
 			    .withMessageArg(error);
 		}
 

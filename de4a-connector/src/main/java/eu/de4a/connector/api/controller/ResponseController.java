@@ -18,7 +18,7 @@ import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
-import eu.de4a.connector.error.model.ExternalModuleError;
+import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
@@ -45,7 +45,7 @@ public class ResponseController implements ResponseAPI {
 
         final RedirectUserType redirectUserMsg = (RedirectUserType) APIRestUtils
                 .conversionBytesWithCatching(marshaller, request, false, true,
-                        new ConnectorException().withModule(ExternalModuleError.CONNECTOR_DT));
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(redirectUserMsg.getDataEvaluator().getAgentUrn(),
                 redirectUserMsg.getDataOwner().getAgentUrn())
@@ -70,7 +70,7 @@ public class ResponseController implements ResponseAPI {
 
         final ResponseExtractMultiEvidenceType responseObj = (ResponseExtractMultiEvidenceType) APIRestUtils
                 .conversionBytesWithCatching(marshaller, request, false, true,
-                        new ConnectorException().withModule(ExternalModuleError.CONNECTOR_DT));
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
 
         // Check if there are multiple evidence responses
         final String docTypeID;
@@ -105,7 +105,7 @@ public class ResponseController implements ResponseAPI {
 
         final ResponseEventSubscriptionType responseObj = (ResponseEventSubscriptionType) APIRestUtils
                 .conversionBytesWithCatching(marshaller, request, false, true,
-                        new ConnectorException().withModule(ExternalModuleError.CONNECTOR_DT));
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
 
         // Check if there are multiple evidence responses
         final String docTypeID;

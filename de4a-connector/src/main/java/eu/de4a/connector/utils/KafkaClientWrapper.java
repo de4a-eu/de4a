@@ -6,7 +6,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.helger.commons.error.level.EErrorLevel;
-import eu.de4a.connector.error.model.LogMessages;
+import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
 
 @Component
@@ -23,23 +23,23 @@ public class KafkaClientWrapper {
 
     private KafkaClientWrapper (){}
 
-    public static void sendInfo(final LogMessages logMessage, final Object...params) {
+    public static void sendInfo(final ELogMessages logMessage, final Object...params) {
         send(logMessage, EErrorLevel.INFO, params);
     }
 
-    public static void sendSuccess(final LogMessages logMessage, final Object...params) {
+    public static void sendSuccess(final ELogMessages logMessage, final Object...params) {
         send(logMessage, EErrorLevel.SUCCESS, params);
     }
 
-    public static void sendWarn(final LogMessages logMessage, final Object...params) {
+    public static void sendWarn(final ELogMessages logMessage, final Object...params) {
         send(logMessage, EErrorLevel.WARN, params);
     }
 
-    public static void sendError(final LogMessages logMessage, final Object...params) {
+    public static void sendError(final ELogMessages logMessage, final Object...params) {
         send(logMessage, EErrorLevel.ERROR, params);
     }
 
-    private static CompletableFuture<Void> send(final LogMessages logMessage, final EErrorLevel level, final Object...params) {
+    private static CompletableFuture<Void> send(final ELogMessages logMessage, final EErrorLevel level, final Object...params) {
         final String msg = MessageUtils.valueOf(logMessage.getKey(), params);
 
         ThreadContext.put(ORIGIN_TAG, logMessage.getOrigin().getLabel());

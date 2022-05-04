@@ -22,9 +22,9 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
-import eu.de4a.connector.error.model.ExternalModuleError;
-import eu.de4a.connector.error.model.FamilyErrorType;
-import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.error.model.EFamilyErrorType;
+import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.connector.error.model.MessageKeys;
 import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4AResponseDocumentHelper;
@@ -99,8 +99,8 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         String err = MessageUtils.valueOf(MessageKeys.ERROR_SERVICE_NOT_FOUND,
                 new Object[] { ((ServletWebRequest) request).getRequest().getRequestURI() });
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
-        String code = LayerError.COMMUNICATIONS.getID() + ExternalModuleError.NONE.getId()
-                + FamilyErrorType.SERVICE_NOT_FOUND.getID();
+        String code = ELayerError.COMMUNICATIONS.getID() + EExternalModuleError.NONE.getId()
+                + EFamilyErrorType.SERVICE_NOT_FOUND.getID();
         responseError.addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.NOT_FOUND);
 
@@ -112,8 +112,8 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
-        String code = LayerError.COMMUNICATIONS.getID() + ExternalModuleError.NONE.getId()
-                + FamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID();
+        String code = ELayerError.COMMUNICATIONS.getID() + EExternalModuleError.NONE.getId()
+                + EFamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID();
         responseError.addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, headers, HttpStatus.BAD_REQUEST);
     }

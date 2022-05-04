@@ -15,7 +15,7 @@ import com.helger.peppolid.IProcessIdentifier;
 import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.config.DE4AConstants;
-import eu.de4a.connector.error.model.LogMessages;
+import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.DOMUtils;
 
 @Component
@@ -55,7 +55,7 @@ public class MessageExchangeManager {
         switch (iProcessID.getValue()) {
             case DE4AConstants.MESSAGE_TYPE_REQUEST:            
                 response = this.deliverService.pushMessage(docMsg, senderID, receiverID, 
-                        LogMessages.LOG_REQ_DO);
+                        ELogMessages.LOG_REQ_DO);
                 if(HttpStatus.OK.equals(response.getStatusCode())) {
                     LOGGER.info("Message successfully sent to the Data Owner");
                 } else {
@@ -64,7 +64,7 @@ public class MessageExchangeManager {
                 break;
             case DE4AConstants.MESSAGE_TYPE_RESPONSE:
                 response = this.deliverService.pushMessage(docMsg, senderID, receiverID, 
-                        LogMessages.LOG_REQ_DE);
+                        ELogMessages.LOG_REQ_DE);
                 if(HttpStatus.OK.equals(response.getStatusCode())) {
                     LOGGER.info("Message successfully sent to the Data Evaluator");
                 } else {

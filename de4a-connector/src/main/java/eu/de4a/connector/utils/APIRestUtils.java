@@ -22,8 +22,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
-import eu.de4a.connector.error.model.FamilyErrorType;
-import eu.de4a.connector.error.model.LayerError;
+import eu.de4a.connector.error.model.EFamilyErrorType;
+import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 
 public class APIRestUtils {
@@ -37,8 +37,8 @@ public class APIRestUtils {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Failed or empty response received - {}", response);
             }
-            final ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
-                .withFamily(FamilyErrorType.ERROR_RESPONSE)
+            final ConnectorException exception = ex.withLayer(ELayerError.COMMUNICATIONS)
+                .withFamily(EFamilyErrorType.ERROR_RESPONSE)
                 .withModule(ex.getModule())
                 .withMessageArg(MessageFormat.format("Failed or empty response received {0}", response));
             if(throwException) {
@@ -60,8 +60,8 @@ public class APIRestUtils {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("There was an error on HTTP client GET connection", e);
             }
-            final ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
-                    .withFamily(FamilyErrorType.CONNECTION_ERROR)
+            final ConnectorException exception = ex.withLayer(ELayerError.COMMUNICATIONS)
+                    .withFamily(EFamilyErrorType.CONNECTION_ERROR)
                     .withMessageArg(e.getMessage());
             if(throwException) {
                 throw exception;
@@ -82,8 +82,8 @@ public class APIRestUtils {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("There was an error on HTTP client POST connection", e);
             }
-            final ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
-                .withFamily(FamilyErrorType.CONNECTION_ERROR)
+            final ConnectorException exception = ex.withLayer(ELayerError.COMMUNICATIONS)
+                .withFamily(EFamilyErrorType.CONNECTION_ERROR)
                 .withMessageArg(e.getMessage());
             if(throwException) {
                 throw exception;
@@ -98,8 +98,8 @@ public class APIRestUtils {
             final boolean objToBytes, final boolean throwException, final ConnectorException ex) {
         Object returnObj = null;
         final String errorMsg = "Object received is not valid, check the structure";
-        final ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
-                .withLayer(LayerError.INTERNAL_FAILURE);
+        final ConnectorException exception = ex.withFamily(EFamilyErrorType.CONVERSION_ERROR)
+                .withLayer(ELayerError.INTERNAL_FAILURE);
         marshaller.readExceptionCallbacks().set(e -> {
             if(!ObjectUtils.isEmpty(e.getLinkedException()))
                 ex.withMessageArg(e.getLinkedException().getMessage());
@@ -153,8 +153,8 @@ public class APIRestUtils {
             final boolean objToDoc, final boolean throwException, final ConnectorException ex) {
         Object returnObj = null;
         final String errorMsg = "Object received is not valid, check the structure";
-        final ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
-                .withFamily(FamilyErrorType.CONVERSION_ERROR);
+        final ConnectorException exception = ex.withLayer(ELayerError.INTERNAL_FAILURE)
+                .withFamily(EFamilyErrorType.CONVERSION_ERROR);
         marshaller.readExceptionCallbacks().set(e -> {
             if(!ObjectUtils.isEmpty(e.getLinkedException()))
                 ex.withMessageArg(e.getLinkedException().getMessage());

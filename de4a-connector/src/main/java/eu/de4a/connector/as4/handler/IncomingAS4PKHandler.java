@@ -9,7 +9,7 @@ import com.helger.dcng.api.me.incoming.IMEIncomingHandler;
 import com.helger.dcng.api.me.incoming.MEIncomingException;
 import com.helger.dcng.api.me.model.MEMessage;
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
-import eu.de4a.connector.error.model.LogMessages;
+import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 
 @Component
@@ -25,7 +25,7 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler {
     public void handleIncomingRequest(final MEMessage aMessage) throws MEIncomingException {
       LOGGER.debug("Incoming AS4 message...");
 
-        KafkaClientWrapper.sendInfo(LogMessages.LOG_AS4_REQ_RECEIPT);
+        KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_REQ_RECEIPT);
 
         final MessageExchangeWrapper messageWrapper = new MessageExchangeWrapper(context);
         messageWrapper.setMeMessage(aMessage);

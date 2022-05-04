@@ -9,8 +9,8 @@ import org.w3c.dom.Document;
 import eu.de4a.connector.api.service.model.EMessageServiceTypes;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.ExternalModuleError;
-import eu.de4a.connector.error.model.LogMessages;
+import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.connector.utils.KafkaClientWrapper;
@@ -36,7 +36,7 @@ public class DeliverService {
      * @return ResponseEntity with the response of the external service
      */
     public ResponseEntity<byte[]> pushMessage(Document docMsg, String senderID, String receiverID,
-            LogMessages logMessage) {        
+            ELogMessages logMessage) {        
         
         String requestID = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_REQUEST_ID, 
                 docMsg.getDocumentElement());
@@ -53,7 +53,7 @@ public class DeliverService {
         
         //Send message
         return APIRestUtils.postRestObjectWithCatching(url, DOMUtils.documentToByte(docMsg), 
-                false, new ConnectorException().withModule(ExternalModuleError.DATA_OWNER), 
+                false, new ConnectorException().withModule(EExternalModuleError.DATA_OWNER), 
                 this.restTemplate);
     }
 }
