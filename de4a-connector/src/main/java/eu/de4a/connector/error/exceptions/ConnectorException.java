@@ -2,60 +2,66 @@ package eu.de4a.connector.error.exceptions;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import org.springframework.http.HttpStatus;
 import eu.de4a.connector.error.model.ExternalModuleError;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
-@NoArgsConstructor
 public class ConnectorException extends RuntimeException {
     private static final long serialVersionUID = 1L;
-    
-    @NonNull
+
     private ExternalModuleError module;
-    @NonNull
     private FamilyErrorType family;
-    @NonNull
     private LayerError layer;
     private HttpStatus status = HttpStatus.BAD_REQUEST;
     private String code;
     private List<Object> args;
 
-    public ConnectorException withModule(ExternalModuleError module) {
+    @Nullable
+    public ExternalModuleError getModule ()
+    {
+        return module;
+    }
+
+
+    public ConnectorException withModule(final ExternalModuleError module) {
         this.module = module;
         return this;
     }
 
-    public ConnectorException withLayer(LayerError layer) {
+    public ConnectorException withLayer(final LayerError layer) {
         this.layer = layer;
         return this;
     }
 
-    public ConnectorException withFamily(FamilyErrorType family) {
+    public ConnectorException withFamily(final FamilyErrorType family) {
         this.family = family;
         return this;
     }
 
-    public ConnectorException withHttpStatus(HttpStatus status) {
+    @Nullable
+    public HttpStatus getStatus ()
+    {
+      return this.status;
+    }
+
+    public ConnectorException withHttpStatus(final HttpStatus status) {
         this.status = status;
         return this;
     }
 
-    public ConnectorException withMessageArgs(List<Object> args) {
+    @Nullable
+    public List<Object> getArgs (){
+      return args;
+    }
+
+    public ConnectorException withMessageArgs(final List<Object> args) {
         this.args = args;
         return this;
     }
 
-    public ConnectorException withMessageArg(Object arg) {
+    public ConnectorException withMessageArg(final Object arg) {
         if (args == null) {
             args = new ArrayList<>();
         }

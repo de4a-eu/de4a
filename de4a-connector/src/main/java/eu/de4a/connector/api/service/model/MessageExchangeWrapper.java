@@ -1,22 +1,25 @@
 package eu.de4a.connector.api.service.model;
 
+import javax.annotation.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
-
 import com.helger.dcng.api.me.model.MEMessage;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class MessageExchangeWrapper extends ContextRefreshedEvent {
-    private static final long serialVersionUID = 1L;
-    
-    public MessageExchangeWrapper(ApplicationContext source) {        
+  private transient MEMessage meMessage;
+
+  public MessageExchangeWrapper(final ApplicationContext source) {
         super(source);
         this.meMessage = null;
     }
-    private transient MEMessage meMessage;
-    
+
+  @Nullable
+  public MEMessage getMeMessage (){
+    return meMessage;
+  }
+
+  public void setMeMessage (@Nullable final MEMessage aMessage)
+  {
+    meMessage = aMessage;
+  }
 }

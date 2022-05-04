@@ -1,16 +1,12 @@
 package eu.de4a.connector.config;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DE4AConstants {
 	public static final String ID_MIMEPART="id";
 
 	public static final String TAG_FORWARD_EVIDENCE_REQUEST="RequestForwardEvidence";
 	public static final String TAG_EXTRACT_EVIDENCE_RESPONSE="ResponseExtractEvidence";
 	public static final String TAG_NATIONAL_EVIDENCE_RESPONSE="NationalEvidenceResponse";
-	public static final String XPATH_ABSOLUTE_PARAM="//*[local-name()='%s']";	
+	public static final String XPATH_ABSOLUTE_PARAM="//*[local-name()='%s']";
 	public static final String XPATH_EVIDENCE_REQUEST="//*[local-name()='RequestTransferEvidence']";
 	public static final String XPATH_REQUEST_ID="//*[local-name()='RequestId']/text()";
 	public static final String XPATH_EVIDENCE_DATA="//*[local-name()='EvidenceData']";
@@ -38,7 +34,7 @@ public class DE4AConstants {
 	public static final String XPATH_EIDAS_NAME_NODE="//*[local-name()='PersonGivenName']";
 	public static final String XPATH_EIDAS_FULLNAME_NODE="//*[local-name()='PersonBirthName']";
 	public static final String XPATH_EIDAS_BIRTHDATE_NODE="//*[local-name()='PersonBirthDate']";
-	
+
 	public static final String NAMESPACE_USI = "http://www.de4a.eu/2020/data/requestor/pattern/usi";
 
 	//Processes identifiers
@@ -55,4 +51,5 @@ public class DE4AConstants {
 	public static final String CANONICAL_EVIDENCE_TYPE = "CanonicalEvidenceType";
 	public static final String MULTI_ITEM_TYPE = "MultiItem";
 
+	private DE4AConstants (){}
 }

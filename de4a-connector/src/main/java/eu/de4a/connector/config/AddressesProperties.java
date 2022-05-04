@@ -1,12 +1,9 @@
 package eu.de4a.connector.config;
 
 import java.util.Map;
-
+import javax.annotation.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Mapping class for the external services URLs </br>
@@ -15,18 +12,26 @@ import lombok.Setter;
  */
 @Component
 @ConfigurationProperties(prefix = "addresses")
-@Getter
-@Setter
 public class AddressesProperties {
     private Map<String, Map<String, String>> dataOwners;
     private Map<String, Map<String, String>> dataEvaluators;
-    
-    public String getDataOwnerByType(final String doID, 
+
+    @Nullable
+    public Map<String, Map<String, String>> getDataOwners (){
+      return dataOwners;
+    }
+
+    public String getDataOwnerByType(final String doID,
             final String endpointType) {
         return this.dataOwners.get(doID).get(endpointType);
     }
-    
-    public String getDataEvaluatorByType(final String deID, 
+
+    @Nullable
+    public Map<String, Map<String, String>> getDataEvaluators (){
+      return dataEvaluators;
+    }
+
+    public String getDataEvaluatorByType(final String deID,
             final String endpointType) {
         return this.dataEvaluators.get(deID).get(endpointType);
     }

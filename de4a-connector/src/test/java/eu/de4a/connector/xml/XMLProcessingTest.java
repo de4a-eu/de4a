@@ -12,6 +12,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,11 +23,10 @@ import eu.de4a.connector.error.exceptions.MessageException;
 import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.iem.jaxb.t41.uc1.v2021_04_13.HigherEducationDiplomaType;
 import eu.de4a.iem.xml.de4a.t41.v2021_04_13.DE4AT41Marshaller;
-import lombok.extern.log4j.Log4j2;
 
-@Log4j2
 @RunWith(SpringRunner.class)
 public class XMLProcessingTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(XMLProcessingTest.class);
     
     @Test
     public void testRegRepWrapMessage() {
@@ -38,7 +39,7 @@ public class XMLProcessingTest {
             requestWrapper = RegRepTransformer.wrapMessage(doc.getDocumentElement(), "request", true);
             String newDoc = DOMUtils.documentToString(requestWrapper.getOwnerDocument());
             
-            log.info(newDoc);            
+            LOGGER.info(newDoc);            
             Assert.assertNotNull(newDoc);
         } catch (MessageException | IOException e) {
             fail();

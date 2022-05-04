@@ -1,6 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>eu.de4a</groupId>
@@ -12,8 +12,9 @@
     <name>de4a-connector</name>
     <version>0.2.0-SNAPSHOT</version>
     <url>http://maven.apache.org</url>
+    
     <dependencies>
-        <!-- DE4A GitHub commons project -->
+        <!-- DE4A commons -->
         <dependency>
             <groupId>eu.de4a</groupId>
             <artifactId>de4a-iem</artifactId>
@@ -23,13 +24,27 @@
             <artifactId>de4a-core-schemas</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.de4a.ial</groupId>
-            <artifactId>ial-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>eu.de4a</groupId>
             <artifactId>de4a-kafka-client</artifactId>
         </dependency>
+        
+        <!-- DE4A IAL -->
+        <dependency>
+            <groupId>eu.de4a.ial</groupId>
+            <artifactId>ial-api</artifactId>
+        </dependency>
+
+        <!-- DE4A Connector basis -->
+        <dependency>
+          <groupId>com.helger.dcng</groupId>
+          <artifactId>dcng-web-api</artifactId>
+        </dependency>
+        
+        <dependency>
+          <groupId>com.helger.photon</groupId>
+          <artifactId>ph-oton-core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
@@ -38,30 +53,10 @@
             <groupId>com.sun.xml.messaging.saaj</groupId>
             <artifactId>saaj-impl</artifactId>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
         <!-- Spring dependencies -->
         <dependency>
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>taglibs</groupId>
-            <artifactId>standard</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -79,6 +74,7 @@
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
+
         <!-- Log4j2 dependencies -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -92,6 +88,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -106,56 +103,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-boot-starter</artifactId>
             <version>${springfox-version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>com.helger.dcng</groupId>
-          <artifactId>dcng-api</artifactId>
-          <version>0.2.2</version>
-        </dependency>
-        <dependency>
-          <groupId>com.helger.dcng</groupId>
-          <artifactId>dcng-phase4</artifactId>
-          <version>0.2.2</version>
-        </dependency>
-        <dependency>
-          <groupId>com.helger.dcng</groupId>
-          <artifactId>dcng-core</artifactId>
-          <version>0.2.2</version>
-        </dependency>
-        <dependency>
-          <groupId>com.helger.dcng</groupId>
-          <artifactId>dcng-web-api</artifactId>
-          <version>0.2.2</version>
-        </dependency>
-        <dependency>
-          <groupId>com.helger.photon</groupId>
-          <artifactId>ph-oton-core</artifactId>
-        </dependency>
         
-        <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -187,12 +141,41 @@
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>taglibs</groupId>
+            <artifactId>standard</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
+    
     <build>
         <plugins>
             <plugin>
@@ -209,11 +192,6 @@
                     </execution>
                 </executions>
             </plugin>    
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.0.0</version>
-            </plugin>            
         </plugins>
         <finalName>de4a-connector</finalName>
     </build>

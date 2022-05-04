@@ -6,13 +6,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,11 +25,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import com.helger.dcng.webapi.as4.ApiPostLookendAndSend;
 import com.helger.json.IJsonObject;
 import com.helger.json.JsonObject;
-
 import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.api.controller.EventController;
 import eu.de4a.connector.api.controller.RequestController;
@@ -42,15 +40,13 @@ import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.EventNotificationType;
 import eu.de4a.iem.core.jaxb.common.RedirectUserType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceUSIType;
-import lombok.extern.log4j.Log4j2;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @SpringBootTest(classes = {TestConf.class, AddressesProperties.class, StaticContextAccessor.class})
-@Log4j2
-@SuppressWarnings("unused")
 public class TestConnectorAPIs {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestConnectorAPIs.class);
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,7 +68,7 @@ public class TestConnectorAPIs {
         RequestExtractMultiEvidenceUSIType req = MessagesHelper.createRequestExtractMultiEvidenceUSI(2);
         var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller();
         
-        log.debug(marshaller.formatted().getAsString(req));
+        LOGGER.debug(marshaller.formatted().getAsString(req));
         byte[] bReq = marshaller.getAsBytes(req);
         
         int status = postCallMockedAS4API(bReq, "/request/usi/");
@@ -87,7 +83,7 @@ public class TestConnectorAPIs {
         RedirectUserType req = MessagesHelper.createRedirectUser();
         var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller();
         
-        log.debug(marshaller.formatted().getAsString(req));
+        LOGGER.debug(marshaller.formatted().getAsString(req));
         byte[] bReq = marshaller.getAsBytes(req);
         
         int status = postCallMockedAS4API(bReq, "/response/usi/redirectUser/");
@@ -101,7 +97,7 @@ public class TestConnectorAPIs {
         EventNotificationType req = MessagesHelper.createRequestEventNotification(2);
         var marshaller = DE4ACoreMarshaller.dtEventNotificationMarshaller();
         
-        log.debug(marshaller.formatted().getAsString(req));
+        LOGGER.debug(marshaller.formatted().getAsString(req));
         byte[] bReq = marshaller.getAsBytes(req);
         
         int status = postCallMockedAS4API(bReq, "/event/notification/");
@@ -118,7 +114,7 @@ public class TestConnectorAPIs {
             MvcResult result = createCall(httpReq, status().isOk());    
             assertNotNull(result);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             fail();
         }
         
@@ -146,10 +142,10 @@ public class TestConnectorAPIs {
             httpReq.contentType(MediaType.APPLICATION_XML_VALUE).content(bReq);
             
             MvcResult result = createCall(httpReq, status().isOk());
-            log.info(result.getResponse().getContentAsString());
+            LOGGER.info(result.getResponse().getContentAsString());
             return result.getResponse().getStatus();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             fail();
         }
         return HttpStatus.INTERNAL_SERVER_ERROR.value();

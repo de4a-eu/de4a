@@ -6,10 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Objects;
-
 import javax.annotation.Nonnull;
-
 import org.apache.http.client.utils.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,51 +20,47 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.FamilyErrorType;
 import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
-@Log4j2
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class APIRestUtils {
-    
-    
-    public static ResponseEntity<byte[]> checkResponse(ResponseEntity<byte[]> response, ConnectorException ex, 
-            boolean throwException) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(APIRestUtils.class);
+
+    private APIRestUtils (){}
+
+    public static ResponseEntity<byte[]> checkResponse(final ResponseEntity<byte[]> response, final ConnectorException ex,
+            final boolean throwException) {
         if(response == null || !HttpStatus.OK.equals(response.getStatusCode())) {
-            if(log.isDebugEnabled()) {
-                log.debug("Failed or empty response received - {}", response);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Failed or empty response received - {}", response);
             }
-            ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
-                .withFamily(FamilyErrorType.ERROR_RESPONSE) 
+            final ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
+                .withFamily(FamilyErrorType.ERROR_RESPONSE)
                 .withModule(ex.getModule())
                 .withMessageArg(MessageFormat.format("Failed or empty response received {0}", response));
             if(throwException) {
                 throw exception;
             }
-            return new ResponseEntity<>((byte[]) ConnectorExceptionHandler.getResponseError(exception, true), 
+            return new ResponseEntity<>((byte[]) ConnectorExceptionHandler.getResponseError(exception, true),
                     HttpStatus.BAD_REQUEST);
         }
         return response;
     }
-    
-    public static byte[] getRestObjectWithCatching(String url, boolean throwException,
-            ConnectorException ex, RestTemplate restTemplate) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8)); 
+
+    public static byte[] getRestObjectWithCatching(final String url, final boolean throwException,
+            final ConnectorException ex, final RestTemplate restTemplate) {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
         try {
             return restTemplate.getForObject(url, byte[].class);
-        } catch(RestClientException e) {
-            if(log.isDebugEnabled()) {
-                log.debug("There was an error on HTTP client GET connection", e);
+        } catch(final RestClientException e) {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("There was an error on HTTP client GET connection", e);
             }
-            ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
+            final ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
                     .withFamily(FamilyErrorType.CONNECTION_ERROR)
                     .withMessageArg(e.getMessage());
             if(throwException) {
@@ -73,36 +69,36 @@ public class APIRestUtils {
             return (byte[]) ConnectorExceptionHandler.getResponseError(exception, true);
         }
     }
-    
-    public static ResponseEntity<byte[]> postRestObjectWithCatching(String url, byte[] request, boolean throwException,
-            ConnectorException ex, RestTemplate restTemplate) {
-        HttpHeaders headers = new HttpHeaders();
+
+    public static ResponseEntity<byte[]> postRestObjectWithCatching(final String url, final byte[] request, final boolean throwException,
+            final ConnectorException ex, final RestTemplate restTemplate) {
+        final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
         ResponseEntity<byte[]> response;
         try {
             response = restTemplate.postForEntity(url,
                     new HttpEntity<>(request, headers), byte[].class);
-        } catch(RestClientException e) {
-            if(log.isDebugEnabled()) {
-                log.debug("There was an error on HTTP client POST connection", e);
+        } catch(final RestClientException e) {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("There was an error on HTTP client POST connection", e);
             }
-            ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
+            final ConnectorException exception = ex.withLayer(LayerError.COMMUNICATIONS)
                 .withFamily(FamilyErrorType.CONNECTION_ERROR)
                 .withMessageArg(e.getMessage());
             if(throwException) {
                 throw exception;
             }
-            return new ResponseEntity<>((byte[]) ConnectorExceptionHandler.getResponseError(exception, true), 
+            return new ResponseEntity<>((byte[]) ConnectorExceptionHandler.getResponseError(exception, true),
                     HttpStatus.BAD_REQUEST);
         }
         return checkResponse(response, ex, throwException);
     }
-    
-    public static <T> Object conversionBytesWithCatching(DE4ACoreMarshaller<T> marshaller, Object obj, 
-            boolean objToBytes, boolean throwException, ConnectorException ex) {
+
+    public static <T> Object conversionBytesWithCatching(final DE4ACoreMarshaller<T> marshaller, final Object obj,
+            final boolean objToBytes, final boolean throwException, final ConnectorException ex) {
         Object returnObj = null;
-        String errorMsg = "Object received is not valid, check the structure";
-        ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
+        final String errorMsg = "Object received is not valid, check the structure";
+        final ConnectorException exception = ex.withFamily(FamilyErrorType.CONVERSION_ERROR)
                 .withLayer(LayerError.INTERNAL_FAILURE);
         marshaller.readExceptionCallbacks().set(e -> {
             if(!ObjectUtils.isEmpty(e.getLinkedException()))
@@ -110,17 +106,17 @@ public class APIRestUtils {
         });
         try {
             returnObj = getObjectTypeFromObject(marshaller, obj, objToBytes);
-        } catch(Exception e) {
-            if(log.isDebugEnabled()) {
-                log.debug(errorMsg, e);
-            }            
+        } catch(final Exception e) {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug(errorMsg, e);
+            }
             if(throwException) {
                 throw exception.withMessageArg(e.getMessage());
             }
             return ConnectorExceptionHandler
                     .getResponseError(exception.withMessageArg(e.getMessage()), objToBytes);
         }
-        if(returnObj == null) {            
+        if(returnObj == null) {
             exception.withMessageArg(ex.getArgs());
             if(throwException) {
                 throw exception;
@@ -129,10 +125,10 @@ public class APIRestUtils {
         }
         return returnObj;
     }
-    
+
     @SuppressWarnings("unchecked")
-    private static <T> Object getObjectTypeFromObject(DE4ACoreMarshaller<T> marshaller, Object obj, 
-            boolean objToBytes) {
+    private static <T> Object getObjectTypeFromObject(final DE4ACoreMarshaller<T> marshaller, final Object obj,
+            final boolean objToBytes) {
         Object retObj;
         if(objToBytes) {
             retObj = marshaller.getAsBytes((T) obj);
@@ -151,13 +147,13 @@ public class APIRestUtils {
         }
         return retObj;
     }
-    
+
     @SuppressWarnings("unchecked")
-    public static <T> Object conversionDocWithCatching(DE4ACoreMarshaller<T> marshaller, Object obj, 
-            boolean objToDoc, boolean throwException, ConnectorException ex) {
+    public static <T> Object conversionDocWithCatching(final DE4ACoreMarshaller<T> marshaller, final Object obj,
+            final boolean objToDoc, final boolean throwException, final ConnectorException ex) {
         Object returnObj = null;
-        String errorMsg = "Object received is not valid, check the structure";
-        ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
+        final String errorMsg = "Object received is not valid, check the structure";
+        final ConnectorException exception = ex.withLayer(LayerError.INTERNAL_FAILURE)
                 .withFamily(FamilyErrorType.CONVERSION_ERROR);
         marshaller.readExceptionCallbacks().set(e -> {
             if(!ObjectUtils.isEmpty(e.getLinkedException()))
@@ -169,10 +165,10 @@ public class APIRestUtils {
             } else {
                 returnObj = marshaller.read((Node) obj);
             }
-        } catch(Exception e) {
-            if(log.isDebugEnabled()) {
-                log.debug(errorMsg, e);
-            }            
+        } catch(final Exception e) {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug(errorMsg, e);
+            }
             if(throwException) {
                 throw exception.withMessageArg(e.getMessage());
             }
@@ -190,19 +186,19 @@ public class APIRestUtils {
         return returnObj;
     }
 
-    public static URIBuilder buildURI(String endpoint, @Nonnull String[] paths, String[] params, 
-            String[] values) {
-        
-        URIBuilder uriBuilder;      
+    public static URIBuilder buildURI(final String endpoint, @Nonnull final String[] paths, final String[] params,
+            final String[] values) {
+
+        URIBuilder uriBuilder;
         try {
             uriBuilder = new URIBuilder(endpoint);
-        
-            if(uriBuilder.toString().endsWith("/") && paths.length > 0) 
+
+            if(uriBuilder.toString().endsWith("/") && paths.length > 0)
                 uriBuilder.setPath(uriBuilder.getPath().substring(0, uriBuilder.getPath().length() - 1));
-            
+
             Arrays.asList(paths).stream()
                 .forEach(x -> uriBuilder.setPath(Objects.toString(uriBuilder.getPath(), "") + "/" + x));
-            
+
             if(params != null && values != null) {
                 if(params.length == values.length) {
                     for(int i = 0; i < params.length; i++) {
@@ -211,9 +207,9 @@ public class APIRestUtils {
                 } else throw new IllegalArgumentException("URIBuilder - Params and values don't matches");
             }
         } catch (NullPointerException | URISyntaxException e) {
-            log.error("There was an error creating URI", e);
+            LOGGER.error("There was an error creating URI", e);
             return new URIBuilder();
-        }        
+        }
         return uriBuilder;
     }
 }

@@ -29,7 +29,7 @@ import eu.de4a.connector.error.model.LayerError;
 import eu.de4a.connector.utils.DOMUtils;
 
 public final class RegRepTransformer {
-	private static final Logger log = LoggerFactory.getLogger(RegRepTransformer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegRepTransformer.class);
 	private static final String REQUEST_TEMPLATE = "templates/regrep_req.xsl";
 	private static final String RESPONSE_TEMPLATE = "templates/regrep_resp.xsl";
 	private static final String REQUEST_ID = "requestId";
@@ -54,7 +54,7 @@ public final class RegRepTransformer {
 
 		try (OutputStream xmlFile = new ByteArrayOutputStream()) {
 			String template = (isRequest ? REQUEST_TEMPLATE : RESPONSE_TEMPLATE);
-			log.debug("Wrapping canonical request as RegRep message");
+			LOGGER.debug("Wrapping canonical request as RegRep message");
 			TransformerFactory factory = TransformerFactory.newInstance();
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -91,7 +91,7 @@ public final class RegRepTransformer {
 			return docFinal.getDocumentElement();
 		} catch (Exception e) {
 			String error = "Error building RegRep wrapped message";
-			log.error(error, e);
+			LOGGER.error(error, e);
 			throw new ConnectorException()
 			    .withFamily(FamilyErrorType.CONVERSION_ERROR)
 			    .withLayer(LayerError.INTERNAL_FAILURE)

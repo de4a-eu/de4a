@@ -3,9 +3,9 @@ package eu.de4a.connector.api.controller;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.UnmarshalException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,7 +20,6 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.ExternalModuleError;
@@ -30,15 +29,14 @@ import eu.de4a.connector.error.model.MessageKeys;
 import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4AResponseDocumentHelper;
 import eu.de4a.iem.core.jaxb.common.ResponseErrorType;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Controller for handling type errors for more concise messages
  *
  */
 @ControllerAdvice
-@Log4j2
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomRestExceptionHandler.class);
     
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
@@ -49,7 +47,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = { ConnectorException.class })
     protected ResponseEntity<byte[]> handleConnectorException(ConnectorException ex, WebRequest request) {
-        log.error(ex);
+        LOGGER.error("handleConnectorException", ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
         return new ResponseEntity<>((byte[]) ConnectorExceptionHandler.getResponseError(ex, true), 
@@ -58,7 +56,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = { Exception.class })
     protected ResponseEntity<byte[]> handleExceptionUnknown(Exception ex, WebRequest request) {
-        log.error(ex);
+        LOGGER.error("handleExceptionUnknown", ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
         return new ResponseEntity<>(ConnectorExceptionHandler.getGenericResponseError(ex), 
@@ -95,7 +93,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
-        log.warn("REST service requested not found");
+        LOGGER.warn("REST service requested not found");
 
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
         String err = MessageUtils.valueOf(MessageKeys.ERROR_SERVICE_NOT_FOUND,
@@ -109,7 +107,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private ResponseEntity<Object> buildBadRequestError(String err) {
-        log.warn("REST Client BAD REQUEST-> {}", err);
+        LOGGER.warn("REST Client BAD REQUEST-> {}", err);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
