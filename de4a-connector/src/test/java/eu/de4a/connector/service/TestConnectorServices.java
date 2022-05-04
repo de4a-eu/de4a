@@ -5,11 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +27,6 @@ import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
-
 import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.config.AddressesProperties;
@@ -69,17 +66,17 @@ public class TestConnectorServices {
                 .andRespond(withStatus(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_XML)
                 .body(""));
-            
+
             // Using test request
-            Resource rReq = this.resourceLoader.getResource("classpath:xml/request-usi.xml");
-            Document dReq = DOMUtils.byteToDocument(rReq.getInputStream().readAllBytes());
-            
+            final Resource rReq = this.resourceLoader.getResource("classpath:xml/request-usi.xml");
+            final Document dReq = DOMUtils.byteToDocument(rReq.getInputStream().readAllBytes());
+
             // Calling the tested method
-            ResponseEntity<byte[]> response = this.deliverService.pushMessage(dReq, "iso6523-actorid-upis::9999:lu000000025", 
+            final ResponseEntity<byte[]> response = this.deliverService.pushMessage(dReq, "iso6523-actorid-upis::9999:lu000000025",
                     "iso6523-actorid-upis::9999:test-sgad", ELogMessages.LOG_REQ_DO);
-        
+
             assertEquals(HttpStatus.OK, response.getStatusCode());
-            
+
         } catch (URISyntaxException | MessageException | IOException e) {
             fail();
         }

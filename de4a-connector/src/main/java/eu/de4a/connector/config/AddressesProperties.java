@@ -21,6 +21,11 @@ public class AddressesProperties {
       return dataOwners;
     }
 
+
+    public void setDataOwners (final Map<String, Map<String, String>> a){
+      dataOwners = a;
+    }
+
     public String getDataOwnerByType(final String doID,
             final String endpointType) {
         return this.dataOwners.get(doID).get(endpointType);
@@ -29,6 +34,10 @@ public class AddressesProperties {
     @Nullable
     public Map<String, Map<String, String>> getDataEvaluators (){
       return dataEvaluators;
+    }
+
+    public void setDataEvaluators (final Map<String, Map<String, String>> a){
+      dataEvaluators = a;
     }
 
     public String getDataEvaluatorByType(final String deID,

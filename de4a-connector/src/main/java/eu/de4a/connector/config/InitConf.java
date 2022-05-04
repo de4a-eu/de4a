@@ -5,8 +5,8 @@ import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
 import org.apache.logging.log4j.ThreadContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,11 +25,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 import com.fasterxml.classmate.TypeResolver;
 import com.helger.commons.thirdparty.ELicense;
-import com.helger.dcng.core.DcngInit;
 import com.helger.httpclient.HttpClientSettings;
-import com.helger.web.scope.mgr.WebScopeManager;
-import eu.de4a.connector.as4.handler.IncomingAS4PKHandler;
-import eu.de4a.ial.api.jaxb.RequestLookupRoutingInformationType;
+import eu.de4a.connector.as4.servlet.AS4ServletListener;
 import eu.de4a.iem.core.jaxb.common.EventNotificationType;
 import eu.de4a.iem.core.jaxb.common.RedirectUserType;
 import eu.de4a.iem.core.jaxb.common.RequestEventSubscriptionType;
@@ -39,6 +36,7 @@ import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceUSIType;
 import eu.de4a.iem.core.jaxb.common.ResponseErrorType;
 import eu.de4a.iem.core.jaxb.common.ResponseEventSubscriptionType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
+import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.kafkaclient.DE4AKafkaSettings;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -103,22 +101,22 @@ public class InitConf implements ServletContextAware {
         return new RestTemplate();
     }
 
+
+  private final AS4ServletListener m_aListener = new AS4ServletListener ();
+
 	/**
 	 * Basic initialization of DCNG
 	 */
-	@Autowired IncomingAS4PKHandler handler;
 	@PostConstruct
-    private void configureAS4() {
-        // Create scopes
-        WebScopeManager.onGlobalBegin (this.servletContext);
-        DcngInit.initGlobally (this.servletContext, handler);
-    }
+  private void configureAS4() {
+	  m_aListener.contextInitialized(new ServletContextEvent(servletContext));
+  }
 
 
 	@PreDestroy
-    public void shutDownAS4() {
-        DcngInit.shutdownGlobally(this.servletContext);
-    }
+  public void shutDownAS4() {
+    m_aListener.contextDestroyed(new ServletContextEvent(servletContext));
+  }
 
 	@Bean
 	public ViewResolver viewResolver() {
@@ -137,9 +135,10 @@ public class InitConf implements ServletContextAware {
 		if (locale != null && !locale.trim().isEmpty())
 			slr.setDefaultLocale(new Locale(locale));
 		else
-			slr.setDefaultLocale(Locale.ENGLISH);
+			slr.setDefaultLocale(Locale.US);
 		return slr;
 	}
+
 
 	@Bean
 	CharacterEncodingFilter characterEncodingFilter() {
@@ -166,7 +165,7 @@ public class InitConf implements ServletContextAware {
         DE4AKafkaSettings.setKafkaEnabled(kafkaEnabled);
         DE4AKafkaSettings.setKafkaHttp(kafkaHttp);
         if(kafkaHttp) {
-            DE4AKafkaSettings.setHttpClientSetting(this.httpSettings);
+            DE4AKafkaSettings.setHttpClientSettings(this.httpSettings);
         }
         DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);
         DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
@@ -182,7 +181,6 @@ public class InitConf implements ServletContextAware {
 		return eventMulticaster;
 	}
 
-	@Override
     public void setServletContext(final ServletContext servletContext) {
         this.servletContext = servletContext;
     }

@@ -2,6 +2,7 @@ package eu.de4a.connector.as4.servlet;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
+import javax.servlet.annotation.WebListener;
 import com.helger.dcng.api.DcngConfig;
 import com.helger.dcng.core.DcngInit;
 import com.helger.dcng.webapi.DcngApiInit;
@@ -11,6 +12,7 @@ import com.helger.photon.audit.DoNothingAuditor;
 import com.helger.photon.core.servlet.WebAppListener;
 import eu.de4a.connector.as4.handler.IncomingAS4PKHandler;
 
+@WebListener
 public class AS4ServletListener extends WebAppListener {
 
     @Override

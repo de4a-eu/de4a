@@ -41,6 +41,16 @@
         <dependency>
           <groupId>com.helger.dcng</groupId>
           <artifactId>dcng-web-api</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>xml-apis</groupId>
+              <artifactId>xml-apis</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>com.helger.dcng</groupId>
+          <artifactId>dcng-phase4</artifactId>
         </dependency>
         
         <dependency>
@@ -101,6 +111,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.helger.photon</groupId>
+            <artifactId>ph-oton-jetty</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -114,6 +129,21 @@
     </dependencies>
     
     <build>
+      <resources>
+        <resource>
+          <directory>${basedir}/src/main/resources</directory>
+          <targetPath>${project.build.directory}/classes</targetPath>
+        </resource>
+        <resource>
+          <directory>${basedir}/src/main/webapp</directory>
+          <targetPath>${project.build.directory}/webapp-classes</targetPath>
+        </resource>
+        <resource>
+          <directory>${basedir}/src/test/resources</directory>
+          <targetPath>${project.build.directory}/test-classes</targetPath>
+        </resource>
+      </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
