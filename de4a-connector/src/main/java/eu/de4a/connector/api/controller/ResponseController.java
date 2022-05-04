@@ -48,10 +48,7 @@ public class ResponseController implements ResponseAPI {
                         new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(redirectUserMsg.getDataEvaluator().getAgentUrn(),
-                redirectUserMsg.getDataOwner().getAgentUrn())
-                    .withContentID(redirectUserMsg.getClass().getSimpleName())
-                    .withDocTypeID(redirectUserMsg.getCanonicalEvidenceTypeId())
-                    .withProcessID(DE4AConstants.MESSAGE_TYPE_RESPONSE);
+                redirectUserMsg.getDataOwner().getAgentUrn(), redirectUserMsg.getCanonicalEvidenceTypeId(), DE4AConstants.MESSAGE_TYPE_RESPONSE);
 
         final boolean isSent = this.apiManager.processIncomingMessage(redirectUserMsg, messageDTO, redirectUserMsg.getRequestId(),
                 "Redirect User", marshaller);
@@ -83,10 +80,7 @@ public class ResponseController implements ResponseAPI {
         }
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(responseObj.getDataOwner().getAgentUrn(),
-                responseObj.getDataEvaluator().getAgentUrn())
-                    .withContentID(responseObj.getClass().getSimpleName())
-                    .withDocTypeID(docTypeID)
-                    .withProcessID(DE4AConstants.MESSAGE_TYPE_RESPONSE);
+                responseObj.getDataEvaluator().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_RESPONSE);
 
         final boolean isSent = this.apiManager.processIncomingMessage(responseObj, messageDTO, responseObj.getRequestId(),
                 "Response Evidence", marshaller);
@@ -118,10 +112,7 @@ public class ResponseController implements ResponseAPI {
         }
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(responseObj.getDataEvaluator().getAgentUrn(),
-                responseObj.getDataOwner().getAgentUrn())
-                    .withContentID(responseObj.getClass().getSimpleName())
-                    .withDocTypeID(docTypeID)
-                    .withProcessID(DE4AConstants.MESSAGE_TYPE_RESPONSE);
+                responseObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_RESPONSE);
 
         final boolean isSent = this.apiManager.processIncomingMessage(responseObj, messageDTO, responseObj.getRequestId(),
                 "Response Evidence", marshaller);

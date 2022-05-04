@@ -11,14 +11,18 @@ import com.helger.commons.annotation.Nonempty;
 public class AS4MessageDTO {
     private final String senderID;
     private final String receiverID;
+    private final String docTypeID;
+    private final String processID;
     private Document message;
-    private String docTypeID;
-    private String processID;
-    private String contentID;
 
-    public AS4MessageDTO (@Nonnull @Nonempty final String sSenderID, @Nonnull @Nonempty final String sReceiverID) {
+    public AS4MessageDTO (@Nonnull @Nonempty final String sSenderID,
+        @Nonnull @Nonempty final String sReceiverID,
+        @Nonnull @Nonempty final String sDocTypeID,
+        @Nonnull @Nonempty final String sProcessID) {
       senderID = sSenderID;
       receiverID = sReceiverID;
+      this.docTypeID = sDocTypeID;
+      this.processID = sProcessID;
     }
 
     @Nonnull @Nonempty
@@ -31,6 +35,16 @@ public class AS4MessageDTO {
       return receiverID;
     }
 
+    @Nonnull @Nonempty
+    public String getDocTypeID (){
+      return docTypeID;
+    }
+
+    @Nonnull @Nonempty
+    public String getProcessID (){
+      return processID;
+    }
+
     public Document getMessage ()
     {
       return message;
@@ -38,34 +52,6 @@ public class AS4MessageDTO {
 
     public AS4MessageDTO withMessage(final Document message) {
         this.message = message;
-        return this;
-    }
-
-    public String getDocTypeId (){
-      return docTypeID;
-    }
-
-    public AS4MessageDTO withDocTypeID(final String docTypeID) {
-        this.docTypeID = docTypeID;
-        return this;
-    }
-
-    public String getProcessID (){
-      return processID;
-    }
-
-    public AS4MessageDTO withProcessID(final String processID) {
-        this.processID = processID;
-        return this;
-    }
-
-    public String getContentID ()
-    {
-      return contentID;
-    }
-
-    public AS4MessageDTO withContentID(final String contentID) {
-        this.contentID = contentID;
         return this;
     }
 }

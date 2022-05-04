@@ -39,8 +39,8 @@ public class KafkaClientWrapper {
         send(logMessage, EErrorLevel.ERROR, params);
     }
 
-    private static CompletableFuture<Void> send(final ELogMessages logMessage, final EErrorLevel level, final Object...params) {
-        final String msg = MessageUtils.valueOf(logMessage.getKey(), params);
+    private static void send(final ELogMessages logMessage, final EErrorLevel level, final Object...params) {
+        final String msg = MessageUtils.format(logMessage.getKey(), params);
 
         ThreadContext.put(ORIGIN_TAG, logMessage.getOrigin().getLabel());
         ThreadContext.put(DESTINY_TAG, logMessage.getDestiny().getLabel());
@@ -48,12 +48,11 @@ public class KafkaClientWrapper {
         ThreadContext.put(METRICS_ENABLED_TAG, "true");
         ThreadContext.put(LOG_CODE_TAG, logMessage.getLogCode());
 
-        return CompletableFuture.runAsync(() -> DE4AKafkaClient.send(level, msg))
+        CompletableFuture.runAsync(() -> DE4AKafkaClient.send(level, msg))
             .thenRun(() -> {
                 ThreadContext.clearAll();
                 ThreadContext.put(METRICS_ENABLED_TAG, "false");
             });
-
     }
 
 }

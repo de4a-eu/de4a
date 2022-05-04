@@ -10,7 +10,7 @@
   </parent>
   <groupId>eu.de4a</groupId>
   <artifactId>de4a-parent-pom</artifactId>
-  <version>1.0.0</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>de4a-parent-pom</name>
   <description>Base POM to build the DE4A projects</description>
@@ -40,34 +40,22 @@
   <properties>
     <maven.compiler.release>11</maven.compiler.release>
 
-    <axiom.version>1.2.22</axiom.version>
-    <commons.io.version>2.7</commons.io.version>
-    <commons.fileupload.version>1.4</commons.fileupload.version>
-    <httpclient.version>4.5.12</httpclient.version>
-    <httpmime.version>4.3.1</httpmime.version>
-    <jaxb.version>2.3.3</jaxb.version>
     <jackson.databind.version>2.13.2</jackson.databind.version>
     <jackson.datatype.version>2.12.5</jackson.datatype.version>
     <jacoco.version>0.8.6</jacoco.version>
-    <jakarta.activation.api>1.2.2</jakarta.activation.api>
-    <jakarta.xml.bind.api.version>2.3.3</jakarta.xml.bind.api.version>
     <javax.servlet.api.version>3.0.1</javax.servlet.api.version>
     <javax.validation.api>2.0.1.Final</javax.validation.api>
     <jaxb.api.version>2.3.1</jaxb.api.version>
     <jaxb.core.version>2.3.0.1</jaxb.core.version>
     <jaxb2.maven.plugin>2.3.1</jaxb2.maven.plugin>
-    <jaxen.version>1.2.0</jaxen.version>
     <jstl.version>1.2</jstl.version>
     <log4j2.version>2.17.2</log4j2.version>
     <logback.version>1.2.3</logback.version>
     <slf4j.version>1.7.30</slf4j.version>
     <spring.version>5.3.5</spring.version>
     <spring.ws.version>3.0.10.RELEASE</spring.ws.version>
-    <spring.boot.version>2.4.5</spring.boot.version>
+    <spring.boot.version>2.6.7</spring.boot.version>
     <springfox-version>3.0.0</springfox-version>
-    <taglibs.standard.version>1.1.2</taglibs.standard.version>
-    <saaj.impl.version>1.5.2</saaj.impl.version>
-    <xmlsec.version>2.2.3</xmlsec.version>
 
     <!-- Sonar/Jacoco -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -102,17 +90,6 @@
         <version>0.2.2</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>${jakarta.xml.bind.api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.xml.bind</groupId>
-        <artifactId>jaxb-impl</artifactId>
-        <version>${jaxb.version}</version>
       </dependency>
 
       <!-- Log4j2 dependencies -->
@@ -159,36 +136,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpmime</artifactId>
-        <version>${httpmime.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-fileupload</groupId>
-        <artifactId>commons-fileupload</artifactId>
-        <version>${commons.fileupload.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${commons.io.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.santuario</groupId>
-        <artifactId>xmlsec</artifactId>
-        <version>${xmlsec.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>jstl</artifactId>
-        <version>${jstl.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>taglibs</groupId>
-        <artifactId>standard</artifactId>
-        <version>${taglibs.standard.version}</version>
-      </dependency>
-      <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${jackson.databind.version}</version>
@@ -207,26 +154,6 @@
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>${jackson.databind.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.joschi.jackson</groupId>
-        <artifactId>jackson-datatype-threetenbp</artifactId>
-        <version>${jackson.datatype.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.ws.commons.axiom</groupId>
-        <artifactId>axiom-impl</artifactId>
-        <version>${axiom.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>jaxen</groupId>
-        <artifactId>jaxen</artifactId>
-        <version>${jaxen.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.ws.commons.axiom</groupId>
-        <artifactId>axiom-dom</artifactId>
-        <version>${axiom.version}</version>
       </dependency>
       <dependency>
         <groupId>javax.validation</groupId>

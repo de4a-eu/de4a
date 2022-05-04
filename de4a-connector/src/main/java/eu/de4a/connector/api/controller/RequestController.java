@@ -60,10 +60,7 @@ public class RequestController implements RequestAPI {
         }
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(requestObj.getDataEvaluator().getAgentUrn(),
-                requestObj.getDataOwner().getAgentUrn())
-                    .withContentID(requestObj.getClass().getSimpleName())
-                    .withDocTypeID(docTypeID)
-                    .withProcessID(DE4AConstants.MESSAGE_TYPE_REQUEST);
+                requestObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_REQUEST);
 
         final boolean isSent = this.apiManager.processIncomingMessage(requestObj, messageDTO,
                 docTypeID, "USI Request", marshaller);
@@ -97,10 +94,7 @@ public class RequestController implements RequestAPI {
         }
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(requestObj.getDataEvaluator().getAgentUrn(),
-                requestObj.getDataOwner().getAgentUrn())
-                    .withContentID(requestObj.getClass().getSimpleName())
-                    .withDocTypeID(docTypeID)
-                    .withProcessID(DE4AConstants.MESSAGE_TYPE_REQUEST);
+                requestObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_REQUEST);
 
         final boolean isSent = this.apiManager.processIncomingMessage(requestObj, messageDTO,
                 docTypeID, "IM Request", marshaller);
@@ -116,7 +110,7 @@ public class RequestController implements RequestAPI {
     public ResponseEntity<byte[]> requestEvidenceLU(@Valid final InputStream request) {
         LOGGER.debug("Request to API /lu/ received");
 
-        final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller();
+        final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller();
 
         // Unmarshalling and schema validation
         final RequestExtractMultiEvidenceLUType requestObj = (RequestExtractMultiEvidenceLUType)
@@ -134,10 +128,7 @@ public class RequestController implements RequestAPI {
         }
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(requestObj.getDataEvaluator().getAgentUrn(),
-                requestObj.getDataOwner().getAgentUrn())
-                    .withContentID(requestObj.getClass().getSimpleName())
-                    .withDocTypeID(docTypeID)
-                    .withProcessID(DE4AConstants.MESSAGE_TYPE_REQUEST);
+                requestObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_REQUEST);
 
         final boolean isSent = this.apiManager.processIncomingMessage(requestObj, messageDTO,
                 docTypeID, "LU Request", marshaller);
@@ -171,16 +162,13 @@ public class RequestController implements RequestAPI {
         }
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(requestObj.getDataEvaluator().getAgentUrn(),
-                requestObj.getDataOwner().getAgentUrn())
-                    .withContentID(requestObj.getClass().getSimpleName())
-                    .withDocTypeID(docTypeID)
-                    .withProcessID(DE4AConstants.MESSAGE_TYPE_REQUEST);
+                requestObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_REQUEST);
 
         final boolean isSent = this.apiManager.processIncomingMessage(requestObj, messageDTO,
                 docTypeID, "Subscription Request", marshaller);
 
         //Default response - at this point must be successful but doesn't hurt double check
-        return ResponseEntity.status((isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR))
+        return ResponseEntity.status(isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR)
                 .body((byte[]) ConnectorExceptionHandler.getResponseError(null, isSent));
     }
 }

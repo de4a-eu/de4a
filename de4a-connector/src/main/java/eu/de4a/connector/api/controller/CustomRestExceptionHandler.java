@@ -73,7 +73,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         List<String> args = new ArrayList<>();
         args.add(String.valueOf(ex.getContentType()));
         args.add(mediaTypes.toString());
-        String err = MessageUtils.valueOf(MessageKeys.ERROR_400_MIMETYPE, args.toArray());
+        String err = MessageUtils.format(MessageKeys.ERROR_400_MIMETYPE, args.toArray());
         return buildBadRequestError(err);
     }
 
@@ -83,9 +83,9 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         String error;
         if (ex.getCause() instanceof UnmarshalException) {
             String[] args = { ex.getMessage() };
-            error = MessageUtils.valueOf(MessageKeys.ERROR_400_UNMARSHALLING, args);
+            error = MessageUtils.format(MessageKeys.ERROR_400_UNMARSHALLING, args);
         } else {
-            error = MessageUtils.valueOf(MessageKeys.ERROR_400_ARGS_REQUIRED, null);
+            error = MessageUtils.format(MessageKeys.ERROR_400_ARGS_REQUIRED, null);
         }
         return buildBadRequestError(error);
     }
@@ -96,7 +96,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         LOGGER.warn("REST service requested not found");
 
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-        String err = MessageUtils.valueOf(MessageKeys.ERROR_SERVICE_NOT_FOUND,
+        String err = MessageUtils.format(MessageKeys.ERROR_SERVICE_NOT_FOUND,
                 new Object[] { ((ServletWebRequest) request).getRequest().getRequestURI() });
         ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
         String code = ELayerError.COMMUNICATIONS.getID() + EExternalModuleError.NONE.getId()

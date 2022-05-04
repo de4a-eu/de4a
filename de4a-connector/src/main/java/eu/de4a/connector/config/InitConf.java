@@ -2,11 +2,9 @@ package eu.de4a.connector.config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
-
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,12 +23,11 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
-
 import com.fasterxml.classmate.TypeResolver;
+import com.helger.commons.thirdparty.ELicense;
 import com.helger.dcng.core.DcngInit;
 import com.helger.httpclient.HttpClientSettings;
 import com.helger.web.scope.mgr.WebScopeManager;
-
 import eu.de4a.connector.as4.handler.IncomingAS4PKHandler;
 import eu.de4a.ial.api.jaxb.RequestLookupRoutingInformationType;
 import eu.de4a.iem.core.jaxb.common.EventNotificationType;
@@ -55,9 +52,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableScheduling
 @EnableSwagger2
 public class InitConf implements ServletContextAware {
-    private ServletContext servletContext;	
-	private HttpClientSettings httpSettings = new HttpClientSettings();
-	
+    private ServletContext servletContext;
+	private final HttpClientSettings httpSettings = new HttpClientSettings();
+
 	@Value("${de4a.kafka.enabled:false}")
 	private boolean kafkaEnabled;
 	@Value("${de4a.kafka.logging.enabled:true}")
@@ -68,11 +65,11 @@ public class InitConf implements ServletContextAware {
     private String kafkaUrl;
     @Value("${de4a.kafka.topic:#{de4a-connector}}")
     private String kafkaTopic;
-    
-	
+
+
 	@Bean
 	public Docket api() {
-		TypeResolver typeResolver = new TypeResolver();
+		final TypeResolver typeResolver = new TypeResolver();
 		return new Docket(DocumentationType.SWAGGER_2)
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("eu"))
@@ -94,21 +91,21 @@ public class InitConf implements ServletContextAware {
 		return new ApiInfoBuilder()
 			.title("DE4A - Connector")
 			.description("DE4A Connector component - eDelivery Exchange")
-			.version("0.2.0")
+			.version("2.0.0-SNAPSHOT")
 			.termsOfServiceUrl("http://www.de4a.eu")
-			.licenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
-			.license("APACHE2")
+			.licenseUrl(ELicense.APACHE2.getURL())
+			.license(ELicense.APACHE2.getDisplayName() + " " + ELicense.APACHE2.getVersion().getAsString(false))
 			.build();
 	}
-	
+
 	@Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-	
+
 	/**
 	 * Basic initialization of DCNG
-	 */	
+	 */
 	@Autowired IncomingAS4PKHandler handler;
 	@PostConstruct
     private void configureAS4() {
@@ -116,8 +113,8 @@ public class InitConf implements ServletContextAware {
         WebScopeManager.onGlobalBegin (this.servletContext);
         DcngInit.initGlobally (this.servletContext, handler);
     }
-	
-	
+
+
 	@PreDestroy
     public void shutDownAS4() {
         DcngInit.shutdownGlobally(this.servletContext);
@@ -125,7 +122,7 @@ public class InitConf implements ServletContextAware {
 
 	@Bean
 	public ViewResolver viewResolver() {
-		InternalResourceViewResolver bean = new InternalResourceViewResolver();
+		final InternalResourceViewResolver bean = new InternalResourceViewResolver();
 
 		bean.setViewClass(JstlView.class);
 		bean.setPrefix("/WEB-INF/view/");
@@ -135,27 +132,27 @@ public class InitConf implements ServletContextAware {
 	}
 
 	@Bean(name = "localeResolver")
-	public LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}") String locale) {
-		SessionLocaleResolver slr = new SessionLocaleResolver();
+	public LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}") final String locale) {
+		final SessionLocaleResolver slr = new SessionLocaleResolver();
 		if (locale != null && !locale.trim().isEmpty())
 			slr.setDefaultLocale(new Locale(locale));
 		else
 			slr.setDefaultLocale(Locale.ENGLISH);
 		return slr;
 	}
-	
+
 	@Bean
 	CharacterEncodingFilter characterEncodingFilter() {
-		CharacterEncodingFilter filter = new CharacterEncodingFilter();
+		final CharacterEncodingFilter filter = new CharacterEncodingFilter();
 		filter.setEncoding(StandardCharsets.UTF_8.name());
 		filter.setForceEncoding(true);
 		return filter;
 	}
-	
+
 	@Bean
     public ReloadableResourceBundleMessageSource messageSource() {
 
-        var source = new ReloadableResourceBundleMessageSource();
+        final var source = new ReloadableResourceBundleMessageSource();
         source.setBasenames("classpath:messages/messages");
         source.setDefaultEncoding(StandardCharsets.UTF_8.name());
         source.setUseCodeAsDefaultMessage(true);
@@ -171,22 +168,22 @@ public class InitConf implements ServletContextAware {
         if(kafkaHttp) {
             DE4AKafkaSettings.setHttpClientSetting(this.httpSettings);
         }
-        DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);        
+        DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);
         DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
-        
+
         ThreadContext.put("metrics.enabled", "false");
 	}
 
 	@Bean(name = "applicationEventMulticaster")
 	public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
-		SimpleApplicationEventMulticaster eventMulticaster = new SimpleApplicationEventMulticaster();
+		final SimpleApplicationEventMulticaster eventMulticaster = new SimpleApplicationEventMulticaster();
 
 		eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
 		return eventMulticaster;
 	}
 
 	@Override
-    public void setServletContext(ServletContext servletContext) {
+    public void setServletContext(final ServletContext servletContext) {
         this.servletContext = servletContext;
     }
 }

@@ -46,7 +46,7 @@ public class TestConnectorUtils {
     
     @Test
     public void TestMessageSources() {
-        String message = MessageUtils.valueOf("error.as4.communications", new Object[]{"SMP", "Data not found"});
+        String message = MessageUtils.format("error.as4.communications", new Object[]{"SMP", "Data not found"});
         
         assertTrue(message.contains("Data not found"));
     }

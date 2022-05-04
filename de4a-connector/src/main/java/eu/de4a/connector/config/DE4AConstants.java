@@ -6,34 +6,7 @@ public class DE4AConstants {
 	public static final String TAG_FORWARD_EVIDENCE_REQUEST="RequestForwardEvidence";
 	public static final String TAG_EXTRACT_EVIDENCE_RESPONSE="ResponseExtractEvidence";
 	public static final String TAG_NATIONAL_EVIDENCE_RESPONSE="NationalEvidenceResponse";
-	public static final String XPATH_ABSOLUTE_PARAM="//*[local-name()='%s']";
-	public static final String XPATH_EVIDENCE_REQUEST="//*[local-name()='RequestTransferEvidence']";
-	public static final String XPATH_REQUEST_ID="//*[local-name()='RequestId']/text()";
-	public static final String XPATH_EVIDENCE_DATA="//*[local-name()='EvidenceData']";
-	public static final String XPATH_EVALUATOR_ID="//*[local-name()='DataEvaluator']/*[local-name()='AgentUrn']/text()";
-	public static final String XPATH_EVALUATOR_NAME="//*[local-name()='DataEvaluator']/*[local-name()='AgentName']/text()";
-	public static final String XPATH_EVALUATOR_ID_NODE="//*[local-name()='DataEvaluator']/*[local-name()='id']";
-	public static final String XPATH_EVALUATOR_NAME_NODE="//*[local-name()='DataEvaluator']/*[local-name()='name']";
-	public static final String XPATH_OWNER_ID="//*[local-name()='DataOwner']/*[local-name()='AgentUrn']/text()";
-	public static final String XPATH_OWNER_NAME="//*[local-name()='DataOwner']/*[local-name()='AgentName']/text()";
-	public static final String XPATH_OWNER_ID_NODE="//*[local-name()='DataOwner']/*[local-name()='id']";
-	public static final String XPATH_OWNER_NAME_NODE="//*[local-name()='DataOwner']/*[local-name()='name']";
-	public static final String XPATH_CANONICAL_EVICENCE_ID="//*[local-name()='CanonicalEvidenceTypeId']/text()";
-	public static final String XPATH_CANONICAL_EVICENCE="//*[local-name()='CanonicalEvidence']";
-
-	public static final String XPATH_EIDAS_DOC="//*[local-name()='PersonIdentifier']/text()";
-	public static final String XPATH_EIDAS_SURNAME="//*[local-name()='FamilyName']/text()";
-	public static final String XPATH_EIDAS_NAME="//*[local-name()='FirstName']/text()";
-	public static final String XPATH_EIDAS_FULLNAME="//*[local-name()='BirthName']/text()";
-
-	public static final String XPATH_EIDAS_BIRTHDATE="//*[local-name()='DateOfBirth']/text()";
-
-
-	public static final String XPATH_EIDAS_DOC_NODE="//*[local-name()='PersonID']";
-	public static final String XPATH_EIDAS_SURNAME_NODE="//*[local-name()='PersonFamilyName']";
-	public static final String XPATH_EIDAS_NAME_NODE="//*[local-name()='PersonGivenName']";
-	public static final String XPATH_EIDAS_FULLNAME_NODE="//*[local-name()='PersonBirthName']";
-	public static final String XPATH_EIDAS_BIRTHDATE_NODE="//*[local-name()='PersonBirthDate']";
+  public static final String XPATH_REQUEST_ID="//*[local-name()='RequestId']/text()";
 
 	public static final String NAMESPACE_USI = "http://www.de4a.eu/2020/data/requestor/pattern/usi";
 

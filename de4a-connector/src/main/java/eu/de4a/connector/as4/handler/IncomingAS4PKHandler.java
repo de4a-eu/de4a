@@ -12,6 +12,10 @@ import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 
+/**
+ * This is the handler for incoming AS4 messages.
+ * It is registered on startup and spreads the information.
+ */
 @Component
 public class IncomingAS4PKHandler implements IMEIncomingHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(IncomingAS4PKHandler.class);

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,7 +25,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -35,9 +33,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
-
 import eu.de4a.connector.error.exceptions.MessageException;
 
 public class DOMUtils {
@@ -47,20 +43,6 @@ public class DOMUtils {
     private static final String XML_TRANSFORMER_IMPL = "net.sf.saxon.TransformerFactoryImpl";
 
     private DOMUtils() {
-        // empty private constructor
-    }
-
-    public static Node changeNode(final Document request, final String expression, final String value) {
-        Node node = null;
-        try {
-            final XPath xpath = XPathFactory.newInstance().newXPath();
-            node = (Node) xpath.evaluate(expression, request, XPathConstants.NODE);
-            node.setTextContent(value);
-        } catch (final XPathExpressionException e) {
-            logger.error(String.format("Error accessing indicated element '%s'", expression), e);
-
-        }
-        return node;
     }
 
     public static String getValueFromXpath(final String xpath, final Element message) {
@@ -83,7 +65,7 @@ public class DOMUtils {
             final NodeList nodes = (NodeList) xPath.evaluate(xpath, message, XPathConstants.NODESET);
             if (nodes != null && nodes.getLength() > 0) {
                 return nodes.item(0);
-            }            
+            }
         } catch (final XPathExpressionException e) {
             final String err = "Error getting Xpath " + xpath;
             logger.error(err, e);
@@ -151,7 +133,7 @@ public class DOMUtils {
         }
 
         try {
-            InputSource is = new InputSource(in);
+            final InputSource is = new InputSource(in);
             is.setEncoding(StandardCharsets.UTF_8.toString());
             ret = builder.parse(is);
         } catch (SAXException | IOException e) {
@@ -246,17 +228,17 @@ public class DOMUtils {
         }
     }
 
-    public static Document newDocumentFromNode(Element element, String nodeName) throws ParserConfigurationException {
-        NodeList nodes = element.getOwnerDocument().getDocumentElement().getElementsByTagNameNS("*", nodeName);
+    public static Document newDocumentFromNode(final Element element, final String nodeName) throws ParserConfigurationException {
+        final NodeList nodes = element.getOwnerDocument().getDocumentElement().getElementsByTagNameNS("*", nodeName);
 
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-        Document newXmlDocument = factory.newDocumentBuilder().newDocument();
-        Element root = (Element) nodes.item(0);
-        Node copyNode = newXmlDocument.importNode(root, true);
+        final Document newXmlDocument = factory.newDocumentBuilder().newDocument();
+        final Element root = (Element) nodes.item(0);
+        final Node copyNode = newXmlDocument.importNode(root, true);
         newXmlDocument.appendChild(copyNode);
 
         return newXmlDocument;

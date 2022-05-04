@@ -1,6 +1,7 @@
 package eu.de4a.connector.error.handler;
 
 import java.util.Locale;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.NoSuchMessageException;
@@ -21,14 +22,14 @@ public class ConnectorExceptionHandler {
         try {
             final String key = ex.getMessage();
             ex.getArgs().add(0, ex.getModule().getLabel());
-            return  MessageUtils.valueOf(key, ex.getArgs().toArray());
+            return  MessageUtils.format(key, ex.getArgs().toArray());
         } catch (final NoSuchMessageException name) {
             LOGGER.error("Bundle key {} is missing for locale {}", ex.getMessage(), Locale.getDefault());
             return ex.getMessage();
         }
     }
 
-    public static Object getResponseError(final ConnectorException ex, final boolean returnBytes) {
+    public static Object getResponseError(@Nullable final ConnectorException ex, final boolean returnBytes) {
         final ResponseErrorType response;
         if(ex != null) {
             response = DE4AResponseDocumentHelper.createResponseError(false);

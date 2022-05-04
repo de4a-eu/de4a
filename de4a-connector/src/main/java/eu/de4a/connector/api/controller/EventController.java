@@ -53,10 +53,7 @@ public class EventController implements NotificationAPI {
         }
 
         final AS4MessageDTO messageDTO = new AS4MessageDTO(eventObj.getDataOwner().getAgentUrn(),
-                eventObj.getDataEvaluator().getAgentUrn())
-                    .withContentID(eventObj.getClass().getSimpleName())
-                    .withDocTypeID(docTypeID)
-                    .withProcessID(DE4AConstants.MESSAGE_TYPE_NOTIFICATION);
+                eventObj.getDataEvaluator().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_NOTIFICATION);
 
         final boolean isSent = this.apiManager.processIncomingMessage(eventObj, messageDTO, eventObj.getNotificationId(),
                 "Event Notification", marshaller);
