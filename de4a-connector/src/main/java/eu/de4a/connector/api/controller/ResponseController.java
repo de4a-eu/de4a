@@ -1,9 +1,9 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
-
 import javax.validation.Valid;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,74 +11,113 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.w3c.dom.Document;
-
-import eu.de4a.connector.api.ResponseApi;
-import eu.de4a.connector.api.manager.EvidenceTransferorManager;
-import eu.de4a.connector.as4.owner.MessageResponseOwner;
-import eu.de4a.connector.error.exceptions.ResponseTransferEvidenceUSIDTException;
-import eu.de4a.connector.error.exceptions.ResponseUSIRedirectUserException;
-import eu.de4a.connector.error.model.ExternalModuleError;
-import eu.de4a.connector.error.model.LogMessages;
-import eu.de4a.connector.error.utils.ErrorHandlerUtils;
-import eu.de4a.connector.error.utils.KafkaClientWrapper;
-import eu.de4a.iem.jaxb.common.types.RedirectUserType;
-import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIDTType;
-import eu.de4a.iem.xml.de4a.DE4AMarshaller;
-import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
-import eu.de4a.util.DE4AConstants;
+import org.springframework.web.bind.annotation.RequestMapping;
+import eu.de4a.connector.api.ResponseAPI;
+import eu.de4a.connector.api.manager.APIManager;
+import eu.de4a.connector.config.DE4AConstants;
+import eu.de4a.connector.dto.AS4MessageDTO;
+import eu.de4a.connector.error.exceptions.ConnectorException;
+import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
+import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.utils.APIRestUtils;
+import eu.de4a.iem.core.DE4ACoreMarshaller;
+import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
+import eu.de4a.iem.core.jaxb.common.RedirectUserType;
+import eu.de4a.iem.core.jaxb.common.ResponseEventSubscriptionType;
+import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
 
 @Controller
+@RequestMapping("/response")
 @Validated
-public class ResponseController implements ResponseApi {
+public class ResponseController implements ResponseAPI {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseController.class);
 
 	@Autowired
-    private EvidenceTransferorManager evidenceTransferorManager;
+    private APIManager apiManager;
 
-	@PostMapping(value = "/requestTransferEvidenceUSIDT", produces = MediaType.APPLICATION_XML_VALUE, 
-            consumes = MediaType.APPLICATION_XML_VALUE)
-	public ResponseEntity<byte[]> requestTransferEvidenceUSIDT(InputStream request) {
-	    DE4AMarshaller<RequestTransferEvidenceUSIDTType> marshaller = 
-	            DE4AMarshaller.dtUsiRequestMarshaller(IDE4ACanonicalEvidenceType.NONE);
-	    
-	    RequestTransferEvidenceUSIDTType reqObj = (RequestTransferEvidenceUSIDTType) ErrorHandlerUtils
-                .conversionBytesWithCatching(marshaller, request, false, true, 
-                        new ResponseTransferEvidenceUSIDTException().withModule(ExternalModuleError.CONNECTOR_DT));
-	    KafkaClientWrapper.sendInfo(LogMessages.LOG_USI_DT_REQ_RECEIPT, reqObj.getRequestId());
-	    
-		return processResponseUsiMsg(marshaller, reqObj, reqObj.getRequestId(), reqObj.getDataEvaluator().getAgentUrn(), 
-		        reqObj.getDataOwner().getAgentUrn(), DE4AConstants.TAG_EVIDENCE_REQUEST);
-	}
-	
-	@PostMapping(value = "/usiRedirectUser", produces = MediaType.APPLICATION_XML_VALUE, 
-            consumes = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<byte[]> redirectUserUsi(@Valid InputStream request) {
-        DE4AMarshaller<RedirectUserType> marshaller = DE4AMarshaller.deUsiRedirectUserMarshaller();
 
-        RedirectUserType redirectUserMsg = (RedirectUserType) ErrorHandlerUtils
-                .conversionBytesWithCatching(marshaller, request, false, true, 
-                        new ResponseUSIRedirectUserException().withModule(ExternalModuleError.CONNECTOR_DT)
-                            .withHttpStatus(HttpStatus.BAD_REQUEST));
-        KafkaClientWrapper.sendInfo(LogMessages.LOG_USI_RED_USER, RedirectUserType.class.getSimpleName(), 
-                redirectUserMsg.getRequestId(), redirectUserMsg.getCanonicalEvidenceTypeId(),
-                redirectUserMsg.getDataEvaluator().getAgentUrn(), "N/A");
-        
-        return processResponseUsiMsg(marshaller, redirectUserMsg, redirectUserMsg.getRequestId(),
-                redirectUserMsg.getDataEvaluator().getAgentUrn(), null, DE4AConstants.TAG_REDIRECT_USER);
+	@PostMapping(value = "/usi/redirectUser/", produces = MediaType.APPLICATION_XML_VALUE,
+            consumes = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity<byte[]> redirectUserUsi(@Valid final InputStream request) {
+        LOGGER.debug("Request to API /redirectUser/ received");
+
+        final var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller();
+
+        final RedirectUserType redirectUserMsg = (RedirectUserType) APIRestUtils
+                .conversionBytesWithCatching(marshaller, request, false, true,
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
+
+        final AS4MessageDTO messageDTO = new AS4MessageDTO(redirectUserMsg.getDataEvaluator().getAgentUrn(),
+                redirectUserMsg.getDataOwner().getAgentUrn(), redirectUserMsg.getCanonicalEvidenceTypeId(), DE4AConstants.MESSAGE_TYPE_RESPONSE);
+
+        final boolean isSent = this.apiManager.processIncomingMessage(redirectUserMsg, messageDTO, redirectUserMsg.getRequestId(),
+                "Redirect User", marshaller);
+
+        return ResponseEntity.status((isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR))
+                .body((byte[]) ConnectorExceptionHandler.getResponseError(null, isSent));
     }
-    
-    private <T> ResponseEntity<byte[]> processResponseUsiMsg(DE4AMarshaller<T> marshaller, T reqObj,
-            String requestId, String dataEvaluatorId, String dataOwnerId, String msgTag) {
-        MessageResponseOwner responseMsg;
-        Document doc = marshaller.getAsDocument(reqObj);
-        responseMsg = new MessageResponseOwner();
-        responseMsg.setMessage(doc.getDocumentElement());
-        responseMsg.setId(requestId);
-        responseMsg.setDataEvaluatorId(dataEvaluatorId);
-        responseMsg.setDataOwnerId(dataOwnerId);
-        
-        evidenceTransferorManager.queueMessageResponse(responseMsg, msgTag);
-        
-        return new ResponseEntity<>(HttpStatus.OK);
+
+    @PostMapping(value = "/evidence/", produces = MediaType.APPLICATION_XML_VALUE,
+            consumes = MediaType.APPLICATION_XML_VALUE)
+    @Override
+    public ResponseEntity<byte[]> responseEvidence(@Valid final InputStream request) {
+        LOGGER.debug("Request to API /evidence/ received");
+
+        final var marshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller(IDE4ACanonicalEvidenceType.NONE);
+
+        final ResponseExtractMultiEvidenceType responseObj = (ResponseExtractMultiEvidenceType) APIRestUtils
+                .conversionBytesWithCatching(marshaller, request, false, true,
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
+
+        // Check if there are multiple evidence responses
+        final String docTypeID;
+        if(responseObj.getResponseExtractEvidenceItemCount() > 1) {
+            docTypeID = DE4AConstants.EVIDENCE_SCHEME + "::" +
+                    DE4AConstants.MULTI_ITEM_TYPE;
+        } else {
+            docTypeID = responseObj.getResponseExtractEvidenceItemAtIndex(0)
+                    .getCanonicalEvidenceTypeId();
+        }
+
+        final AS4MessageDTO messageDTO = new AS4MessageDTO(responseObj.getDataOwner().getAgentUrn(),
+                responseObj.getDataEvaluator().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_RESPONSE);
+
+        final boolean isSent = this.apiManager.processIncomingMessage(responseObj, messageDTO, responseObj.getRequestId(),
+                "Response Evidence", marshaller);
+
+        return ResponseEntity.status((isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR))
+                .body((byte[]) ConnectorExceptionHandler.getResponseError(null, isSent));
+    }
+
+    @PostMapping(value = "/subscription/", produces = MediaType.APPLICATION_XML_VALUE,
+            consumes = MediaType.APPLICATION_XML_VALUE)
+    @Override
+    public ResponseEntity<byte[]> responseEventSubscription(@Valid final InputStream request) {
+        LOGGER.debug("Request to API /subscription/ received");
+
+        final var marshaller = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller();
+
+        final ResponseEventSubscriptionType responseObj = (ResponseEventSubscriptionType) APIRestUtils
+                .conversionBytesWithCatching(marshaller, request, false, true,
+                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
+
+        // Check if there are multiple evidence responses
+        final String docTypeID;
+        if(responseObj.getResponseEventSubscriptionItemCount() > 1) {
+            docTypeID = DE4AConstants.EVENT_CATALOGUE_SCHEME + "::" +
+                    DE4AConstants.MULTI_ITEM_TYPE;
+        } else {
+            docTypeID = responseObj.getResponseEventSubscriptionItemAtIndex(0)
+                    .getCanonicalEventCatalogUri();
+        }
+
+        final AS4MessageDTO messageDTO = new AS4MessageDTO(responseObj.getDataEvaluator().getAgentUrn(),
+                responseObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_RESPONSE);
+
+        final boolean isSent = this.apiManager.processIncomingMessage(responseObj, messageDTO, responseObj.getRequestId(),
+                "Response Evidence", marshaller);
+
+        return ResponseEntity.status((isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR))
+                .body((byte[]) ConnectorExceptionHandler.getResponseError(null, isSent));
     }
 }

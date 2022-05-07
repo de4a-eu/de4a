@@ -1,0 +1,67 @@
+<RequestTransferEvidenceUSI
+    xmlns="http://www.de4a.eu/2020/data/requestor/v2"
+    xmlns:einp="http://eidas.europa.eu/attributes/naturalperson"
+    xmlns:eilp="http://eidas.europa.eu/attributes/legalperson"
+    xmlns:de4a="http://www.de4a.eu/2020/commons/type/v2">
+    <de4a:RequestId>0106c4c0-4a5f-4e92-956d-08c21178e606
+    </de4a:RequestId>
+    <de4a:SpecificationId>Specification-1567805410
+    </de4a:SpecificationId>
+    <de4a:TimeStamp>2022-03-02T12:58:33.434</de4a:TimeStamp>
+    <de4a:ProcedureId>Procedure-391265045</de4a:ProcedureId>
+    <de4a:DataEvaluator>
+        <de4a:AgentUrn>iso6523-actorid-upis::9999:lu000000025
+        </de4a:AgentUrn>
+        <de4a:AgentName>(CTIE) Centre des Technologies de l'Information
+            de l'Etat (State Information Technology Center)
+        </de4a:AgentName>
+    </de4a:DataEvaluator>
+    <de4a:DataOwner>
+        <de4a:AgentUrn>iso6523-actorid-upis::9999:test-sgad
+        </de4a:AgentUrn>
+        <de4a:AgentName>(TEST-SGAD) Secretaría General de Administración
+            Digital</de4a:AgentName>
+    </de4a:DataOwner>
+    <de4a:RequestEvidenceUSIItem>
+        <de4a:RequestItemId>3c96837a-83ce-4b65-b187-f151602d74fb
+        </de4a:RequestItemId>
+        <de4a:DataRequestSubject>
+            <de4a:DataSubjectPerson>
+                <de4a:PersonIdentifier>ES/PT/99999142H
+                </de4a:PersonIdentifier>
+                <de4a:FirstName>Nombre</de4a:FirstName>
+                <de4a:FamilyName>ApellidoPrimero ApellidoSegundo
+                </de4a:FamilyName>
+                <de4a:DateOfBirth>2000-01-01</de4a:DateOfBirth>
+            </de4a:DataSubjectPerson>
+        </de4a:DataRequestSubject>
+        <de4a:CanonicalEvidenceTypeId>urn:de4a-eu:CanonicalEvidenceType::DomicileRegistrationEvidence
+        </de4a:CanonicalEvidenceTypeId>
+        <de4a:RequestGrounds>
+            <de4a:ExplicitRequest>SDGR14</de4a:ExplicitRequest>
+        </de4a:RequestGrounds>
+        <de4a:DataEvaluatorURL>http://localhost:8080/
+        </de4a:DataEvaluatorURL>
+    </de4a:RequestEvidenceUSIItem>
+    <de4a:RequestEvidenceUSIItem>
+        <de4a:RequestItemId>0619f188-62b5-49b4-ac18-c8440cc24677
+        </de4a:RequestItemId>
+        <de4a:DataRequestSubject>
+            <de4a:DataSubjectPerson>
+                <de4a:PersonIdentifier>ES/PT/99999142H
+                </de4a:PersonIdentifier>
+                <de4a:FirstName>Nombre</de4a:FirstName>
+                <de4a:FamilyName>ApellidoPrimero ApellidoSegundo
+                </de4a:FamilyName>
+                <de4a:DateOfBirth>2000-01-01</de4a:DateOfBirth>
+            </de4a:DataSubjectPerson>
+        </de4a:DataRequestSubject>
+        <de4a:CanonicalEvidenceTypeId>urn:de4a-eu:CanonicalEvidenceType::HigherEducationDiploma
+        </de4a:CanonicalEvidenceTypeId>
+        <de4a:RequestGrounds>
+            <de4a:ExplicitRequest>SDGR14</de4a:ExplicitRequest>
+        </de4a:RequestGrounds>
+        <de4a:DataEvaluatorURL>http://localhost:8080/
+        </de4a:DataEvaluatorURL>
+    </de4a:RequestEvidenceUSIItem>
+</RequestTransferEvidenceUSI>

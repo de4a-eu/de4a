@@ -1,11 +1,6 @@
 package eu.de4a.connector.error.model;
 
 public final class MessageKeys {
-    
-    private MessageKeys() {
-        //empty constructor
-    }
-    
     /*
      * Errors message keys
      */
@@ -18,10 +13,11 @@ public final class MessageKeys {
     public static final String ERROR_DATABASE = "error.database";
     public static final String ERROR_SCHEME_VALIDATION = "error.schema.validation";
     public static final String ERROR_AS4_COMMUNICATION = "error.as4.communications";
-    
+
     public static final String ERROR_404 = "error.404";
     public static final String ERROR_400_MIMETYPE = "error.400.mimetype";
     public static final String ERROR_400_UNMARSHALLING = "error.400.args.unmarshalling";
     public static final String ERROR_400_ARGS_REQUIRED = "error.400.args.required";
-    
+
+    private MessageKeys() {}
 }
