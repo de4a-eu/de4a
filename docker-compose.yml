@@ -6,7 +6,6 @@ services:
         ports:
             - "8080:8080"
         volumes:
-            - ./config/phase4:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/phase4
             - ./config/application.properties:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
-            - ./config/phase4.properties:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/phase4.properties
+            - ./config/application.yml:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.yml
             - /tmp/connector:/tmp

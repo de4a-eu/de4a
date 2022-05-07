@@ -8,7 +8,7 @@ Substitute `<tag>` with the version you want to pull.
 
 To run
 
-`docker run -p 8080:8080 -v ./config/phase4:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/phase4 -v ./config/application.properties:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties -v ./config/phase4.properties:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/phase4.properties -v /tmp/connector:/tmp de4a/connector:<tag>`
+`docker run -p 8080:8080 -v /config/application.properties:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties -v ./config/application.yml:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.yml -v /tmp/connector:/tmp de4a/connector:<tag>`
 
 Or use the example docker-compose.yml file with
 
@@ -19,11 +19,10 @@ Or use the example docker-compose.yml file with
 For the above docker command you need the following on the HOST machine running the docker container:
 
 a folder named `config/`
-a folder named `phase4/` in the config/ folder.
 `application.properties` in the config/ folder.
-`phase4.properties` in the config/ folder.
+`application.yml` in the config/ folder.
 
-The \*.properties files are your system specific configuration files where you have changed the relevant properties to suit your system. In the phase4/ folder you can put your AS4 certificate that will be used by the built in phase4 gateway. Make sure to point the relevant properties in the above files to this folder and the files in there
+The \*.properties files are your system specific configuration files where you have changed the relevant properties to suit your system. In the application.yml you can configure DE/DOs endpoints that will be used by the Connector to deliver the messages to the receivers. Make sure to point the relevant properties in the above files to this folder and the files in there
 
 ## Updating the running container to a newer image
 

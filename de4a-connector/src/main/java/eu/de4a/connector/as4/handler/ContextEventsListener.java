@@ -1,75 +1,35 @@
 package eu.de4a.connector.as4.handler;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-
-import eu.de4a.connector.api.manager.EvidenceTransferorManager;
-import eu.de4a.connector.api.manager.ResponseManager;
-import eu.de4a.connector.as4.client.ResponseWrapper;
-import eu.de4a.connector.as4.owner.MessageRequestOwner;
+import eu.de4a.connector.api.manager.MessageExchangeManager;
+import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 
 /**
- * Asynchronous listener from spring events for manage requests
- * to external monitored service
+ * Asynchronous listener for spring events. It manage requests
+ * from an external monitored service
  *
  */
 @Component
 public class ContextEventsListener implements ApplicationListener<ContextRefreshedEvent> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContextEventsListener.class);
 
-    private static final Log LOG = LogFactory.getLog(ContextEventsListener.class);
     @Autowired
-    private EvidenceTransferorManager evidenceTransferorManager;
-    @Autowired
-    private ResponseManager responseManager;
+    private MessageExchangeManager messageExchangeManager;
 
-    enum EventMessages {
-        MESSAGE_REQUEST_OWNER("MessageRequestOwner"), RESPONSE_WRAPPER("ResponseWrapper"), CONTEXT_REFRESHED_EVENT("ContextRefreshedEvent");
-        private String name;
-        private static Map<String, EventMessages> lookup = new HashMap<>();
+    public void onApplicationEvent(final ContextRefreshedEvent cse) {
+        LOGGER.info("Processing event received: " + cse.getClass().getName());
 
-        static {
-            for (EventMessages obj : EventMessages.values()) {
-                lookup.put(obj.getName(), obj);
-            }
-        }
-
-        EventMessages(String messageName) {
-            name = messageName;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public static EventMessages fromValue(String v) {
-            return lookup.get(v);
-        }
-    }
-
-    public void onApplicationEvent(ContextRefreshedEvent cse) {
-        LOG.info("Processing event received: " + cse.getClass().getName());
-        
-        EventMessages eventClass = EventMessages.fromValue(cse.getClass().getSimpleName());
-        switch(eventClass) {
-            case MESSAGE_REQUEST_OWNER:
-                MessageRequestOwner request = (MessageRequestOwner) cse;
-                evidenceTransferorManager.queueMessage(request);
-                break;
-            case RESPONSE_WRAPPER:
-                ResponseWrapper response = (ResponseWrapper) cse;
-                responseManager.processAS4Response(response);
-                break;
-            default:
-                LOG.warn("Event received is not an instance of MessageOwner, it won´t be processed. "
-                        + cse.getClass().getName());
-                break;
+        if(MessageExchangeWrapper.class.isAssignableFrom(cse.getClass())) {
+                final MessageExchangeWrapper message = (MessageExchangeWrapper) cse;
+                this.messageExchangeManager.processMessageExchange(message);
+        } else {
+                LOGGER.warn("Event received is not an instance of MessageExchangeWrapper, "
+                        + "it won´t be processed. " + cse.getClass().getName());
         }
     }
 }

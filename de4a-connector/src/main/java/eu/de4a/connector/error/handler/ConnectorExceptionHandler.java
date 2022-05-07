@@ -1,28 +1,53 @@
 package eu.de4a.connector.error.handler;
 
 import java.util.Locale;
-
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.NoSuchMessageException;
-
+import org.springframework.stereotype.Component;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.service.spring.MessageUtils;
+import eu.de4a.connector.utils.MessageUtils;
+import eu.de4a.iem.core.DE4ACoreMarshaller;
+import eu.de4a.iem.core.DE4AResponseDocumentHelper;
+import eu.de4a.iem.core.jaxb.common.ResponseErrorType;
 
-public abstract class ConnectorExceptionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(ConnectorExceptionHandler.class);
+@Component
+public class ConnectorExceptionHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorExceptionHandler.class);
 
-    public String getMessage(ConnectorException ex) {
+    private ConnectorExceptionHandler (){}
+
+    public static String getMessage(final ConnectorException ex) {
         try {
-            String key = ex.getMessage();
+            final String key = ex.getMessage();
             ex.getArgs().add(0, ex.getModule().getLabel());
-            return new MessageUtils(key, ex.getArgs().toArray()).value();
-        } catch (NoSuchMessageException name) {
-            logger.error("Bundle key {} is missing for locale {}", ex.getMessage(), Locale.getDefault());
+            return  MessageUtils.format(key, ex.getArgs().toArray());
+        } catch (final NoSuchMessageException name) {
+            LOGGER.error("Bundle key {} is missing for locale {}", ex.getMessage(), Locale.getDefault());
             return ex.getMessage();
         }
     }
 
-    public abstract Object getResponseError(ConnectorException exception, boolean returnBytes);
-    public abstract Object buildResponse(ConnectorException exception);
+    public static Object getResponseError(@Nullable final ConnectorException ex, final boolean returnBytes) {
+        final ResponseErrorType response;
+        if(ex != null) {
+            response = DE4AResponseDocumentHelper.createResponseError(false);
+            final String msg = getMessage(ex);
+            response.addError(DE4AResponseDocumentHelper.createError(ex.buildCode(), msg));
+        } else {
+            response = DE4AResponseDocumentHelper.createResponseError(true);
+        }
+        if(returnBytes) {
+            return DE4ACoreMarshaller.defResponseMessage().getAsBytes(response);
+        }
+        return response;
+    }
+
+    public static byte[] getGenericResponseError(final Exception ex) {
+        final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
+        final String msg = ex.getMessage() == null ? "Internal Connector Error" : ex.getMessage();
+        responseError.addError(DE4AResponseDocumentHelper.createError("99999", msg));
+        return DE4ACoreMarshaller.defResponseMessage().getAsBytes(responseError);
+    }
 }
