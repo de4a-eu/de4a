@@ -10,7 +10,7 @@ import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.mime.CMimeType;
 import com.helger.dcng.api.me.EMEProtocol;
 import com.helger.dcng.api.rest.DCNGPayload;
-import com.helger.dcng.webapi.as4.ApiPostLookendAndSend;
+import com.helger.dcng.webapi.as4.ApiPostLookupAndSend;
 import com.helger.json.IJsonObject;
 import com.helger.json.serialize.JsonWriterSettings;
 import com.helger.peppolid.IDocumentTypeIdentifier;
@@ -63,7 +63,7 @@ public class AS4Service {
         KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_MSG_SENT, sPI.getURIEncoded(),
                 rPI.getURIEncoded(), aDocumentTypeID.getURIEncoded(), aProcessID.getURIEncoded());
 
-        final IJsonObject aJson = ApiPostLookendAndSend.perform(sPI, rPI, aDocumentTypeID, aProcessID,
+        final IJsonObject aJson = ApiPostLookupAndSend.perform(sPI, rPI, aDocumentTypeID, aProcessID,
                 EMEProtocol.AS4.getTransportProfileID(), aPayloads);
         //Process json response
         manageAs4SendingResult(aJson);

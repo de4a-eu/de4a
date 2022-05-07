@@ -16,8 +16,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import eu.de4a.connector.error.exceptions.MessageException;
 import eu.de4a.connector.utils.DOMUtils;
+import eu.de4a.iem.cev.de4a.t41.v2021_04_13.DE4AT41Marshaller;
 import eu.de4a.iem.jaxb.t41.uc1.v2021_04_13.HigherEducationDiplomaType;
-import eu.de4a.iem.xml.de4a.t41.v2021_04_13.DE4AT41Marshaller;
 
 @RunWith(SpringRunner.class)
 public class XMLProcessingTest {
@@ -74,7 +74,7 @@ public class XMLProcessingTest {
                 + "      </holderOfAchievement>\n"
                 + "    </HigherEducationDiploma>";
         final Document doc = DOMUtils.stringToDocument(evidencia);
-        final DE4AT41Marshaller <HigherEducationDiplomaType> marshaller = DE4AT41Marshaller.higherEducationDiploma();
+        final DE4AT41Marshaller <HigherEducationDiplomaType> marshaller =  DE4AT41Marshaller.higherEducationDiploma();
         final HigherEducationDiplomaType diplomaType = marshaller.read(doc);
         assertNotNull(diplomaType);
     }

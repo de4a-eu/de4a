@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
-
 import eu.de4a.connector.api.service.model.EMessageServiceTypes;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.error.exceptions.ConnectorException;

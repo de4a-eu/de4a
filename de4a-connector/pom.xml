@@ -20,7 +20,7 @@
         <!-- DE4A commons -->
         <dependency>
             <groupId>eu.de4a</groupId>
-            <artifactId>de4a-iem</artifactId>
+            <artifactId>de4a-kafka-client</artifactId>
         </dependency>
         <dependency>
             <groupId>eu.de4a</groupId>
@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>eu.de4a</groupId>
-            <artifactId>de4a-kafka-client</artifactId>
+            <artifactId>de4a-canonical-evidences</artifactId>
         </dependency>
         
         <!-- DE4A IAL -->
@@ -92,12 +92,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-boot-starter</artifactId>
-            <version>${springfox-version}</version>
-        </dependency>
         
         <dependency>
             <groupId>javax.validation</groupId>
@@ -108,6 +102,11 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
         </dependency>
 
         <dependency>

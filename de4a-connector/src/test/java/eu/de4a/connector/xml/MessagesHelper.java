@@ -3,15 +3,11 @@ package eu.de4a.connector.xml;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
-
 import javax.annotation.Nonnull;
-
-
 import com.helger.commons.datetime.PDTFactory;
 import com.helger.commons.datetime.XMLOffsetDateTime;
 import com.helger.commons.math.MathHelper;
 import com.helger.dcng.api.DcngIdentifierFactory;
-
 import eu.de4a.iem.core.jaxb.common.AgentType;
 import eu.de4a.iem.core.jaxb.common.DataRequestSubjectCVType;
 import eu.de4a.iem.core.jaxb.common.EventNotificationItemType;

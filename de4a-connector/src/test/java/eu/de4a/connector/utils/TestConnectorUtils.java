@@ -2,7 +2,6 @@ package eu.de4a.connector.utils;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;

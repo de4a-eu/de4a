@@ -86,7 +86,5 @@
     <h4 class="param-name">phase4.send.fromparty.id: <span class="param-value value">${empty as4FromPartyId ? 'not-set' : as4FromPartyId}</span></h4>
     <h4 class="param-name">de4a.me.implementation: <span class="param-value value">${empty as4GatewayBean ? 'not-set' : as4GatewayBean}</span></h4>
     <hr style="width: 40%;min-width:600px;margin-left:0; margin-top:25px;">
-    
-    <h4>Check out the system API on: <a href="./swagger-ui/">Connector Swagger API definition</a></h4>
 </body>
 </html>

@@ -7,11 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
-
 import com.helger.dcng.api.me.model.MEMessage;
 import com.helger.dcng.api.me.model.MEPayload;
 import com.helger.peppolid.IProcessIdentifier;
-
 import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.config.DE4AConstants;

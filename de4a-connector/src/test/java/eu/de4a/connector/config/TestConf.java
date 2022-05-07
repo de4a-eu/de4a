@@ -2,7 +2,6 @@ package eu.de4a.connector.config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;

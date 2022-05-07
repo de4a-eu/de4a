@@ -5,7 +5,6 @@ import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,32 +22,11 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
-import com.fasterxml.classmate.TypeResolver;
-import com.helger.commons.thirdparty.ELicense;
 import com.helger.httpclient.HttpClientSettings;
-import eu.de4a.connector.as4.servlet.AS4ServletListener;
-import eu.de4a.iem.core.jaxb.common.EventNotificationType;
-import eu.de4a.iem.core.jaxb.common.RedirectUserType;
-import eu.de4a.iem.core.jaxb.common.RequestEventSubscriptionType;
-import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceIMType;
-import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceLUType;
-import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceUSIType;
-import eu.de4a.iem.core.jaxb.common.ResponseErrorType;
-import eu.de4a.iem.core.jaxb.common.ResponseEventSubscriptionType;
-import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
-import eu.de4a.iem.jaxb.common.types.RequestLookupRoutingInformationType;
 import eu.de4a.kafkaclient.DE4AKafkaSettings;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableScheduling
-@EnableSwagger2
 public class InitConf implements ServletContextAware {
     private ServletContext servletContext;
 	private final HttpClientSettings httpSettings = new HttpClientSettings();
@@ -66,56 +44,24 @@ public class InitConf implements ServletContextAware {
 
 
 	@Bean
-	public Docket api() {
-		final TypeResolver typeResolver = new TypeResolver();
-		return new Docket(DocumentationType.SWAGGER_2)
-				.select()
-				.apis(RequestHandlerSelectors.basePackage("eu"))
-				.paths(PathSelectors.any()).build()
-				.additionalModels(typeResolver.resolve(RequestExtractMultiEvidenceIMType.class),
-				        typeResolver.resolve(RequestExtractMultiEvidenceUSIType.class),
-				        typeResolver.resolve(RequestExtractMultiEvidenceLUType.class),
-				        typeResolver.resolve(RequestEventSubscriptionType.class),
-				        typeResolver.resolve(RedirectUserType.class),
-				        typeResolver.resolve(ResponseErrorType.class),
-				        typeResolver.resolve(ResponseEventSubscriptionType.class),
-				        typeResolver.resolve(ResponseExtractMultiEvidenceType.class),
-				        typeResolver.resolve(RequestLookupRoutingInformationType.class),
-				        typeResolver.resolve(EventNotificationType.class))
-				.apiInfo(apiInfo());
-	}
-
-	private ApiInfo apiInfo() {
-		return new ApiInfoBuilder()
-			.title("DE4A - Connector")
-			.description("DE4A Connector component - eDelivery Exchange")
-			.version("2.0.0-SNAPSHOT")
-			.termsOfServiceUrl("http://www.de4a.eu")
-			.licenseUrl(ELicense.APACHE2.getURL())
-			.license(ELicense.APACHE2.getDisplayName() + " " + ELicense.APACHE2.getVersion().getAsString(false))
-			.build();
-	}
-
-	@Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
-
-  private final AS4ServletListener m_aListener = new AS4ServletListener ();
+  // private final AS4ServletListener m_aListener = new AS4ServletListener ();
 
 	/**
 	 * Basic initialization of DCNG
 	 */
 	@PostConstruct
   private void configureAS4() {
-	  m_aListener.contextInitialized(new ServletContextEvent(servletContext));
+	  // m_aListener.contextInitialized(new ServletContextEvent(servletContext));
   }
 
 
 	@PreDestroy
   public void shutDownAS4() {
-    m_aListener.contextDestroyed(new ServletContextEvent(servletContext));
+	// m_aListener.contextDestroyed(new ServletContextEvent(servletContext));
   }
 
 	@Bean
