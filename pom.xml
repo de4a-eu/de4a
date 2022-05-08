@@ -153,15 +153,6 @@
     <module>de4a-connector</module>
   </modules>
 
-  <dependencies>
-    <!-- JUnit 4 for testing -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
   <build>
     <plugins>
       <plugin>

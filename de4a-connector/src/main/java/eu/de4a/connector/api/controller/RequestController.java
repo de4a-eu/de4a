@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.helger.dcng.api.DcngIdentifierFactory;
+import com.helger.peppolid.CIdentifier;
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
@@ -42,13 +44,13 @@ public class RequestController {
     final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller();
 
     // Unmarshalling and schema validation
-    final RequestExtractMultiEvidenceUSIType requestObj = APIRestUtils.conversionBytesWithCatching(marshaller, request,
+    final RequestExtractMultiEvidenceUSIType requestObj = APIRestUtils.conversionBytesWithCatching(request, marshaller,
         new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
 
     // Check if there are multiple evidence request
     final String docTypeID;
     if (requestObj.getRequestEvidenceUSIItemCount() > 1) {
-      docTypeID = DE4AConstants.EVIDENCE_SCHEME + "::" + DE4AConstants.MULTI_ITEM_TYPE;
+      docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
     } else {
       docTypeID = requestObj.getRequestEvidenceUSIItemAtIndex(0).getCanonicalEvidenceTypeId();
     }
@@ -68,13 +70,13 @@ public class RequestController {
     final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller();
 
     // Unmarshalling and schema validation
-    final RequestExtractMultiEvidenceIMType requestObj = APIRestUtils.conversionBytesWithCatching(marshaller, request,
+    final RequestExtractMultiEvidenceIMType requestObj = APIRestUtils.conversionBytesWithCatching(request, marshaller,
         new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
 
     // Check if there are multiple evidence request
     final String docTypeID;
     if (requestObj.getRequestEvidenceIMItemCount() > 1) {
-      docTypeID = DE4AConstants.EVIDENCE_SCHEME + "::" + DE4AConstants.MULTI_ITEM_TYPE;
+      docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
     } else {
       docTypeID = requestObj.getRequestEvidenceIMItemAtIndex(0).getCanonicalEvidenceTypeId();
     }
@@ -94,13 +96,13 @@ public class RequestController {
     final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller();
 
     // Unmarshalling and schema validation
-    final RequestExtractMultiEvidenceLUType requestObj = APIRestUtils.conversionBytesWithCatching(marshaller, request,
+    final RequestExtractMultiEvidenceLUType requestObj = APIRestUtils.conversionBytesWithCatching(request, marshaller,
         new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
 
     // Check if there are multiple evidence request
     final String docTypeID;
     if (requestObj.getRequestEvidenceLUItemCount() > 1) {
-      docTypeID = DE4AConstants.EVIDENCE_SCHEME + "::" + DE4AConstants.MULTI_ITEM_TYPE;
+      docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
     } else {
       docTypeID = requestObj.getRequestEvidenceLUItemAtIndex(0).getCanonicalEvidenceTypeId();
     }
@@ -121,13 +123,13 @@ public class RequestController {
     final var marshaller = DE4ACoreMarshaller.drRequestEventSubscriptionMarshaller();
 
     // Unmarshalling and schema validation
-    final RequestEventSubscriptionType requestObj = APIRestUtils.conversionBytesWithCatching(marshaller, request,
+    final RequestEventSubscriptionType requestObj = APIRestUtils.conversionBytesWithCatching(request, marshaller,
         new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
 
     // Check if there are multiple evidence request
     final String docTypeID;
     if (requestObj.getEventSubscripRequestItemCount() > 1) {
-      docTypeID = DE4AConstants.EVENT_CATALOGUE_SCHEME + "::" + DE4AConstants.MULTI_ITEM_TYPE;
+      docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, DE4AConstants.MULTI_ITEM_TYPE);
     } else {
       docTypeID = requestObj.getEventSubscripRequestItemAtIndex(0).getCanonicalEventCatalogUri();
     }

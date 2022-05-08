@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import com.helger.commons.annotation.Nonempty;
 
 /**
@@ -48,11 +49,19 @@ public enum EMessageServiceTypes {
     }
 
     @Override
+    @Deprecated
     public String toString() {
-        return super.toString().toLowerCase(Locale.ROOT);
+        return getEndpointType();
     }
 
-    public static EMessageServiceTypes getByType(final String type) {
+    @Nonnull
+    @Nonempty
+    public String getEndpointType() {
+        return name().toLowerCase(Locale.ROOT);
+    }
+
+    @Nullable
+    public static EMessageServiceTypes getByTypeOrNull(@Nullable final String type) {
         return LOOKUP.get(type);
     }
 }

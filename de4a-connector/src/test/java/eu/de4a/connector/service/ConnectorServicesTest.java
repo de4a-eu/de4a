@@ -1,7 +1,7 @@
 package eu.de4a.connector.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -30,7 +30,7 @@ import org.w3c.dom.Document;
 import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.config.AddressesProperties;
-import eu.de4a.connector.config.TestConf;
+import eu.de4a.connector.config.MockConf;
 import eu.de4a.connector.error.exceptions.MessageException;
 import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.DOMUtils;
@@ -39,16 +39,17 @@ import eu.de4a.connector.utils.DOMUtils;
 @TestPropertySource(locations = "classpath:application.yml")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@SpringBootTest(classes = {TestConf.class, AddressesProperties.class, StaticContextAccessor.class})
-public class TestConnectorServices {
+@SpringBootTest(classes = {MockConf.class, AddressesProperties.class, StaticContextAccessor.class})
+public class ConnectorServicesTest {
 
     @Autowired
     private DeliverService deliverService;
 
     @Autowired
     private RestTemplate restTemplate;
+
     @Autowired
-    ResourceLoader resourceLoader;
+    private ResourceLoader resourceLoader;
 
     private MockRestServiceServer mockServer;
 

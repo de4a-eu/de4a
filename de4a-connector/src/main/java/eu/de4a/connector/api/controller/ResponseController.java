@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.helger.dcng.api.DcngIdentifierFactory;
+import com.helger.peppolid.CIdentifier;
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
@@ -42,7 +44,7 @@ public class ResponseController {
 
     final var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller();
 
-    final RedirectUserType redirectUserMsg = APIRestUtils.conversionBytesWithCatching(marshaller, request,
+    final RedirectUserType redirectUserMsg = APIRestUtils.conversionBytesWithCatching(request, marshaller,
         new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO(redirectUserMsg.getDataEvaluator().getAgentUrn(),
@@ -62,13 +64,13 @@ public class ResponseController {
 
     final var marshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller(IDE4ACanonicalEvidenceType.NONE);
 
-    final ResponseExtractMultiEvidenceType responseObj = APIRestUtils.conversionBytesWithCatching(marshaller, request,
+    final ResponseExtractMultiEvidenceType responseObj = APIRestUtils.conversionBytesWithCatching(request, marshaller,
         new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
 
     // Check if there are multiple evidence responses
     final String docTypeID;
     if (responseObj.getResponseExtractEvidenceItemCount() > 1) {
-      docTypeID = DE4AConstants.EVIDENCE_SCHEME + "::" + DE4AConstants.MULTI_ITEM_TYPE;
+      docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
     } else {
       docTypeID = responseObj.getResponseExtractEvidenceItemAtIndex(0).getCanonicalEvidenceTypeId();
     }
@@ -89,13 +91,13 @@ public class ResponseController {
 
     final var marshaller = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller();
 
-    final ResponseEventSubscriptionType responseObj = APIRestUtils.conversionBytesWithCatching(marshaller, request,
+    final ResponseEventSubscriptionType responseObj = APIRestUtils.conversionBytesWithCatching(request, marshaller,
         new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
 
     // Check if there are multiple evidence responses
     final String docTypeID;
     if (responseObj.getResponseEventSubscriptionItemCount() > 1) {
-      docTypeID = DE4AConstants.EVENT_CATALOGUE_SCHEME + "::" + DE4AConstants.MULTI_ITEM_TYPE;
+      docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, DE4AConstants.MULTI_ITEM_TYPE);
     } else {
       docTypeID = responseObj.getResponseEventSubscriptionItemAtIndex(0).getCanonicalEventCatalogUri();
     }

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.helger.dcng.api.DcngIdentifierFactory;
+import com.helger.peppolid.CIdentifier;
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
@@ -37,12 +39,12 @@ public class EventController {
         final var marshaller = DE4ACoreMarshaller.dtEventNotificationMarshaller();
 
         final EventNotificationType eventObj = APIRestUtils
-                .conversionBytesWithCatching(marshaller, request, new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
+                .conversionBytesWithCatching(request, marshaller, new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
 
         // Check if there are multiple evidence responses
         final String docTypeID;
         if(eventObj.getEventNotificationItemCount() > 1) {
-            docTypeID = DE4AConstants.EVENT_CATALOGUE_SCHEME + "::" + DE4AConstants.MULTI_ITEM_TYPE;
+            docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, DE4AConstants.MULTI_ITEM_TYPE);
         } else {
             docTypeID = eventObj.getEventNotificationItemAtIndex(0).getCanonicalEventCatalogUri();
         }

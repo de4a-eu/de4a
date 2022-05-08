@@ -2,41 +2,35 @@ package eu.de4a.connector.config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import javax.servlet.ServletContext;
-import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
-import com.helger.dcng.core.http.DcngHttpClientSettings;
-import eu.de4a.kafkaclient.DE4AKafkaSettings;
 
+
+@PropertySource("classpath:application-test.properties")
 @Configuration
-@EnableScheduling
-public class InitConf implements ServletContextAware {
-  private ServletContext servletContext;
-
-  @Value("${de4a.kafka.enabled:false}")
-  private boolean kafkaEnabled;
-  @Value("${de4a.kafka.logging.enabled:true}")
-  private boolean kafkaLoggingEnabled;
-  @Value("${de4a.kafka.http.enabled:false}")
-  private boolean kafkaHttp;
-  @Value("${de4a.kafka.url:#{null}}")
-  private String kafkaUrl;
-  @Value("${de4a.kafka.topic:#{de4a-connector}}")
-  private String kafkaTopic;
+@ComponentScan(basePackages = {"eu.de4a.connector.api", "eu.de4a.connector.utils"})
+@Profile("test")
+public class MockConf {
+  // Required for testing only
+  @Bean
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
+  }
 
   @Bean
   public ViewResolver viewResolver() {
@@ -53,7 +47,7 @@ public class InitConf implements ServletContextAware {
     if (locale != null && !locale.trim().isEmpty())
       ret.setDefaultLocale(new Locale(locale));
     else
-      ret.setDefaultLocale(Locale.US);
+      ret.setDefaultLocale(Locale.ENGLISH);
     return ret;
   }
 
@@ -74,28 +68,10 @@ public class InitConf implements ServletContextAware {
     return ret;
   }
 
-  @Bean(initMethod = "start", destroyMethod = "stop")
-  public void kafkaSettings() {
-    DE4AKafkaSettings.defaultProperties().put("bootstrap.servers", kafkaUrl);
-    DE4AKafkaSettings.setKafkaEnabled(kafkaEnabled);
-    DE4AKafkaSettings.setKafkaHttp(kafkaHttp);
-    if (kafkaHttp) {
-      DE4AKafkaSettings.setHttpClientSettings(new DcngHttpClientSettings());
-    }
-    DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);
-    DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
-
-    ThreadContext.put("metrics.enabled", "false");
-  }
-
   @Bean(name = "applicationEventMulticaster")
   public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
     final SimpleApplicationEventMulticaster ret = new SimpleApplicationEventMulticaster();
     ret.setTaskExecutor(new SimpleAsyncTaskExecutor());
     return ret;
-  }
-
-  public void setServletContext(final ServletContext servletContext) {
-    this.servletContext = servletContext;
   }
 }

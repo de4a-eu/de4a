@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Mapping class for the external services URLs </br>
- * Check - {@link application.yml}
+ * Check local file {@link application.yml}
  *
  */
 @Component

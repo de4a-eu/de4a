@@ -1,78 +1,75 @@
 package eu.de4a.connector.utils;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import javax.annotation.Nonnull;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import com.helger.commons.collection.ArrayHelper;
+import com.helger.commons.http.CHttpHeader;
+import com.helger.commons.mime.CMimeType;
+import com.helger.dcng.core.http.DcngHttpClientSettings;
+import com.helger.httpclient.HttpClientManager;
+import com.helger.httpclient.response.ExtendedHttpResponseException;
+import com.helger.httpclient.response.ResponseHandlerByteArray;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 
-public class APIRestUtils {
+public final class APIRestUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(APIRestUtils.class);
 
   private APIRestUtils() {}
 
-  private static ResponseEntity<byte[]> checkResponse(final ResponseEntity<byte[]> response, final ConnectorException ex,
-      final boolean throwException) {
-    if (response == null || !HttpStatus.OK.equals(response.getStatusCode())) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Failed or empty response received - {}", response);
-      }
-      final ConnectorException exception = ex.withLayer(ELayerError.COMMUNICATIONS)
-          .withFamily(EFamilyErrorType.ERROR_RESPONSE).withModule(ex.getModule())
-          .withMessageArg(MessageFormat.format("Failed or empty response received {0}", response));
-      if (throwException) {
-        throw exception;
-      }
-      return new ResponseEntity<>(ConnectorExceptionHandler.getResponseErrorObjectBytes(exception),
-          HttpStatus.BAD_REQUEST);
-    }
-    return response;
-  }
-
+  @Nonnull
   public static ResponseEntity<byte[]> postRestObjectWithCatching(final String url, final byte[] request,
-      final boolean throwException, final ConnectorException ex, final RestTemplate restTemplate) {
-    final HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-    ResponseEntity<byte[]> response;
-    try {
-      response = restTemplate.postForEntity(url, new HttpEntity<>(request, headers), byte[].class);
-    } catch (final RestClientException e) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("There was an error on HTTP client POST connection", e);
+      final ConnectorException aBaseEx) {
+    // Use global HTTP settings
+    try (final HttpClientManager aHCM = HttpClientManager.create (new DcngHttpClientSettings ()))
+    {
+      final HttpPost aPost = new HttpPost (url);
+      aPost.addHeader(CHttpHeader.CONTENT_TYPE, CMimeType.APPLICATION_XML.getAsString());
+      aPost.setEntity (new ByteArrayEntity (request));
+      final byte [] aResult = aHCM.execute (aPost, new ResponseHandlerByteArray ());
+      if (aResult == null)
+      {
+        LOGGER.warn("HTTP POST to '"+url+"' - received an empty response");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ArrayHelper.EMPTY_BYTE_ARRAY);
       }
-      final ConnectorException exception = ex.withLayer(ELayerError.COMMUNICATIONS)
-          .withFamily(EFamilyErrorType.CONNECTION_ERROR).withMessageArg(e.getMessage());
-      if (throwException) {
-        throw exception;
-      }
-      return new ResponseEntity<>(ConnectorExceptionHandler.getResponseErrorObjectBytes(exception),
-          HttpStatus.BAD_REQUEST);
+      return ResponseEntity.ok(aResult);
     }
-    return checkResponse(response, ex, throwException);
+    catch (final ExtendedHttpResponseException ex)
+    {
+      LOGGER.error("There was an error on HTTP client POST connection", ex);
+
+      final ConnectorException exception = aBaseEx.withLayer(ELayerError.COMMUNICATIONS)
+          .withFamily(EFamilyErrorType.ERROR_RESPONSE).withMessageArg(ex.getMessage());
+      return new ResponseEntity<>(ConnectorExceptionHandler.getResponseErrorObjectBytes(exception), HttpStatus.resolve (ex.getStatusCode()));
+    }
+    catch (final IOException ex)
+    {
+      LOGGER.error("There was an error on HTTP client POST connection", ex);
+
+      final ConnectorException exception = aBaseEx.withLayer(ELayerError.COMMUNICATIONS)
+          .withFamily(EFamilyErrorType.CONNECTION_ERROR).withMessageArg(ex.getMessage());
+      return new ResponseEntity<>(ConnectorExceptionHandler.getResponseErrorObjectBytes(exception), HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Nonnull
-  public static <T> T conversionBytesWithCatching(final DE4ACoreMarshaller<T> marshaller, final InputStream obj,
+  public static <T> T conversionBytesWithCatching(final InputStream obj, final DE4ACoreMarshaller<T> marshaller,
       final ConnectorException ex) {
     T returnObj;
-    final ConnectorException baseEx =
-        ex.withFamily(EFamilyErrorType.CONVERSION_ERROR).withLayer(ELayerError.INTERNAL_FAILURE);
+    final ConnectorException baseEx = ex.withFamily(EFamilyErrorType.CONVERSION_ERROR).withLayer(ELayerError.INTERNAL_FAILURE);
     marshaller.readExceptionCallbacks().set(e -> {
       if (e.getLinkedException() != null)
-        ex.withMessageArg(e.getLinkedException().getMessage());
+        baseEx.withMessageArg(e.getLinkedException().getMessage());
     });
 
     try {
@@ -82,10 +79,9 @@ public class APIRestUtils {
         LOGGER.debug("Object received is not valid, check the structure", e);
       throw baseEx.withMessageArg(e.getMessage());
     }
-    if (returnObj == null) {
-      baseEx.withMessageArg(ex.getArgs());
-      throw baseEx;
-    }
+    if (returnObj == null)
+      throw baseEx.withMessageArg(ex.getArgs());
+
     return returnObj;
   }
 }

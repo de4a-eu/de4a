@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.mime.CMimeType;
+import com.helger.dcng.api.DcngIdentifierFactory;
 import com.helger.dcng.api.me.EMEProtocol;
 import com.helger.dcng.api.rest.DCNGPayload;
 import com.helger.dcng.webapi.as4.ApiPostLookupAndSend;
@@ -17,8 +18,6 @@ import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.peppolid.factory.IIdentifierFactory;
-import com.helger.peppolid.factory.SimpleIdentifierFactory;
-import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.EExternalModuleError;
@@ -31,7 +30,7 @@ import eu.de4a.connector.utils.KafkaClientWrapper;
 @Service
 public class AS4Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(AS4Service.class);
-    private static final IIdentifierFactory IF = SimpleIdentifierFactory.INSTANCE;
+    private static final IIdentifierFactory IF = DcngIdentifierFactory.INSTANCE;
 
     // Tags for Json returned by the AS4 API - Strong change dependence
     private static final String JSON_TAG_SUCCESS = "success";
@@ -48,10 +47,18 @@ public class AS4Service {
      * @param messageDTO
      */
     public void sendMessage(@Nonnull final AS4MessageDTO messageDTO) {
-        final IParticipantIdentifier sPI = IF.parseParticipantIdentifier(messageDTO.getSenderID().toLowerCase(Locale.ROOT));
-        final IParticipantIdentifier rPI = IF.parseParticipantIdentifier(messageDTO.getReceiverID().toLowerCase(Locale.ROOT));
+        final IParticipantIdentifier aSendingPI = IF.parseParticipantIdentifier(messageDTO.getSenderID().toLowerCase(Locale.ROOT));
+        if (aSendingPI == null)
+          throw new IllegalStateException("Failed to parse sending PI '"+messageDTO.getSenderID()+"'");
+        final IParticipantIdentifier aReceiverPI = IF.parseParticipantIdentifier(messageDTO.getReceiverID().toLowerCase(Locale.ROOT));
+        if (aReceiverPI == null)
+          throw new IllegalStateException("Failed to parse receiving PI '"+messageDTO.getReceiverID()+"'");
         final IDocumentTypeIdentifier aDocumentTypeID = IF.parseDocumentTypeIdentifier(messageDTO.getDocTypeID());
-        final IProcessIdentifier aProcessID = IF.createProcessIdentifier(DE4AConstants.PROCESS_SCHEME, messageDTO.getProcessID());
+        if (aDocumentTypeID == null)
+          throw new IllegalStateException("Failed to parse doctype ID '"+messageDTO.getDocTypeID()+"'");
+        final IProcessIdentifier aProcessID = IF.createProcessIdentifier(DcngIdentifierFactory.PROCESS_SCHEME, messageDTO.getProcessID());
+        if (aProcessID == null)
+          throw new IllegalStateException("Failed to parse process ID '"+messageDTO.getProcessID()+"'");
 
         final ICommonsList<DCNGPayload> aPayloads = new CommonsArrayList<>();
         final DCNGPayload a = new DCNGPayload();
@@ -59,10 +66,10 @@ public class AS4Service {
         a.setMimeType(CMimeType.APPLICATION_XML.getAsString());
         aPayloads.add(a);
 
-        KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_MSG_SENT, sPI.getURIEncoded(),
-                rPI.getURIEncoded(), aDocumentTypeID.getURIEncoded(), aProcessID.getURIEncoded());
+        KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_MSG_SENT, aSendingPI.getURIEncoded(),
+                aReceiverPI.getURIEncoded(), aDocumentTypeID.getURIEncoded(), aProcessID.getURIEncoded());
 
-        final IJsonObject aJson = ApiPostLookupAndSend.perform(sPI, rPI, aDocumentTypeID, aProcessID,
+        final IJsonObject aJson = ApiPostLookupAndSend.perform(aSendingPI, aReceiverPI, aDocumentTypeID, aProcessID,
                 EMEProtocol.AS4.getTransportProfileID(), aPayloads);
         //Process json response
         manageAs4SendingResult(aJson);
