@@ -80,7 +80,7 @@ public class XMLProcessingTest {
 
     @Test
     public void testUjiResponse() throws MessageException, ParserConfigurationException {
-        final String XPATH_TITULO_NAME_FILTER = "//*[local-name()='HigherEducationDiploma'][./*[local-name()='title']/*[local-name()='text'='%s']]";
+        final String XPATH_TITLE_NAME_FILTER = "//*[local-name()='HigherEducationDiploma'][./*[local-name()='title']/*[local-name()='text'='%s']]";
         final String xml = "<TitleEvidenceResponse xmlns:p2=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:udt=\"urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2\" xmlns:clm54217=\"urn:un:unece:uncefact:codelist:specification:54217:2001\" xmlns:edci=\"http://data.europa.eu/europass/model/credentials#\" xmlns:cred=\"http://data.europa.eu/europass/model/credentials/w3c#\" xmlns:p3=\"urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2\" xmlns:sa=\"urn:eu-de4a:xsd:CanonicalEvidenceType::HigherEducationEvidence:v1.0\" xmlns:clm66411=\"urn:un:unece:uncefact:codelist:specification:66411:2001\">\n"
                 + "<titles>\n"
                 + "<title>\n"
@@ -123,13 +123,12 @@ public class XMLProcessingTest {
         final Document docUji = DOMUtils.stringToDocument(xml);
 
         final Element title = (Element) DOMUtils.getNodeFromXpath(
-                String.format(XPATH_TITULO_NAME_FILTER ,
-                        "Degree in Computer Science Engineering (2001 Programme of Study)"),
+                String.format(XPATH_TITLE_NAME_FILTER, "Degree in Computer Science Engineering (2001 Programme of Study)"),
                 docUji.getDocumentElement());
-        System.out.println(DOMUtils.nodeToString(title, false));
+        LOGGER.info(DOMUtils.nodeToString(title, false));
 
         final Document docTitle = DOMUtils.newDocumentFromNode(title, "HigherEducationDiploma");
-        System.out.println(DOMUtils.documentToString(docTitle));
+        LOGGER.info(DOMUtils.documentToString(docTitle));
 
         final DE4AT41Marshaller <HigherEducationDiplomaType> marshaller = DE4AT41Marshaller.higherEducationDiploma();
         final HigherEducationDiplomaType diplomaType1 = marshaller.read(title);

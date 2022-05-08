@@ -25,7 +25,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import com.helger.dcng.api.DcngIdentifierFactory;
 import com.helger.dcng.webapi.as4.ApiPostLookupAndSend;
 import com.helger.json.IJsonObject;
 import com.helger.json.JsonObject;
@@ -72,8 +71,7 @@ public class ConnectorAPITest {
     LOGGER.debug(marshaller.formatted().getAsString(req));
     final byte[] bReq = marshaller.getAsBytes(req);
 
-    final int status = postCallMockedAS4API(bReq, "/request/usi/");
-
+    final int status = _postCallMockedAS4API(bReq, "/request/usi/");
     assertEquals(HttpStatus.OK.value(), status);
   }
 
@@ -88,8 +86,7 @@ public class ConnectorAPITest {
     LOGGER.debug(marshaller.formatted().getAsString(req));
     final byte[] bReq = marshaller.getAsBytes(req);
 
-    final int status = postCallMockedAS4API(bReq, "/response/usi/redirectUser/");
-
+    final int status = _postCallMockedAS4API(bReq, "/response/usi/redirectUser/");
     assertEquals(HttpStatus.OK.value(), status);
   }
 
@@ -102,7 +99,7 @@ public class ConnectorAPITest {
     LOGGER.debug(marshaller.formatted().getAsString(req));
     final byte[] bReq = marshaller.getAsBytes(req);
 
-    final int status = postCallMockedAS4API(bReq, "/event/notification/");
+    final int status = _postCallMockedAS4API(bReq, "/event/notification/");
 
     assertEquals(HttpStatus.OK.value(), status);
   }
@@ -113,7 +110,7 @@ public class ConnectorAPITest {
 
     final MockHttpServletRequestBuilder httpReq = MockMvcRequestBuilders.get("/service/mor/{lang}", "en");
     try {
-      final MvcResult result = createCall(httpReq, status().isOk());
+      final MvcResult result = _createCall(httpReq, status().isOk());
       assertNotNull(result);
     } catch (final Exception e) {
       LOGGER.error(e.getMessage());
@@ -123,12 +120,12 @@ public class ConnectorAPITest {
   }
 
 
-  private MvcResult createCall(final MockHttpServletRequestBuilder httpReq, final ResultMatcher matcher)
+  private MvcResult _createCall(final MockHttpServletRequestBuilder httpReq, final ResultMatcher matcher)
       throws Exception {
     return this.mockMvc.perform(httpReq).andDo(print()).andExpect(matcher).andReturn();
   }
 
-  private int postCallMockedAS4API(final byte[] bReq, final String path) {
+  private int _postCallMockedAS4API(final byte[] bReq, final String path) {
 
     final IJsonObject aJson = new JsonObject();
     aJson.add("success", true);
@@ -137,15 +134,16 @@ public class ConnectorAPITest {
     try (MockedStatic<ApiPostLookupAndSend> apiMock = Mockito.mockStatic(ApiPostLookupAndSend.class)) {
       apiMock
           .when(() -> ApiPostLookupAndSend.perform(any(), any(),
-              DcngIdentifierFactory.INSTANCE.createDocumentTypeIdentifierWithDefaultScheme("foo"),
-              DcngIdentifierFactory.INSTANCE.createProcessIdentifierWithDefaultScheme("bar"), any(), any()))
+              any (),
+              any (), any(), any()))
           .thenReturn(aJson);
 
       final MockHttpServletRequestBuilder httpReq = MockMvcRequestBuilders.post(path);
       httpReq.contentType(MediaType.APPLICATION_XML_VALUE).content(bReq);
 
-      final MvcResult result = createCall(httpReq, status().isOk());
+      final MvcResult result = _createCall(httpReq, status().isOk());
       LOGGER.info(result.getResponse().getContentAsString());
+
       return result.getResponse().getStatus();
     } catch (final Exception e) {
       LOGGER.error(e.getMessage());

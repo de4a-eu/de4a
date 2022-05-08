@@ -3,6 +3,7 @@ package eu.de4a.connector.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 
+@Immutable
 public final class APIRestUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(APIRestUtils.class);
 
@@ -30,6 +32,8 @@ public final class APIRestUtils {
   @Nonnull
   public static ResponseEntity<byte[]> postRestObjectWithCatching(final String url, final byte[] request,
       final ConnectorException aBaseEx) {
+    LOGGER.info ("Sending HTTP POST request to '" + url + "' with " + request.length + " bytes");
+
     // Use global HTTP settings
     try (final HttpClientManager aHCM = HttpClientManager.create (new DcngHttpClientSettings ()))
     {
@@ -46,7 +50,7 @@ public final class APIRestUtils {
     }
     catch (final ExtendedHttpResponseException ex)
     {
-      LOGGER.error("There was an error on HTTP client POST connection", ex);
+      LOGGER.error("There was an error on HTTP client POST connection to '" + url + "'", ex);
 
       final ConnectorException exception = aBaseEx.withLayer(ELayerError.COMMUNICATIONS)
           .withFamily(EFamilyErrorType.ERROR_RESPONSE).withMessageArg(ex.getMessage());

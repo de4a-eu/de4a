@@ -12,7 +12,6 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -26,12 +25,6 @@ import org.springframework.web.servlet.view.JstlView;
 @ComponentScan(basePackages = {"eu.de4a.connector.api", "eu.de4a.connector.utils"})
 @Profile("test")
 public class MockConf {
-  // Required for testing only
-  @Bean
-  public RestTemplate restTemplate() {
-    return new RestTemplate();
-  }
-
   @Bean
   public ViewResolver viewResolver() {
     final InternalResourceViewResolver ret = new InternalResourceViewResolver();
