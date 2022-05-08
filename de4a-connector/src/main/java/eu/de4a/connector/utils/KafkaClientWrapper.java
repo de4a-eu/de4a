@@ -24,22 +24,22 @@ public class KafkaClientWrapper {
     private KafkaClientWrapper (){}
 
     public static void sendInfo(final ELogMessages logMessage, final Object...params) {
-        send(logMessage, EErrorLevel.INFO, params);
+        _send(logMessage, EErrorLevel.INFO, params);
     }
 
     public static void sendSuccess(final ELogMessages logMessage, final Object...params) {
-        send(logMessage, EErrorLevel.SUCCESS, params);
+        _send(logMessage, EErrorLevel.SUCCESS, params);
     }
 
     public static void sendWarn(final ELogMessages logMessage, final Object...params) {
-        send(logMessage, EErrorLevel.WARN, params);
+        _send(logMessage, EErrorLevel.WARN, params);
     }
 
     public static void sendError(final ELogMessages logMessage, final Object...params) {
-        send(logMessage, EErrorLevel.ERROR, params);
+        _send(logMessage, EErrorLevel.ERROR, params);
     }
 
-    private static void send(final ELogMessages logMessage, final EErrorLevel level, final Object...params) {
+    private static void _send(final ELogMessages logMessage, final EErrorLevel level, final Object...params) {
         final String msg = MessageUtils.format(logMessage.getKey(), params);
 
         ThreadContext.put(ORIGIN_TAG, logMessage.getOrigin().getLabel());

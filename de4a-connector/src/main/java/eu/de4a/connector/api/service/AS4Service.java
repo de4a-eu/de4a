@@ -46,9 +46,8 @@ public class AS4Service {
      * {@link com.helger.dcng.webapi.as4.ApiPostLookendAndSend}
      *
      * @param messageDTO
-     * @return if message is successfully sent
      */
-    public boolean sendMessage(@Nonnull final AS4MessageDTO messageDTO) {
+    public void sendMessage(@Nonnull final AS4MessageDTO messageDTO) {
         final IParticipantIdentifier sPI = IF.parseParticipantIdentifier(messageDTO.getSenderID().toLowerCase(Locale.ROOT));
         final IParticipantIdentifier rPI = IF.parseParticipantIdentifier(messageDTO.getReceiverID().toLowerCase(Locale.ROOT));
         final IDocumentTypeIdentifier aDocumentTypeID = IF.parseDocumentTypeIdentifier(messageDTO.getDocTypeID());
@@ -67,8 +66,6 @@ public class AS4Service {
                 EMEProtocol.AS4.getTransportProfileID(), aPayloads);
         //Process json response
         manageAs4SendingResult(aJson);
-
-        return true;
     }
 
     /**

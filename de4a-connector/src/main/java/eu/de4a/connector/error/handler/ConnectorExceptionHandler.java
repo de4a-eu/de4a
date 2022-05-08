@@ -1,11 +1,13 @@
 package eu.de4a.connector.error.handler;
 
 import java.util.Locale;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Component;
+import com.helger.commons.string.StringHelper;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
@@ -29,7 +31,8 @@ public class ConnectorExceptionHandler {
         }
     }
 
-    public static Object getResponseError(@Nullable final ConnectorException ex, final boolean returnBytes) {
+    @Nonnull
+    public static ResponseErrorType getResponseErrorObject(@Nullable final ConnectorException ex) {
         final ResponseErrorType response;
         if(ex != null) {
             response = DE4AResponseDocumentHelper.createResponseError(false);
@@ -38,15 +41,17 @@ public class ConnectorExceptionHandler {
         } else {
             response = DE4AResponseDocumentHelper.createResponseError(true);
         }
-        if(returnBytes) {
-            return DE4ACoreMarshaller.defResponseMessage().getAsBytes(response);
-        }
         return response;
+    }
+
+    @Nullable
+    public static byte[] getResponseErrorObjectBytes(@Nullable final ConnectorException ex) {
+        return DE4ACoreMarshaller.defResponseMessage().getAsBytes(getResponseErrorObject (ex));
     }
 
     public static byte[] getGenericResponseError(final Exception ex) {
         final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
-        final String msg = ex.getMessage() == null ? "Internal Connector Error" : ex.getMessage();
+        final String msg = StringHelper.hasNoText (ex.getMessage()) ? "Internal Connector Error" : ex.getMessage();
         responseError.addError(DE4AResponseDocumentHelper.createError("99999", msg));
         return DE4ACoreMarshaller.defResponseMessage().getAsBytes(responseError);
     }

@@ -37,52 +37,52 @@ import eu.de4a.iem.core.jaxb.common.ResponseErrorType;
 @ControllerAdvice
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomRestExceptionHandler.class);
-    
+
     @Override
-    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
-            HttpHeaders headers, HttpStatus status, WebRequest request) {
-        String error = ex.getParameterName() + " parameter is missing";
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(final MissingServletRequestParameterException ex,
+            final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+        final String error = ex.getParameterName() + " parameter is missing";
         return buildBadRequestError(error);
     }
 
     @ExceptionHandler(value = { ConnectorException.class })
-    protected ResponseEntity<byte[]> handleConnectorException(ConnectorException ex, WebRequest request) {
+    protected ResponseEntity<byte[]> handleConnectorException(final ConnectorException ex, final WebRequest request) {
         LOGGER.error("handleConnectorException", ex);
-        HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-        return new ResponseEntity<>((byte[]) ConnectorExceptionHandler.getResponseError(ex, true), 
+        return new ResponseEntity<>(ConnectorExceptionHandler.getResponseErrorObjectBytes(ex),
                 headers, ex.getStatus());
     }
 
     @ExceptionHandler(value = { Exception.class })
-    protected ResponseEntity<byte[]> handleExceptionUnknown(Exception ex, WebRequest request) {
+    protected ResponseEntity<byte[]> handleExceptionUnknown(final Exception ex, final WebRequest request) {
         LOGGER.error("handleExceptionUnknown", ex);
-        HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-        return new ResponseEntity<>(ConnectorExceptionHandler.getGenericResponseError(ex), 
+        return new ResponseEntity<>(ConnectorExceptionHandler.getGenericResponseError(ex),
                 headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
-    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex,
-            HttpHeaders headers, HttpStatus status, WebRequest request) {
-        List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(final HttpMediaTypeNotSupportedException ex,
+            final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+        final List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
         if (!CollectionUtils.isEmpty(mediaTypes)) {
             headers.setAccept(mediaTypes);
         }
-        List<String> args = new ArrayList<>();
+        final List<String> args = new ArrayList<>();
         args.add(String.valueOf(ex.getContentType()));
         args.add(mediaTypes.toString());
-        String err = MessageUtils.format(MessageKeys.ERROR_400_MIMETYPE, args.toArray());
+        final String err = MessageUtils.format(MessageKeys.ERROR_400_MIMETYPE, args.toArray());
         return buildBadRequestError(err);
     }
 
     @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-            HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex,
+            final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
         String error;
         if (ex.getCause() instanceof UnmarshalException) {
-            String[] args = { ex.getMessage() };
+            final String[] args = { ex.getMessage() };
             error = MessageUtils.format(MessageKeys.ERROR_400_UNMARSHALLING, args);
         } else {
             error = MessageUtils.format(MessageKeys.ERROR_400_ARGS_REQUIRED, null);
@@ -91,28 +91,28 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
-            HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleNoHandlerFoundException(final NoHandlerFoundException ex, final HttpHeaders headers,
+            final HttpStatus status, final WebRequest request) {
         LOGGER.warn("REST service requested not found");
 
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-        String err = MessageUtils.format(MessageKeys.ERROR_SERVICE_NOT_FOUND,
+        final String err = MessageUtils.format(MessageKeys.ERROR_SERVICE_NOT_FOUND,
                 new Object[] { ((ServletWebRequest) request).getRequest().getRequestURI() });
-        ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
-        String code = ELayerError.COMMUNICATIONS.getID() + EExternalModuleError.NONE.getId()
+        final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
+        final String code = ELayerError.COMMUNICATIONS.getID() + EExternalModuleError.NONE.getId()
                 + EFamilyErrorType.SERVICE_NOT_FOUND.getID();
         responseError.addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.NOT_FOUND);
 
     }
 
-    private ResponseEntity<Object> buildBadRequestError(String err) {
+    private ResponseEntity<Object> buildBadRequestError(final String err) {
         LOGGER.warn("REST Client BAD REQUEST-> {}", err);
 
-        HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-        ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
-        String code = ELayerError.COMMUNICATIONS.getID() + EExternalModuleError.NONE.getId()
+        final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError(false);
+        final String code = ELayerError.COMMUNICATIONS.getID() + EExternalModuleError.NONE.getId()
                 + EFamilyErrorType.MISSING_REQUIRED_ARGUMENTS.getID();
         responseError.addError(DE4AResponseDocumentHelper.createError(code, err));
         return new ResponseEntity<>(responseError, headers, HttpStatus.BAD_REQUEST);

@@ -51,7 +51,7 @@ public class MessageExchangeManager {
 
         ResponseEntity<byte[]> response;
         switch (iProcessID.getValue()) {
-            case DE4AConstants.MESSAGE_TYPE_REQUEST:            
+            case DE4AConstants.PROCESS_ID_REQUEST:            
                 response = this.deliverService.pushMessage(docMsg, senderID, receiverID, 
                         ELogMessages.LOG_REQ_DO);
                 if(HttpStatus.OK.equals(response.getStatusCode())) {
@@ -60,7 +60,7 @@ public class MessageExchangeManager {
                     LOGGER.error("Error connecting with the Data Owner");
                 }
                 break;
-            case DE4AConstants.MESSAGE_TYPE_RESPONSE:
+            case DE4AConstants.PROCESS_ID_RESPONSE:
                 response = this.deliverService.pushMessage(docMsg, senderID, receiverID, 
                         ELogMessages.LOG_REQ_DE);
                 if(HttpStatus.OK.equals(response.getStatusCode())) {

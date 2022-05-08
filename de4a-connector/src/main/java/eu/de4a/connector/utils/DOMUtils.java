@@ -213,8 +213,7 @@ public class DOMUtils {
     }
 
     public static Transformer getXXESecureTransformer(final String impl) {
-        TransformerFactory factory;
-        factory = TransformerFactory.newInstance(impl, null);
+        final TransformerFactory factory = TransformerFactory.newInstance(impl, null);
 
         try {
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);

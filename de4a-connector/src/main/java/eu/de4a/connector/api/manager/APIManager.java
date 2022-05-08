@@ -27,7 +27,7 @@ public class APIManager {
      * @param marshaller
      * @return if the message has been sent
      */
-    public <T> boolean processIncomingMessage(final T requestObj,
+    public <T> void processIncomingMessage(final T requestObj,
             final AS4MessageDTO messageDTO, final String requestId,
             final String kafkaMsg, final DE4ACoreMarshaller<T> marshaller) {
 
@@ -37,6 +37,6 @@ public class APIManager {
         final Document doc = marshaller.getAsDocument(requestObj);
 
         // Sends AS4 message - it can trigger an error response via exceptions advised
-        return this.as4Service.sendMessage(messageDTO.withMessage(doc));
+        this.as4Service.sendMessage(messageDTO.withMessage(doc));
     }
 }
