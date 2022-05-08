@@ -6,7 +6,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import com.helger.commons.collection.ArrayHelper;
 import eu.de4a.connector.StaticContextAccessor;
 
-public class MessageUtils {
+public final class MessageUtils {
 
     private MessageUtils (){}
 

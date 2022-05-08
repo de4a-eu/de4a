@@ -1,10 +1,8 @@
 package eu.de4a.connector.api.controller;
 
-import java.io.InputStream;
-import java.net.URL;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,14 +13,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.helger.commons.io.stream.NonBlockingBufferedInputStream;
+import com.helger.commons.io.file.FilenameHelper;
+import com.helger.commons.string.StringHelper;
+import com.helger.dcng.core.api.DcngApiHelper;
+import com.helger.dcng.core.http.DcngHttpClientSettings;
+import com.helger.httpclient.HttpClientManager;
+import com.helger.httpclient.response.ResponseHandlerByteArray;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
-import eu.de4a.connector.utils.APIRestUtils;
+import eu.de4a.ial.api.IALMarshaller;
+import eu.de4a.ial.api.jaxb.ResponseLookupRoutingInformationType;
 
 @Controller
 @RequestMapping("/service")
@@ -33,24 +36,40 @@ public class ServiceController {
   @Value("${mor.file.endpoint}")
   private String morFileEndpoint;
 
-  @PostMapping(value = "/ial/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity<byte[]> lookupRoutingInformation(final InputStream request) {
-    LOGGER.debug("Request to API /service/ial/ received");
+  @GetMapping(value = "/ial/{cot}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity<byte[]> lookupRoutingInformation(@Valid @PathVariable @NotNull final String cot) {
+    LOGGER.debug("Request to API /service/ial/"+cot+" received");
 
-    // NOT IMPLEMENTED - YET
-    // TODO - has to be adapted to the new IAL implementation
-    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
+    // Main query
+    final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL(StringHelper.getExplodedToOrderedSet(",", cot));
+    if (aResponse == null)
+    {
+      // Error case
+      throw new ConnectorException().withFamily(EFamilyErrorType.CONNECTION_ERROR)
+      .withLayer(ELayerError.INTERNAL_FAILURE).withModule(EExternalModuleError.IAL)
+      .withMessageArg("Error querying IAL")
+      .withHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // Success case
+    return ResponseEntity.status(HttpStatus.OK).body(IALMarshaller.idkResponseLookupRoutingInformationMarshaller().getAsBytes(aResponse));
   }
 
   @GetMapping(value = "/mor/{lang}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<byte[]> getMorFile(@Valid @PathVariable @NotNull final String lang) {
-    // TODO - Potential changes around the file name pattern and implementation of this API
-    LOGGER.debug("Request to API /service/mor/ received");
+    LOGGER.debug("Request to API /service/mor/"+lang+" received");
     try {
-      final String fileName = "mor_"+lang+".json";
-      final URIBuilder uri = APIRestUtils.buildURI(this.morFileEndpoint, new String[] {fileName}, null, null);
-      try (final NonBlockingBufferedInputStream in = new NonBlockingBufferedInputStream(new URL(uri.toString()).openStream())) {
-        return ResponseEntity.ok(in.readAllBytes());
+      // TODO - Potential changes around the file name pattern and implementation of this API
+      final String sDestURL = FilenameHelper.getCleanConcatenatedUrlPath (this.morFileEndpoint,
+          "/mor_"+lang+".json");
+
+      try (final HttpClientManager aHCM = HttpClientManager.create (new DcngHttpClientSettings ()))
+      {
+        final HttpGet aGet = new HttpGet (sDestURL);
+        // Query
+        final byte [] aResult = aHCM.execute (aGet, new ResponseHandlerByteArray ());
+        // Pass through
+        return ResponseEntity.ok(aResult);
       }
     } catch (final Exception e) {
       throw new ConnectorException().withFamily(EFamilyErrorType.CONNECTION_ERROR)
@@ -59,5 +78,4 @@ public class ServiceController {
           .withHttpStatus(HttpStatus.NOT_FOUND);
     }
   }
-
 }

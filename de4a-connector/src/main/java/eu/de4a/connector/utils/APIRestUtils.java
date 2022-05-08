@@ -1,13 +1,9 @@
 package eu.de4a.connector.utils;
 
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Objects;
 import javax.annotation.Nonnull;
-import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -71,7 +67,7 @@ public class APIRestUtils {
   @Nonnull
   public static <T> T conversionBytesWithCatching(final DE4ACoreMarshaller<T> marshaller, final InputStream obj,
       final ConnectorException ex) {
-    T returnObj = null;
+    T returnObj;
     final ConnectorException baseEx =
         ex.withFamily(EFamilyErrorType.CONVERSION_ERROR).withLayer(ELayerError.INTERNAL_FAILURE);
     marshaller.readExceptionCallbacks().set(e -> {
@@ -91,33 +87,5 @@ public class APIRestUtils {
       throw baseEx;
     }
     return returnObj;
-  }
-
-  public static URIBuilder buildURI(final String endpoint, @Nonnull final String[] paths, final String[] params,
-      final String[] values) {
-
-    URIBuilder uriBuilder;
-    try {
-      uriBuilder = new URIBuilder(endpoint);
-
-      if (uriBuilder.toString().endsWith("/") && paths.length > 0)
-        uriBuilder.setPath(uriBuilder.getPath().substring(0, uriBuilder.getPath().length() - 1));
-
-      Arrays.asList(paths).stream()
-          .forEach(x -> uriBuilder.setPath(Objects.toString(uriBuilder.getPath(), "") + "/" + x));
-
-      if (params != null && values != null) {
-        if (params.length == values.length) {
-          for (int i = 0; i < params.length; i++) {
-            uriBuilder.addParameter(params[i], values[i]);
-          }
-        } else
-          throw new IllegalArgumentException("URIBuilder - Params and values don't matches");
-      }
-    } catch (NullPointerException | URISyntaxException e) {
-      LOGGER.error("There was an error creating URI", e);
-      return new URIBuilder();
-    }
-    return uriBuilder;
   }
 }
