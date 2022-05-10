@@ -55,6 +55,26 @@ public class ServiceController {
     return ResponseEntity.status(HttpStatus.OK).body(IALMarshaller.idkResponseLookupRoutingInformationMarshaller().getAsBytes(aResponse));
   }
 
+  @GetMapping(value = "/ial/{cot}/{atu}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity<byte[]> lookupRoutingInformation(@Valid @PathVariable @NotNull final String cot,
+                                                         @Valid @PathVariable @NotNull final String atu) {
+    LOGGER.debug("Request to API /service/ial/"+cot+"/"+atu+" received");
+
+    // Main query
+    final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL(StringHelper.getExplodedToOrderedSet(",", cot), atu);
+    if (aResponse == null)
+    {
+      // Error case
+      throw new ConnectorException().withFamily(EFamilyErrorType.CONNECTION_ERROR)
+      .withLayer(ELayerError.INTERNAL_FAILURE).withModule(EExternalModuleError.IAL)
+      .withMessageArg("Error querying IAL with ATU code")
+      .withHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // Success case
+    return ResponseEntity.status(HttpStatus.OK).body(IALMarshaller.idkResponseLookupRoutingInformationMarshaller().getAsBytes(aResponse));
+  }
+
   @GetMapping(value = "/mor/{lang}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<byte[]> getMorFile(@Valid @PathVariable @NotNull final String lang) {
     LOGGER.debug("Request to API /service/mor/"+lang+" received");
