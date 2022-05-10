@@ -69,8 +69,10 @@ public class AS4Service {
         KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_MSG_SENT, aSendingPI.getURIEncoded(),
                 aReceiverPI.getURIEncoded(), aDocumentTypeID.getURIEncoded(), aProcessID.getURIEncoded());
 
+        // Perform SMP client lookup and send the AS4 message in one call
         final IJsonObject aJson = ApiPostLookupAndSend.perform(aSendingPI, aReceiverPI, aDocumentTypeID, aProcessID,
                 EMEProtocol.AS4.getTransportProfileID(), aPayloads);
+
         //Process json response
         manageAs4SendingResult(aJson);
     }
