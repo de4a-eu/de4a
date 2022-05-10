@@ -5,13 +5,11 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import com.helger.commons.collection.impl.CommonsArrayList;
-import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.mime.CMimeType;
 import com.helger.dcng.api.DcngIdentifierFactory;
 import com.helger.dcng.api.me.EMEProtocol;
 import com.helger.dcng.api.rest.DCNGPayload;
-import com.helger.dcng.webapi.as4.ApiPostLookupAndSend;
+import com.helger.dcng.webapi.as4.ApiPostLookupAndSendIt2;
 import com.helger.json.IJsonObject;
 import com.helger.json.serialize.JsonWriterSettings;
 import com.helger.peppolid.IDocumentTypeIdentifier;
@@ -60,18 +58,16 @@ public class AS4Service {
         if (aProcessID == null)
           throw new IllegalStateException("Failed to parse process ID '"+messageDTO.getProcessID()+"'");
 
-        final ICommonsList<DCNGPayload> aPayloads = new CommonsArrayList<>();
-        final DCNGPayload a = new DCNGPayload();
-        a.setValue(DOMUtils.documentToByte(messageDTO.getMessage()));
-        a.setMimeType(CMimeType.APPLICATION_XML.getAsString());
-        aPayloads.add(a);
+        final DCNGPayload aPayload = new DCNGPayload();
+        aPayload.setValue(DOMUtils.documentToByte(messageDTO.getMessage()));
+        aPayload.setMimeType(CMimeType.APPLICATION_XML.getAsString());
 
         KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_MSG_SENT, aSendingPI.getURIEncoded(),
                 aReceiverPI.getURIEncoded(), aDocumentTypeID.getURIEncoded(), aProcessID.getURIEncoded());
 
         // Perform SMP client lookup and send the AS4 message in one call
-        final IJsonObject aJson = ApiPostLookupAndSend.perform(aSendingPI, aReceiverPI, aDocumentTypeID, aProcessID,
-                EMEProtocol.AS4.getTransportProfileID(), aPayloads);
+        final IJsonObject aJson = ApiPostLookupAndSendIt2.perform(aSendingPI, aReceiverPI, aDocumentTypeID, aProcessID,
+                EMEProtocol.AS4.getTransportProfileID(), aPayload);
 
         //Process json response
         manageAs4SendingResult(aJson);

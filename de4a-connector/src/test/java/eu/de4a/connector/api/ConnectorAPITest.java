@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import com.helger.dcng.webapi.as4.ApiPostLookupAndSend;
+import com.helger.dcng.webapi.as4.ApiPostLookupAndSendIt2;
 import com.helger.json.IJsonObject;
 import com.helger.json.JsonObject;
 import eu.de4a.connector.StaticContextAccessor;
@@ -131,9 +131,9 @@ public class ConnectorAPITest {
     aJson.add("success", true);
 
     // To skip the AS4 exchange since there is no multiple Connector instances running on tests
-    try (MockedStatic<ApiPostLookupAndSend> apiMock = Mockito.mockStatic(ApiPostLookupAndSend.class)) {
+    try (MockedStatic<ApiPostLookupAndSendIt2> apiMock = Mockito.mockStatic(ApiPostLookupAndSendIt2.class)) {
       apiMock
-          .when(() -> ApiPostLookupAndSend.perform(any(), any(),
+          .when(() -> ApiPostLookupAndSendIt2.perform(any(), any(),
               any (),
               any (), any(), any()))
           .thenReturn(aJson);
