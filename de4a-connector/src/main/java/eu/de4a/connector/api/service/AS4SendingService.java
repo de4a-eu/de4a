@@ -31,9 +31,9 @@ import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 
 @Service
-public class AS4Service
+public class AS4SendingService
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (AS4Service.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (AS4SendingService.class);
 
   /**
    * Invoke the message exchange via API
@@ -72,15 +72,15 @@ public class AS4Service
                                  aProcessID.getURIEncoded ());
 
     // Perform SMP client lookup and send the AS4 message in one call
-    final LookupAndSendingResult aJson = ApiPostLookupAndSendIt2.perform (aSendingPI,
-                                                                          aReceiverPI,
-                                                                          aDocumentTypeID,
-                                                                          aProcessID,
-                                                                          EMEProtocol.AS4.getTransportProfileID (),
-                                                                          aPayload);
+    final LookupAndSendingResult aResult = ApiPostLookupAndSendIt2.perform (aSendingPI,
+                                                                            aReceiverPI,
+                                                                            aDocumentTypeID,
+                                                                            aProcessID,
+                                                                            EMEProtocol.AS4.getTransportProfileID (),
+                                                                            aPayload);
 
     // Process json response
-    manageAs4SendingResult (aJson);
+    _manageAs4SendingResult (aResult);
   }
 
   /**
@@ -89,12 +89,12 @@ public class AS4Service
    * object is managed here
    *
    * @param aJson
-   *        - Execution results in json format from the dcng-web-api
+   *        Execution results in format from the dcng-web-api
    */
-  private void manageAs4SendingResult (@Nonnull final LookupAndSendingResult aResult)
+  private static void _manageAs4SendingResult (@Nonnull final LookupAndSendingResult aResult)
   {
     if (LOGGER.isDebugEnabled ())
-      LOGGER.debug ("AS4 Sending result:\n {}", aResult.getAsJson ().getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
+      LOGGER.debug ("AS4 Sending result:\n " + aResult.getAsJson ().getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
 
     if (!aResult.isOverallSuccess ())
     {

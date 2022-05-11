@@ -1,42 +1,53 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
-import java.util.UUID;
-import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.w3c.dom.Document;
 
-import com.helger.dcng.api.DcngIdentifierFactory;
-import com.helger.peppolid.CIdentifier;
+import com.helger.commons.concurrent.ThreadHelper;
+import com.helger.commons.datetime.PDTFactory;
+import com.helger.xml.serialize.write.EXMLSerializeIndent;
+import com.helger.xml.serialize.write.XMLWriter;
+import com.helger.xml.serialize.write.XMLWriterSettings;
 
+import eu.de4a.connector.api.legacy.LegacyAPIHelper;
+import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
-import eu.de4a.iem.core.CIEM;
-import eu.de4a.iem.core.jaxb.common.RequestEvidenceItemType;
+import eu.de4a.iem.core.DE4ACoreMarshaller;
+import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceIMType;
-import eu.de4a.iem.core.jaxb.eidas.np.GenderType;
+import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
+import eu.de4a.iem.jaxb.common.types.ErrorListType;
+import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
+import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 
 @Controller
 public class ConnectorController
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (ConnectorController.class);
+
+  @Autowired
+  private APIManager apiManager;
 
   @GetMapping (value = "/")
   public String root ()
@@ -81,88 +92,77 @@ public class ConnectorController
   public ResponseEntity <byte []> iteration1LegacyIM (@Valid final InputStream request)
   {
     // Read the old format
-    final var marshaller = DE4AMarshaller.drImRequestMarshaller ();
+    final var aOldRequestMarshaller = DE4AMarshaller.drImRequestMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestTransferEvidenceUSIIMDRType aOldRequest = _conversionBytesWithCatching (request,
-                                                                                         marshaller,
+                                                                                         aOldRequestMarshaller,
                                                                                          new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
 
     // Convert to the new format
-    final RequestExtractMultiEvidenceIMType aNewRequest = new RequestExtractMultiEvidenceIMType ();
-    aNewRequest.setRequestId (aOldRequest.getRequestId ());
-    aNewRequest.setSpecificationId (CIEM.SPECIFICATION_ID);
-    aNewRequest.setTimeStamp (aOldRequest.getTimeStamp ());
-    aNewRequest.setProcedureId (aOldRequest.getProcedureId ());
+    final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest (aOldRequest);
 
-    final Function <eu.de4a.iem.jaxb.common.types.AgentType, eu.de4a.iem.core.jaxb.common.AgentType> aAgentConverter = o -> {
-      final eu.de4a.iem.core.jaxb.common.AgentType ret = new eu.de4a.iem.core.jaxb.common.AgentType ();
-      ret.setAgentName (o.getAgentNameValue ());
-      ret.setAgentUrn (o.getAgentUrn ());
-      ret.setRedirectURL (o.getRedirectURL ());
-      return ret;
-    };
-    aNewRequest.setDataEvaluator (aAgentConverter.apply (aOldRequest.getDataEvaluator ()));
-    aNewRequest.setDataOwner (aAgentConverter.apply (aOldRequest.getDataOwner ()));
-    final RequestEvidenceItemType aItem = new RequestEvidenceItemType ();
-    final Function <eu.de4a.iem.jaxb.common.idtypes.NaturalPersonIdentifierType, eu.de4a.iem.core.jaxb.common.NaturalPersonIdentifierType> aNPConverter = o -> {
-      final eu.de4a.iem.core.jaxb.common.NaturalPersonIdentifierType ret = new eu.de4a.iem.core.jaxb.common.NaturalPersonIdentifierType ();
-      ret.setPersonIdentifier (o.getPersonIdentifier ());
-      ret.setFirstName (o.getFirstNameValue ());
-      ret.setFamilyName (o.getFamilyNameValue ());
-      ret.setDateOfBirth (o.getDateOfBirth ());
-      if (o.getGender () != null)
-        ret.setGender (GenderType.fromValue (o.getGender ().value ()));
-      ret.setBirthName (o.getBirthNameValue ());
-      ret.setPlaceOfBirth (o.getPlaceOfBirthValue ());
-      ret.setCurrentAddress (o.getCurrentAddress ());
-      return ret;
-    };
-    final Function <eu.de4a.iem.jaxb.common.idtypes.LegalPersonIdentifierType, eu.de4a.iem.core.jaxb.common.LegalPersonIdentifierType> aLPConverter = o -> {
-      final eu.de4a.iem.core.jaxb.common.LegalPersonIdentifierType ret = new eu.de4a.iem.core.jaxb.common.LegalPersonIdentifierType ();
-      ret.setPersonIdentifier (o.getPersonIdentifier ());
-      ret.setFirstName (o.getFirstNameValue ());
-      ret.setFamilyName (o.getFamilyNameValue ());
-      ret.setDateOfBirth (o.getDateOfBirth ());
-      if (o.getGender () != null)
-        ret.setGender (GenderType.fromValue (o.getGender ().value ()));
-      ret.setBirthName (o.getBirthNameValue ());
-      ret.setPlaceOfBirth (o.getPlaceOfBirthValue ());
-      ret.setCurrentAddress (o.getCurrentAddress ());
-      return ret;
-    };
-    final Function <eu.de4a.iem.jaxb.common.types.DataRequestSubjectCVType, eu.de4a.iem.core.jaxb.common.DataRequestSubjectCVType> aDRSConverter = o -> {
-      final eu.de4a.iem.core.jaxb.common.DataRequestSubjectCVType ret = new eu.de4a.iem.core.jaxb.common.DataRequestSubjectCVType ();
-      if (o.getDataSubjectPerson () != null)
-        ret.setDataSubjectPerson (aNPConverter.apply (o.getDataSubjectPerson ()));
-      if (o.getDataSubjectCompany () != null)
-        ret.setDataSubjectCompany (aLPConverter.apply (o.getDataSubjectCompany ()));
-      if (o.getDataSubjectRepresentative () != null)
-        ret.setDataSubjectRepresentative (aNPConverter.apply (o.getDataSubjectRepresentative ()));
-      return ret;
-    };
-    aItem.setRequestItemId (UUID.randomUUID ().toString ());
-    aItem.setDataRequestSubject (aDRSConverter.apply (aOldRequest.getDataRequestSubject ()));
-    aNewRequest.addRequestEvidenceIMItem (aItem);
+    final String sNewDocTypeID = aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewRequest.getDataEvaluator ().getAgentUrn (),
+                                                        aNewRequest.getDataOwner ().getAgentUrn (),
+                                                        sNewDocTypeID,
+                                                        DE4AConstants.PROCESS_ID_REQUEST);
 
-    // Check if there are multiple evidence request
-    final String docTypeID;
-    if (aOldRequest.getRequestEvidenceUSIItemCount () > 1)
+    final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ();
+    this.apiManager.processIncomingMessage (aNewRequest, messageDTO, sNewDocTypeID, "Legacy IM Request", aNewRequestMarshaller);
+
+    // Remember request
+    LegacyAPIHelper.rememberLegacyRequest (aOldRequest);
+
+    // Synchronously wait for response
+    final long timeout = 60_000;
+    final long init = PDTFactory.getCurrentMillis ();
+    Document aResponseDoc = LegacyAPIHelper.isFinalized (aOldRequest);
+    while (aResponseDoc == null)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+      LOGGER.info ("Waiting for synchronous response on legacy IM request");
+      ThreadHelper.sleep (500);
+      aResponseDoc = LegacyAPIHelper.isFinalized (aOldRequest);
+      if (PDTFactory.getCurrentMillis () - init >= timeout)
+        break;
+    }
+
+    final ResponseTransferEvidenceType aOldResponse;
+    if (aResponseDoc == null)
+    {
+      // Failed to wait - send error message back
+      final String sErrorMsg = "Failed to wait for synchronous response on legacy IM request. Timeout after " + timeout + " milliseconds.";
+      LOGGER.error (sErrorMsg);
+      // Copy as much as possible from the old request
+      aOldResponse = DE4AResponseDocumentHelper.createResponseTransferEvidence (aOldRequest);
+      final ErrorListType aOldErrorList = new ErrorListType ();
+      final ErrorType aError = new ErrorType ();
+      aError.setCode ("99999");
+      aError.setText (sErrorMsg);
+      aOldErrorList.addError (aError);
+      aOldResponse.setErrorList (aOldErrorList);
     }
     else
     {
-      docTypeID = aOldRequest.getRequestEvidenceUSIItemAtIndex (0).getCanonicalEvidenceTypeId ();
+      // Try to interpret response
+      final var aNewResponseMarshaller = DE4ACoreMarshaller.dtResponseExtractMultiEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
+      final ResponseExtractMultiEvidenceType aNewResponse = aNewResponseMarshaller.read (aResponseDoc);
+      if (aNewResponse == null)
+      {
+        LOGGER.warn ("Response received:\n" +
+                     XMLWriter.getNodeAsString (aResponseDoc, new XMLWriterSettings ().setIndent (EXMLSerializeIndent.INDENT_AND_ALIGN)));
+        throw new IllegalStateException ("Failed to interprete Response as ResponseExtractMultiEvidenceType - see log for details");
+      }
+
+      // Convert new Response to old response
+      LOGGER.info ("Converting new response to old format");
+      aOldResponse = LegacyAPIHelper.convertNewToOldResponse (aOldRequest, aNewResponse);
     }
 
-    final AS4MessageDTO messageDTO = new AS4MessageDTO (aOldRequest.getDataEvaluator ().getAgentUrn (),
-                                                        aOldRequest.getDataOwner ().getAgentUrn (),
-                                                        docTypeID,
-                                                        DE4AConstants.PROCESS_ID_REQUEST);
-
-    this.apiManager.processIncomingMessage (aOldRequest, messageDTO, docTypeID, "USI Request", marshaller);
-
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
+    // Serialize result
+    final byte [] aOldResponseBytes = DE4AMarshaller.drImResponseMarshaller (eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType.NONE)
+                                                    .getAsBytes (aOldResponse);
+    LOGGER.info ("Returning old response");
+    return ResponseEntity.status (HttpStatus.OK).body (aOldResponseBytes);
   }
 }
