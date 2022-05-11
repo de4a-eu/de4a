@@ -1,10 +1,13 @@
 package eu.de4a.connector.api.service;
 
 import java.util.Locale;
+
 import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import com.helger.commons.mime.CMimeType;
 import com.helger.dcng.api.DcngIdentifierFactory;
 import com.helger.dcng.api.me.EMEProtocol;
@@ -16,6 +19,7 @@ import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.peppolid.factory.IIdentifierFactory;
+
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.EExternalModuleError;
@@ -40,23 +44,23 @@ public class AS4Service {
 
     /**
      * Invoke the message exchange via API
-     * {@link com.helger.dcng.webapi.as4.ApiPostLookendAndSend}
+     * {@link com.helger.dcng.webapi.as4.ApiPostLookupAndSendIt2}
      *
-     * @param messageDTO
+     * @param messageDTO The message to be send
      */
     public void sendMessage(@Nonnull final AS4MessageDTO messageDTO) {
         final IParticipantIdentifier aSendingPI = IF.parseParticipantIdentifier(messageDTO.getSenderID().toLowerCase(Locale.ROOT));
         if (aSendingPI == null)
-          throw new IllegalStateException("Failed to parse sending PI '"+messageDTO.getSenderID()+"'");
+          throw new IllegalStateException("Failed to parse sending Participant ID '"+messageDTO.getSenderID()+"'");
         final IParticipantIdentifier aReceiverPI = IF.parseParticipantIdentifier(messageDTO.getReceiverID().toLowerCase(Locale.ROOT));
         if (aReceiverPI == null)
-          throw new IllegalStateException("Failed to parse receiving PI '"+messageDTO.getReceiverID()+"'");
+          throw new IllegalStateException("Failed to parse receiving Participant ID '"+messageDTO.getReceiverID()+"'");
         final IDocumentTypeIdentifier aDocumentTypeID = IF.parseDocumentTypeIdentifier(messageDTO.getDocTypeID());
         if (aDocumentTypeID == null)
-          throw new IllegalStateException("Failed to parse doctype ID '"+messageDTO.getDocTypeID()+"'");
+          throw new IllegalStateException("Failed to parse Document Type ID '"+messageDTO.getDocTypeID()+"'");
         final IProcessIdentifier aProcessID = IF.createProcessIdentifier(DcngIdentifierFactory.PROCESS_SCHEME, messageDTO.getProcessID());
         if (aProcessID == null)
-          throw new IllegalStateException("Failed to parse process ID '"+messageDTO.getProcessID()+"'");
+          throw new IllegalStateException("Failed to parse Process ID '"+messageDTO.getProcessID()+"'");
 
         final DCNGPayload aPayload = new DCNGPayload();
         aPayload.setValue(DOMUtils.documentToByte(messageDTO.getMessage()));
