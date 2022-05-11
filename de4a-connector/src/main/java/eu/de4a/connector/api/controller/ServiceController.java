@@ -31,60 +31,69 @@ import eu.de4a.ial.api.IALMarshaller;
 import eu.de4a.ial.api.jaxb.ResponseLookupRoutingInformationType;
 
 @Controller
-@RequestMapping("/service")
+@RequestMapping ("/service")
 @Validated
-public class ServiceController {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ServiceController.class);
+public class ServiceController
+{
+  private static final Logger LOGGER = LoggerFactory.getLogger (ServiceController.class);
 
-  @Value("${mor.file.endpoint}")
+  @Value ("${mor.file.endpoint}")
   private String morFileEndpoint;
 
-  @GetMapping(value = "/ial/{cot}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity<byte[]> lookupRoutingInformation(@Valid @PathVariable @NotNull final String cot) {
-    LOGGER.info("Request to API /service/ial/"+cot+" received");
+  @GetMapping (value = "/ial/{cot}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot)
+  {
+    LOGGER.info ("Request to API /service/ial/" + cot + " received");
 
     // Main query
-    final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL(StringHelper.getExplodedToOrderedSet(",", cot));
+    final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL (StringHelper.getExplodedToOrderedSet (",", cot));
     if (aResponse == null)
     {
       // Error case
-      throw new ConnectorException().withFamily(EFamilyErrorType.CONNECTION_ERROR)
-      .withLayer(ELayerError.INTERNAL_FAILURE).withModule(EExternalModuleError.IAL)
-      .withMessageArg("Error querying IAL")
-      .withHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
+                                     .withLayer (ELayerError.INTERNAL_FAILURE)
+                                     .withModule (EExternalModuleError.IAL)
+                                     .withMessageArg ("Error querying IAL")
+                                     .withHttpStatus (HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Success case
-    return ResponseEntity.status(HttpStatus.OK).body(IALMarshaller.idkResponseLookupRoutingInformationMarshaller().getAsBytes(aResponse));
+    return ResponseEntity.status (HttpStatus.OK)
+                         .body (IALMarshaller.idkResponseLookupRoutingInformationMarshaller ().getAsBytes (aResponse));
   }
 
-  @GetMapping(value = "/ial/{cot}/{atu}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity<byte[]> lookupRoutingInformation(@Valid @PathVariable @NotNull final String cot,
-                                                         @Valid @PathVariable @NotNull final String atu) {
-    LOGGER.info("Request to API /service/ial/"+cot+"/"+atu+" received");
+  @GetMapping (value = "/ial/{cot}/{atu}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot,
+                                                            @Valid @PathVariable @NotNull final String atu)
+  {
+    LOGGER.info ("Request to API /service/ial/" + cot + "/" + atu + " received");
 
     // Main query
-    final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL(StringHelper.getExplodedToOrderedSet(",", cot), atu);
+    final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL (StringHelper.getExplodedToOrderedSet (",", cot), atu);
     if (aResponse == null)
     {
       // Error case
-      throw new ConnectorException().withFamily(EFamilyErrorType.CONNECTION_ERROR)
-      .withLayer(ELayerError.INTERNAL_FAILURE).withModule(EExternalModuleError.IAL)
-      .withMessageArg("Error querying IAL with ATU code")
-      .withHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
+                                     .withLayer (ELayerError.INTERNAL_FAILURE)
+                                     .withModule (EExternalModuleError.IAL)
+                                     .withMessageArg ("Error querying IAL with ATU code")
+                                     .withHttpStatus (HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Success case
-    return ResponseEntity.status(HttpStatus.OK).body(IALMarshaller.idkResponseLookupRoutingInformationMarshaller().getAsBytes(aResponse));
+    return ResponseEntity.status (HttpStatus.OK)
+                         .body (IALMarshaller.idkResponseLookupRoutingInformationMarshaller ().getAsBytes (aResponse));
   }
 
-  @GetMapping(value = "/mor/{lang}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<byte[]> getMorFile(@Valid @PathVariable @NotNull final String lang) {
-    LOGGER.info("Request to API /service/mor/"+lang+" received");
-    try {
-      // TODO - Potential changes around the file name pattern and implementation of this API
-      final String sDestURL = FilenameHelper.getCleanConcatenatedUrlPath (this.morFileEndpoint,
-          "/mor_"+lang+".json");
+  @GetMapping (value = "/mor/{lang}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity <byte []> getMorFile (@Valid @PathVariable @NotNull final String lang)
+  {
+    LOGGER.info ("Request to API /service/mor/" + lang + " received");
+    try
+    {
+      // TODO - Potential changes around the file name pattern and
+      // implementation of this API
+      final String sDestURL = FilenameHelper.getCleanConcatenatedUrlPath (this.morFileEndpoint, "/mor_" + lang + ".json");
 
       try (final HttpClientManager aHCM = HttpClientManager.create (new DcngHttpClientSettings ()))
       {
@@ -92,13 +101,16 @@ public class ServiceController {
         // Query
         final byte [] aResult = aHCM.execute (aGet, new ResponseHandlerByteArray ());
         // Pass through
-        return ResponseEntity.ok(aResult);
+        return ResponseEntity.ok (aResult);
       }
-    } catch (final Exception e) {
-      throw new ConnectorException().withFamily(EFamilyErrorType.CONNECTION_ERROR)
-          .withLayer(ELayerError.INTERNAL_FAILURE).withModule(EExternalModuleError.MOR)
-          .withMessageArg("Error accessing/processing to remote MOR file from: " + this.morFileEndpoint)
-          .withHttpStatus(HttpStatus.NOT_FOUND);
+    }
+    catch (final Exception e)
+    {
+      throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
+                                     .withLayer (ELayerError.INTERNAL_FAILURE)
+                                     .withModule (EExternalModuleError.MOR)
+                                     .withMessageArg ("Error accessing/processing to remote MOR file from: " + this.morFileEndpoint)
+                                     .withHttpStatus (HttpStatus.NOT_FOUND);
     }
   }
 }

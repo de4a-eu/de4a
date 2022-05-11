@@ -43,6 +43,21 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (CustomRestExceptionHandler.class);
 
+  @Nonnull
+  private static ResponseEntity <Object> _buildBadRequestError (final String err)
+  {
+    LOGGER.warn ("REST Client BAD REQUEST-> {}", err);
+
+    final HttpHeaders headers = new HttpHeaders ();
+    headers.setContentType (new MediaType (MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
+    final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError (false);
+    final String code = ErrorHelper.createCode (ELayerError.COMMUNICATIONS,
+                                                EExternalModuleError.NONE,
+                                                EFamilyErrorType.MISSING_REQUIRED_ARGUMENTS);
+    responseError.addError (DE4AResponseDocumentHelper.createError (code, err));
+    return new ResponseEntity <> (responseError, headers, HttpStatus.BAD_REQUEST);
+  }
+
   @Override
   protected ResponseEntity <Object> handleMissingServletRequestParameter (final MissingServletRequestParameterException ex,
                                                                           final HttpHeaders headers,
@@ -124,20 +139,5 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler
     responseError.addError (DE4AResponseDocumentHelper.createError (code, err));
     return new ResponseEntity <> (responseError, new HttpHeaders (), HttpStatus.NOT_FOUND);
 
-  }
-
-  @Nonnull
-  private ResponseEntity <Object> _buildBadRequestError (final String err)
-  {
-    LOGGER.warn ("REST Client BAD REQUEST-> {}", err);
-
-    final HttpHeaders headers = new HttpHeaders ();
-    headers.setContentType (new MediaType (MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
-    final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError (false);
-    final String code = ErrorHelper.createCode (ELayerError.COMMUNICATIONS,
-                                                EExternalModuleError.NONE,
-                                                EFamilyErrorType.MISSING_REQUIRED_ARGUMENTS);
-    responseError.addError (DE4AResponseDocumentHelper.createError (code, err));
-    return new ResponseEntity <> (responseError, headers, HttpStatus.BAD_REQUEST);
   }
 }

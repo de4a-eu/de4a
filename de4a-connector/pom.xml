@@ -31,6 +31,13 @@
             <artifactId>de4a-canonical-evidences</artifactId>
         </dependency>
         
+        <!-- For the DBA legacy layer only -->
+        <dependency>
+            <groupId>eu.de4a</groupId>
+            <artifactId>de4a-iem</artifactId>
+            <version>0.1.11</version>
+        </dependency>
+        
         <!-- DE4A IAL -->
         <dependency>
             <groupId>eu.de4a.ial</groupId>
