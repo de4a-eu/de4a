@@ -13,11 +13,17 @@ import eu.de4a.connector.error.model.ELayerError;
 
 public class ConnectorException extends RuntimeException
 {
+  private ELayerError layer;
   private EExternalModuleError module;
   private EFamilyErrorType family;
-  private ELayerError layer;
   private HttpStatus status = HttpStatus.BAD_REQUEST;
   private List <Object> args;
+
+  public ConnectorException withLayer (final ELayerError layer)
+  {
+    this.layer = layer;
+    return this;
+  }
 
   @Nullable
   public EExternalModuleError getModule ()
@@ -28,12 +34,6 @@ public class ConnectorException extends RuntimeException
   public ConnectorException withModule (final EExternalModuleError module)
   {
     this.module = module;
-    return this;
-  }
-
-  public ConnectorException withLayer (final ELayerError layer)
-  {
-    this.layer = layer;
     return this;
   }
 
