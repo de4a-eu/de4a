@@ -13,27 +13,33 @@ import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 
 /**
- * This is the handler for incoming AS4 messages.
- * It is registered on startup and spreads the information.
+ * This is the handler for incoming AS4 messages. It is registered on startup and spreads the
+ * information.
  */
 @Component
 public class IncomingAS4PKHandler implements IMEIncomingHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IncomingAS4PKHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IncomingAS4PKHandler.class);
 
-    @Autowired
-    private ApplicationContext context;
-    @Autowired
-    private MessageEventPublisher publisher;
+  @Autowired
+  private ApplicationContext context;
+  @Autowired
+  private MessageEventPublisher publisher;
 
-    @Override
-    public void handleIncomingRequest(final MEMessage aMessage) throws MEIncomingException {
-      LOGGER.debug("Incoming AS4 message...");
+  public IncomingAS4PKHandler() {}
 
-        KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_REQ_RECEIPT);
+  @Override
+  public void handleIncomingRequest(final MEMessage aMessage) throws MEIncomingException {
+    if (context == null)
+      throw new IllegalStateException("ApplicationContext wasn't initialized properly");
+    if (publisher == null)
+      throw new IllegalStateException("MessageEventPublisher wasn't initialized properly");
 
-        final MessageExchangeWrapper messageWrapper = new MessageExchangeWrapper(context);
-        messageWrapper.setMeMessage(aMessage);
-        publisher.publishCustomEvent(messageWrapper);
-    }
+    LOGGER.info("Incoming AS4 message...");
 
+    KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_REQ_RECEIPT);
+
+    final MessageExchangeWrapper messageWrapper = new MessageExchangeWrapper(context);
+    messageWrapper.setMeMessage(aMessage);
+    publisher.publishCustomEvent(messageWrapper);
+  }
 }

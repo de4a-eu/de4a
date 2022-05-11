@@ -17,6 +17,7 @@
 package eu.de4a.connector.jetty;
 
 import javax.annotation.concurrent.Immutable;
+
 import com.helger.photon.jetty.JettyStarter;
 
 /**
@@ -31,7 +32,7 @@ public final class RunInJettyConnector
   public static void main (final String [] args) throws Exception
   {
     final JettyStarter js = new JettyStarter (RunInJettyConnector.class).setSessionCookieName ("DC_SESSION")
-                                                                   .setContainerIncludeJarPattern (JettyStarter.CONTAINER_INCLUDE_JAR_PATTERN_ALL);
+                                                                    .setContainerIncludeJarPattern (JettyStarter.CONTAINER_INCLUDE_JAR_PATTERN_ALL);
     js.run ();
   }
 }

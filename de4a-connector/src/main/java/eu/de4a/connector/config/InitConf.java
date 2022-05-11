@@ -11,7 +11,6 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.LocaleResolver;
@@ -23,7 +22,6 @@ import com.helger.dcng.core.http.DcngHttpClientSettings;
 import eu.de4a.kafkaclient.DE4AKafkaSettings;
 
 @Configuration
-@EnableScheduling
 public class InitConf implements ServletContextAware {
   private ServletContext servletContext;
 
@@ -37,9 +35,13 @@ public class InitConf implements ServletContextAware {
   private String kafkaUrl;
   @Value("${de4a.kafka.topic:#{de4a-connector}}")
   private String kafkaTopic;
+ 
+  public void setServletContext(final ServletContext servletContext) {
+    this.servletContext = servletContext;
+  }
 
   @Bean
-  public ViewResolver viewResolver() {
+  ViewResolver viewResolver() {
     final InternalResourceViewResolver ret = new InternalResourceViewResolver();
     ret.setViewClass(JstlView.class);
     ret.setPrefix("/WEB-INF/view/");
@@ -48,7 +50,7 @@ public class InitConf implements ServletContextAware {
   }
 
   @Bean(name = "localeResolver")
-  public LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}") final String locale) {
+  LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}") final String locale) {
     final SessionLocaleResolver ret = new SessionLocaleResolver();
     if (locale != null && !locale.trim().isEmpty())
       ret.setDefaultLocale(new Locale(locale));
@@ -66,7 +68,7 @@ public class InitConf implements ServletContextAware {
   }
 
   @Bean
-  public ReloadableResourceBundleMessageSource messageSource() {
+  ReloadableResourceBundleMessageSource messageSource() {
     final var ret = new ReloadableResourceBundleMessageSource();
     ret.setBasenames("classpath:messages/messages");
     ret.setDefaultEncoding(StandardCharsets.UTF_8.name());
@@ -75,7 +77,7 @@ public class InitConf implements ServletContextAware {
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
-  public void kafkaSettings() {
+  void kafkaSettings() {
     DE4AKafkaSettings.defaultProperties().put("bootstrap.servers", kafkaUrl);
     DE4AKafkaSettings.setKafkaEnabled(kafkaEnabled);
     DE4AKafkaSettings.setKafkaHttp(kafkaHttp);
@@ -89,13 +91,9 @@ public class InitConf implements ServletContextAware {
   }
 
   @Bean(name = "applicationEventMulticaster")
-  public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
+  ApplicationEventMulticaster simpleApplicationEventMulticaster() {
     final SimpleApplicationEventMulticaster ret = new SimpleApplicationEventMulticaster();
     ret.setTaskExecutor(new SimpleAsyncTaskExecutor());
     return ret;
-  }
-
-  public void setServletContext(final ServletContext servletContext) {
-    this.servletContext = servletContext;
   }
 }

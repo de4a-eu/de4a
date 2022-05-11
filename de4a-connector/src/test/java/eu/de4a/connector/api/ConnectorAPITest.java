@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,9 +26,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import com.helger.dcng.api.DcngConfig;
 import com.helger.dcng.webapi.as4.ApiPostLookupAndSendIt2;
-import com.helger.json.IJsonObject;
-import com.helger.json.JsonObject;
+import com.helger.dcng.webapi.as4.LookupAndSendingResult;
+import com.helger.peppolid.factory.IIdentifierFactory;
+
 import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.api.controller.EventController;
 import eu.de4a.connector.api.controller.RequestController;
@@ -41,12 +45,13 @@ import eu.de4a.iem.core.jaxb.common.EventNotificationType;
 import eu.de4a.iem.core.jaxb.common.RedirectUserType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceUSIType;
 
-@RunWith(SpringRunner.class)
+@RunWith (SpringRunner.class)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@SpringBootTest(classes = {MockConf.class, AddressesProperties.class, StaticContextAccessor.class})
-public class ConnectorAPITest {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorAPITest.class);
+@ActiveProfiles ("test")
+@SpringBootTest (classes = { MockConf.class, AddressesProperties.class, StaticContextAccessor.class })
+public class ConnectorAPITest
+{
+  private static final Logger LOGGER = LoggerFactory.getLogger (ConnectorAPITest.class);
 
   @Autowired
   private MockMvc mockMvc;
@@ -60,95 +65,105 @@ public class ConnectorAPITest {
   @Autowired
   private ServiceController serviceController;
 
-
   @Test
-  public void testRequestAPI() {
+  public void testRequestAPI ()
+  {
 
     // USI Request - modify it as needed
-    final RequestExtractMultiEvidenceUSIType req = MockMessagesHelper.createRequestExtractMultiEvidenceUSI(2);
-    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller();
+    final RequestExtractMultiEvidenceUSIType req = MockMessagesHelper.createRequestExtractMultiEvidenceUSI (2);
+    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ();
 
-    LOGGER.debug(marshaller.formatted().getAsString(req));
-    final byte[] bReq = marshaller.getAsBytes(req);
+    LOGGER.debug (marshaller.formatted ().getAsString (req));
+    final byte [] bReq = marshaller.getAsBytes (req);
 
-    final int status = _postCallMockedAS4API(bReq, "/request/usi/");
-    assertEquals(HttpStatus.OK.value(), status);
+    final int status = _postCallMockedAS4API (bReq, "/request/usi/");
+    assertEquals (HttpStatus.OK.value (), status);
   }
 
   @Test
   @Ignore
-  public void testResponseAPI() {
+  public void testResponseAPI ()
+  {
 
     // USI Redirect User message - modify it as needed
-    final RedirectUserType req = MockMessagesHelper.createRedirectUser();
-    final var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller();
+    final RedirectUserType req = MockMessagesHelper.createRedirectUser ();
+    final var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller ();
 
-    LOGGER.debug(marshaller.formatted().getAsString(req));
-    final byte[] bReq = marshaller.getAsBytes(req);
+    LOGGER.debug (marshaller.formatted ().getAsString (req));
+    final byte [] bReq = marshaller.getAsBytes (req);
 
-    final int status = _postCallMockedAS4API(bReq, "/response/usi/redirectUser/");
-    assertEquals(HttpStatus.OK.value(), status);
+    final int status = _postCallMockedAS4API (bReq, "/response/usi/redirectUser/");
+    assertEquals (HttpStatus.OK.value (), status);
   }
 
   @Test
-  public void testNotificationAPI() {
+  public void testNotificationAPI ()
+  {
 
-    final EventNotificationType req = MockMessagesHelper.createRequestEventNotification(2);
-    final var marshaller = DE4ACoreMarshaller.dtEventNotificationMarshaller();
+    final EventNotificationType req = MockMessagesHelper.createRequestEventNotification (2);
+    final var marshaller = DE4ACoreMarshaller.dtEventNotificationMarshaller ();
 
-    LOGGER.debug(marshaller.formatted().getAsString(req));
-    final byte[] bReq = marshaller.getAsBytes(req);
+    LOGGER.debug (marshaller.formatted ().getAsString (req));
+    final byte [] bReq = marshaller.getAsBytes (req);
 
-    final int status = _postCallMockedAS4API(bReq, "/event/notification/");
+    final int status = _postCallMockedAS4API (bReq, "/event/notification/");
 
-    assertEquals(HttpStatus.OK.value(), status);
+    assertEquals (HttpStatus.OK.value (), status);
   }
 
-  @Ignore("Not neccessary for integration")
+  @Ignore ("Not neccessary for integration")
   @Test
-  public void testMorAPI() {
+  public void testMorAPI ()
+  {
 
-    final MockHttpServletRequestBuilder httpReq = MockMvcRequestBuilders.get("/service/mor/{lang}", "en");
-    try {
-      final MvcResult result = _createCall(httpReq, status().isOk());
-      assertNotNull(result);
-    } catch (final Exception e) {
-      LOGGER.error(e.getMessage());
-      fail();
+    final MockHttpServletRequestBuilder httpReq = MockMvcRequestBuilders.get ("/service/mor/{lang}", "en");
+    try
+    {
+      final MvcResult result = _createCall (httpReq, status ().isOk ());
+      assertNotNull (result);
+    }
+    catch (final Exception e)
+    {
+      LOGGER.error (e.getMessage ());
+      fail ();
     }
 
   }
 
-
-  private MvcResult _createCall(final MockHttpServletRequestBuilder httpReq, final ResultMatcher matcher)
-      throws Exception {
-    return this.mockMvc.perform(httpReq).andDo(print()).andExpect(matcher).andReturn();
+  private MvcResult _createCall (final MockHttpServletRequestBuilder httpReq, final ResultMatcher matcher) throws Exception
+  {
+    return this.mockMvc.perform (httpReq).andDo (print ()).andExpect (matcher).andReturn ();
   }
 
-  private int _postCallMockedAS4API(final byte[] bReq, final String path) {
+  private int _postCallMockedAS4API (final byte [] bReq, final String path)
+  {
+    final IIdentifierFactory aIF = DcngConfig.getIdentifierFactory ();
+    final LookupAndSendingResult aResult = new LookupAndSendingResult (aIF.createParticipantIdentifierWithDefaultScheme ("9999:test-sender"),
+                                                                     aIF.createParticipantIdentifierWithDefaultScheme ("9999:test-receiver"),
+                                                                     aIF.createDocumentTypeIdentifierWithDefaultScheme ("bla"),
+                                                                     aIF.createProcessIdentifierWithDefaultScheme ("foo"),
+                                                                     "fasel");
+    aResult.setOverallSuccess (true);
 
-    final IJsonObject aJson = new JsonObject();
-    aJson.add("success", true);
+    // To skip the AS4 exchange since there is no multiple Connector instances
+    // running on tests
+    try (MockedStatic <ApiPostLookupAndSendIt2> apiMock = Mockito.mockStatic (ApiPostLookupAndSendIt2.class))
+    {
+      apiMock.when ( () -> ApiPostLookupAndSendIt2.perform (any (), any (), any (), any (), any (), any ())).thenReturn (aResult);
 
-    // To skip the AS4 exchange since there is no multiple Connector instances running on tests
-    try (MockedStatic<ApiPostLookupAndSendIt2> apiMock = Mockito.mockStatic(ApiPostLookupAndSendIt2.class)) {
-      apiMock
-          .when(() -> ApiPostLookupAndSendIt2.perform(any(), any(),
-              any (),
-              any (), any(), any()))
-          .thenReturn(aJson);
+      final MockHttpServletRequestBuilder httpReq = MockMvcRequestBuilders.post (path);
+      httpReq.contentType (MediaType.APPLICATION_XML_VALUE).content (bReq);
 
-      final MockHttpServletRequestBuilder httpReq = MockMvcRequestBuilders.post(path);
-      httpReq.contentType(MediaType.APPLICATION_XML_VALUE).content(bReq);
+      final MvcResult result = _createCall (httpReq, status ().isOk ());
+      LOGGER.info (result.getResponse ().getContentAsString ());
 
-      final MvcResult result = _createCall(httpReq, status().isOk());
-      LOGGER.info(result.getResponse().getContentAsString());
-
-      return result.getResponse().getStatus();
-    } catch (final Exception e) {
-      LOGGER.error(e.getMessage());
-      fail();
+      return result.getResponse ().getStatus ();
     }
-    return HttpStatus.INTERNAL_SERVER_ERROR.value();
+    catch (final Exception e)
+    {
+      LOGGER.error (e.getMessage ());
+      fail ();
+    }
+    return HttpStatus.INTERNAL_SERVER_ERROR.value ();
   }
 }

@@ -2,16 +2,20 @@ package eu.de4a.connector.utils;
 
 
 import java.util.concurrent.CompletableFuture;
+
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.helger.commons.error.level.EErrorLevel;
+
 import eu.de4a.connector.error.model.ELogMessages;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
 
 @Component
 public class KafkaClientWrapper {
 
+    // Must be non-static to get auto-wired
     @Value("#{'${log.metrics.prefix:DE4A METRICS}'}")
     private static String metricsPrefix;
 

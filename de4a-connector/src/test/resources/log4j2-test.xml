@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info" strict="true">
+  <!-- This file always has precendence in Test runs -->
   <Appenders>
     <Console name="STDOUT" target="SYSTEM_OUT">
       <!-- Location may be an issue when async logging is used! -->
-      <PatternLayout pattern="[DE4A-CONNECTOR][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
+      <PatternLayout pattern="[DE4A-CONNECTOR-TEST][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
     </Console>
   </Appenders>
   <Loggers>

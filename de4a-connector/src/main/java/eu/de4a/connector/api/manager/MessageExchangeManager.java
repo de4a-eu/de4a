@@ -8,14 +8,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import com.helger.dcng.api.me.model.MEMessage;
 import com.helger.dcng.api.me.model.MEPayload;
+import com.helger.dcng.core.regrep.DcngRegRepHelperIt2;
 import com.helger.peppolid.IProcessIdentifier;
+import com.helger.xml.XMLFactory;
 import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.error.model.ELogMessages;
-import eu.de4a.connector.utils.DOMUtils;
 
 @Component
 public class MessageExchangeManager {
@@ -30,7 +32,6 @@ public class MessageExchangeManager {
    * corresponding external component (DE/DO)
    *
    * @param messageWrapper
-   * @return void
    */
   public void processMessageExchange(@Nonnull final MessageExchangeWrapper messageWrapper) {
     final MEMessage meMessage = messageWrapper.getMeMessage();
@@ -39,20 +40,25 @@ public class MessageExchangeManager {
     final String receiverID = meMessage.getReceiverID().getURIEncoded();
     final String senderID = meMessage.getSenderID().getURIEncoded();
 
-    final MEPayload payload;
-    if (meMessage.payloads().size() >= 2) {
-      // TODO Useless - First is for regRep - Has to be aligned with the Connector-NG
-      payload = messageWrapper.getMeMessage().payloads().get(1);
-    } else {
-      LOGGER.error("Incoming message seems to be ill-formatted - too few payloads. " + "Trying first one.");
-      payload = meMessage.payloads().getFirst();
-    }
-    final Document docMsg = DOMUtils.newDocumentFromInputStream(payload.getData().getInputStream());
+    if (meMessage.payloads().size() != 1)
+      throw new IllegalArgumentException("Expecting the AS4 message to have exactly one payload only, but found "
+          + meMessage.payloads().size() + " payloads");
+
+    // This is the RegRep
+    final MEPayload aPayload = messageWrapper.getMeMessage().payloads().get(0);
+    final Element aRegRepElement = DcngRegRepHelperIt2.extractPayload(aPayload.getData());
+    if (aRegRepElement == null)
+      throw new IllegalStateException(
+          "Failed to extract the payload from the anticipated RegRep message - see the log for details");
+
+    // Create a new document
+    final Document aRegRepDoc = XMLFactory.newDocument();
+    aRegRepDoc.appendChild(aRegRepDoc.adoptNode(aRegRepElement.cloneNode(true)));
 
     ResponseEntity<byte[]> response;
     switch (iProcessID.getValue()) {
       case DE4AConstants.PROCESS_ID_REQUEST:
-        response = this.deliverService.pushMessage(docMsg, senderID, receiverID, ELogMessages.LOG_REQ_DO);
+        response = this.deliverService.pushMessage(aRegRepDoc, senderID, receiverID, ELogMessages.LOG_REQ_DO);
         if (HttpStatus.OK.equals(response.getStatusCode())) {
           LOGGER.info("Message successfully sent to the Data Owner");
         } else {
@@ -60,7 +66,7 @@ public class MessageExchangeManager {
         }
         break;
       case DE4AConstants.PROCESS_ID_RESPONSE:
-        response = this.deliverService.pushMessage(docMsg, senderID, receiverID, ELogMessages.LOG_REQ_DE);
+        response = this.deliverService.pushMessage(aRegRepDoc, senderID, receiverID, ELogMessages.LOG_REQ_DE);
         if (HttpStatus.OK.equals(response.getStatusCode())) {
           LOGGER.info("Message successfully sent to the Data Evaluator");
         } else {
@@ -68,7 +74,7 @@ public class MessageExchangeManager {
         }
         break;
       default:
-        LOGGER.error("ProcessID exchanged is not found: {}", iProcessID.getValue());
+        LOGGER.error("ProcessID exchanged is not found: " + iProcessID.getValue());
     }
   }
 }

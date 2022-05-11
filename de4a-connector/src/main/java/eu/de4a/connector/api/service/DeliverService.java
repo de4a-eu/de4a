@@ -16,40 +16,41 @@ import eu.de4a.connector.utils.ServiceUtils;
 
 @Service
 public class DeliverService {
-    @Autowired
-    private ServiceUtils serviceUtils;
+  @Autowired
+  private ServiceUtils serviceUtils;
 
-    /**
-     * Deliver a message to the corresponding participant
-     * based on the receiver internal configuration
-     * resolved by {@link eu.de4a.connector.config.AddressesProperties}
-     *
-     * @param docMsg - DOM Document with the message
-     * @param senderID - Sender participant identifier
-     * @param receiverID - Receiver participant identifier
-     * @param logMessage - Log tag for i18n
-     * @return ResponseEntity with the response of the external service
-     */
-    public ResponseEntity<byte[]> pushMessage(final Document docMsg, final String senderID, final String receiverID,
-            final ELogMessages logMessage) {
+  /**
+   * Deliver a message to the corresponding participant based on the receiver internal configuration
+   * resolved by {@link eu.de4a.connector.config.AddressesProperties}
+   *
+   * @param docMsg - DOM Document with the message
+   * @param senderID - Sender participant identifier
+   * @param receiverID - Receiver participant identifier
+   * @param logMessage - Log tag for i18n
+   * @return ResponseEntity with the response of the external service
+   */
+  public ResponseEntity<byte[]> pushMessage(final Document docMsg, final String senderID, final String receiverID,
+      final ELogMessages logMessage) {
 
-        final String requestID = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_REQUEST_ID,
-                docMsg.getDocumentElement());
+    final String requestID = DOMUtils.getValueFromXpath(DE4AConstants.XPATH_REQUEST_ID, docMsg.getDocumentElement());
 
-        final String elemType = docMsg.getDocumentElement().getNodeName();
-        final EMessageServiceTypes eMessageServiceTypes = EMessageServiceTypes.getByTypeOrNull(elemType);
-        if (eMessageServiceTypes == null)
-          throw new IllegalStateException ("Failed to resolve message type from XML document element local name '"+elemType+"'");
+    final String elemType = docMsg.getDocumentElement().getNodeName();
+    final EMessageServiceTypes eMessageServiceTypes = EMessageServiceTypes.getByTypeOrNull(elemType);
+    if (eMessageServiceTypes == null)
+      throw new IllegalStateException(
+          "Failed to resolve message type from XML document element local name '" + elemType + "'");
 
-        // Get where has to be sent depending of the content
-        final String url = this.serviceUtils.getParticipantAddress(receiverID, eMessageServiceTypes.getEndpointType(),
-                eMessageServiceTypes.isRequest());
+    // Get where has to be sent depending of the content
+    final String url = this.serviceUtils.getParticipantAddress(receiverID, eMessageServiceTypes.getEndpointType(),
+        eMessageServiceTypes.isRequest());
+    if (url == null)
+      throw new IllegalStateException(
+          "Failed to determine DE/DO URL for receiver '" + receiverID + "' and message type " + eMessageServiceTypes);
 
-        KafkaClientWrapper.sendInfo(logMessage, eMessageServiceTypes.getType(),
-                requestID, senderID, receiverID, url);
+    KafkaClientWrapper.sendInfo(logMessage, eMessageServiceTypes.getType(), requestID, senderID, receiverID, url);
 
-        //Send message
-        return APIRestUtils.postRestObjectWithCatching(url, DOMUtils.documentToByte(docMsg),
-                 new ConnectorException().withModule(EExternalModuleError.DATA_OWNER));
-    }
+    // Send message
+    return APIRestUtils.postRestObjectWithCatching(url, DOMUtils.documentToByte(docMsg),
+        new ConnectorException().withModule(EExternalModuleError.DATA_OWNER));
+  }
 }

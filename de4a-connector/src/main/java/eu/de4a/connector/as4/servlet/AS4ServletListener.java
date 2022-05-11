@@ -10,6 +10,7 @@ import com.helger.photon.api.IAPIRegistry;
 import com.helger.photon.audit.AuditHelper;
 import com.helger.photon.audit.DoNothingAuditor;
 import com.helger.photon.core.servlet.WebAppListener;
+import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.as4.handler.IncomingAS4PKHandler;
 
 @WebListener
@@ -37,16 +38,19 @@ public class AS4ServletListener extends WebAppListener {
 
     @Override
     protected void afterContextInitialized(final ServletContext aSC) {
-        // Use default handler
-        DcngInit.initGlobally(aSC, new IncomingAS4PKHandler());
-
         // Don't write audit logs
         AuditHelper.setAuditor(new DoNothingAuditor(() -> "none"));
+
+        // Use default handler
+        // Set an indirection level because I can't get the Spring CDI to work
+        DcngInit.initGlobally(aSC, x ->  StaticContextAccessor.getBean (IncomingAS4PKHandler.class).handleIncomingRequest(x));
     }
 
     @Override
     protected void initAPI(@Nonnull final IAPIRegistry aAPIRegistry) {
-        DcngApiInit.initAPI(aAPIRegistry);
+        // I don't think we need this here
+        if (false)
+          DcngApiInit.initAPI(aAPIRegistry);
     }
 
     @Override
