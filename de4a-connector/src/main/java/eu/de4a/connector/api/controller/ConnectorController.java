@@ -100,6 +100,7 @@ public class ConnectorController
                                                                                          new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
 
     // Convert to the new format
+    LOGGER.info ("Converting old request to new request");
     final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest (aOldRequest);
 
     final String sNewDocTypeID = aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();

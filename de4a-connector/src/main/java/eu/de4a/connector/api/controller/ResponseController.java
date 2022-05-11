@@ -42,7 +42,7 @@ public class ResponseController
   @Autowired
   private APIManager apiManager;
 
-  @PostMapping (value = "/usi/redirectUser/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/usi/redirectUser", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> redirectUserUsi (@Valid final InputStream request)
   {
     LOGGER.info ("[DO-DT] Request to API /response/usi/redirectUser/ received");
@@ -63,7 +63,7 @@ public class ResponseController
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
-  @PostMapping (value = "/evidence/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/evidence", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> responseEvidence (@Valid final InputStream request)
   {
     LOGGER.info ("[DO-DT] Request to API /response/evidence/ received");
@@ -97,7 +97,7 @@ public class ResponseController
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
-  @PostMapping (value = "/subscription/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/subscription", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> responseEventSubscription (@Valid final InputStream request)
   {
     LOGGER.info ("[DO-DT] Request to API /response/subscription/ received");

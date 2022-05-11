@@ -37,7 +37,7 @@ public class EventController
   @Autowired
   private APIManager apiManager;
 
-  @PostMapping (value = "/notification/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/notification", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> eventNotification (@Valid final InputStream request)
   {
     LOGGER.info ("Request to API /event/notification/ received");

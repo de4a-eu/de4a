@@ -42,7 +42,7 @@ public class RequestController
   @Autowired
   private APIManager apiManager;
 
-  @PostMapping (value = "/usi/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/usi", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEvidenceUSI (@Valid final InputStream request)
   {
     LOGGER.info ("[DE-DR] Request to API /request/usi/ received");
@@ -77,7 +77,7 @@ public class RequestController
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
-  @PostMapping (value = "/im/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/im", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEvidenceIM (@Valid final InputStream request)
   {
     LOGGER.info ("[DE-DR] Request to API /request/im/ received");
@@ -112,7 +112,7 @@ public class RequestController
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
-  @PostMapping (value = "/lu/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/lu", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEvidenceLU (@Valid final InputStream request)
   {
     LOGGER.info ("[DE-DR] Request to API /request/lu/ received");
@@ -147,7 +147,7 @@ public class RequestController
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
-  @PostMapping (value = "/subscription/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/subscription", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEventSubscription (@Valid final InputStream request)
   {
     LOGGER.info ("[DE-DR] Request to API /request/subscription/ received");
