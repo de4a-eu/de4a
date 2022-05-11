@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
+import eu.de4a.connector.error.model.ErrorHelper;
 
 public class ConnectorException extends RuntimeException
 {
@@ -79,7 +80,7 @@ public class ConnectorException extends RuntimeException
 
   public String buildCode ()
   {
-    return layer.ordinal () + module.getId () + family.getID ();
+    return ErrorHelper.createCode (layer, module, family);
   }
 
   @Override

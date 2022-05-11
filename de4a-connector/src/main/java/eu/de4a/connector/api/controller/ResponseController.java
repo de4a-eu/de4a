@@ -32,86 +32,97 @@ import eu.de4a.iem.core.jaxb.common.ResponseEventSubscriptionType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
 
 @Controller
-@RequestMapping("/response")
+@RequestMapping ("/response")
 @Validated
-public class ResponseController {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ResponseController.class);
+public class ResponseController
+{
+  private static final Logger LOGGER = LoggerFactory.getLogger (ResponseController.class);
 
   @Autowired
   private APIManager apiManager;
 
+  @PostMapping (value = "/usi/redirectUser/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> redirectUserUsi (@Valid final InputStream request)
+  {
+    LOGGER.info ("Request to API /response/usi/redirectUser/ received");
 
-  @PostMapping(value = "/usi/redirectUser/", produces = MediaType.APPLICATION_XML_VALUE,
-      consumes = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity<byte[]> redirectUserUsi(@Valid final InputStream request) {
-    LOGGER.info("Request to API /response/usi/redirectUser/ received");
+    final var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller ();
 
-    final var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller();
+    final RedirectUserType redirectUserMsg = APIRestUtils.conversionBytesWithCatching (request,
+                                                                                       marshaller,
+                                                                                       new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
 
-    final RedirectUserType redirectUserMsg = APIRestUtils.conversionBytesWithCatching(request, marshaller,
-        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (redirectUserMsg.getDataEvaluator ().getAgentUrn (),
+                                                        redirectUserMsg.getDataOwner ().getAgentUrn (),
+                                                        redirectUserMsg.getCanonicalEvidenceTypeId (),
+                                                        DE4AConstants.PROCESS_ID_RESPONSE);
 
-    final AS4MessageDTO messageDTO = new AS4MessageDTO(redirectUserMsg.getDataEvaluator().getAgentUrn(),
-        redirectUserMsg.getDataOwner().getAgentUrn(), redirectUserMsg.getCanonicalEvidenceTypeId(),
-        DE4AConstants.PROCESS_ID_RESPONSE);
+    this.apiManager.processIncomingMessage (redirectUserMsg, messageDTO, redirectUserMsg.getRequestId (), "Redirect User", marshaller);
 
-    this.apiManager.processIncomingMessage(redirectUserMsg, messageDTO, redirectUserMsg.getRequestId(), "Redirect User",
-        marshaller);
-
-    return ResponseEntity.status(HttpStatus.OK).body(ConnectorExceptionHandler.getResponseErrorObjectBytes(null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
   }
 
-  @PostMapping(value = "/evidence/", produces = MediaType.APPLICATION_XML_VALUE,
-      consumes = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity<byte[]> responseEvidence(@Valid final InputStream request) {
-    LOGGER.info("Request to API /response/evidence/ received");
+  @PostMapping (value = "/evidence/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> responseEvidence (@Valid final InputStream request)
+  {
+    LOGGER.info ("Request to API /response/evidence/ received");
 
-    final var marshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller(IDE4ACanonicalEvidenceType.NONE);
+    final var marshaller = DE4ACoreMarshaller.dtResponseExtractMultiEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
 
-    final ResponseExtractMultiEvidenceType responseObj = APIRestUtils.conversionBytesWithCatching(request, marshaller,
-        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
+    final ResponseExtractMultiEvidenceType responseObj = APIRestUtils.conversionBytesWithCatching (request,
+                                                                                                   marshaller,
+                                                                                                   new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
 
     // Check if there are multiple evidence responses
     final String docTypeID;
-    if (responseObj.getResponseExtractEvidenceItemCount() > 1) {
-      docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
-    } else {
-      docTypeID = responseObj.getResponseExtractEvidenceItemAtIndex(0).getCanonicalEvidenceTypeId();
+    if (responseObj.getResponseExtractEvidenceItemCount () > 1)
+    {
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
+    }
+    else
+    {
+      docTypeID = responseObj.getResponseExtractEvidenceItemAtIndex (0).getCanonicalEvidenceTypeId ();
     }
 
-    final AS4MessageDTO messageDTO = new AS4MessageDTO(responseObj.getDataOwner().getAgentUrn(),
-        responseObj.getDataEvaluator().getAgentUrn(), docTypeID, DE4AConstants.PROCESS_ID_RESPONSE);
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (responseObj.getDataOwner ().getAgentUrn (),
+                                                        responseObj.getDataEvaluator ().getAgentUrn (),
+                                                        docTypeID,
+                                                        DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage(responseObj, messageDTO, responseObj.getRequestId(), "Response Evidence",
-        marshaller);
+    this.apiManager.processIncomingMessage (responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
 
-    return ResponseEntity.status(HttpStatus.OK).body(ConnectorExceptionHandler.getResponseErrorObjectBytes(null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
   }
 
-  @PostMapping(value = "/subscription/", produces = MediaType.APPLICATION_XML_VALUE,
-      consumes = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity<byte[]> responseEventSubscription(@Valid final InputStream request) {
-    LOGGER.info("Request to API /response/subscription/ received");
+  @PostMapping (value = "/subscription/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> responseEventSubscription (@Valid final InputStream request)
+  {
+    LOGGER.info ("Request to API /response/subscription/ received");
 
-    final var marshaller = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller();
+    final var marshaller = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller ();
 
-    final ResponseEventSubscriptionType responseObj = APIRestUtils.conversionBytesWithCatching(request, marshaller,
-        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DT));
+    final ResponseEventSubscriptionType responseObj = APIRestUtils.conversionBytesWithCatching (request,
+                                                                                                marshaller,
+                                                                                                new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
 
     // Check if there are multiple evidence responses
     final String docTypeID;
-    if (responseObj.getResponseEventSubscriptionItemCount() > 1) {
-      docTypeID = CIdentifier.getURIEncoded(DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, DE4AConstants.MULTI_ITEM_TYPE);
-    } else {
-      docTypeID = responseObj.getResponseEventSubscriptionItemAtIndex(0).getCanonicalEventCatalogUri();
+    if (responseObj.getResponseEventSubscriptionItemCount () > 1)
+    {
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, DE4AConstants.MULTI_ITEM_TYPE);
+    }
+    else
+    {
+      docTypeID = responseObj.getResponseEventSubscriptionItemAtIndex (0).getCanonicalEventCatalogUri ();
     }
 
-    final AS4MessageDTO messageDTO = new AS4MessageDTO(responseObj.getDataEvaluator().getAgentUrn(),
-        responseObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.PROCESS_ID_RESPONSE);
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (responseObj.getDataEvaluator ().getAgentUrn (),
+                                                        responseObj.getDataOwner ().getAgentUrn (),
+                                                        docTypeID,
+                                                        DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage(responseObj, messageDTO, responseObj.getRequestId(), "Response Evidence",
-        marshaller);
+    this.apiManager.processIncomingMessage (responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
 
-    return ResponseEntity.status(HttpStatus.OK).body(ConnectorExceptionHandler.getResponseErrorObjectBytes(null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
   }
 }

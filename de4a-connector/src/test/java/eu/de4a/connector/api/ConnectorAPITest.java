@@ -71,7 +71,7 @@ public class ConnectorAPITest
 
     // USI Request - modify it as needed
     final RequestExtractMultiEvidenceUSIType req = MockMessagesHelper.createRequestExtractMultiEvidenceUSI (2);
-    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
 
     LOGGER.debug (marshaller.formatted ().getAsString (req));
     final byte [] bReq = marshaller.getAsBytes (req);
@@ -139,10 +139,10 @@ public class ConnectorAPITest
   {
     final IIdentifierFactory aIF = DcngConfig.getIdentifierFactory ();
     final LookupAndSendingResult aResult = new LookupAndSendingResult (aIF.createParticipantIdentifierWithDefaultScheme ("9999:test-sender"),
-                                                                     aIF.createParticipantIdentifierWithDefaultScheme ("9999:test-receiver"),
-                                                                     aIF.createDocumentTypeIdentifierWithDefaultScheme ("bla"),
-                                                                     aIF.createProcessIdentifierWithDefaultScheme ("foo"),
-                                                                     "fasel");
+                                                                       aIF.createParticipantIdentifierWithDefaultScheme ("9999:test-receiver"),
+                                                                       aIF.createDocumentTypeIdentifierWithDefaultScheme ("bla"),
+                                                                       aIF.createProcessIdentifierWithDefaultScheme ("foo"),
+                                                                       "fasel");
     aResult.setOverallSuccess (true);
 
     // To skip the AS4 exchange since there is no multiple Connector instances

@@ -46,7 +46,7 @@ public class RequestController
   {
     LOGGER.info ("Request to API /request/usi/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceUSIType requestObj = APIRestUtils.conversionBytesWithCatching (request,
@@ -81,7 +81,7 @@ public class RequestController
   {
     LOGGER.info ("Request to API /request/im/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceIMType requestObj = APIRestUtils.conversionBytesWithCatching (request,
@@ -116,7 +116,7 @@ public class RequestController
   {
     LOGGER.info ("Request to API /request/lu/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceLUMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceLUType requestObj = APIRestUtils.conversionBytesWithCatching (request,
