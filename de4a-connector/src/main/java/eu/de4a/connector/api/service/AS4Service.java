@@ -13,7 +13,7 @@ import com.helger.dcng.api.DcngIdentifierFactory;
 import com.helger.dcng.api.me.EMEProtocol;
 import com.helger.dcng.api.rest.DCNGPayload;
 import com.helger.dcng.webapi.as4.ApiPostLookupAndSendIt2;
-import com.helger.json.IJsonObject;
+import com.helger.dcng.webapi.as4.LookupAndSendingResult;
 import com.helger.json.serialize.JsonWriterSettings;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
@@ -70,7 +70,7 @@ public class AS4Service {
                 aReceiverPI.getURIEncoded(), aDocumentTypeID.getURIEncoded(), aProcessID.getURIEncoded());
 
         // Perform SMP client lookup and send the AS4 message in one call
-        final IJsonObject aJson = ApiPostLookupAndSendIt2.perform(aSendingPI, aReceiverPI, aDocumentTypeID, aProcessID,
+        final LookupAndSendingResult aJson = ApiPostLookupAndSendIt2.perform(aSendingPI, aReceiverPI, aDocumentTypeID, aProcessID,
                 EMEProtocol.AS4.getTransportProfileID(), aPayload);
 
         //Process json response
@@ -85,35 +85,30 @@ public class AS4Service {
      *
      * @param aJson - Execution results in json format from the dcng-web-api
      */
-    private void manageAs4SendingResult(final IJsonObject aJson) {
+    private void manageAs4SendingResult(@Nonnull final LookupAndSendingResult aResult) {
       if (LOGGER.isDebugEnabled())
         LOGGER.debug("AS4 Sending result:\n {}",
-                aJson.getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
+                     aResult.getAsJson ().getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
 
         // Base exception to be thrown
         final ConnectorException ex = new ConnectorException().withLayer(ELayerError.COMMUNICATIONS)
                 .withFamily(EFamilyErrorType.AS4_ERROR_COMMUNICATION);
 
-        if(!aJson.getAsValue(JSON_TAG_SUCCESS).getAsBoolean(false)) {
+        if(!aResult.isOverallSuccess ()) {
             //A problem occurs sending the AS4 message
-            if(aJson.containsKey(JSON_TAG_EXCEPTION)) {
-                final String message = aJson.get(JSON_TAG_EXCEPTION).getAsObject()
-                        .get(JSON_TAG_MESSAGE).getAsValue().getAsString();
-                throw ex.withModule(EExternalModuleError.AS4).withMessageArg(message);
+            if(aResult.hasException ()) {
+                throw ex.withModule(EExternalModuleError.AS4).withMessageArg(aResult.getException ().getMessage ());
             }
 
-            final IJsonObject lookupResults = (IJsonObject) aJson.get(JSON_TAG_RESULT_LOOKUP);
-            final IJsonObject sendResults = (IJsonObject) aJson.get(JSON_TAG_RESULT_SEND);
-            if(!lookupResults.getAsValue(JSON_TAG_SUCCESS).getAsBoolean(false)) {
+            if(!aResult.isLookupSuccess ()) {
                     final String smpErrMsg;
-                    if(lookupResults.containsKey(JSON_TAG_RESPONSE))
-                        smpErrMsg = lookupResults.get(JSON_TAG_RESPONSE)
-                                .getAsValue().getAsString();
+                    if(aResult.hasLookupServiceMetadata ())
+                        smpErrMsg = "Found the SMP Participant and Document Type, but failed to select based on Process and Transport Profile.";
                     else
-                        smpErrMsg = "Found no matching SMP service metadata";
-                    throw ex.withModule(EExternalModuleError.SMP) .withMessageArg(smpErrMsg);
+                        smpErrMsg = "Found no matching SMP Participant and/or Document Type";
+                    throw ex.withModule(EExternalModuleError.SMP).withMessageArg(smpErrMsg);
             }
-            if(!sendResults.getAsValue(JSON_TAG_SUCCESS).getAsBoolean(false))
+            if(!aResult.isSendingSuccess ())
                     throw ex.withModule(EExternalModuleError.AS4)
                         .withMessageArg("Error with AS4 communications");
         }

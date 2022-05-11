@@ -12,7 +12,7 @@ public class ConnectorController {
     @GetMapping(value = "/")
     // @ApiOperation(httpMethod = "GET", value = "Connector Index Page")
     public String root() {
-        LOGGER.debug("Request to API / received");
+        LOGGER.info("Request to API / received");
 
         // Refers to WEB-INF/view/index.jsp
         return "index";
