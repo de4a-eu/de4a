@@ -3,7 +3,6 @@ package eu.de4a.connector.error.handler;
 import java.util.Locale;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,13 @@ public class ConnectorExceptionHandler
   private ConnectorExceptionHandler ()
   {}
 
-  public static String getMessage (final ConnectorException ex)
+  @Nonnull
+  public static byte [] getSuccessResponseBytes ()
+  {
+    return DE4ACoreMarshaller.defResponseErrorMarshaller ().getAsBytes (DE4AResponseDocumentHelper.createResponseError (true));
+  }
+
+  private static String _getMessage (@Nonnull final ConnectorException ex)
   {
     try
     {
@@ -36,38 +41,25 @@ public class ConnectorExceptionHandler
     }
     catch (final NoSuchMessageException name)
     {
-      LOGGER.error ("Bundle key {} is missing for locale {}", ex.getMessage (), Locale.getDefault ());
+      LOGGER.error ("[internal] Bundle key '" + ex.getMessage () + "' is missing for locale " + Locale.getDefault ());
       return ex.getMessage ();
     }
   }
 
   @Nonnull
-  public static ResponseErrorType getResponseErrorObject (@Nullable final ConnectorException ex)
+  public static byte [] getResponseErrorObjectBytes (@Nonnull final ConnectorException ex)
   {
-    final ResponseErrorType response;
-    if (ex != null)
-    {
-      response = DE4AResponseDocumentHelper.createResponseError (false);
-      final String msg = getMessage (ex);
-      response.addError (DE4AResponseDocumentHelper.createError (ex.buildCode (), msg));
-    }
-    else
-    {
-      response = DE4AResponseDocumentHelper.createResponseError (true);
-    }
-    return response;
+    final ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError (false);
+    response.addError (DE4AResponseDocumentHelper.createError (ex.buildCode (), _getMessage (ex)));
+    return DE4ACoreMarshaller.defResponseErrorMarshaller ().getAsBytes (response);
   }
 
-  @Nullable
-  public static byte [] getResponseErrorObjectBytes (@Nullable final ConnectorException ex)
-  {
-    return DE4ACoreMarshaller.defResponseErrorMarshaller ().getAsBytes (getResponseErrorObject (ex));
-  }
-
-  public static byte [] getGenericResponseError (final Exception ex)
+  @Nonnull
+  public static byte [] getGenericResponseError (@Nonnull final Exception ex)
   {
     final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError (false);
-    final String msg = StringHelper.hasNoText (ex.getMessage ()) ? "Internal Connector Error" : ex.getMessage ();
+    final String msg = StringHelper.hasNoText (ex.getMessage ()) ? "Internal Connector Error"
+                                                                 : "[" + ex.getClass ().getSimpleName () + "] " + ex.getMessage ();
     responseError.addError (DE4AResponseDocumentHelper.createError ("99999", msg));
     return DE4ACoreMarshaller.defResponseErrorMarshaller ().getAsBytes (responseError);
   }

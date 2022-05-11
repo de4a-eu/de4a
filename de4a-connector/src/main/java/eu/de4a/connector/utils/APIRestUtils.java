@@ -82,13 +82,13 @@ public final class APIRestUtils
                                                    final DE4ACoreMarshaller <T> marshaller,
                                                    final ConnectorException ex)
   {
-    T returnObj;
     final ConnectorException baseEx = ex.withFamily (EFamilyErrorType.CONVERSION_ERROR).withLayer (ELayerError.INTERNAL_FAILURE);
     marshaller.readExceptionCallbacks ().set (e -> {
       if (e.getLinkedException () != null)
         baseEx.withMessageArg (e.getLinkedException ().getMessage ());
     });
 
+    final T returnObj;
     try
     {
       returnObj = marshaller.read (obj);

@@ -38,7 +38,7 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler
     if (publisher == null)
       throw new MEIncomingException ("IncomingAS4PKHandler/MessageEventPublisher wasn't initialized properly");
 
-    LOGGER.info ("Start handling incoming AS4 message");
+    LOGGER.info ("[DR-DT] Start handling incoming AS4 message");
 
     KafkaClientWrapper.sendInfo (ELogMessages.LOG_AS4_REQ_RECEIPT);
 
@@ -46,6 +46,6 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler
     messageWrapper.setMeMessage (aMessage);
     publisher.publishCustomEvent (messageWrapper);
 
-    LOGGER.info ("Finished handling incoming AS4 message");
+    LOGGER.info ("[DR-DT] Finished handling incoming AS4 message");
   }
 }

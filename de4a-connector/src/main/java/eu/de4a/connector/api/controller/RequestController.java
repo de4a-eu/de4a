@@ -25,6 +25,7 @@ import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.utils.APIRestUtils;
+import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.RequestEventSubscriptionType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceIMType;
@@ -44,7 +45,7 @@ public class RequestController
   @PostMapping (value = "/usi/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEvidenceUSI (@Valid final InputStream request)
   {
-    LOGGER.info ("Request to API /request/usi/ received");
+    LOGGER.info ("[DE-DR] Request to API /request/usi/ received");
 
     final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
 
@@ -53,13 +54,13 @@ public class RequestController
                                                                                                     marshaller,
                                                                                                     new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
     if (requestObj.hasNoRequestEvidenceUSIItemEntries ())
-      throw new IllegalStateException ("Provided payload has no RequestEvidenceUSIItemEntries");
+      throw new IllegalStateException ("Provided payload has no RequestEvidenceUSIItem entries");
 
     // Check if there are multiple evidence request
     final String docTypeID;
     if (requestObj.getRequestEvidenceUSIItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
@@ -73,13 +74,13 @@ public class RequestController
 
     this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "USI Request", marshaller);
 
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
   @PostMapping (value = "/im/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEvidenceIM (@Valid final InputStream request)
   {
-    LOGGER.info ("Request to API /request/im/ received");
+    LOGGER.info ("[DE-DR] Request to API /request/im/ received");
 
     final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ();
 
@@ -88,13 +89,13 @@ public class RequestController
                                                                                                    marshaller,
                                                                                                    new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
     if (requestObj.hasNoRequestEvidenceIMItemEntries ())
-      throw new IllegalStateException ("Provided payload has no RequestEvidenceIMItemEntries");
+      throw new IllegalStateException ("Provided payload has no RequestEvidenceIMItem entries");
 
     // Check if there are multiple evidence request
     final String docTypeID;
     if (requestObj.getRequestEvidenceIMItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
@@ -108,13 +109,13 @@ public class RequestController
 
     this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "IM Request", marshaller);
 
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
   @PostMapping (value = "/lu/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEvidenceLU (@Valid final InputStream request)
   {
-    LOGGER.info ("Request to API /request/lu/ received");
+    LOGGER.info ("[DE-DR] Request to API /request/lu/ received");
 
     final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceLUMarshaller ();
 
@@ -123,13 +124,13 @@ public class RequestController
                                                                                                    marshaller,
                                                                                                    new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
     if (requestObj.hasNoRequestEvidenceLUItemEntries ())
-      throw new IllegalStateException ("Provided payload has no RequestEvidenceLUItemEntries");
+      throw new IllegalStateException ("Provided payload has no RequestEvidenceLUItem entries");
 
     // Check if there are multiple evidence request
     final String docTypeID;
     if (requestObj.getRequestEvidenceLUItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
@@ -143,13 +144,13 @@ public class RequestController
 
     this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "LU Request", marshaller);
 
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
   @PostMapping (value = "/subscription/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEventSubscription (@Valid final InputStream request)
   {
-    LOGGER.info ("Request to API /request/subscription/ received");
+    LOGGER.info ("[DE-DR] Request to API /request/subscription/ received");
 
     final var marshaller = DE4ACoreMarshaller.drRequestEventSubscriptionMarshaller ();
 
@@ -158,13 +159,13 @@ public class RequestController
                                                                                               marshaller,
                                                                                               new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
     if (requestObj.hasNoEventSubscripRequestItemEntries ())
-      throw new IllegalStateException ("Provided payload has no EventSubscripRequestItemEntries");
+      throw new IllegalStateException ("Provided payload has no EventSubscripRequestItem entries");
 
     // Check if there are multiple evidence request
     final String docTypeID;
     if (requestObj.getEventSubscripRequestItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, DE4AConstants.MULTI_ITEM_TYPE);
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
@@ -178,6 +179,6 @@ public class RequestController
 
     this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "Subscription Request", marshaller);
 
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 }

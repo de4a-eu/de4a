@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.xml.bind.UnmarshalException;
 
 import org.slf4j.Logger;
@@ -125,6 +126,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler
 
   }
 
+  @Nonnull
   private ResponseEntity <Object> _buildBadRequestError (final String err)
   {
     LOGGER.warn ("REST Client BAD REQUEST-> {}", err);

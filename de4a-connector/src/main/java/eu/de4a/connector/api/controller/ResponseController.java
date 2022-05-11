@@ -25,6 +25,7 @@ import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.utils.APIRestUtils;
+import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
 import eu.de4a.iem.core.jaxb.common.RedirectUserType;
@@ -44,7 +45,7 @@ public class ResponseController
   @PostMapping (value = "/usi/redirectUser/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> redirectUserUsi (@Valid final InputStream request)
   {
-    LOGGER.info ("Request to API /response/usi/redirectUser/ received");
+    LOGGER.info ("[DO-DT] Request to API /response/usi/redirectUser/ received");
 
     final var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller ();
 
@@ -59,25 +60,27 @@ public class ResponseController
 
     this.apiManager.processIncomingMessage (redirectUserMsg, messageDTO, redirectUserMsg.getRequestId (), "Redirect User", marshaller);
 
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
   @PostMapping (value = "/evidence/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> responseEvidence (@Valid final InputStream request)
   {
-    LOGGER.info ("Request to API /response/evidence/ received");
+    LOGGER.info ("[DO-DT] Request to API /response/evidence/ received");
 
     final var marshaller = DE4ACoreMarshaller.dtResponseExtractMultiEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
 
     final ResponseExtractMultiEvidenceType responseObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                    marshaller,
                                                                                                    new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+    if (responseObj.hasNoResponseExtractEvidenceItemEntries ())
+      throw new IllegalStateException ("Provided payload has no ResponseExtractEvidenceItem entries");
 
     // Check if there are multiple evidence responses
     final String docTypeID;
     if (responseObj.getResponseExtractEvidenceItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, DE4AConstants.MULTI_ITEM_TYPE);
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
@@ -91,25 +94,27 @@ public class ResponseController
 
     this.apiManager.processIncomingMessage (responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
 
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
   @PostMapping (value = "/subscription/", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> responseEventSubscription (@Valid final InputStream request)
   {
-    LOGGER.info ("Request to API /response/subscription/ received");
+    LOGGER.info ("[DO-DT] Request to API /response/subscription/ received");
 
     final var marshaller = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller ();
 
     final ResponseEventSubscriptionType responseObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                 marshaller,
                                                                                                 new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+    if (responseObj.hasNoResponseEventSubscriptionItemEntries ())
+      throw new IllegalStateException ("Provided payload has no ResponseEventSubscriptionItem entries");
 
     // Check if there are multiple evidence responses
     final String docTypeID;
     if (responseObj.getResponseEventSubscriptionItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, DE4AConstants.MULTI_ITEM_TYPE);
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
@@ -123,6 +128,6 @@ public class ResponseController
 
     this.apiManager.processIncomingMessage (responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
 
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getResponseErrorObjectBytes (null));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 }
