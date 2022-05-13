@@ -21,13 +21,13 @@ import com.helger.json.serialize.JsonReader;
 
 /**
  * Mapping class for the external services URLs </br>
- * Check local file {@link application.yml}
+ * Check local file "de-do.json".
  */
 @Component
 public class AddressesProperties
 {
-
   private static final Logger LOGGER = LoggerFactory.getLogger (AddressesProperties.class);
+
   private final Map <String, Map <String, String>> dataOwners = new LinkedHashMap <> ();
   private final Map <String, Map <String, String>> dataEvaluators = new LinkedHashMap <> ();
 
@@ -44,6 +44,10 @@ public class AddressesProperties
     if (aJson == null)
       throw new IllegalStateException ("The DE/DO address JSON is missing the top level child '" + sChildName + "'");
 
+    // Ensure to start fresh
+    aTarget.clear ();
+
+    // Add all from JSON
     for (final Map.Entry <String, IJson> aEntry : aJson)
       if (aEntry.getValue ().isObject ())
       {
@@ -68,23 +72,25 @@ public class AddressesProperties
     _fillMap (dataEvaluators, aJson.getAsObject ("dataEvaluators"), "dataEvaluators");
   }
 
-  @Nullable
+  @Nonnull
   public Map <String, Map <String, String>> getDataOwners ()
   {
     return dataOwners;
   }
 
+  @Nullable
   public String getDataOwnerByType (final String doID, final String endpointType)
   {
     return this.dataOwners.get (doID).get (endpointType);
   }
 
-  @Nullable
+  @Nonnull
   public Map <String, Map <String, String>> getDataEvaluators ()
   {
     return dataEvaluators;
   }
 
+  @Nullable
   public String getDataEvaluatorByType (final String deID, final String endpointType)
   {
     return this.dataEvaluators.get (deID).get (endpointType);
