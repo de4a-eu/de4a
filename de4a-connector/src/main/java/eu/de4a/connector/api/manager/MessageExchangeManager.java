@@ -23,6 +23,7 @@ import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
+import eu.de4a.iem.core.jaxb.common.ResponseErrorType;
 
 @Component
 public class MessageExchangeManager
@@ -66,6 +67,7 @@ public class MessageExchangeManager
 
     // Create a new document with the payload only
 
+    ResponseEntity <byte []> response = null;
     switch (aProcessID.getValue ())
     {
       case DE4AConstants.PROCESS_ID_REQUEST:
@@ -105,11 +107,7 @@ public class MessageExchangeManager
             throw new IllegalStateException ("Unsupported message type " + eMessageServiceType);
         }
 
-        final ResponseEntity <byte []> response = this.deliverService.pushMessage (eMessageServiceType,
-                                                                                   aTargetDoc,
-                                                                                   senderID,
-                                                                                   receiverID,
-                                                                                   ELogMessage.LOG_REQ_DO);
+        response = this.deliverService.pushMessage (eMessageServiceType, aTargetDoc, senderID, receiverID, ELogMessage.LOG_REQ_DO);
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Owner");
         else
@@ -130,11 +128,7 @@ public class MessageExchangeManager
             aTargetDoc = aNewDoc;
           }
         }
-        final ResponseEntity <byte []> response = this.deliverService.pushMessage (eMessageServiceType,
-                                                                                   aTargetDoc,
-                                                                                   senderID,
-                                                                                   receiverID,
-                                                                                   ELogMessage.LOG_REQ_DE);
+        response = this.deliverService.pushMessage (eMessageServiceType, aTargetDoc, senderID, receiverID, ELogMessage.LOG_REQ_DE);
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Evaluator");
         else
@@ -143,6 +137,25 @@ public class MessageExchangeManager
       }
       default:
         LOGGER.error ("ProcessID exchanged is not found: " + aProcessID.getValue ());
+    }
+
+    if (response != null)
+    {
+      final ResponseErrorType aResponse = DE4ACoreMarshaller.defResponseErrorMarshaller ().read (response.getBody ());
+      if (aResponse != null)
+      {
+        if (aResponse.isAck ())
+        {
+          LOGGER.info ("DO accepted our request");
+        }
+        else
+        {
+          LOGGER.error ("DO rejected our request");
+          aResponse.getError ().forEach (x -> LOGGER.error ("  DO Error [" + x.getCode () + "] " + x.getText ()));
+        }
+      }
+      else
+        LOGGER.warn ("Failed to interprete the DO response as a ResponseErrorType");
     }
   }
 }

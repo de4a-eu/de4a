@@ -35,7 +35,6 @@ import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceIMType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
-import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
@@ -137,10 +136,7 @@ public class ConnectorController
       // Copy as much as possible from the old request
       aOldResponse = DE4AResponseDocumentHelper.createResponseTransferEvidence (aOldRequest);
       final ErrorListType aOldErrorList = new ErrorListType ();
-      final ErrorType aError = new ErrorType ();
-      aError.setCode ("99999");
-      aError.setText (sErrorMsg);
-      aOldErrorList.addError (aError);
+      aOldErrorList.addError (DE4AResponseDocumentHelper.createError ("timeout", sErrorMsg));
       aOldResponse.setErrorList (aOldErrorList);
     }
     else

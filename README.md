@@ -1,11 +1,21 @@
-
 # DE4A - CONNECTOR `Iteration 2`
+
 Connector component. Check out following instructions and descriptions.
 
 ## de4a-connector
 
 ### `package`
+
 Checkout the technical documentation on [the Wiki page](https://wiki.de4a.eu/index.php/DE4A_Connector)
+
+### Public REST API
+
+* **`/request/im`** - As DR, take an IM request (`RequestExtractMultiEvidenceIMType`) and sent it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/request/usi`** - As DR, take a USI request (`RequestExtractMultiEvidenceUSIType`) and sent it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/request/lu`** - As DR, take a USI request (`RequestExtractMultiEvidenceLUType`) and sent it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/request/subscription`** - As DR, take a USI request (`RequestEventSubscriptionType`) and sent it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/requestTransferEvidenceIM`** - this is the backwards compatibility layer for Iteration 1. It takes an Iteration 1 IM request (`RequestTransferEvidenceUSIIMDRType`) and synchronously returns an Iteration 1 IM response (`ResponseTransferEvidenceType`). It times out after 60 seconds.
+
 
 ### Configuration
 
@@ -20,26 +30,28 @@ Global application properties definitions - including AS4 properties:
 #### External addresses configuration
 
 Configuration meant to **define the DE/DOs endpoints** where the components expect the delivered messages from the Connector.
-The strcuture is divided in two principal groups and in turn into differents types according with the component nature regarding the interactions patterns:
-- **Owner Addresses**
- - **im**: endpoint where the Connector will deliver an IM message
- - **usi**: endpoint where the Connector will deliver an USI message
- - **lu**: endpoint where the Connector will deliver an LookUp message
- - **sn**: endpoint where the Connector will deliver an Subscription message
-- **Evaluator Addresses**
- - **response**: endpoint where the Connector will deliver a response message
- - **redirect**: endpoint where the Connector will deliver a user redirection message
- - **notification**: endpoint where the Connector will deliver a notification message
+The structure is divided in two principal groups and in turn into different types according with the component nature regarding the interactions patterns:
+
+* **Owner Addresses**
+   * **im**: endpoint where the Connector will deliver an IM message
+   * **usi**: endpoint where the Connector will deliver an USI message
+   * **lu**: endpoint where the Connector will deliver an LookUp message
+   * **sn**: endpoint where the Connector will deliver an Subscription message
+* **Evaluator Addresses**
+   * **response**: endpoint where the Connector will deliver a response message
+   * **subscription_resp**: endpoint where the Connector will deliver a subscription response message
+   * **redirect**: endpoint where the Connector will deliver a user redirection message
+   * **notification**: endpoint where the Connector will deliver a notification message
 
 The configuration file is located at:
 
 ```sh
-~/de4a/de4a-connector/src/main/resources/application.yml
+~/de4a/de4a-connector/src/main/resources/de-do.json
 ```
 
 #### Logging config
 
-Supported by the logging framework Log4j2, multiple parameters can be configured by editing the following config file:
+Supported by the logging framework Log4J2, multiple parameters can be configured by editing the following config file:
 
 ```sh
 ~/de4a/de4a-connector/src/main/resources/log4j2.xml
@@ -57,26 +69,26 @@ It is also possible to compile each package separately by browsing to the folder
 
 #### Package
 
-The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the IDK and Connector target paths will be created with their corresponding `war` files.
+The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the Connector target paths will be created with their corresponding `war` files.
 
-#### de4a-commons `v0.2.4
+#### de4a-commons `v0.2.5`
 
-Utilities and resources based on the model and schemas defined at the [Schemas proejct](https://github.com/de4a-wp5/xml-schemas) (**Please check the schemas definitions in case of any question about the messages structure and model definition**). 
-[DE4A-commons](https://github.com/de4a-wp5/de4a-commons/tree/development) project is on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
+Utilities and resources based on the model and schemas defined at the [Schemas project](https://github.com/de4a-wp5/xml-schemas) (**Please check the schemas definitions in case of any question about the messages structure and model definition**). 
+[DE4A-commons](https://github.com/de4a-wp5/de4a-commons) project is on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
 
-#### ial-service `v0.1.4`
+#### ial-service `v0.1.5`
 
 Same purpose than de4a-commons but including all relative to the IAL model.
 
-#### DCNG - Connector `v0.2.3
+#### DCNG - Connector `v0.2.5`
 
-The [DE4A-Connector-NG](https://github.com/de4a-wp5/de4a-connector-ng) is a project developed by [Phax](https://github.com/phax) and from now on maintained by WP5 which provides all the tools and infrastructure for the AS4 message exchange (before TOOP).
+The [DE4A-Connector-NG](https://github.com/de4a-wp5/de4a-connector-ng) is a project developed by [Phax](https://github.com/phax) and from now on maintained by WP5 which provides all the tools and infrastructure for the AS4 message exchange (previously from TOOP).
 
 ## Connector configuration guide
 
-For a correct configuration of the Connector, three main property files must be cosidered:
+For a correct configuration of the Connector, three main property files must be considered:
 - `application.properties`: main system configuration
-- `application.yml`: DE/DOs addresses for delivering messages
+- `de-do.json`: DE/DOs addresses for delivering messages
 - `log4j2.xml`: logging configuration
 
 Lets review relevant aspects of the overall configuration:
@@ -87,7 +99,7 @@ In order to send log messages to a kafka server, configure the following paramet
 
 ```properties
 de4a.kafka.enabled = true
-# Enables the standard logging separately of the Kafka messages. It is neccessary for print metrics messages - (default: true)
+# Enables the standard logging separately of the Kafka messages. It is necessary for print metrics messages - (default: true)
 de4a.kafka.logging.enabled = true
 # Enables Kafka connection via HTTP (Only enable HTTP mode if outbound TCP connections are blocked from your internal network)
 de4a.kafka.http.enabled = false
@@ -125,14 +137,12 @@ smpclient.truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
 smpclient.truststore.password = de4a
 ```
 
-#### AS4 - DCNG `application.properties`
+#### AS4 properties `application.properties`
 
 ```properties
 # What AS4 implementation to use?
 de4a.me.implementation = phase4
 ```
-
-#### Phase4 properties `phase4.properties`
 
 Parameters used by the built-in Phase4 module of the Connector. Set up the properties above following the commented indications. Some of them are filled in to clarify the content -- **Important** to consider if each property is optional or not (*check out the the in-line comments*).
 
@@ -169,7 +179,7 @@ phase4.keystore.key-password =
 
 # AS4 truststore for validating
 phase4.truststore.type = jks
-phase4.truststore.path = truststore/de4a-truststore-as4-pw-de4a.jks
+phase4.truststore.path = truststore/de4a-truststore-as4-v3-pw-de4a.jks
 phase4.truststore.password = de4a
 ```
 
@@ -210,4 +220,3 @@ Once you have all configuration parameters well configured (if not, check the lo
 Once you have deployed the `war` file, there are several **checks to ensure that the deployment was successful**:
 - Connector index page will be at root path: `http://host:port/`
 	- Eg.: [UM Connector](https://de4a-connector.informatika.uni-mb.si/)
-	
