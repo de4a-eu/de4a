@@ -10,18 +10,35 @@ Checkout the technical documentation on [the Wiki page](https://wiki.de4a.eu/ind
 
 ### Public REST API
 
-* **`/request/im`** - As DR, take an IM request (`RequestExtractMultiEvidenceIMType`) and sent it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
-* **`/request/usi`** - As DR, take a USI request (`RequestExtractMultiEvidenceUSIType`) and sent it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
-* **`/request/lu`** - As DR, take a USI request (`RequestExtractMultiEvidenceLUType`) and sent it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
-* **`/request/subscription`** - As DR, take a USI request (`RequestEventSubscriptionType`) and sent it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
-* **`/requestTransferEvidenceIM`** - this is the backwards compatibility layer for Iteration 1. It takes an Iteration 1 IM request (`RequestTransferEvidenceUSIIMDRType`) and synchronously returns an Iteration 1 IM response (`ResponseTransferEvidenceType`). It times out after 60 seconds.
+#### Requests
 
+* **`/request/im`** - As DR, take an IM request (`RequestExtractMultiEvidenceIMType`) and send it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/request/usi`** - As DR, take a USI request (`RequestExtractMultiEvidenceUSIType`) and send it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/request/lu`** - As DR, take a USI request (`RequestExtractMultiEvidenceLUType`) and send it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/request/subscription`** - As DR, take a USI request (`RequestEventSubscriptionType`) and send it with AS4 to DT. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/requestTransferEvidenceIM`** - This is the backwards compatibility layer for Iteration 1. As DR, take an Iteration 1 IM request (`RequestTransferEvidenceUSIIMDRType`) and send it with AS4 to DT. Wait synchronously until the DR receives a matching response from DT. Return an Iteration 1 IM response (`ResponseTransferEvidenceType`). It times out after 60 seconds.
+
+#### Responses
+
+* **`/response/usi/redirectUser`** - As DT, takes a Redirect User response (`RedirectUserType`) and send it with AS4 to DR. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/response/evidence`** - As DT, takes an Evidence response (`ResponseExtractMultiEvidenceType`) and send it with AS4 to DR. Returns a generic synchronous response (`ResponseErrorType`).
+* **`/response/subscription`** - As DT, takes an Subscription response (`ResponseEventSubscriptionType`) and send it with AS4 to DR. Returns a generic synchronous response (`ResponseErrorType`).
+
+#### Events
+
+* **`/event/notification`** - Takes an event notification (`EventNotificationType`). Returns a generic synchronous response (`ResponseErrorType`).
+
+#### Service APIs
+
+* **`/service/ial/{cot}`** - Query the IAL for provided Canonical Object Types (COTs). Multiple COTs can be separated by `,`. No ATU restrictions are applied.
+* **`/service/ial/{cot}/{atu}`** - Query the IAL for provided Canonical Object Types (COTs) but only for the ones in the specified ATU. Multiple COTs can be separated by `,`.
+* **`/service/mor/{lang}`** - Query MOR. This API is NOT YET FINALIZED. DON'T USE IT.
 
 ### Configuration
 
 #### Application properties
 
-Global application properties definitions - including AS4 properties:
+Global application properties definitions (including AS4 properties):
 
 ```sh
 ~/de4a/de4a-connector/src/main/resources/application.properties
