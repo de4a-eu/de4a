@@ -5,17 +5,17 @@
     "# Different URLs could be configured depending on the usage pattern/incoming message"
   ],
   "dataOwners": {
+    "iso6523-actorid-upis::9999:at000000271-it2": {
+      "im":  "http://localhost:8080/do/requestExtractEvidenceIM",
+      "usi": "http://localhost:8080/do/do1/usi/extractevidence",
+      "lu":  "http://localhost:8080/dataOwner/in/lu/",
+      "sn":  "http://localhost:8080/dataOwner/in/sn/"
+    },
     "iso6523-actorid-upis::9999:ess2833002e-it2": {
       "im": "https://data-owner.com/im/",
       "usi": "https://data-owner.com/usi/",
       "lu": "https://data-owner.com/lu/",
       "sn": "https://data-owner.com/sn/"
-    },
-    "iso6523-actorid-upis::9999:at000000271-it2": {
-      "im": "http://localhost:8080/dataOwner/in/im/",
-      "usi": "http://localhost:8080/dataOwner/in/usi/",
-      "lu": "http://localhost:8080/dataOwner/in/lu/",
-      "sn": "http://localhost:8080/dataOwner/in/sn/"
     },
     "iso6523-actorid-upis::9999:nl990000106-it2": {
       "im": "https://data-owner.com/im/",
@@ -115,6 +115,12 @@
     }
   },
   "dataEvaluators": {
+    "iso6523-actorid-upis::9999:demoui-it2": {
+      "response":          "http://localhost:8080/api/de-inbound/",
+      "subscription_resp": "http://localhost:8080/api/de-inbound/",
+      "redirect":          "http://localhost:8080/api/de-inbound/",
+      "notification":      "http://localhost:8080/api/de-inbound/"
+    },
     "iso6523-actorid-upis::9999:ess2833002e-it2": {
       "response": "https://data-evaluator.com/response/",
       "subscription_resp": "https://data-evaluator.com/subscription-resp/",
