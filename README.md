@@ -108,7 +108,8 @@ This project leverages other DE4A applications and libraries:
 ## Connector configuration guide
 
 For a correct configuration of the Connector, three main property files must be considered:
-- `application.properties`: main system configuration
+- `reference.properties`: Part of the system configuration that should not be changed.
+- `application.properties`: main system configuration. Properties configured here, have precedence over the ones in `reference.properties`.
 - `de-do.json`: DE/DOs addresses for delivering messages
 - `log4j2.xml`: logging configuration
 
@@ -139,7 +140,7 @@ To enable HTTP kafka log producer, you only need to set the property to true `de
 
 It is important to mention the property `de4a.kafka.logging.enabled`, used to enable the file log printing for each kafka message sent, that property could be enabled even when the `de4a.kafka.enabled=false`, just for write the log at the different appenders configured in the log4j2 configuration file.
 
-#### SMP/SML properties `application.properties`
+#### SMP/SML properties `refeence.properties`
 
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
 
@@ -154,11 +155,11 @@ de4a.smp.sml.clientcert = true
 
 # SMP truststore for validating messages
 smpclient.truststore.type = jks
-smpclient.truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
+smpclient.truststore.path = truststore/de4a-truststore-smp-v3-pw-de4a.jks
 smpclient.truststore.password = de4a
 ```
 
-### AS4 properties `application.properties`
+### AS4 properties `application.properties` and `reference.properties`
 
 ```properties
 # What AS4 implementation to use?
@@ -233,7 +234,6 @@ log.metrics.prefix=DE4A METRICS
 ```
 
 It is used to include a prefix on each logging line written by the Kafka logging that could be useful to parse and filter the lines with metrics information.
-
 
 ## Starting up Connector
 
