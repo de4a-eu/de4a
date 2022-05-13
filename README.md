@@ -83,23 +83,27 @@ mvn clean install
 ```
 
 It is also possible to compile each package separately by browsing to the folder and running the command above.
+It requires Java 11 and Maven 3.x (latest).
 
 #### Package
 
-The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the Connector target paths will be created with their corresponding `war` files.
+The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server.
 
-#### de4a-commons `v0.2.5`
+This project leverages other DE4A applications and libraries:
+* **`de4a-commons`**
+    * Content: Utilities and resources based on the model and schemas defined at the [Schemas project](https://github.com/de4a-wp5/xml-schemas)
+    * Source: https://github.com/de4a-wp5/de4a-commons
+    * Deployed to Maven Central: https://search.maven.org/search?q=g:eu.de4a
 
-Utilities and resources based on the model and schemas defined at the [Schemas project](https://github.com/de4a-wp5/xml-schemas) (**Please check the schemas definitions in case of any question about the messages structure and model definition**). 
-[DE4A-commons](https://github.com/de4a-wp5/de4a-commons) project is on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
+* **`ial-service`**
+    * Content: Utilities and resources related to the IAL data model
+    * Source: https://github.com/de4a-wp5/ial-service
+    * Deployed to Maven Central: https://search.maven.org/search?q=g:eu.de4a.ial
 
-#### ial-service `v0.1.5`
-
-Same purpose than de4a-commons but including all relative to the IAL model.
-
-#### DCNG - Connector `v0.2.5`
-
-The [DE4A-Connector-NG](https://github.com/de4a-wp5/de4a-connector-ng) is a project developed by [Phax](https://github.com/phax) and from now on maintained by WP5 which provides all the tools and infrastructure for the AS4 message exchange (previously from TOOP).
+* **`de4a-connector-ng`**
+    * Content: A TOOP derived Connector infrastructure that contains tools for Dynamic Discovery, IAL calling and the AS4 message exchange
+    * Source: https://github.com/de4a-wp5/de4a-connector-ng
+    * Deployed to Maven Central: https://search.maven.org/search?q=g:com.helger.dcng
 
 ## Connector configuration guide
 
@@ -110,7 +114,7 @@ For a correct configuration of the Connector, three main property files must be 
 
 Lets review relevant aspects of the overall configuration:
 
-#### Kafka configuration `application.properties`
+### Kafka configuration `application.properties`
 
 In order to send log messages to a kafka server, configure the following parameters:
 
@@ -154,7 +158,7 @@ smpclient.truststore.path = truststore/de4a-truststore-test-smp-pw-de4a.jks
 smpclient.truststore.password = de4a
 ```
 
-#### AS4 properties `application.properties`
+### AS4 properties `application.properties`
 
 ```properties
 # What AS4 implementation to use?
@@ -200,7 +204,7 @@ phase4.truststore.path = truststore/de4a-truststore-as4-v3-pw-de4a.jks
 phase4.truststore.password = de4a
 ```
 
-#### Logging configuration `log4j2.xml`
+### Logging configuration `log4j2.xml`
 
 The configuration file bellow maintains the logging configuration where you can set the level of each appender, set up log file path, or even include more appenders or configuration.
 **Important** - to correctly configure the path of log file. By default it is a relative path to catalina.base (Tomcat server) `${sys:catalina.base}/logs/connector.log`
