@@ -1,5 +1,7 @@
 package eu.de4a.connector.api.service;
 
+import javax.annotation.Nonnull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class DeliverService
    * internal configuration resolved by
    * {@link eu.de4a.connector.config.AddressesProperties}
    *
+   * @param eMessageServiceType
    * @param docMsg
    *        - DOM Document with the message
    * @param senderID
@@ -40,33 +43,28 @@ public class DeliverService
    *        - Log tag for i18n
    * @return ResponseEntity with the response of the external service
    */
-  public ResponseEntity <byte []> pushMessage (final Document docMsg,
-                                               final String senderID,
-                                               final String receiverID,
-                                               final ELogMessage logMessage)
+  public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
+                                               @Nonnull final Document docMsg,
+                                               @Nonnull final String senderID,
+                                               @Nonnull final String receiverID,
+                                               @Nonnull final ELogMessage logMessage)
   {
     // Generic way for all request IDs
     final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, docMsg.getDocumentElement ());
-
     if (StringHelper.hasText (sRequestID))
       LegacyAPIHelper.rememberFinalized (sRequestID, docMsg);
 
-    final String elemType = docMsg.getDocumentElement ().getNodeName ();
-    final EMessageServiceType eMessageServiceTypes = EMessageServiceType.getByTypeOrNull (elemType);
-    if (eMessageServiceTypes == null)
-      throw new IllegalStateException ("Failed to resolve message type from XML document element local name '" + elemType + "'");
-
     // Get where has to be sent depending of the content
     final String url = this.serviceUtils.getParticipantAddress (receiverID,
-                                                                eMessageServiceTypes.getEndpointType (),
-                                                                eMessageServiceTypes.isRequest ());
+                                                                eMessageServiceType.getEndpointType (),
+                                                                eMessageServiceType.isRequest ());
     if (url == null)
       throw new IllegalStateException ("Failed to determine DE/DO URL for receiver '" +
                                        receiverID +
                                        "' and message type " +
-                                       eMessageServiceTypes);
+                                       eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceTypes.getType (), sRequestID, senderID, receiverID, url);
+    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, senderID, receiverID, url);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,

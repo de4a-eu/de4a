@@ -18,9 +18,11 @@ import com.helger.peppolid.IProcessIdentifier;
 import com.helger.xml.XMLFactory;
 
 import eu.de4a.connector.api.service.DeliverService;
+import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.error.model.ELogMessage;
+import eu.de4a.iem.core.DE4ACoreMarshaller;
 
 @Component
 public class MessageExchangeManager
@@ -57,27 +59,88 @@ public class MessageExchangeManager
     if (aRegRepElement == null)
       throw new IllegalStateException ("Failed to extract the payload from the anticipated RegRep message - see the log for details");
 
-    // Create a new document with the payload only
-    final Document aRegRepDoc = XMLFactory.newDocument ();
-    aRegRepDoc.appendChild (aRegRepDoc.adoptNode (aRegRepElement.cloneNode (true)));
+    final String elemType = aRegRepElement.getNodeName ();
+    final EMessageServiceType eMessageServiceType = EMessageServiceType.getByTypeOrNull (elemType);
+    if (eMessageServiceType == null)
+      throw new IllegalStateException ("Failed to resolve message type from XML document element local name '" + elemType + "'");
 
-    ResponseEntity <byte []> response;
+    // Create a new document with the payload only
+
     switch (aProcessID.getValue ())
     {
       case DE4AConstants.PROCESS_ID_REQUEST:
-        response = this.deliverService.pushMessage (aRegRepDoc, senderID, receiverID, ELogMessage.LOG_REQ_DO);
+      {
+        Document aTargetDoc = null;
+        switch (eMessageServiceType)
+        {
+          case IM:
+          {
+            LOGGER.info ("Converting IM request from DR to DO");
+            final var aDRRequest = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ().read (aRegRepElement);
+            aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceIMMarshaller ().getAsDocument (aDRRequest);
+            break;
+          }
+          case USI:
+          {
+            LOGGER.info ("Converting USI request from DR to DO");
+            final var aDRRequest = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ().read (aRegRepElement);
+            aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceUSIMarshaller ().getAsDocument (aDRRequest);
+            break;
+          }
+          case LU:
+          {
+            LOGGER.info ("Converting LU request from DR to DO");
+            final var aDRRequest = DE4ACoreMarshaller.drRequestExtractMultiEvidenceLUMarshaller ().read (aRegRepElement);
+            aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceLUMarshaller ().getAsDocument (aDRRequest);
+            break;
+          }
+          case SN:
+          {
+            LOGGER.info ("Copying SN request from DR to DO");
+            final Document aNewDoc = XMLFactory.newDocument ();
+            aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
+            aTargetDoc = aNewDoc;
+          }
+          default:
+            throw new IllegalStateException ("Unsupported message type " + eMessageServiceType);
+        }
+
+        final ResponseEntity <byte []> response = this.deliverService.pushMessage (eMessageServiceType,
+                                                                                   aTargetDoc,
+                                                                                   senderID,
+                                                                                   receiverID,
+                                                                                   ELogMessage.LOG_REQ_DO);
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Owner");
         else
           LOGGER.error ("Error connecting with the Data Owner");
         break;
+      }
       case DE4AConstants.PROCESS_ID_RESPONSE:
-        response = this.deliverService.pushMessage (aRegRepDoc, senderID, receiverID, ELogMessage.LOG_REQ_DE);
+      {
+        Document aTargetDoc = null;
+        switch (eMessageServiceType)
+        {
+          // Dunno if we need translations
+          default:
+          {
+            LOGGER.info ("Copying " + eMessageServiceType + " request from DT to DE");
+            final Document aNewDoc = XMLFactory.newDocument ();
+            aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
+            aTargetDoc = aNewDoc;
+          }
+        }
+        final ResponseEntity <byte []> response = this.deliverService.pushMessage (eMessageServiceType,
+                                                                                   aTargetDoc,
+                                                                                   senderID,
+                                                                                   receiverID,
+                                                                                   ELogMessage.LOG_REQ_DE);
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Evaluator");
         else
           LOGGER.error ("Error connecting with the Data Evaluator");
         break;
+      }
       default:
         LOGGER.error ("ProcessID exchanged is not found: " + aProcessID.getValue ());
     }

@@ -49,11 +49,12 @@ public final class APIRestUtils
       aPost.addHeader (CHttpHeader.CONTENT_TYPE, CMimeType.APPLICATION_XML.getAsString ());
       aPost.setEntity (new ByteArrayEntity (request));
       final byte [] aResult = aHCM.execute (aPost, new ResponseHandlerByteArray ());
-      if (aResult == null)
+      if (aResult == null || aResult.length == 0)
       {
         LOGGER.warn ("HTTP POST to '" + url + "' - received an empty response");
         return ResponseEntity.status (HttpStatus.NO_CONTENT).body (ArrayHelper.EMPTY_BYTE_ARRAY);
       }
+      LOGGER.info ("Received HTTP response from '" + url + "' with " + aResult.length + " bytes");
       return ResponseEntity.ok (aResult);
     }
     catch (final ExtendedHttpResponseException ex)

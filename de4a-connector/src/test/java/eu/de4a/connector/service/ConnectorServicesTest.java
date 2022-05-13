@@ -33,6 +33,7 @@ import com.helger.commons.io.stream.StreamHelper;
 
 import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.api.service.DeliverService;
+import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.config.AddressesProperties;
 import eu.de4a.connector.config.MockConf;
 import eu.de4a.connector.error.model.ELogMessage;
@@ -71,7 +72,8 @@ public class ConnectorServicesTest
     assertNotNull (dReq);
 
     // Calling the tested method
-    final ResponseEntity <byte []> response = this.deliverService.pushMessage (dReq,
+    final ResponseEntity <byte []> response = this.deliverService.pushMessage (EMessageServiceType.USI,
+                                                                               dReq,
                                                                                "iso6523-actorid-upis::9999:lu000000025",
                                                                                "iso6523-actorid-upis::9999:test-sgad",
                                                                                ELogMessage.LOG_REQ_DO);
