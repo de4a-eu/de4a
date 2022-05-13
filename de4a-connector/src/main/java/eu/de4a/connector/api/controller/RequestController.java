@@ -42,41 +42,6 @@ public class RequestController
   @Autowired
   private APIManager apiManager;
 
-  @PostMapping (value = "/usi", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity <byte []> requestEvidenceUSI (@Valid final InputStream request)
-  {
-    LOGGER.info ("[DE-DR] Request to API /request/usi/ received");
-
-    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
-
-    // Unmarshalling and schema validation
-    final RequestExtractMultiEvidenceUSIType requestObj = APIRestUtils.conversionBytesWithCatching (request,
-                                                                                                    marshaller,
-                                                                                                    new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
-    if (requestObj.hasNoRequestEvidenceUSIItemEntries ())
-      throw new IllegalStateException ("Provided payload has no RequestEvidenceUSIItem entries");
-
-    // Check if there are multiple evidence request
-    final String docTypeID;
-    if (requestObj.getRequestEvidenceUSIItemCount () > 1)
-    {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
-    }
-    else
-    {
-      docTypeID = requestObj.getRequestEvidenceUSIItemAtIndex (0).getCanonicalEvidenceTypeId ();
-    }
-
-    final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
-                                                        requestObj.getDataOwner ().getAgentUrn (),
-                                                        docTypeID,
-                                                        DE4AConstants.PROCESS_ID_REQUEST);
-
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "USI Request", marshaller);
-
-    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
-  }
-
   @PostMapping (value = "/im", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> requestEvidenceIM (@Valid final InputStream request)
   {
@@ -108,6 +73,41 @@ public class RequestController
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
     this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "IM Request", marshaller);
+
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
+  }
+
+  @PostMapping (value = "/usi", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> requestEvidenceUSI (@Valid final InputStream request)
+  {
+    LOGGER.info ("[DE-DR] Request to API /request/usi/ received");
+
+    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
+
+    // Unmarshalling and schema validation
+    final RequestExtractMultiEvidenceUSIType requestObj = APIRestUtils.conversionBytesWithCatching (request,
+                                                                                                    marshaller,
+                                                                                                    new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+    if (requestObj.hasNoRequestEvidenceUSIItemEntries ())
+      throw new IllegalStateException ("Provided payload has no RequestEvidenceUSIItem entries");
+
+    // Check if there are multiple evidence request
+    final String docTypeID;
+    if (requestObj.getRequestEvidenceUSIItemCount () > 1)
+    {
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+    }
+    else
+    {
+      docTypeID = requestObj.getRequestEvidenceUSIItemAtIndex (0).getCanonicalEvidenceTypeId ();
+    }
+
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
+                                                        requestObj.getDataOwner ().getAgentUrn (),
+                                                        docTypeID,
+                                                        DE4AConstants.PROCESS_ID_REQUEST);
+
+    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "USI Request", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

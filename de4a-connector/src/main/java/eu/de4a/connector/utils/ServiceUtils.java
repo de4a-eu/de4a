@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import eu.de4a.connector.config.AddressesProperties;
-import eu.de4a.connector.error.model.ELogMessages;
+import eu.de4a.connector.error.model.ELogMessage;
 
 @Component
 public class ServiceUtils
@@ -31,7 +31,7 @@ public class ServiceUtils
    */
   public String getParticipantAddress (final String participantId, final String endpointType, final boolean isRequest)
   {
-    KafkaClientWrapper.sendInfo (ELogMessages.LOG_PARTICIPANT_LOOKUP, participantId, endpointType);
+    KafkaClientWrapper.sendInfo (ELogMessage.LOG_PARTICIPANT_LOOKUP, participantId, endpointType);
 
     final Map <String, Map <String, String>> participants = isRequest ? addressesProperties.getDataOwners ()
                                                                       : addressesProperties.getDataEvaluators ();
@@ -43,7 +43,7 @@ public class ServiceUtils
     final Map <String, String> participantAddress = participants.get (participantId);
     if (participantAddress == null || participantAddress.get (endpointType) == null)
     {
-      KafkaClientWrapper.sendError (ELogMessages.LOG_ERROR_PARTICIPANT_LOOKUP, participantId, endpointType);
+      KafkaClientWrapper.sendError (ELogMessage.LOG_ERROR_PARTICIPANT_LOOKUP, participantId, endpointType);
       return null;
     }
     return participantAddress.get (endpointType);

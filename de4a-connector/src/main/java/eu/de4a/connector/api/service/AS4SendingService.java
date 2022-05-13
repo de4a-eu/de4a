@@ -26,7 +26,7 @@ import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
-import eu.de4a.connector.error.model.ELogMessages;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 
@@ -65,7 +65,7 @@ public class AS4SendingService
     aPayload.setValue (DOMUtils.documentToByte (messageDTO.getMessage ()));
     aPayload.setMimeType (CMimeType.APPLICATION_XML.getAsString ());
 
-    KafkaClientWrapper.sendInfo (ELogMessages.LOG_AS4_MSG_SENT,
+    KafkaClientWrapper.sendInfo (ELogMessage.LOG_AS4_MSG_SENT,
                                  aSendingPI.getURIEncoded (),
                                  aReceiverPI.getURIEncoded (),
                                  aDocumentTypeID.getURIEncoded (),

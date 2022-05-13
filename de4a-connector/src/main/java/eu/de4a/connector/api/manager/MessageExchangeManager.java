@@ -20,7 +20,7 @@ import com.helger.xml.XMLFactory;
 import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.config.DE4AConstants;
-import eu.de4a.connector.error.model.ELogMessages;
+import eu.de4a.connector.error.model.ELogMessage;
 
 @Component
 public class MessageExchangeManager
@@ -35,14 +35,15 @@ public class MessageExchangeManager
    * message to the corresponding external component (DE/DO)
    *
    * @param messageWrapper
+   *        The wrapped incoming AS4 message
    */
   public void processMessageExchange (@Nonnull final MessageExchangeWrapper messageWrapper)
   {
     final MEMessage meMessage = messageWrapper.getMeMessage ();
 
-    final IProcessIdentifier iProcessID = meMessage.getProcessID ();
-    final String receiverID = meMessage.getReceiverID ().getURIEncoded ();
     final String senderID = meMessage.getSenderID ().getURIEncoded ();
+    final String receiverID = meMessage.getReceiverID ().getURIEncoded ();
+    final IProcessIdentifier aProcessID = meMessage.getProcessID ();
 
     if (meMessage.payloads ().size () != 1)
       throw new IllegalArgumentException ("Expecting the AS4 message to have exactly one payload only, but found " +
@@ -51,6 +52,7 @@ public class MessageExchangeManager
 
     // This is the RegRep
     final MEPayload aPayload = messageWrapper.getMeMessage ().payloads ().get (0);
+    // Extract payload from RegRep
     final Element aRegRepElement = DcngRegRepHelperIt2.extractPayload (aPayload.getData ());
     if (aRegRepElement == null)
       throw new IllegalStateException ("Failed to extract the payload from the anticipated RegRep message - see the log for details");
@@ -60,24 +62,24 @@ public class MessageExchangeManager
     aRegRepDoc.appendChild (aRegRepDoc.adoptNode (aRegRepElement.cloneNode (true)));
 
     ResponseEntity <byte []> response;
-    switch (iProcessID.getValue ())
+    switch (aProcessID.getValue ())
     {
       case DE4AConstants.PROCESS_ID_REQUEST:
-        response = this.deliverService.pushMessage (aRegRepDoc, senderID, receiverID, ELogMessages.LOG_REQ_DO);
+        response = this.deliverService.pushMessage (aRegRepDoc, senderID, receiverID, ELogMessage.LOG_REQ_DO);
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Owner");
         else
           LOGGER.error ("Error connecting with the Data Owner");
         break;
       case DE4AConstants.PROCESS_ID_RESPONSE:
-        response = this.deliverService.pushMessage (aRegRepDoc, senderID, receiverID, ELogMessages.LOG_REQ_DE);
+        response = this.deliverService.pushMessage (aRegRepDoc, senderID, receiverID, ELogMessage.LOG_REQ_DE);
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Evaluator");
         else
           LOGGER.error ("Error connecting with the Data Evaluator");
         break;
       default:
-        LOGGER.error ("ProcessID exchanged is not found: " + iProcessID.getValue ());
+        LOGGER.error ("ProcessID exchanged is not found: " + aProcessID.getValue ());
     }
   }
 }

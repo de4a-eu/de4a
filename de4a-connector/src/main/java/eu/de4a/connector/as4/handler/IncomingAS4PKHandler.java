@@ -13,7 +13,7 @@ import com.helger.dcng.api.me.incoming.MEIncomingException;
 import com.helger.dcng.api.me.model.MEMessage;
 
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
-import eu.de4a.connector.error.model.ELogMessages;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 
 /**
@@ -40,10 +40,9 @@ public class IncomingAS4PKHandler implements IMEIncomingHandler
 
     LOGGER.info ("[DR-DT] Start handling incoming AS4 message");
 
-    KafkaClientWrapper.sendInfo (ELogMessages.LOG_AS4_REQ_RECEIPT);
+    KafkaClientWrapper.sendInfo (ELogMessage.LOG_AS4_REQ_RECEIPT);
 
-    final MessageExchangeWrapper messageWrapper = new MessageExchangeWrapper (context);
-    messageWrapper.setMeMessage (aMessage);
+    final MessageExchangeWrapper messageWrapper = new MessageExchangeWrapper (context, aMessage);
     publisher.publishCustomEvent (messageWrapper);
 
     LOGGER.info ("[DR-DT] Finished handling incoming AS4 message");

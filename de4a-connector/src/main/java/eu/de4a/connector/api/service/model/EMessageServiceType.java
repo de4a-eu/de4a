@@ -15,7 +15,7 @@ import com.helger.commons.annotation.Nonempty;
  * {@link eu.de4a.iem.core} it forces to update this class and keep it up to
  * date
  */
-public enum EMessageServiceTypes
+public enum EMessageServiceType
 {
   IM (eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestTransferEvidenceIM_QNAME.getLocalPart (), true),
   USI (eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestTransferEvidenceUSI_QNAME.getLocalPart (), true),
@@ -26,17 +26,17 @@ public enum EMessageServiceTypes
   REDIRECT (eu.de4a.iem.core.jaxb.dt.ObjectFactory._USIRedirectUser_QNAME.getLocalPart (), false),
   NOTIFICATION (eu.de4a.iem.core.jaxb.dt.ObjectFactory._EventNotification_QNAME.getLocalPart (), false);
 
-  private static final Map <String, EMessageServiceTypes> LOOKUP = new HashMap <> ();
+  private static final Map <String, EMessageServiceType> LOOKUP = new HashMap <> ();
   static
   {
-    for (final EMessageServiceTypes item : values ())
+    for (final EMessageServiceType item : values ())
       LOOKUP.put (item.getType (), item);
   }
 
   private final String type;
   private final boolean isRequest;
 
-  EMessageServiceTypes (@Nonnull @Nonempty final String type, final boolean isRequest)
+  EMessageServiceType (@Nonnull @Nonempty final String type, final boolean isRequest)
   {
     this.type = type;
     this.isRequest = isRequest;
@@ -62,7 +62,7 @@ public enum EMessageServiceTypes
   }
 
   @Nullable
-  public static EMessageServiceTypes getByTypeOrNull (@Nullable final String type)
+  public static EMessageServiceType getByTypeOrNull (@Nullable final String type)
   {
     return LOOKUP.get (type);
   }

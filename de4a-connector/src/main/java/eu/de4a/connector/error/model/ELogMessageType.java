@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import com.helger.commons.annotation.Nonempty;
 
-public enum ELogMessageTypes
+public enum ELogMessageType
 {
   SERVICES ("Services", "01"),
   CLIENT ("Client", "02"),
@@ -14,7 +14,7 @@ public enum ELogMessageTypes
   private final String name;
   private final String code;
 
-  ELogMessageTypes (@Nonnull @Nonempty final String name, @Nonnull @Nonempty final String code)
+  ELogMessageType (@Nonnull @Nonempty final String name, @Nonnull @Nonempty final String code)
   {
     this.name = name;
     this.code = code;

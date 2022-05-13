@@ -11,20 +11,15 @@ public class MessageExchangeWrapper extends ContextRefreshedEvent
 {
   private transient MEMessage meMessage;
 
-  public MessageExchangeWrapper (final ApplicationContext source)
+  public MessageExchangeWrapper (final ApplicationContext source, @Nullable final MEMessage aMessage)
   {
     super (source);
-    this.meMessage = null;
+    meMessage = aMessage;
   }
 
   @Nullable
   public MEMessage getMeMessage ()
   {
     return meMessage;
-  }
-
-  public void setMeMessage (@Nullable final MEMessage aMessage)
-  {
-    meMessage = aMessage;
   }
 }

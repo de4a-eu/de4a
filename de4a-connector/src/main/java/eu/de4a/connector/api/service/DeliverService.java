@@ -8,10 +8,10 @@ import org.w3c.dom.Document;
 import com.helger.commons.string.StringHelper;
 
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
-import eu.de4a.connector.api.service.model.EMessageServiceTypes;
+import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.EExternalModuleError;
-import eu.de4a.connector.error.model.ELogMessages;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.connector.utils.KafkaClientWrapper;
@@ -43,7 +43,7 @@ public class DeliverService
   public ResponseEntity <byte []> pushMessage (final Document docMsg,
                                                final String senderID,
                                                final String receiverID,
-                                               final ELogMessages logMessage)
+                                               final ELogMessage logMessage)
   {
     // Generic way for all request IDs
     final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, docMsg.getDocumentElement ());
@@ -52,7 +52,7 @@ public class DeliverService
       LegacyAPIHelper.rememberFinalized (sRequestID, docMsg);
 
     final String elemType = docMsg.getDocumentElement ().getNodeName ();
-    final EMessageServiceTypes eMessageServiceTypes = EMessageServiceTypes.getByTypeOrNull (elemType);
+    final EMessageServiceType eMessageServiceTypes = EMessageServiceType.getByTypeOrNull (elemType);
     if (eMessageServiceTypes == null)
       throw new IllegalStateException ("Failed to resolve message type from XML document element local name '" + elemType + "'");
 

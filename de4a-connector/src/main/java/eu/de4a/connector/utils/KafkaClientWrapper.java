@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.helger.commons.error.level.EErrorLevel;
 
-import eu.de4a.connector.error.model.ELogMessages;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.kafkaclient.DE4AKafkaClient;
 
 @Component
@@ -27,23 +27,23 @@ public class KafkaClientWrapper {
 
     private KafkaClientWrapper (){}
 
-    public static void sendInfo(final ELogMessages logMessage, final Object...params) {
+    public static void sendInfo(final ELogMessage logMessage, final Object...params) {
         _send(logMessage, EErrorLevel.INFO, params);
     }
 
-    public static void sendSuccess(final ELogMessages logMessage, final Object...params) {
+    public static void sendSuccess(final ELogMessage logMessage, final Object...params) {
         _send(logMessage, EErrorLevel.SUCCESS, params);
     }
 
-    public static void sendWarn(final ELogMessages logMessage, final Object...params) {
+    public static void sendWarn(final ELogMessage logMessage, final Object...params) {
         _send(logMessage, EErrorLevel.WARN, params);
     }
 
-    public static void sendError(final ELogMessages logMessage, final Object...params) {
+    public static void sendError(final ELogMessage logMessage, final Object...params) {
         _send(logMessage, EErrorLevel.ERROR, params);
     }
 
-    private static void _send(final ELogMessages logMessage, final EErrorLevel level, final Object...params) {
+    private static void _send(final ELogMessage logMessage, final EErrorLevel level, final Object...params) {
         final String msg = MessageUtils.format(logMessage.getKey(), params);
 
         ThreadContext.put(ORIGIN_TAG, logMessage.getOrigin().getLabel());
