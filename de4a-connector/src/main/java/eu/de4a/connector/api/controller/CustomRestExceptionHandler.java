@@ -3,10 +3,8 @@ package eu.de4a.connector.api.controller;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.xml.bind.UnmarshalException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +21,6 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.CMessageKeys;
@@ -46,7 +43,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler
   @Nonnull
   private static ResponseEntity <Object> _buildBadRequestError (final String err)
   {
-    LOGGER.warn ("REST Client BAD REQUEST-> {}", err);
+    LOGGER.warn ("REST Client BAD REQUEST-> " + err);
 
     final HttpHeaders headers = new HttpHeaders ();
     headers.setContentType (new MediaType (MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
