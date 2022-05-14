@@ -140,7 +140,7 @@ To enable HTTP kafka log producer, you only need to set the property to true `de
 
 It is important to mention the property `de4a.kafka.logging.enabled`, used to enable the file log printing for each kafka message sent, that property could be enabled even when the `de4a.kafka.enabled=false`, just for write the log at the different appenders configured in the log4j2 configuration file.
 
-#### SMP/SML properties `refeence.properties`
+### SMP/SML properties `refeence.properties`
 
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
 
