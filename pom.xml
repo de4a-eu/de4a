@@ -23,7 +23,19 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-    
+
+  <scm>
+    <connection>scm:git:git@github.com:de4a-wp5/de4a.git</connection>
+    <developerConnection>scm:git:git@github.com:de4a-wp5/de4a.git</developerConnection>
+    <url>http://github.com/de4a-wp5/de4a</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <organization>
+    <name>de4a</name>
+    <url>http://www.de4a.eu</url>
+  </organization>
+
   <repositories>
     <repository>
       <id>central.snapshots</id>
@@ -85,14 +97,14 @@
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
-        <version>5.3.19</version>
+        <version>5.3.20</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.6.7</version>
+        <version>2.7.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -110,7 +122,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>2.13.2.2</version>
+        <version>2.13.3</version>
       </dependency>
 
       <dependency>
