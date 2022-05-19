@@ -1,7 +1,9 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
+
 import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import eu.de4a.connector.api.RequestAPI;
+
+import com.helger.dcng.api.DcngIdentifierFactory;
+import com.helger.peppolid.CIdentifier;
+
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
@@ -20,6 +25,7 @@ import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.utils.APIRestUtils;
+import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.RequestEventSubscriptionType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceIMType;
@@ -27,148 +33,152 @@ import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceLUType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceUSIType;
 
 @Controller
-@RequestMapping("/request")
+@RequestMapping ("/request")
 @Validated
-public class RequestController implements RequestAPI {
-  private static final Logger LOGGER = LoggerFactory.getLogger(RequestController.class);
+public class RequestController
+{
+  private static final Logger LOGGER = LoggerFactory.getLogger (RequestController.class);
 
-	@Autowired
-	private APIManager apiManager;
+  @Autowired
+  private APIManager apiManager;
 
+  @PostMapping (value = "/im", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> requestEvidenceIM (@Valid final InputStream request)
+  {
+    LOGGER.info ("[DE-DR] Request to API /request/im/ received");
 
-	@PostMapping(value = "/usi/", produces = MediaType.APPLICATION_XML_VALUE,
-            consumes = MediaType.APPLICATION_XML_VALUE)
-    @Override
-    public ResponseEntity<byte[]> requestEvidenceUSI(@Valid final InputStream request) {
-        LOGGER.debug("Request to API /usi/ received");
+    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ();
 
-        final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller();
+    // Unmarshalling and schema validation
+    final RequestExtractMultiEvidenceIMType requestObj = APIRestUtils.conversionBytesWithCatching (request,
+                                                                                                   marshaller,
+                                                                                                   new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+    if (requestObj.hasNoRequestEvidenceIMItemEntries ())
+      throw new IllegalStateException ("Provided payload has no RequestEvidenceIMItem entries");
 
-        // Unmarshalling and schema validation
-        final RequestExtractMultiEvidenceUSIType requestObj = (RequestExtractMultiEvidenceUSIType)
-                APIRestUtils.conversionBytesWithCatching(marshaller,request, false, true,
-                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
-
-        // Check if there are multiple evidence request
-        final String docTypeID;
-        if(requestObj.getRequestEvidenceUSIItemCount() > 1) {
-            docTypeID = DE4AConstants.EVIDENCE_SCHEME + "::" +
-                    DE4AConstants.MULTI_ITEM_TYPE;
-        } else {
-            docTypeID = requestObj.getRequestEvidenceUSIItemAtIndex(0)
-                    .getCanonicalEvidenceTypeId();
-        }
-
-        final AS4MessageDTO messageDTO = new AS4MessageDTO(requestObj.getDataEvaluator().getAgentUrn(),
-                requestObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_REQUEST);
-
-        final boolean isSent = this.apiManager.processIncomingMessage(requestObj, messageDTO,
-                docTypeID, "USI Request", marshaller);
-
-        //Default response - at this point must be successful but doesn't hurt double check
-        return ResponseEntity.status((isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR))
-                .body((byte[]) ConnectorExceptionHandler.getResponseError(null, isSent));
+    // Check if there are multiple evidence request
+    final String docTypeID;
+    if (requestObj.getRequestEvidenceIMItemCount () > 1)
+    {
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+    }
+    else
+    {
+      docTypeID = requestObj.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
     }
 
-    @PostMapping(value = "/im/", produces = MediaType.APPLICATION_XML_VALUE,
-            consumes = MediaType.APPLICATION_XML_VALUE)
-    @Override
-    public ResponseEntity<byte[]> requestEvidenceIM(@Valid final InputStream request) {
-        LOGGER.debug("Request to API /im/ received");
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
+                                                        requestObj.getDataOwner ().getAgentUrn (),
+                                                        docTypeID,
+                                                        DE4AConstants.PROCESS_ID_REQUEST);
 
-        final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller();
+    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "IM Request", marshaller);
 
-        // Unmarshalling and schema validation
-        final RequestExtractMultiEvidenceIMType requestObj = (RequestExtractMultiEvidenceIMType)
-                APIRestUtils.conversionBytesWithCatching(marshaller,request, false, true,
-                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
+  }
 
-        // Check if there are multiple evidence request
-        final String docTypeID;
-        if(requestObj.getRequestEvidenceIMItemCount() > 1) {
-            docTypeID = DE4AConstants.EVIDENCE_SCHEME + "::" +
-                    DE4AConstants.MULTI_ITEM_TYPE;
-        } else {
-            docTypeID = requestObj.getRequestEvidenceIMItemAtIndex(0)
-                    .getCanonicalEvidenceTypeId();
-        }
+  @PostMapping (value = "/usi", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> requestEvidenceUSI (@Valid final InputStream request)
+  {
+    LOGGER.info ("[DE-DR] Request to API /request/usi/ received");
 
-        final AS4MessageDTO messageDTO = new AS4MessageDTO(requestObj.getDataEvaluator().getAgentUrn(),
-                requestObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_REQUEST);
+    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
 
-        final boolean isSent = this.apiManager.processIncomingMessage(requestObj, messageDTO,
-                docTypeID, "IM Request", marshaller);
+    // Unmarshalling and schema validation
+    final RequestExtractMultiEvidenceUSIType requestObj = APIRestUtils.conversionBytesWithCatching (request,
+                                                                                                    marshaller,
+                                                                                                    new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+    if (requestObj.hasNoRequestEvidenceUSIItemEntries ())
+      throw new IllegalStateException ("Provided payload has no RequestEvidenceUSIItem entries");
 
-        //Default response - at this point must be successful but doesn't hurt double check
-        return ResponseEntity.status((isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR))
-                .body((byte[]) ConnectorExceptionHandler.getResponseError(null, isSent));
+    // Check if there are multiple evidence request
+    final String docTypeID;
+    if (requestObj.getRequestEvidenceUSIItemCount () > 1)
+    {
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+    }
+    else
+    {
+      docTypeID = requestObj.getRequestEvidenceUSIItemAtIndex (0).getCanonicalEvidenceTypeId ();
     }
 
-    @PostMapping(value = "/lu/", produces = MediaType.APPLICATION_XML_VALUE,
-            consumes = MediaType.APPLICATION_XML_VALUE)
-    @Override
-    public ResponseEntity<byte[]> requestEvidenceLU(@Valid final InputStream request) {
-        LOGGER.debug("Request to API /lu/ received");
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
+                                                        requestObj.getDataOwner ().getAgentUrn (),
+                                                        docTypeID,
+                                                        DE4AConstants.PROCESS_ID_REQUEST);
 
-        final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller();
+    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "USI Request", marshaller);
 
-        // Unmarshalling and schema validation
-        final RequestExtractMultiEvidenceLUType requestObj = (RequestExtractMultiEvidenceLUType)
-                APIRestUtils.conversionBytesWithCatching(marshaller,request, false, true,
-                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
+  }
 
-        // Check if there are multiple evidence request
-        final String docTypeID;
-        if(requestObj.getRequestEvidenceLUItemCount() > 1) {
-            docTypeID = DE4AConstants.EVIDENCE_SCHEME + "::" +
-                    DE4AConstants.MULTI_ITEM_TYPE;
-        } else {
-            docTypeID = requestObj.getRequestEvidenceLUItemAtIndex(0)
-                    .getCanonicalEvidenceTypeId();
-        }
+  @PostMapping (value = "/lu", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> requestEvidenceLU (@Valid final InputStream request)
+  {
+    LOGGER.info ("[DE-DR] Request to API /request/lu/ received");
 
-        final AS4MessageDTO messageDTO = new AS4MessageDTO(requestObj.getDataEvaluator().getAgentUrn(),
-                requestObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_REQUEST);
+    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceLUMarshaller ();
 
-        final boolean isSent = this.apiManager.processIncomingMessage(requestObj, messageDTO,
-                docTypeID, "LU Request", marshaller);
+    // Unmarshalling and schema validation
+    final RequestExtractMultiEvidenceLUType requestObj = APIRestUtils.conversionBytesWithCatching (request,
+                                                                                                   marshaller,
+                                                                                                   new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+    if (requestObj.hasNoRequestEvidenceLUItemEntries ())
+      throw new IllegalStateException ("Provided payload has no RequestEvidenceLUItem entries");
 
-        //Default response - at this point must be successful but doesn't hurt double check
-        return ResponseEntity.status((isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR))
-                .body((byte[]) ConnectorExceptionHandler.getResponseError(null, isSent));
+    // Check if there are multiple evidence request
+    final String docTypeID;
+    if (requestObj.getRequestEvidenceLUItemCount () > 1)
+    {
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+    }
+    else
+    {
+      docTypeID = requestObj.getRequestEvidenceLUItemAtIndex (0).getCanonicalEvidenceTypeId ();
     }
 
-    @PostMapping(value = "/subscription/", produces = MediaType.APPLICATION_XML_VALUE,
-            consumes = MediaType.APPLICATION_XML_VALUE)
-    @Override
-    public ResponseEntity<byte[]> requestEventSubscription(@Valid final InputStream request) {
-        LOGGER.debug("Request to API /subscription/ received");
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
+                                                        requestObj.getDataOwner ().getAgentUrn (),
+                                                        docTypeID,
+                                                        DE4AConstants.PROCESS_ID_REQUEST);
 
-        final var marshaller = DE4ACoreMarshaller.drRequestEventSubscriptionMarshaller();
+    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "LU Request", marshaller);
 
-        // Unmarshalling and schema validation
-        final RequestEventSubscriptionType requestObj = (RequestEventSubscriptionType)
-                APIRestUtils.conversionBytesWithCatching(marshaller,request, false, true,
-                        new ConnectorException().withModule(EExternalModuleError.CONNECTOR_DR));
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
+  }
 
-        // Check if there are multiple evidence request
-        final String docTypeID;
-        if(requestObj.getEventSubscripRequestItemCount() > 1) {
-            docTypeID = DE4AConstants.EVENT_CATALOGUE_SCHEME + "::" +
-                    DE4AConstants.MULTI_ITEM_TYPE;
-        } else {
-            docTypeID = requestObj.getEventSubscripRequestItemAtIndex(0)
-                    .getCanonicalEventCatalogUri();
-        }
+  @PostMapping (value = "/subscription", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  public ResponseEntity <byte []> requestEventSubscription (@Valid final InputStream request)
+  {
+    LOGGER.info ("[DE-DR] Request to API /request/subscription/ received");
 
-        final AS4MessageDTO messageDTO = new AS4MessageDTO(requestObj.getDataEvaluator().getAgentUrn(),
-                requestObj.getDataOwner().getAgentUrn(), docTypeID, DE4AConstants.MESSAGE_TYPE_REQUEST);
+    final var marshaller = DE4ACoreMarshaller.drRequestEventSubscriptionMarshaller ();
 
-        final boolean isSent = this.apiManager.processIncomingMessage(requestObj, messageDTO,
-                docTypeID, "Subscription Request", marshaller);
+    // Unmarshalling and schema validation
+    final RequestEventSubscriptionType requestObj = APIRestUtils.conversionBytesWithCatching (request,
+                                                                                              marshaller,
+                                                                                              new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+    if (requestObj.hasNoEventSubscripRequestItemEntries ())
+      throw new IllegalStateException ("Provided payload has no EventSubscripRequestItem entries");
 
-        //Default response - at this point must be successful but doesn't hurt double check
-        return ResponseEntity.status(isSent ? HttpStatus.OK: HttpStatus.INTERNAL_SERVER_ERROR)
-                .body((byte[]) ConnectorExceptionHandler.getResponseError(null, isSent));
+    // Check if there are multiple evidence request
+    final String docTypeID;
+    if (requestObj.getEventSubscripRequestItemCount () > 1)
+    {
+      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
     }
+    else
+    {
+      docTypeID = requestObj.getEventSubscripRequestItemAtIndex (0).getCanonicalEventCatalogUri ();
+    }
+
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
+                                                        requestObj.getDataOwner ().getAgentUrn (),
+                                                        docTypeID,
+                                                        DE4AConstants.PROCESS_ID_REQUEST);
+
+    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "Subscription Request", marshaller);
+
+    return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
+  }
 }

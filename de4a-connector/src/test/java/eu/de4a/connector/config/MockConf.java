@@ -2,46 +2,31 @@ package eu.de4a.connector.config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import javax.servlet.ServletContext;
-import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
-import com.helger.dcng.core.http.DcngHttpClientSettings;
-import eu.de4a.kafkaclient.DE4AKafkaSettings;
 
+
+@PropertySource("classpath:application-test.properties")
 @Configuration
-public class InitConf implements ServletContextAware {
-  private ServletContext servletContext;
-
-  @Value("${de4a.kafka.enabled:false}")
-  private boolean kafkaEnabled;
-  @Value("${de4a.kafka.logging.enabled:true}")
-  private boolean kafkaLoggingEnabled;
-  @Value("${de4a.kafka.http.enabled:false}")
-  private boolean kafkaHttp;
-  @Value("${de4a.kafka.url:#{null}}")
-  private String kafkaUrl;
-  @Value("${de4a.kafka.topic:#{de4a-connector}}")
-  private String kafkaTopic;
- 
-  public void setServletContext(final ServletContext servletContext) {
-    this.servletContext = servletContext;
-  }
-
+@ComponentScan(basePackages = {"eu.de4a.connector.api", "eu.de4a.connector.utils"})
+@Profile("test")
+public class MockConf {
   @Bean
-  ViewResolver viewResolver() {
+  public ViewResolver viewResolver() {
     final InternalResourceViewResolver ret = new InternalResourceViewResolver();
     ret.setViewClass(JstlView.class);
     ret.setPrefix("/WEB-INF/view/");
@@ -50,12 +35,12 @@ public class InitConf implements ServletContextAware {
   }
 
   @Bean(name = "localeResolver")
-  LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}") final String locale) {
+  public LocaleResolver localeResolver(@Value("${spring.messages.default_locale:#{null}}") final String locale) {
     final SessionLocaleResolver ret = new SessionLocaleResolver();
     if (locale != null && !locale.trim().isEmpty())
       ret.setDefaultLocale(new Locale(locale));
     else
-      ret.setDefaultLocale(Locale.US);
+      ret.setDefaultLocale(Locale.ENGLISH);
     return ret;
   }
 
@@ -68,7 +53,7 @@ public class InitConf implements ServletContextAware {
   }
 
   @Bean
-  ReloadableResourceBundleMessageSource messageSource() {
+  public ReloadableResourceBundleMessageSource messageSource() {
     final var ret = new ReloadableResourceBundleMessageSource();
     ret.setBasenames("classpath:messages/messages");
     ret.setDefaultEncoding(StandardCharsets.UTF_8.name());
@@ -76,22 +61,8 @@ public class InitConf implements ServletContextAware {
     return ret;
   }
 
-  @Bean(initMethod = "start", destroyMethod = "stop")
-  void kafkaSettings() {
-    DE4AKafkaSettings.defaultProperties().put("bootstrap.servers", kafkaUrl);
-    DE4AKafkaSettings.setKafkaEnabled(kafkaEnabled);
-    DE4AKafkaSettings.setKafkaHttp(kafkaHttp);
-    if (kafkaHttp) {
-      DE4AKafkaSettings.setHttpClientSettings(new DcngHttpClientSettings());
-    }
-    DE4AKafkaSettings.setLoggingEnabled(kafkaLoggingEnabled);
-    DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
-
-    ThreadContext.put("metrics.enabled", "false");
-  }
-
   @Bean(name = "applicationEventMulticaster")
-  ApplicationEventMulticaster simpleApplicationEventMulticaster() {
+  public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
     final SimpleApplicationEventMulticaster ret = new SimpleApplicationEventMulticaster();
     ret.setTaskExecutor(new SimpleAsyncTaskExecutor());
     return ret;

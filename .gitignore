@@ -2,6 +2,7 @@
 .classpath
 .settings/
 target/
+phase4-dumps/
 
 #Ignore out of scope project modules
 .idea/

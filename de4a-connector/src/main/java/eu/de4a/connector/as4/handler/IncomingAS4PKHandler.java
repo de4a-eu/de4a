@@ -1,39 +1,50 @@
 package eu.de4a.connector.as4.handler;
 
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
 import com.helger.dcng.api.me.incoming.IMEIncomingHandler;
 import com.helger.dcng.api.me.incoming.MEIncomingException;
 import com.helger.dcng.api.me.model.MEMessage;
+
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
-import eu.de4a.connector.error.model.ELogMessages;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 
 /**
- * This is the handler for incoming AS4 messages.
- * It is registered on startup and spreads the information.
+ * This is the handler for incoming AS4 messages. It is registered on startup
+ * and spreads the information.
  */
 @Component
-public class IncomingAS4PKHandler implements IMEIncomingHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IncomingAS4PKHandler.class);
+public class IncomingAS4PKHandler implements IMEIncomingHandler
+{
+  private static final Logger LOGGER = LoggerFactory.getLogger (IncomingAS4PKHandler.class);
 
-    @Autowired
-    private ApplicationContext context;
-    @Autowired
-    private MessageEventPublisher publisher;
+  @Autowired
+  private ApplicationContext context;
+  @Autowired
+  private MessageEventPublisher publisher;
 
-    @Override
-    public void handleIncomingRequest(final MEMessage aMessage) throws MEIncomingException {
-      LOGGER.debug("Incoming AS4 message...");
+  @Override
+  public void handleIncomingRequest (@Nonnull final MEMessage aMessage) throws MEIncomingException
+  {
+    if (context == null)
+      throw new MEIncomingException ("IncomingAS4PKHandler/ApplicationContext wasn't initialized properly");
+    if (publisher == null)
+      throw new MEIncomingException ("IncomingAS4PKHandler/MessageEventPublisher wasn't initialized properly");
 
-        KafkaClientWrapper.sendInfo(ELogMessages.LOG_AS4_REQ_RECEIPT);
+    LOGGER.info ("[DR-DT] Start handling incoming AS4 message");
 
-        final MessageExchangeWrapper messageWrapper = new MessageExchangeWrapper(context);
-        messageWrapper.setMeMessage(aMessage);
-        publisher.publishCustomEvent(messageWrapper);
-    }
+    KafkaClientWrapper.sendInfo (ELogMessage.LOG_AS4_REQ_RECEIPT);
 
+    final MessageExchangeWrapper messageWrapper = new MessageExchangeWrapper (context, aMessage);
+    publisher.publishCustomEvent (messageWrapper);
+
+    LOGGER.info ("[DR-DT] Finished handling incoming AS4 message");
+  }
 }
