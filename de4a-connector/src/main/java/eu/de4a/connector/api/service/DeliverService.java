@@ -1,14 +1,11 @@
 package eu.de4a.connector.api.service;
 
 import javax.annotation.Nonnull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
-
 import com.helger.commons.string.StringHelper;
-
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
 import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.error.exceptions.ConnectorException;
@@ -32,15 +29,15 @@ public class DeliverService
    * internal configuration resolved by
    * {@link eu.de4a.connector.config.AddressesProperties}
    *
-   * @param eMessageServiceType
+   * @param eMessageServiceType Message service type
    * @param docMsg
-   *        - DOM Document with the message
+   *         DOM Document with the message
    * @param senderID
-   *        - Sender participant identifier
+   *         Sender participant identifier
    * @param receiverID
-   *        - Receiver participant identifier
+   *         Receiver participant identifier
    * @param logMessage
-   *        - Log tag for i18n
+   *         Log tag for i18n
    * @return ResponseEntity with the response of the external service
    */
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,

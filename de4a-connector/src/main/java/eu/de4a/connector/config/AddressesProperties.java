@@ -3,16 +3,13 @@ package eu.de4a.connector.config;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.json.IJson;
@@ -20,7 +17,7 @@ import com.helger.json.IJsonObject;
 import com.helger.json.serialize.JsonReader;
 
 /**
- * Mapping class for the external services URLs </br>
+ * Mapping class for the external services URLs <br>
  * Check local file "de-do.json".
  */
 @Component
