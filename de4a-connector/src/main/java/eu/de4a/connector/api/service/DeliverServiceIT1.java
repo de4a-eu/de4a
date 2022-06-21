@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import com.helger.commons.string.StringHelper;
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
+import eu.de4a.connector.api.manager.MessageExchangeManager;
 import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.EExternalModuleError;
@@ -20,15 +21,17 @@ import eu.de4a.connector.utils.KafkaClientWrapper;
 import eu.de4a.connector.utils.ServiceUtils;
 
 @Service
-public class DeliverService
+public class DeliverServiceIT1
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger (DeliverService.class);
-	
   private static final String XPATH_REQUEST_ID = "//*[local-name()='RequestId']/text()";
 
+  private static final Logger LOGGER = LoggerFactory.getLogger (DeliverServiceIT1.class);
+		  
   @Autowired
   private ServiceUtils serviceUtils;
-
+  
+  private static String legacyDOURL = "";
+  
   /**
    * Deliver a message to the corresponding participant based on the receiver
    * internal configuration resolved by
@@ -50,6 +53,7 @@ public class DeliverService
                                                @Nonnull final String senderID,
                                                @Nonnull final String receiverID,
                                                @Nonnull final ELogMessage logMessage)
+  
   {
     // Generic way for all request IDs
     final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, docMsg.getDocumentElement ());
@@ -57,10 +61,9 @@ public class DeliverService
       LegacyAPIHelper.rememberFinalized (sRequestID, docMsg);
 
     // Get where has to be sent depending of the content
-    final String url = this.serviceUtils.getParticipantAddress (receiverID,
-                                                                eMessageServiceType.getEndpointType (),
-                                                                eMessageServiceType.isRequest ());
-    LOGGER.info ("URL for DO: "+url);
+    final String url = legacyDOURL;
+    LOGGER.info ("Legacy URL for DO: "+url);
+                                                               
     if (url == null)
       throw new IllegalStateException ("Failed to determine DE/DO URL for receiver '" +
                                        receiverID +
@@ -74,4 +77,12 @@ public class DeliverService
                                                     DOMUtils.documentToByte (docMsg),
                                                     new ConnectorException ().withModule (EExternalModuleError.DATA_OWNER));
   }
+
+	public static String getLegacyDOURL() {
+		return legacyDOURL;
+	}
+	
+	public static void setLegacyDOURL(String legacyDOURL) {
+		DeliverServiceIT1.legacyDOURL = legacyDOURL;
+	}
 }

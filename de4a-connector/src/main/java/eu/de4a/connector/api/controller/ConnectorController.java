@@ -1,6 +1,8 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.validation.Valid;
@@ -32,6 +34,8 @@ import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
+import eu.de4a.iem.core.jaxb.common.AdditionalParameterType;
+import eu.de4a.iem.core.jaxb.common.AdditionalParameterTypeType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceIMType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
@@ -102,6 +106,16 @@ public class ConnectorController
     LOGGER.info ("Converting old request to new request");
     final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest (aOldRequest);
 
+    
+    //additional parameter for it1 message identification
+    List<AdditionalParameterType> aList = new ArrayList();
+    AdditionalParameterType addParam = new AdditionalParameterType();
+    addParam.setLabel("iteration");
+    addParam.setValue("1");
+    addParam.setType(AdditionalParameterTypeType.YES_NO);
+    aList.add(addParam);
+    aNewRequest.getRequestEvidenceIMItemAtIndex(0).setAdditionalParameter(aList);
+   
     final String sNewDocTypeID = aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
     final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewRequest.getDataEvaluator ().getAgentUrn (),
                                                         aNewRequest.getDataOwner ().getAgentUrn (),
@@ -158,7 +172,7 @@ public class ConnectorController
 
     // Serialize result
     final byte [] aOldResponseBytes = DE4AMarshaller.drImResponseMarshaller (eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType.NONE)
-                                                    .getAsBytes (aOldResponse);
+    												 .getAsBytes (aOldResponse);
     LOGGER.info ("Returning old response");
     return ResponseEntity.status (HttpStatus.OK).body (aOldResponseBytes);
   }

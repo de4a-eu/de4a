@@ -1,5 +1,7 @@
 package eu.de4a.connector.api.legacy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -23,7 +25,9 @@ import eu.de4a.iem.core.jaxb.common.ResponseExtractEvidenceItemType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
 import eu.de4a.iem.jaxb.common.types.CanonicalEvidenceType;
 import eu.de4a.iem.jaxb.common.types.DomesticsEvidencesType;
+import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
+import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
 import un.unece.uncefact.codelist.specification.ianamimemediatype._2003.BinaryObjectMimeCodeContentType;
@@ -225,4 +229,143 @@ public final class LegacyAPIHelper
 
     return aResponseDoc;
   }
+
+	public static RequestExtractEvidenceIMType convertNewToOldRequest(RequestExtractMultiEvidenceIMType aDRRequest) {
+		final RequestExtractEvidenceIMType aOldRequest = new RequestExtractEvidenceIMType();
+		aOldRequest.setRequestId(aDRRequest.getRequestId());
+		aOldRequest.setSpecificationId(aDRRequest.getSpecificationId());
+		aOldRequest.setTimeStamp(aDRRequest.getTimeStamp());
+		aOldRequest.setProcedureId(aDRRequest.getProcedureId());
+		
+		final Function <eu.de4a.iem.core.jaxb.common.AgentType, eu.de4a.iem.jaxb.common.types.AgentType> aAgentConverter = o -> {
+		      final eu.de4a.iem.jaxb.common.types.AgentType ret = new eu.de4a.iem.jaxb.common.types.AgentType ();
+		      if (o.getAgentNameValue () != null)
+		        ret.setAgentName (o.getAgentNameValue ());
+		      ret.setAgentUrn (o.getAgentUrn ());
+		      ret.setRedirectURL (o.getRedirectURL ());
+		      return ret;
+		    };
+		aOldRequest.setDataEvaluator (aAgentConverter.apply (aDRRequest.getDataEvaluator ()));
+		aOldRequest.setDataOwner (aAgentConverter.apply (aDRRequest.getDataOwner ()));
+		
+		final Function <eu.de4a.iem.core.jaxb.common.NaturalPersonIdentifierType, eu.de4a.iem.jaxb.common.idtypes.NaturalPersonIdentifierType> aNPConverter = o -> {
+		      final eu.de4a.iem.jaxb.common.idtypes.NaturalPersonIdentifierType ret = new eu.de4a.iem.jaxb.common.idtypes.NaturalPersonIdentifierType();
+		      ret.setPersonIdentifier (o.getPersonIdentifier ());
+		      if (o.getFirstNameValue () != null)
+		        ret.setFirstName (o.getFirstNameValue ());
+		      if (o.getFamilyNameValue () != null)
+		        ret.setFamilyName (o.getFamilyNameValue ());
+		      ret.setDateOfBirth (o.getDateOfBirth ());
+		      if (o.getGender () != null)
+		        ret.setGender (eu.de4a.iem.jaxb.eidas.np.GenderType.fromValue (o.getGender ().value ()));
+		      if (o.getBirthNameValue () != null)
+		        ret.setBirthName (o.getBirthNameValue ());
+		      if (o.getPlaceOfBirthValue () != null)
+		        ret.setPlaceOfBirth (o.getPlaceOfBirthValue ());
+		      ret.setCurrentAddress (o.getCurrentAddress ());
+		      return ret;
+		    };
+	    final Function <eu.de4a.iem.core.jaxb.common.LegalPersonIdentifierType, eu.de4a.iem.jaxb.common.idtypes.LegalPersonIdentifierType> aLPConverter = o -> {
+	      final eu.de4a.iem.jaxb.common.idtypes.LegalPersonIdentifierType ret = new eu.de4a.iem.jaxb.common.idtypes.LegalPersonIdentifierType ();
+	      ret.setLegalPersonIdentifier (o.getLegalPersonIdentifier ());
+	      ret.setLegalName (o.getLegalNameValue ());
+	      ret.setLegalAddress (o.getLegalAddress ());
+	      ret.setVATRegistration (o.getVATRegistration ());
+	      ret.setTaxReference (o.getTaxReference ());
+	      ret.setD201217EUIdentifier (o.getD201217EUIdentifier ());
+	      ret.setLEI (o.getLEI ());
+	      ret.setEORI (o.getEORI ());
+	      ret.setSEED (o.getSEED ());
+	      ret.setSIC (o.getSIC ());
+	      return ret;
+	    };
+	    final Function <eu.de4a.iem.core.jaxb.common.DataRequestSubjectCVType, eu.de4a.iem.jaxb.common.types.DataRequestSubjectCVType> aDRSConverter = o -> {
+	      final eu.de4a.iem.jaxb.common.types.DataRequestSubjectCVType ret = new eu.de4a.iem.jaxb.common.types.DataRequestSubjectCVType ();
+	      if (o.getDataSubjectPerson () != null)
+	        ret.setDataSubjectPerson (aNPConverter.apply (o.getDataSubjectPerson ()));
+	      if (o.getDataSubjectCompany () != null)
+	        ret.setDataSubjectCompany (aLPConverter.apply (o.getDataSubjectCompany ()));
+	      if (o.getDataSubjectRepresentative () != null)
+	        ret.setDataSubjectRepresentative (aNPConverter.apply (o.getDataSubjectRepresentative ()));
+	      return ret;
+	    };
+		if (aDRRequest.getRequestEvidenceIMItemAtIndex(0).getDataRequestSubject () != null)
+			aOldRequest.setDataRequestSubject (aDRSConverter.apply (aDRRequest.getRequestEvidenceIMItemAtIndex(0).getDataRequestSubject ()));
+		final Function < eu.de4a.iem.core.jaxb.common.RequestGroundsType, eu.de4a.iem.jaxb.common.types.RequestGroundsType> aRGConverter = o -> {
+		      final eu.de4a.iem.jaxb.common.types.RequestGroundsType ret = new eu.de4a.iem.jaxb.common.types.RequestGroundsType ();
+		      ret.setLawELIPermanentLink (o.getLawELIPermanentLink ());
+		      if (o.getExplicitRequest () != null)
+		        ret.setExplicitRequest (eu.de4a.iem.jaxb.common.types.ExplicitRequestType.fromValue (o.getExplicitRequest ().value ()));
+		      return ret;
+		    };
+		if (aDRRequest.getRequestEvidenceIMItemAtIndex(0).getRequestGrounds () != null)
+			aOldRequest.setRequestGrounds (aRGConverter.apply (aDRRequest.getRequestEvidenceIMItemAtIndex(0).getRequestGrounds ()));
+		aOldRequest.setCanonicalEvidenceTypeId(aDRRequest.getRequestEvidenceIMItemAtIndex(0).getCanonicalEvidenceTypeId().replace(":1.0",""));
+		return aOldRequest;
+	}
+
+	public static ResponseExtractMultiEvidenceType convertOldToNewResponse(ResponseExtractEvidenceType aOldResponse, RequestExtractMultiEvidenceIMType aNewRequest) {
+	    ValueEnforcer.notNull (aOldResponse, "OldResponse");
+	    ValueEnforcer.notNull (aNewRequest, "NewRequest");
+	    
+	    ResponseExtractMultiEvidenceType aNewResponse = new ResponseExtractMultiEvidenceType();
+
+	    aNewResponse.setRequestId (aNewRequest.getRequestId ());
+	    aNewResponse.setTimeStamp (aNewRequest.getTimeStamp ());
+
+	    aNewResponse.setDataEvaluator(aNewRequest.getDataEvaluator());
+	    aNewResponse.setDataOwner(aNewRequest.getDataOwner());
+	    
+	    ResponseExtractEvidenceItemType item = new ResponseExtractEvidenceItemType();
+	    item.setRequestItemId(aNewRequest.getRequestId ());
+	    item.setDataRequestSubject(aNewRequest.getRequestEvidenceIMItemAtIndex(0).getDataRequestSubject());
+	    item.setCanonicalEvidenceTypeId(aNewRequest.getRequestEvidenceIMItemAtIndex(0).getCanonicalEvidenceTypeId());
+	    
+	    if (aOldResponse.getCanonicalEvidence().getAny () != null)
+	    {
+	      final eu.de4a.iem.core.jaxb.common.CanonicalEvidenceType aNewCE = new eu.de4a.iem.core.jaxb.common.CanonicalEvidenceType ();
+	      
+	      aNewCE.setAny (aOldResponse.getCanonicalEvidence().getAny ());
+	      item.setCanonicalEvidence (aNewCE);
+	    }
+
+	    List<ResponseExtractEvidenceItemType> aList = new ArrayList<>();
+	    aList.add(item);
+	    aNewResponse.setResponseExtractEvidenceItem(aList);
+		
+	    return aNewResponse;
+	}
+
+	public static ResponseExtractMultiEvidenceType convertOldToNewResponse(ResponseTransferEvidenceType aOldResponse2,
+			RequestExtractMultiEvidenceIMType aNewRequest) {
+		ValueEnforcer.notNull (aOldResponse2, "OldResponse");
+	    ValueEnforcer.notNull (aNewRequest, "NewRequest");
+	    
+	    ResponseExtractMultiEvidenceType aNewResponse = new ResponseExtractMultiEvidenceType();
+
+	    aNewResponse.setRequestId (aNewRequest.getRequestId ());
+	    aNewResponse.setTimeStamp (aNewRequest.getTimeStamp ());
+
+	    aNewResponse.setDataEvaluator(aNewRequest.getDataEvaluator());
+	    aNewResponse.setDataOwner(aNewRequest.getDataOwner());
+	    
+	    ResponseExtractEvidenceItemType item = new ResponseExtractEvidenceItemType();
+	    item.setRequestItemId(aNewRequest.getRequestId ());
+	    item.setDataRequestSubject(aNewRequest.getRequestEvidenceIMItemAtIndex(0).getDataRequestSubject());
+	    item.setCanonicalEvidenceTypeId(aNewRequest.getRequestEvidenceIMItemAtIndex(0).getCanonicalEvidenceTypeId());
+	    
+	    if (aOldResponse2.getCanonicalEvidence().getAny () != null)
+	    {
+	      final eu.de4a.iem.core.jaxb.common.CanonicalEvidenceType aNewCE = new eu.de4a.iem.core.jaxb.common.CanonicalEvidenceType ();
+	      
+	      aNewCE.setAny (aOldResponse2.getCanonicalEvidence().getAny ());
+	      item.setCanonicalEvidence (aNewCE);
+	    }
+
+	    List<ResponseExtractEvidenceItemType> aList = new ArrayList<>();
+	    aList.add(item);
+	    aNewResponse.setResponseExtractEvidenceItem(aList);
+		
+	    return aNewResponse;
+	}
 }

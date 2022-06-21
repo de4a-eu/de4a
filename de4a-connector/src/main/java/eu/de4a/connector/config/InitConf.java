@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import javax.servlet.ServletContext;
 import org.apache.logging.log4j.ThreadContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +21,15 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 import com.helger.dcng.core.http.DcngHttpClientSettings;
+
+import eu.de4a.connector.api.service.DeliverServiceIT1;
 import eu.de4a.kafkaclient.DE4AKafkaSettings;
 
 @Configuration
 public class InitConf implements ServletContextAware {
+	
+	 private static final Logger LOGGER = LoggerFactory.getLogger (InitConf.class);
+			 
   private ServletContext servletContext;
 
   @Value("${de4a.kafka.enabled:false}")
@@ -35,6 +42,8 @@ public class InitConf implements ServletContextAware {
   private String kafkaUrl;
   @Value("${de4a.kafka.topic:#{de4a-connector}}")
   private String kafkaTopic;
+  @Value("${legacy.do.url}")
+  private String legacyDO;
  
   public void setServletContext(final ServletContext servletContext) {
     this.servletContext = servletContext;
@@ -88,6 +97,11 @@ public class InitConf implements ServletContextAware {
     DE4AKafkaSettings.setKafkaTopic(kafkaTopic);
 
     ThreadContext.put("metrics.enabled", "false");
+  }
+  
+  @Bean(initMethod = "start", destroyMethod = "stop")
+  void legacySettings() {
+	  DeliverServiceIT1.setLegacyDOURL(legacyDO);
   }
 
   @Bean(name = "applicationEventMulticaster")
