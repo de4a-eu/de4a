@@ -53,8 +53,8 @@ public class ResponseController
                                                                                        marshaller,
                                                                                        new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
 
-    final AS4MessageDTO messageDTO = new AS4MessageDTO (redirectUserMsg.getDataEvaluator ().getAgentUrn (),
-                                                        redirectUserMsg.getDataOwner ().getAgentUrn (),
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (redirectUserMsg.getDataOwner ().getAgentUrn (),
+                                                        redirectUserMsg.getDataEvaluator().getAgentUrn (),
                                                         redirectUserMsg.getCanonicalEvidenceTypeId (),
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
