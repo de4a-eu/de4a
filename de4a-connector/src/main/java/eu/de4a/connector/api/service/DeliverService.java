@@ -54,7 +54,7 @@ public class DeliverService
     // Generic way for all request IDs
     final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, docMsg.getDocumentElement ());
     if (StringHelper.hasText (sRequestID))
-      LegacyAPIHelper.rememberFinalized (sRequestID, docMsg);
+      LegacyAPIHelper.rememberFinalized_DR (sRequestID, docMsg);
 
     // Get where has to be sent depending of the content
     final String url = this.serviceUtils.getParticipantAddress (receiverID,

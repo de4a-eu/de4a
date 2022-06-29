@@ -3,8 +3,10 @@ package eu.de4a.connector.api.controller;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +17,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.w3c.dom.Document;
+
 import com.helger.commons.concurrent.ThreadHelper;
 import com.helger.commons.datetime.PDTFactory;
 import com.helger.xml.serialize.write.EXMLSerializeIndent;
 import com.helger.xml.serialize.write.XMLWriter;
 import com.helger.xml.serialize.write.XMLWriterSettings;
+
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
@@ -100,8 +104,7 @@ public class ConnectorController
 
     // Convert to the new format
     LOGGER.info ("Converting old request to new request");
-    final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest (aOldRequest);
-
+    final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest_DR (aOldRequest);
 
     //additional parameter for it1 message identification
     final List<AdditionalParameterType> aList = new ArrayList<>();
@@ -122,17 +125,17 @@ public class ConnectorController
     this.apiManager.processIncomingMessage (aNewRequest, messageDTO, sNewDocTypeID, "Legacy IM Request", aNewRequestMarshaller);
 
     // Remember request
-    LegacyAPIHelper.rememberLegacyRequest (aOldRequest);
+    LegacyAPIHelper.rememberLegacyRequest_DR (aOldRequest);
 
     // Synchronously wait for response
     final long timeout = 60_000;
     final long init = PDTFactory.getCurrentMillis ();
-    Document aResponseDoc = LegacyAPIHelper.isFinalized (aOldRequest);
+    Document aResponseDoc = LegacyAPIHelper.isFinalized_DR (aOldRequest);
     while (aResponseDoc == null)
     {
       LOGGER.info ("Waiting for synchronous response on legacy IM request");
       ThreadHelper.sleep (500);
-      aResponseDoc = LegacyAPIHelper.isFinalized (aOldRequest);
+      aResponseDoc = LegacyAPIHelper.isFinalized_DR (aOldRequest);
       if (PDTFactory.getCurrentMillis () - init >= timeout)
         break;
     }
@@ -163,7 +166,7 @@ public class ConnectorController
 
       // Convert new Response to old response
       LOGGER.info ("Converting new response to old format");
-      aOldResponse = LegacyAPIHelper.convertNewToOldResponse (aOldRequest, aNewResponse);
+      aOldResponse = LegacyAPIHelper.convertNewToOldResponse_DR (aOldRequest, aNewResponse);
     }
 
     // Serialize result

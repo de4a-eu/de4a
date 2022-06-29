@@ -1,7 +1,7 @@
 package eu.de4a.connector.api.manager;
 
-import java.util.List;
 import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.helger.commons.string.StringHelper;
 import com.helger.dcng.api.me.model.MEMessage;
 import com.helger.dcng.api.me.model.MEPayload;
 import com.helger.dcng.core.regrep.DcngRegRepHelperIt2;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.xml.XMLFactory;
+
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
 import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.api.service.DeliverServiceIT1;
@@ -76,7 +79,9 @@ public class MessageExchangeManager
     final String elemType = aRegRepElement.getNodeName ();
     final EMessageServiceType eMessageServiceType = EMessageServiceType.getByTypeOrNull (elemType);
     if (eMessageServiceType == null)
-      throw new IllegalStateException ("Failed to resolve message type from XML document element local name '" + elemType + "'");
+      throw new IllegalStateException ("Failed to resolve message type from XML document element local name '" +
+                                       elemType +
+                                       "'");
 
     // Create a new document with the payload only
 
@@ -87,7 +92,7 @@ public class MessageExchangeManager
     {
       case DE4AConstants.PROCESS_ID_REQUEST:
       {
-    	boolean backwardsCompatibility = false;
+        boolean backwardsCompatibility = false;
         Document aTargetDoc = null;
         switch (eMessageServiceType)
         {
@@ -97,31 +102,27 @@ public class MessageExchangeManager
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ().read (aRegRepElement);
 
             // check if is a 1st iteration message
-            final RequestEvidenceItemType  itemRequest = aDRRequest.getRequestEvidenceIMItemAtIndex(0);
-            if (itemRequest!=null &&
-            		itemRequest.getAdditionalParameter() != null &&
-            		itemRequest.getAdditionalParameter().size() > 0) {
-	            final List<AdditionalParameterType>  aList = itemRequest.getAdditionalParameter();
-	            AdditionalParameterType addParam = null;
-	            if (!aList.isEmpty()) {
-	            	addParam = aList.get(0);
-	            	if (addParam != null && addParam.getLabel().equals("iteration") &&
-		            		addParam.getValue().equals("1")) {
-		            	LOGGER.info ("backwardsCompatibility enabled");
-		            	backwardsCompatibility = true;
-		            	rememberID = aDRRequest.getRequestId();
-		            	aNewRequest = aDRRequest;
-		            	// convert new to old
-		            	final RequestExtractEvidenceIMType aOldRequest = LegacyAPIHelper.convertNewToOldRequest (aDRRequest);
-		            	aTargetDoc = DE4AMarshaller.doImRequestMarshaller().getAsDocument (aOldRequest);
-		            } else {
-		            	aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceIMMarshaller ().getAsDocument (aDRRequest);
-		            }
-	            }else {
-	            	aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceIMMarshaller ().getAsDocument (aDRRequest);
-	            }
-            } else {
-            	aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceIMMarshaller ().getAsDocument (aDRRequest);
+            final RequestEvidenceItemType itemRequest = aDRRequest.getRequestEvidenceIMItemAtIndex (0);
+            if (itemRequest != null &&
+                itemRequest.hasAdditionalParameterEntries ())
+            {
+              final AdditionalParameterType addParam = itemRequest.getAdditionalParameter ().get (0);
+              if (addParam != null && addParam.getLabel ().equals ("iteration") && addParam.getValue ().equals ("1"))
+              {
+                LOGGER.info ("backwardsCompatibility enabled");
+                backwardsCompatibility = true;
+                rememberID = aDRRequest.getRequestId ();
+                aNewRequest = aDRRequest;
+                // convert new to old
+                final RequestExtractEvidenceIMType aOldRequest = LegacyAPIHelper.convertNewToOldRequest (aDRRequest);
+                aTargetDoc = DE4AMarshaller.doImRequestMarshaller ().getAsDocument (aOldRequest);
+              }
+            }
+
+            if (aTargetDoc == null)
+            {
+              // Not Iteration 1
+              aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceIMMarshaller ().getAsDocument (aDRRequest);
             }
             break;
           }
@@ -145,15 +146,27 @@ public class MessageExchangeManager
             final Document aNewDoc = XMLFactory.newDocument ();
             aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
             aTargetDoc = aNewDoc;
+            break;
           }
           default:
             throw new IllegalStateException ("Unsupported message type " + eMessageServiceType);
         }
 
-        if (backwardsCompatibility) {
-        	response = this.deliverServiceIT1.pushMessage (eMessageServiceType, aTargetDoc, senderID, receiverID, ELogMessage.LOG_REQ_DO);
-        } else {
-        	response = this.deliverService.pushMessage (eMessageServiceType, aTargetDoc, senderID, receiverID, ELogMessage.LOG_REQ_DO);
+        if (backwardsCompatibility)
+        {
+          response = this.deliverServiceIT1.pushMessage (eMessageServiceType,
+                                                         aTargetDoc,
+                                                         senderID,
+                                                         receiverID,
+                                                         ELogMessage.LOG_REQ_DO);
+        }
+        else
+        {
+          response = this.deliverService.pushMessage (eMessageServiceType,
+                                                      aTargetDoc,
+                                                      senderID,
+                                                      receiverID,
+                                                      ELogMessage.LOG_REQ_DO);
         }
 
         if (HttpStatus.OK.equals (response.getStatusCode ()))
@@ -164,19 +177,24 @@ public class MessageExchangeManager
       }
       case DE4AConstants.PROCESS_ID_RESPONSE:
       {
-        Document aTargetDoc = null;
+        final Document aTargetDoc;
         switch (eMessageServiceType)
         {
           // Dunno if we need translations
           default:
           {
-            LOGGER.info ("Copying " + eMessageServiceType + " request from DT to DE");
+            if (LOGGER.isInfoEnabled ())
+              LOGGER.info ("Copying " + eMessageServiceType + " request from DT to DE");
             final Document aNewDoc = XMLFactory.newDocument ();
             aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
             aTargetDoc = aNewDoc;
           }
         }
-        response = this.deliverService.pushMessage (eMessageServiceType, aTargetDoc, senderID, receiverID, ELogMessage.LOG_REQ_DE);
+        response = this.deliverService.pushMessage (eMessageServiceType,
+                                                    aTargetDoc,
+                                                    senderID,
+                                                    receiverID,
+                                                    ELogMessage.LOG_REQ_DE);
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Evaluator");
         else
@@ -187,36 +205,45 @@ public class MessageExchangeManager
         LOGGER.error ("ProcessID exchanged is not found: " + aProcessID.getValue ());
     }
 
-    if (!"".equals(rememberID)) {
-    	final var aOldResponseMarshaller = DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE);
-    	final ResponseExtractEvidenceType aOldResponse = aOldResponseMarshaller.read(response.getBody());
-		final ResponseExtractMultiEvidenceType aNewResponse = LegacyAPIHelper.convertOldToNewResponse(aOldResponse, aNewRequest);
-		final var marshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller (eu.de4a.iem.core.IDE4ACanonicalEvidenceType.NONE);
+    if (StringHelper.hasText (rememberID))
+    {
+      final var aOldResponseMarshaller = DE4AMarshaller.doImResponseMarshaller (IDE4ACanonicalEvidenceType.NONE);
+      final ResponseExtractEvidenceType aOldResponse = aOldResponseMarshaller.read (response.getBody ());
+      final ResponseExtractMultiEvidenceType aNewResponse = LegacyAPIHelper.convertOldToNewResponse (aOldResponse,
+                                                                                                     aNewRequest);
+      final var marshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller (eu.de4a.iem.core.IDE4ACanonicalEvidenceType.NONE);
 
-		final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewResponse.getDataOwner ().getAgentUrn (),
-					aNewResponse.getDataEvaluator ().getAgentUrn (),
-					aNewResponse.getResponseExtractEvidenceItemAtIndex (0).getCanonicalEvidenceTypeId (),
-	                DE4AConstants.PROCESS_ID_RESPONSE);
-		this.apiManager.processIncomingMessage (aNewResponse, messageDTO, aNewResponse.getRequestId (), "Response Evidence", marshaller);
-    } else {
-	    if (response != null)
-	    {
-	      final ResponseErrorType aResponse = DE4ACoreMarshaller.defResponseMarshaller ().read (response.getBody ());
-	      if (aResponse != null)
-	      {
-	        if (aResponse.isAck ())
-	        {
-	          LOGGER.info ("DO accepted our request");
-	        }
-	        else
-	        {
-	          LOGGER.error ("DO rejected our request");
-	          aResponse.getError ().forEach (x -> LOGGER.error ("  DO Error [" + x.getCode () + "] " + x.getText ()));
-	        }
-	      }
-	      else
-	        LOGGER.warn ("Failed to interprete the DO response as a ResponseErrorType");
-	    }
+      final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewResponse.getDataOwner ().getAgentUrn (),
+                                                          aNewResponse.getDataEvaluator ().getAgentUrn (),
+                                                          aNewResponse.getResponseExtractEvidenceItemAtIndex (0)
+                                                                      .getCanonicalEvidenceTypeId (),
+                                                          DE4AConstants.PROCESS_ID_RESPONSE);
+      this.apiManager.processIncomingMessage (aNewResponse,
+                                              messageDTO,
+                                              aNewResponse.getRequestId (),
+                                              "Response Evidence",
+                                              marshaller);
+    }
+    else
+    {
+      if (response != null)
+      {
+        final ResponseErrorType aResponse = DE4ACoreMarshaller.defResponseMarshaller ().read (response.getBody ());
+        if (aResponse != null)
+        {
+          if (aResponse.isAck ())
+          {
+            LOGGER.info ("DO accepted our request");
+          }
+          else
+          {
+            LOGGER.error ("DO rejected our request");
+            aResponse.getError ().forEach (x -> LOGGER.error ("  DO Error [" + x.getCode () + "] " + x.getText ()));
+          }
+        }
+        else
+          LOGGER.warn ("Failed to interprete the DO response as a ResponseErrorType");
+      }
     }
   }
 }
