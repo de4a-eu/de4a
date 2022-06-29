@@ -241,3 +241,10 @@ Once you have all configuration parameters well configured (if not, check the lo
 Once you have deployed the `war` file, there are several **checks to ensure that the deployment was successful**:
 - Connector index page will be at root path: `http://host:port/`
 	- Eg.: [UM Connector](https://de4a-connector.informatika.uni-mb.si/)
+
+# News and Noteworthy
+
+* v0.2.1 - work in progress
+    * Updated to de4a-commons 0.2.8
+* v0.2.0 - 2022-05-20
+    * This is the first version of the Iteration 2 Connector. It's not the final version, but a good starting point
