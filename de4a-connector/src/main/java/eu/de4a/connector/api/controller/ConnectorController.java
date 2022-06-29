@@ -3,10 +3,8 @@ package eu.de4a.connector.api.controller;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +15,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.w3c.dom.Document;
-
 import com.helger.commons.concurrent.ThreadHelper;
 import com.helger.commons.datetime.PDTFactory;
 import com.helger.xml.serialize.write.EXMLSerializeIndent;
 import com.helger.xml.serialize.write.XMLWriter;
 import com.helger.xml.serialize.write.XMLWriterSettings;
-
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
@@ -106,16 +102,16 @@ public class ConnectorController
     LOGGER.info ("Converting old request to new request");
     final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest (aOldRequest);
 
-    
+
     //additional parameter for it1 message identification
-    List<AdditionalParameterType> aList = new ArrayList();
-    AdditionalParameterType addParam = new AdditionalParameterType();
+    final List<AdditionalParameterType> aList = new ArrayList<>();
+    final AdditionalParameterType addParam = new AdditionalParameterType();
     addParam.setLabel("iteration");
     addParam.setValue("1");
     addParam.setType(AdditionalParameterTypeType.YES_NO);
     aList.add(addParam);
     aNewRequest.getRequestEvidenceIMItemAtIndex(0).setAdditionalParameter(aList);
-   
+
     final String sNewDocTypeID = aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
     final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewRequest.getDataEvaluator ().getAgentUrn (),
                                                         aNewRequest.getDataOwner ().getAgentUrn (),
