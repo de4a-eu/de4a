@@ -1,9 +1,7 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
-
 import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import com.helger.dcng.api.DcngIdentifierFactory;
 import com.helger.peppolid.CIdentifier;
-
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
@@ -47,7 +43,7 @@ public class RequestController
   {
     LOGGER.info ("[DE-DR] Request to API /request/im/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceIMType requestObj = APIRestUtils.conversionBytesWithCatching (request,
@@ -82,7 +78,7 @@ public class RequestController
   {
     LOGGER.info ("[DE-DR] Request to API /request/usi/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceUSIType requestObj = APIRestUtils.conversionBytesWithCatching (request,
@@ -117,7 +113,7 @@ public class RequestController
   {
     LOGGER.info ("[DE-DR] Request to API /request/lu/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceLUMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceLUType requestObj = APIRestUtils.conversionBytesWithCatching (request,

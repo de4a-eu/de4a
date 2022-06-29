@@ -14,7 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.iem.cev.de4a.t41.DE4AT41Marshaller;
-import eu.de4a.iem.jaxb.t41.higheredu.v2021_04_13.HigherEducationDiplomaType;
+import eu.de4a.iem.jaxb.t41.higheredu.v2022_06_23.HigherEducationDiplomaType;
 
 @RunWith (SpringRunner.class)
 public class XMLProcessingTest

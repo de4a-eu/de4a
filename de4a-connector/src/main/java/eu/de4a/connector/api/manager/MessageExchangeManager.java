@@ -1,9 +1,7 @@
 package eu.de4a.connector.api.manager;
 
 import java.util.List;
-
 import javax.annotation.Nonnull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import com.helger.dcng.api.me.model.MEMessage;
 import com.helger.dcng.api.me.model.MEPayload;
 import com.helger.dcng.core.regrep.DcngRegRepHelperIt2;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.xml.XMLFactory;
-
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
 import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.api.service.DeliverServiceIT1;
@@ -49,7 +45,7 @@ public class MessageExchangeManager
   private DeliverServiceIT1 deliverServiceIT1;
   @Autowired
   private APIManager apiManager;
-  
+
   /**
    * Process message exchange wrapper. Include the business logic to forward the
    * message to the corresponding external component (DE/DO)
@@ -98,18 +94,18 @@ public class MessageExchangeManager
           case IM:
           {
             LOGGER.info ("Converting IM request from DT to DO");
-            final var aDRRequest = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ().read (aRegRepElement);
-            
+            final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ().read (aRegRepElement);
+
             // check if is a 1st iteration message
-            RequestEvidenceItemType  itemRequest = aDRRequest.getRequestEvidenceIMItemAtIndex(0);
-            if (itemRequest!=null && 
+            final RequestEvidenceItemType  itemRequest = aDRRequest.getRequestEvidenceIMItemAtIndex(0);
+            if (itemRequest!=null &&
             		itemRequest.getAdditionalParameter() != null &&
             		itemRequest.getAdditionalParameter().size() > 0) {
-	            List<AdditionalParameterType>  aList = itemRequest.getAdditionalParameter();
+	            final List<AdditionalParameterType>  aList = itemRequest.getAdditionalParameter();
 	            AdditionalParameterType addParam = null;
 	            if (!aList.isEmpty()) {
 	            	addParam = aList.get(0);
-	            	if (addParam != null && addParam.getLabel().equals("iteration") && 
+	            	if (addParam != null && addParam.getLabel().equals("iteration") &&
 		            		addParam.getValue().equals("1")) {
 		            	LOGGER.info ("backwardsCompatibility enabled");
 		            	backwardsCompatibility = true;
@@ -132,14 +128,14 @@ public class MessageExchangeManager
           case USI:
           {
             LOGGER.info ("Converting USI request from DR to DO");
-            final var aDRRequest = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ().read (aRegRepElement);
+            final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceUSIMarshaller ().getAsDocument (aDRRequest);
             break;
           }
           case LU:
           {
             LOGGER.info ("Converting LU request from DR to DO");
-            final var aDRRequest = DE4ACoreMarshaller.drRequestExtractMultiEvidenceLUMarshaller ().read (aRegRepElement);
+            final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceLUMarshaller ().getAsDocument (aDRRequest);
             break;
           }
@@ -153,13 +149,13 @@ public class MessageExchangeManager
           default:
             throw new IllegalStateException ("Unsupported message type " + eMessageServiceType);
         }
-        
+
         if (backwardsCompatibility) {
         	response = this.deliverServiceIT1.pushMessage (eMessageServiceType, aTargetDoc, senderID, receiverID, ELogMessage.LOG_REQ_DO);
         } else {
         	response = this.deliverService.pushMessage (eMessageServiceType, aTargetDoc, senderID, receiverID, ELogMessage.LOG_REQ_DO);
         }
-        
+
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Owner");
         else
@@ -190,13 +186,13 @@ public class MessageExchangeManager
       default:
         LOGGER.error ("ProcessID exchanged is not found: " + aProcessID.getValue ());
     }
-    
+
     if (!"".equals(rememberID)) {
     	final var aOldResponseMarshaller = DE4AMarshaller.doImResponseMarshaller(IDE4ACanonicalEvidenceType.NONE);
     	final ResponseExtractEvidenceType aOldResponse = aOldResponseMarshaller.read(response.getBody());
-		ResponseExtractMultiEvidenceType aNewResponse = LegacyAPIHelper.convertOldToNewResponse(aOldResponse, aNewRequest);
-		final var marshaller = DE4ACoreMarshaller.dtResponseExtractMultiEvidenceMarshaller (eu.de4a.iem.core.IDE4ACanonicalEvidenceType.NONE);
-		
+		final ResponseExtractMultiEvidenceType aNewResponse = LegacyAPIHelper.convertOldToNewResponse(aOldResponse, aNewRequest);
+		final var marshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller (eu.de4a.iem.core.IDE4ACanonicalEvidenceType.NONE);
+
 		final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewResponse.getDataOwner ().getAgentUrn (),
 					aNewResponse.getDataEvaluator ().getAgentUrn (),
 					aNewResponse.getResponseExtractEvidenceItemAtIndex (0).getCanonicalEvidenceTypeId (),
@@ -205,7 +201,7 @@ public class MessageExchangeManager
     } else {
 	    if (response != null)
 	    {
-	      final ResponseErrorType aResponse = DE4ACoreMarshaller.defResponseErrorMarshaller ().read (response.getBody ());
+	      final ResponseErrorType aResponse = DE4ACoreMarshaller.defResponseMarshaller ().read (response.getBody ());
 	      if (aResponse != null)
 	      {
 	        if (aResponse.isAck ())

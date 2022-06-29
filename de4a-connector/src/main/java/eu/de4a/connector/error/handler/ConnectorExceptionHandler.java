@@ -1,16 +1,12 @@
 package eu.de4a.connector.error.handler;
 
 import java.util.Locale;
-
 import javax.annotation.Nonnull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Component;
-
 import com.helger.commons.string.StringHelper;
-
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
@@ -28,7 +24,7 @@ public class ConnectorExceptionHandler
   @Nonnull
   public static byte [] getSuccessResponseBytes ()
   {
-    return DE4ACoreMarshaller.defResponseErrorMarshaller ().getAsBytes (DE4AResponseDocumentHelper.createResponseError (true));
+    return DE4ACoreMarshaller.defResponseMarshaller ().getAsBytes (DE4AResponseDocumentHelper.createResponseError (true));
   }
 
   private static String _getMessage (@Nonnull final ConnectorException ex)
@@ -51,7 +47,7 @@ public class ConnectorExceptionHandler
   {
     final ResponseErrorType response = DE4AResponseDocumentHelper.createResponseError (false);
     response.addError (DE4AResponseDocumentHelper.createError (ex.buildCode (), _getMessage (ex)));
-    return DE4ACoreMarshaller.defResponseErrorMarshaller ().getAsBytes (response);
+    return DE4ACoreMarshaller.defResponseMarshaller ().getAsBytes (response);
   }
 
   @Nonnull
@@ -61,6 +57,6 @@ public class ConnectorExceptionHandler
     final String msg = StringHelper.hasNoText (ex.getMessage ()) ? "Internal Connector Error"
                                                                  : "[" + ex.getClass ().getSimpleName () + "] " + ex.getMessage ();
     responseError.addError (DE4AResponseDocumentHelper.createError ("99999", msg));
-    return DE4ACoreMarshaller.defResponseErrorMarshaller ().getAsBytes (responseError);
+    return DE4ACoreMarshaller.defResponseMarshaller ().getAsBytes (responseError);
   }
 }

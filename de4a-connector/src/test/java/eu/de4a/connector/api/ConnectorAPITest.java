@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,12 +25,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import com.helger.dcng.api.DcngConfig;
 import com.helger.dcng.webapi.as4.ApiPostLookupAndSendIt2;
 import com.helger.dcng.webapi.as4.LookupAndSendingResult;
 import com.helger.peppolid.factory.IIdentifierFactory;
-
 import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.connector.api.controller.EventController;
 import eu.de4a.connector.api.controller.RequestController;
@@ -71,9 +68,10 @@ public class ConnectorAPITest
 
     // USI Request - modify it as needed
     final RequestExtractMultiEvidenceUSIType req = MockMessagesHelper.createRequestExtractMultiEvidenceUSI (2);
-    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ();
 
-    LOGGER.debug (marshaller.formatted ().getAsString (req));
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug (marshaller.formatted ().getAsString (req));
     final byte [] bReq = marshaller.getAsBytes (req);
 
     final int status = _postCallMockedAS4API (bReq, "/request/usi/");
@@ -89,7 +87,8 @@ public class ConnectorAPITest
     final RedirectUserType req = MockMessagesHelper.createRedirectUser ();
     final var marshaller = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller ();
 
-    LOGGER.debug (marshaller.formatted ().getAsString (req));
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug (marshaller.formatted ().getAsString (req));
     final byte [] bReq = marshaller.getAsBytes (req);
 
     final int status = _postCallMockedAS4API (bReq, "/response/usi/redirectUser/");
@@ -103,7 +102,8 @@ public class ConnectorAPITest
     final EventNotificationType req = MockMessagesHelper.createRequestEventNotification (2);
     final var marshaller = DE4ACoreMarshaller.dtEventNotificationMarshaller ();
 
-    LOGGER.debug (marshaller.formatted ().getAsString (req));
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug (marshaller.formatted ().getAsString (req));
     final byte [] bReq = marshaller.getAsBytes (req);
 
     final int status = _postCallMockedAS4API (bReq, "/event/notification/");
@@ -127,7 +127,6 @@ public class ConnectorAPITest
       LOGGER.error (e.getMessage ());
       fail ();
     }
-
   }
 
   private MvcResult _createCall (final MockHttpServletRequestBuilder httpReq, final ResultMatcher matcher) throws Exception

@@ -118,7 +118,7 @@ public class ConnectorController
                                                         sNewDocTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ();
+    final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
     this.apiManager.processIncomingMessage (aNewRequest, messageDTO, sNewDocTypeID, "Legacy IM Request", aNewRequestMarshaller);
 
     // Remember request
@@ -152,7 +152,7 @@ public class ConnectorController
     else
     {
       // Try to interpret response
-      final var aNewResponseMarshaller = DE4ACoreMarshaller.dtResponseExtractMultiEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
+      final var aNewResponseMarshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
       final ResponseExtractMultiEvidenceType aNewResponse = aNewResponseMarshaller.read (aResponseDoc);
       if (aNewResponse == null)
       {
