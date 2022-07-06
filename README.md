@@ -246,5 +246,6 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 * v0.2.1 - 2022-07-06
     * Updated to de4a-commons 0.2.8
+    * Improved the Iteration 1 backwards compatibility interface for the DO side as well
 * v0.2.0 - 2022-05-20
     * This is the first version of the Iteration 2 Connector. It's not the final version, but a good starting point
