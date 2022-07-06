@@ -244,7 +244,7 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
-* v0.2.1 - work in progress
+* v0.2.1 - 2022-07-06
     * Updated to de4a-commons 0.2.8
 * v0.2.0 - 2022-05-20
     * This is the first version of the Iteration 2 Connector. It's not the final version, but a good starting point
