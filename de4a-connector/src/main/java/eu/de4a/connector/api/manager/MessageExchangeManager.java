@@ -176,6 +176,7 @@ public class MessageExchangeManager
         break;
       }
       case DE4AConstants.PROCESS_ID_RESPONSE:
+      case DE4AConstants.PROCESS_ID_NOTIFICATION:
       {
         final Document aTargetDoc;
         switch (eMessageServiceType)
