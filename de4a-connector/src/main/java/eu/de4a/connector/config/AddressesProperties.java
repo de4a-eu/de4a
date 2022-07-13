@@ -3,13 +3,16 @@ package eu.de4a.connector.config;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.json.IJson;
@@ -52,7 +55,9 @@ public class AddressesProperties
         for (final Map.Entry <String, IJson> aEntry2 : aEntry.getValue ().getAsObject ())
           aMap1.put (aEntry2.getKey (), aEntry2.getValue ().getAsValue ().getAsString ());
       }
-    LOGGER.info ("Successfully read the '" + sChildName + "' address map with " + aTarget.size () + " entries");
+
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Successfully read the '" + sChildName + "' address map with " + aTarget.size () + " entries");
   }
 
   @PostConstruct
@@ -60,10 +65,11 @@ public class AddressesProperties
   {
     ValueEnforcer.notNull (m_sFilePrefix, "FilePrefix");
     final ClassPathResource aRes = new ClassPathResource (m_sFilePrefix + ".json");
-    LOGGER.info ("Reading DE/DO address JSON from " + aRes);
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Reading DE/DO address JSON from " + aRes);
     final IJsonObject aJson = JsonReader.builder ().source (aRes).customizeCallback (p -> p.setTrackPosition (true)).readAsObject ();
     if (aJson == null)
-      throw new IllegalStateException ("Failed to read DE/DO JSON");
+      throw new IllegalStateException ("Failed to read DE/DO JSON from " + aRes);
 
     _fillMap (dataOwners, aJson.getAsObject ("dataOwners"), "dataOwners");
     _fillMap (dataEvaluators, aJson.getAsObject ("dataEvaluators"), "dataEvaluators");

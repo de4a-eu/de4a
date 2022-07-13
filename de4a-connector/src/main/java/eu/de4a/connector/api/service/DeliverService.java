@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
+
 import com.helger.commons.string.StringHelper;
+
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
 import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.error.exceptions.ConnectorException;
@@ -23,7 +25,7 @@ import eu.de4a.connector.utils.ServiceUtils;
 public class DeliverService
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger (DeliverService.class);
-	
+
   private static final String XPATH_REQUEST_ID = "//*[local-name()='RequestId']/text()";
 
   @Autowired
@@ -60,7 +62,8 @@ public class DeliverService
     final String url = this.serviceUtils.getParticipantAddress (receiverID,
                                                                 eMessageServiceType.getEndpointType (),
                                                                 eMessageServiceType.isRequest ());
-    LOGGER.info ("URL for DO: "+url);
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("URL for DO: "+url);
     if (url == null)
       throw new IllegalStateException ("Failed to determine DE/DO URL for receiver '" +
                                        receiverID +

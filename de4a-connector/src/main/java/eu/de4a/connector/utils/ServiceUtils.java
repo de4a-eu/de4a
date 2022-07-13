@@ -18,6 +18,11 @@ public class ServiceUtils
   private ServiceUtils ()
   {}
 
+  public void reloadParticipantAddresses ()
+  {
+    addressesProperties.init ();
+  }
+
   /**
    * Get the participant's endpoint
    *

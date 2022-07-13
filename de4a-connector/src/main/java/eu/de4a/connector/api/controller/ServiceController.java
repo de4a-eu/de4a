@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
+import eu.de4a.connector.utils.ServiceUtils;
 import eu.de4a.ial.api.IALMarshaller;
 import eu.de4a.ial.api.jaxb.ResponseLookupRoutingInformationType;
 
@@ -37,13 +39,17 @@ public class ServiceController
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (ServiceController.class);
 
+  @Autowired
+  private ServiceUtils serviceUtils;
+
   @Value ("${mor.file.endpoint}")
   private String morFileEndpoint;
 
   @GetMapping (value = "/ial/{cot}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot)
   {
-    LOGGER.info ("Request to API /service/ial/" + cot + " received");
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Request to API /service/ial/" + cot + " received");
 
     // Main query
     final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL (StringHelper.getExplodedToOrderedSet (",", cot));
@@ -66,7 +72,8 @@ public class ServiceController
   public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot,
                                                             @Valid @PathVariable @NotNull final String atu)
   {
-    LOGGER.info ("Request to API /service/ial/" + cot + "/" + atu + " received");
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Request to API /service/ial/" + cot + "/" + atu + " received");
 
     // Main query
     final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL (StringHelper.getExplodedToOrderedSet (",", cot), atu);
@@ -88,7 +95,9 @@ public class ServiceController
   @GetMapping (value = "/mor/{lang}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity <byte []> getMorFile (@Valid @PathVariable @NotNull final String lang)
   {
-    LOGGER.info ("Request to API /service/mor/" + lang + " received");
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Request to API /service/mor/" + lang + " received");
+
     try
     {
       // TODO - Potential changes around the file name pattern and
@@ -112,5 +121,19 @@ public class ServiceController
                                      .withMessageArg ("Error accessing/processing to remote MOR file from: " + this.morFileEndpoint)
                                      .withHttpStatus (HttpStatus.NOT_FOUND);
     }
+  }
+
+  @GetMapping (value = "/reload-addresses", produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity <String> reloadAddresses ()
+  {
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Request to API /service/reload-addresses received");
+
+    serviceUtils.reloadParticipantAddresses ();
+
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Finished reloading addresses");
+
+    return ResponseEntity.ok ("done");
   }
 }
