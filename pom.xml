@@ -75,6 +75,13 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>com.helger.web</groupId>
+        <artifactId>ph-web-parent-pom</artifactId>
+        <version>9.6.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>com.helger.photon</groupId>
         <artifactId>ph-oton-parent-pom</artifactId>
         <version>8.4.0</version>
@@ -165,7 +172,7 @@
       <dependency>
         <groupId>com.helger.dcng</groupId>
         <artifactId>dcng-parent-pom</artifactId>
-        <version>0.2.5</version>
+        <version>0.2.6-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
