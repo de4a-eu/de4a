@@ -40,7 +40,8 @@ public final class APIRestUtils
                                                                      final byte [] request,
                                                                      final ConnectorException aBaseEx)
   {
-    LOGGER.info ("Sending HTTP POST request to '" + url + "' with " + request.length + " bytes");
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Sending HTTP POST request to '" + url + "' with " + request.length + " bytes");
 
     // Use global HTTP settings
     try (final HttpClientManager aHCM = HttpClientManager.create (new DcngHttpClientSettings ()))
@@ -51,15 +52,18 @@ public final class APIRestUtils
       final byte [] aResult = aHCM.execute (aPost, new ResponseHandlerByteArray ());
       if (aResult == null || aResult.length == 0)
       {
-        LOGGER.warn ("HTTP POST to '" + url + "' - received an empty response");
+        if (LOGGER.isWarnEnabled ())
+          LOGGER.warn ("HTTP POST to '" + url + "' - received an empty response");
         return ResponseEntity.status (HttpStatus.NO_CONTENT).body (ArrayHelper.EMPTY_BYTE_ARRAY);
       }
-      LOGGER.info ("Received HTTP response from '" + url + "' with " + aResult.length + " bytes");
+      if (LOGGER.isInfoEnabled ())
+        LOGGER.info ("Received HTTP response from '" + url + "' with " + aResult.length + " bytes");
       return ResponseEntity.ok (aResult);
     }
     catch (final ExtendedHttpResponseException ex)
     {
-      LOGGER.error ("There was an error on HTTP client POST connection to '" + url + "'", ex);
+      if (LOGGER.isErrorEnabled ())
+        LOGGER.error ("There was an error on HTTP client POST connection to '" + url + "'", ex);
 
       final ConnectorException exception = aBaseEx.withLayer (ELayerError.COMMUNICATIONS)
                                                   .withFamily (EFamilyErrorType.ERROR_RESPONSE)

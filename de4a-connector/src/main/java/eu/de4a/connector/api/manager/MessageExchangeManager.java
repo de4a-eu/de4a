@@ -85,13 +85,15 @@ public class MessageExchangeManager
 
     // Create a new document with the payload only
 
-    ResponseEntity <byte []> response = null;
-    String rememberID = "";
+    final ResponseEntity <byte []> response;
+    String sIteration1RememberID = null;
     RequestExtractMultiEvidenceIMType aNewRequest = null;
+    final boolean bIsRequestForDO;
     switch (aProcessID.getValue ())
     {
       case DE4AConstants.PROCESS_ID_REQUEST:
       {
+        bIsRequestForDO = true;
         boolean backwardsCompatibility = false;
         Document aTargetDoc = null;
         switch (eMessageServiceType)
@@ -111,7 +113,7 @@ public class MessageExchangeManager
               {
                 LOGGER.info ("backwardsCompatibility enabled");
                 backwardsCompatibility = true;
-                rememberID = aDRRequest.getRequestId ();
+                sIteration1RememberID = aDRRequest.getRequestId ();
                 aNewRequest = aDRRequest;
                 // convert new to old
                 final RequestExtractEvidenceIMType aOldRequest = LegacyAPIHelper.convertNewToOldRequest (aDRRequest);
@@ -123,7 +125,12 @@ public class MessageExchangeManager
             {
               // Not Iteration 1
               aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceIMMarshaller ().getAsDocument (aDRRequest);
+
+              if (aTargetDoc == null)
+                throw new IllegalStateException ("Failed to convert IM request from DR to DO");
             }
+
+
             break;
           }
           case USI:
@@ -131,6 +138,8 @@ public class MessageExchangeManager
             LOGGER.info ("Converting USI request from DR to DO");
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceUSIMarshaller ().getAsDocument (aDRRequest);
+            if (aTargetDoc == null)
+              throw new IllegalStateException ("Failed to convert USI request from DR to DO");
             break;
           }
           case LU:
@@ -138,6 +147,8 @@ public class MessageExchangeManager
             LOGGER.info ("Converting LU request from DR to DO");
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceLUMarshaller ().getAsDocument (aDRRequest);
+            if (aTargetDoc == null)
+              throw new IllegalStateException ("Failed to convert LU request from DR to DO");
             break;
           }
           case SN:
@@ -172,12 +183,13 @@ public class MessageExchangeManager
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Owner");
         else
-          LOGGER.error ("Error connecting with the Data Owner");
+          LOGGER.error ("Error connecting with the Data Owner (status " + response.getStatusCode () + ")");
         break;
       }
       case DE4AConstants.PROCESS_ID_RESPONSE:
       case DE4AConstants.PROCESS_ID_NOTIFICATION:
       {
+        bIsRequestForDO = false;
         final Document aTargetDoc;
         switch (eMessageServiceType)
         {
@@ -199,15 +211,18 @@ public class MessageExchangeManager
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Evaluator");
         else
-          LOGGER.error ("Error connecting with the Data Evaluator");
+          LOGGER.error ("Error connecting with the Data Evaluator (status " + response.getStatusCode () + ")");
         break;
       }
       default:
+        bIsRequestForDO = false;
+        response = null;
         LOGGER.error ("ProcessID exchanged is not found: " + aProcessID.getValue ());
     }
 
-    if (StringHelper.hasText (rememberID))
+    if (StringHelper.hasText (sIteration1RememberID))
     {
+      // This only affects the backwards compatibility layer
       final var aOldResponseMarshaller = DE4AMarshaller.doImResponseMarshaller (IDE4ACanonicalEvidenceType.NONE);
       final ResponseExtractEvidenceType aOldResponse = aOldResponseMarshaller.read (response.getBody ());
       final ResponseExtractMultiEvidenceType aNewResponse = LegacyAPIHelper.convertOldToNewResponse (aOldResponse,
@@ -227,7 +242,8 @@ public class MessageExchangeManager
     }
     else
     {
-      if (response != null)
+      // The response forwarded to the DO does not need to return this API
+      if (bIsRequestForDO && response != null)
       {
         final ResponseErrorType aResponse = DE4ACoreMarshaller.defResponseMarshaller ().read (response.getBody ());
         if (aResponse != null)
