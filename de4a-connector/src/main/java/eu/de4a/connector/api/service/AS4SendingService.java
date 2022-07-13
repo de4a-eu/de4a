@@ -93,11 +93,16 @@ public class AS4SendingService
    */
   private static void _manageAs4SendingResult (@Nonnull final LookupAndSendingResult aResult)
   {
-    if (LOGGER.isDebugEnabled ())
-      LOGGER.debug ("AS4 Sending result:\n " + aResult.getAsJson ().getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
-
-    if (!aResult.isOverallSuccess ())
+    if (aResult.isOverallSuccess ())
     {
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug ("AS4 Sending result:\n " + aResult.getAsJson ().getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
+    }
+    else
+    {
+      if (LOGGER.isWarnEnabled ())
+        LOGGER.warn ("AS4 Sending result:\n " + aResult.getAsJson ().getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
+
       // Base exception to be thrown
       final ConnectorException ex = new ConnectorException ().withLayer (ELayerError.COMMUNICATIONS)
                                                              .withFamily (EFamilyErrorType.AS4_ERROR_COMMUNICATION);
