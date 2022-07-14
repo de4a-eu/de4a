@@ -2,7 +2,6 @@ package eu.de4a.connector.as4.client.regrep;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
