@@ -1,15 +1,15 @@
-
 # DE4A - CONNECTOR `Iteration1`
+
 Connector component. Check out following instructions and descriptions.
 
 ## de4a-commons
-#### `package`
+### `package`
 Conceived as a library that maintains:
 - Utils and general purpose methods
 - Common classes
 
 ## de4a-idk
-#### `package`
+### `package`
 Mocked IDK entity based on [API definition](https://app.swaggerhub.com/apis/danieldecastrop/swagger-idk_de_4_a_information_desk/2.0.1#/). It maintains provided information in the in-memory DB tables. Mock is able to process requests through the interfaces:
 - /idk/ial/{canonicalEvidenceTypeId}
 - /idk/ial/{canonicalEvidenceTypeId}/{countryCode}
@@ -17,10 +17,13 @@ Mocked IDK entity based on [API definition](https://app.swaggerhub.com/apis/dani
 
 ### Configuration
 #### H2 In-Memory database
+
 SQL file with the inserts to set up the information provided by the service
+
 ```sh
 idk/src/main/resources/import.sql
 ```
+
 #### Properties
 
 ```sh
@@ -34,7 +37,7 @@ idk/src/main/eu/idk/configuration/Conf.java
 ```
 
 ## de4a-connector
-#### `package`
+### `package`
 Checkout the technical documentation on [DE4A D5.5 First Release of DE4A Common Components v1.0.1](https://newrepository.atosresearch.eu/remote.php/webdav/DE4A-Project/06%20Workpackages/WP5%20Components%20design/D5.5%20First%20Release%20of%20DE4A%20Common%20Components/DE4A%20D5.5%20First%20Release%20of%20DE4A%20Common%20Components%20v1.0.1.docx)
 ### API doc
 Once you deploy a Connector instance, it will be able to access to Swagger UI browsing:
@@ -46,8 +49,6 @@ http://connector-endpoint:port/swagger-ui/
 Even so, the API definition is published at:
 [Public Swagger API Connector](https://app.swaggerhub.com/apis/de4a/Connector/0.1.1)
 
-
-
 ### Configuration
 #### Application properties
 Global application properties definitions:
@@ -56,7 +57,8 @@ Global application properties definitions:
 ~/de4a/de4a-connector/src/main/resources/application.properties
 ```
 
-#### Phase4 Properties
+#### phase4 Properties
+
 TOOP and AS4 configuration properties
 
 ```sh
@@ -76,6 +78,7 @@ TOOP and AS4 configuration properties
 ```
 
 ## Installation
+
 You should be able to compile entire packages from the parent POM file:
 
 ```sh
@@ -83,13 +86,17 @@ mvn clean install
 ```
 
 It is also possible to compile each package separately by browsing to the folder and running the command above.
-#### Package
+
+### Package
+
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server. If you compile the parent pom, the IDK and Connector target paths will be created with their corresponding `war` files.
 
-#### de4a-commons `v0.1.11`
+### de4a-commons `v0.1.12`
+
 [de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/iteration1) project is now on maven central [OSS Sonatype repository](https://search.maven.org/search?q=g:eu.de4a)
 
 #### Toop version `v2.1.2-SNAPSHOT`
+
 Due to the last changes on [de4a-commons](https://github.com/de4a-wp5/de4a-commons/tree/development) Toop-connector-ng version should be `2.1.2-SNAPSHOT`, so you may need to add following repo server on your maven settings
 
 ```sh
@@ -97,6 +104,7 @@ https://oss.sonatype.org/content/repositories/snapshots/
 ```
 
 ## Connector configuration guide
+
 For a correct configuration of the Connector, three main property files must be cosidered:
 - `application.properties`: main system configuration
 - `phase4.properties`: AS4 gateway configurations
@@ -231,6 +239,7 @@ as4.timeout.miliseconds=30000
 From now on, we will explain the main and most critical configuration:
 
 #### SSL Context (not for AS4) `application.properties`
+
 You can configure secure HTTP connections from the Connector by setting the following property to `true`:
 
 ```properties
@@ -418,6 +427,7 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 * v0.1.7 - 2022-07-14
     * Added the new configuration property `de4a.smp.tls.trustall` to be able to turn off TLS validation for the SMP. The default is `false` for backwards compatibility.
+    * Updated to de4a-commons 0.1.12
 * v0.1.6 - 2022-04-27
     * Fixing a `NullPointerException` in error case
     * Updated to latest H2 version 2.1.212
