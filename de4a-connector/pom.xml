@@ -166,6 +166,12 @@
         <dependency>
             <groupId>eu.toop</groupId>
             <artifactId>toop-edm</artifactId>
+            <exclusions>
+              <exclusion>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.helger.peppol</groupId>
