@@ -416,6 +416,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 ## News and Noteworthy
 
+* v0.1.7 - 2022-07-14
+    * Added the new configuration property `de4a.smp.tls.trustall` to be able to turn off TLS validation for the SMP. The default is `false` for backwards compatibility.
 * v0.1.6 - 2022-04-27
     * Fixing a `NullPointerException` in error case
     * Updated to latest H2 version 2.1.212
