@@ -85,7 +85,24 @@ mvn clean install
 It is also possible to compile each package separately by browsing to the folder and running the command above.
 It requires Java 11 and Maven 3.x (latest).
 
-#### Package
+### Maven packages
+
+The Connector is deployed to Maven Central and is available via the following coordinates, replacing `x.y.z` with the real version:
+
+```xml
+<dependency>
+  <groupId>eu.de4a</groupId>
+  <artifactId>de4a-connector</artifactId>
+  <version>x.y.z</version>
+  <type>war</type>
+</dependency>
+```
+
+### Docker
+
+The Docker images are not yet ready.
+
+### Package
 
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server.
 
@@ -148,6 +165,7 @@ To establish which SMP server will provide the Connector with metadata services,
 # SMP stuff is always the same for the pilots
 de4a.smp.http.useglobalsettings = true
 de4a.smp.usedns = true
+de4a.smp.tls.trustall = true
 de4a.smp.sml.name = SMK DE4A
 de4a.smp.sml.dnszone = de4a.acc.edelivery.tech.ec.europa.eu.
 de4a.smp.sml.serviceurl = https://acc.edelivery.tech.ec.europa.eu/edelivery-sml
@@ -244,6 +262,9 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.2.2 - work in progress
+    * Updated to de4a-commons 0.2.10
+    * Updated to de4a-connector-ng 0.2.6 with improved configurability
 * v0.2.1 - 2022-07-06
     * Updated to de4a-commons 0.2.8
     * Improved the Iteration 1 backwards compatibility interface for the DO side as well
