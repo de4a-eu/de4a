@@ -44,7 +44,7 @@ public class KafkaClientWrapper {
     }
 
     private static void _send(final ELogMessage logMessage, final EErrorLevel level, final Object...params) {
-        final String msg = MessageUtils.format(logMessage.getKey(), params);
+        final String msg = MessageUtils.format(logMessage.getKey(), "[" + logMessage.getLogCode() + "]", params);
 
         ThreadContext.put(ORIGIN_TAG, logMessage.getOrigin().getLabel());
         ThreadContext.put(DESTINY_TAG, logMessage.getDestiny().getLabel());
