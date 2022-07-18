@@ -1,6 +1,8 @@
 package eu.de4a.connector.utils;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.logging.log4j.ThreadContext;
@@ -43,8 +45,10 @@ public class KafkaClientWrapper {
         _send(logMessage, EErrorLevel.ERROR, params);
     }
 
-    private static void _send(final ELogMessage logMessage, final EErrorLevel level, final Object...params) {
-        final String msg = MessageUtils.format(logMessage.getKey(), "[" + logMessage.getLogCode() + "]", params);
+    private static void _send(final ELogMessage logMessage, final EErrorLevel level, Object...params) {
+    	ArrayList<Object> listParams = new ArrayList<Object>(Arrays.asList(params));
+    	listParams.add(0,  "[" + logMessage.getLogCode() + "]");
+        final String msg = MessageUtils.format(logMessage.getKey(), listParams.toArray());
 
         ThreadContext.put(ORIGIN_TAG, logMessage.getOrigin().getLabel());
         ThreadContext.put(DESTINY_TAG, logMessage.getDestiny().getLabel());

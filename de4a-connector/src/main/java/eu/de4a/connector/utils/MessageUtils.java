@@ -20,15 +20,4 @@ public final class MessageUtils {
         }
         return messageSource.getMessage(key, ArrayHelper.EMPTY_OBJECT_ARRAY, locale);
     }
-    
-    public static String format(final String key, String code, Object[] args) {
-        ArrayList<Object> newObj = new ArrayList<Object>(Arrays.asList(args));
-        newObj.add(0, code);
-        final MessageSource messageSource = StaticContextAccessor.getBean(MessageSource.class);
-        final Locale locale = LocaleContextHolder.getLocale();
-        if(args != null && args.length > 0) {
-            return messageSource.getMessage(key, newObj.toArray(), locale);
-        }
-        return messageSource.getMessage(key, ArrayHelper.EMPTY_OBJECT_ARRAY, locale);
-    }
 }
