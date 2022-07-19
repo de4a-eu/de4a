@@ -234,7 +234,9 @@ public class MessageExchangeManager
                                                           aNewResponse.getResponseExtractEvidenceItemAtIndex (0)
                                                                       .getCanonicalEvidenceTypeId (),
                                                           DE4AConstants.PROCESS_ID_RESPONSE);
-      this.apiManager.processIncomingMessage (aNewResponse,
+      
+      this.apiManager.processIncomingMessage (ELogMessage.LOG_IM_LEGACY_RESPONSE,
+    		  							      aNewResponse,
                                               messageDTO,
                                               aNewResponse.getRequestId (),
                                               "Response Evidence",

@@ -23,6 +23,7 @@ import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
@@ -67,7 +68,7 @@ public class EventController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_NOTIFICATION);
 
-    this.apiManager.processIncomingMessage (eventObj, messageDTO, eventObj.getNotificationId (), "Event Notification", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_NOTIF_REQ_RECEIPT, eventObj, messageDTO, eventObj.getNotificationId (), "Event Notification", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

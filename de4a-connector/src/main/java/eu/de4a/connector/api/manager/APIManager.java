@@ -20,13 +20,14 @@ public class APIManager
    * invoked to send the message. If this method returns, the message has been
    * sent
    */
-  public <T> void processIncomingMessage (final T requestObj,
+  public <T> void processIncomingMessage (final ELogMessage eLogMessage,
+		  								  final T requestObj,
                                           final AS4MessageDTO messageDTO,
                                           final String requestId,
                                           final String kafkaMsg,
                                           final DE4ACoreMarshaller <T> marshaller)
   {
-    KafkaClientWrapper.sendInfo (ELogMessage.LOG_REQ_RECEIPT,
+    KafkaClientWrapper.sendInfo (eLogMessage,
                                  kafkaMsg,
                                  requestId,
                                  messageDTO.getDocTypeID (),

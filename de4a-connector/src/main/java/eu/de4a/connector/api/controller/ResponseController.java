@@ -20,6 +20,7 @@ import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
@@ -54,7 +55,8 @@ public class ResponseController
                                                         redirectUserMsg.getCanonicalEvidenceTypeId (),
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage (redirectUserMsg, messageDTO, redirectUserMsg.getRequestId (), "Redirect User", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_USI_REDIRECT_USER_RESPONSE, 
+    		redirectUserMsg, messageDTO, redirectUserMsg.getRequestId (), "Redirect User", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -88,7 +90,8 @@ public class ResponseController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage (responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_USI_EVIDENCE_RESPONSE, 
+    		responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -122,7 +125,8 @@ public class ResponseController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage (responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_USI_SUBSC_RESPONSE, 
+    		responseObj, messageDTO, responseObj.getRequestId (), "Subscription Response", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

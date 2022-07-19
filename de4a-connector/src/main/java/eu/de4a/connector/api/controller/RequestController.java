@@ -20,6 +20,7 @@ import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.EExternalModuleError;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
@@ -68,7 +69,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "IM Request", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_IM_REQ_RECEIPT, requestObj, messageDTO, docTypeID, "IM Request", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -103,7 +104,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "USI Request", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_USI_REQ_RECEIPT, requestObj, messageDTO, docTypeID, "USI Request", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -138,7 +139,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "LU Request", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_LU_REQ_RECEIPT,requestObj, messageDTO, docTypeID, "LU Request", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -173,7 +174,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "Subscription Request", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_SUBSC_REQ_RECEIPT, requestObj, messageDTO, docTypeID, "Subscription Request", marshaller);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

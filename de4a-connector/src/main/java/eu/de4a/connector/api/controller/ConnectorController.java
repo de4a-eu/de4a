@@ -32,6 +32,7 @@ import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
+import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
 import eu.de4a.iem.core.jaxb.common.AdditionalParameterType;
@@ -122,7 +123,8 @@ public class ConnectorController
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
     final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
-    this.apiManager.processIncomingMessage (aNewRequest, messageDTO, sNewDocTypeID, "Legacy IM Request", aNewRequestMarshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_IM_LEGACY_REQ_RECEIPT, 
+    		aNewRequest, messageDTO, sNewDocTypeID, "Legacy IM Request", aNewRequestMarshaller);
 
     // Remember request
     LegacyAPIHelper.rememberLegacyRequest_DR (aOldRequest);
