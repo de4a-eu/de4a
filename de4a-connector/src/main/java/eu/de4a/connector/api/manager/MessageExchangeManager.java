@@ -239,7 +239,7 @@ public class MessageExchangeManager
     		  							      aNewResponse,
                                               messageDTO,
                                               aNewResponse.getRequestId (),
-                                              "Response Evidence",
+                                              "Legacy IM Response Evidence",
                                               marshaller);
     }
     else
