@@ -4,24 +4,46 @@ import javax.annotation.Nonnull;
 import com.helger.commons.annotation.Nonempty;
 
 public enum ELogMessage {
+  
+  // Message received from Data Evaluator
   LOG_IM_LEGACY_REQ_RECEIPT("log.request.receipt", ELogMessageType.SERVICES, "00", EExternalModuleError.DATA_EVALUATOR, EExternalModuleError.CONNECTOR_DR),
   LOG_IM_REQ_RECEIPT("log.request.receipt", ELogMessageType.SERVICES, "01", EExternalModuleError.DATA_EVALUATOR, EExternalModuleError.CONNECTOR_DR),
   LOG_USI_REQ_RECEIPT("log.request.receipt", ELogMessageType.SERVICES, "02", EExternalModuleError.DATA_EVALUATOR, EExternalModuleError.CONNECTOR_DR),
   LOG_LU_REQ_RECEIPT("log.request.receipt", ELogMessageType.SERVICES, "03", EExternalModuleError.DATA_EVALUATOR, EExternalModuleError.CONNECTOR_DR),
   LOG_SUBSC_REQ_RECEIPT("log.request.receipt", ELogMessageType.SERVICES, "04", EExternalModuleError.DATA_EVALUATOR, EExternalModuleError.CONNECTOR_DR),
   LOG_NOTIF_REQ_RECEIPT("log.request.receipt", ELogMessageType.SERVICES, "05", EExternalModuleError.DATA_OWNER, EExternalModuleError.CONNECTOR_DT),
+  
+  // Message received from Connector DT
   LOG_IM_LEGACY_RESPONSE("log.response.receipt", ELogMessageType.SERVICES, "06", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.CONNECTOR_DR),
   LOG_USI_REDIRECT_USER_RESPONSE("log.response.receipt", ELogMessageType.SERVICES, "07", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.CONNECTOR_DR),
   LOG_USI_EVIDENCE_RESPONSE("log.response.receipt", ELogMessageType.SERVICES, "08", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.CONNECTOR_DR),
   LOG_USI_SUBSC_RESPONSE("log.response.receipt", ELogMessageType.SERVICES, "09", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.CONNECTOR_DR),
+  
+  // Lookup on de-do.json
   LOG_PARTICIPANT_LOOKUP("log.participant.lookup", ELogMessageType.CLIENT, "01", EExternalModuleError.NONE, EExternalModuleError.NONE),
-  LOG_REQ_DE("log.request.sent.de", ELogMessageType.CLIENT, "02", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.DATA_EVALUATOR),
-  LOG_REQ_DO("log.request.sent.do", ELogMessageType.CLIENT, "03", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.DATA_OWNER),
-  LOG_AS4_MSG_SENT("log.message.sent.as4", ELogMessageType.AS4, "01", EExternalModuleError.AS4, EExternalModuleError.AS4),
-  LOG_AS4_REQ_RECEIPT("log.message.received.as4", ELogMessageType.AS4, "02", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.CONNECTOR_DT),
+  
+  // Error on lookup on de-do.json
   LOG_ERROR_PARTICIPANT_LOOKUP("log.error.participant.lookup", ELogMessageType.ERROR, "04", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.CONNECTOR_DT),
   
-  // Don't used by connector
+  // Message sent to DO
+  LOG_IM_REQ_DO("log.request.sent.do", ELogMessageType.CLIENT, "02", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.DATA_OWNER),
+  LOG_USI_REQ_DO("log.request.sent.do", ELogMessageType.CLIENT, "03", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.DATA_OWNER),
+  LOG_LU_REQ_DO("log.request.sent.do", ELogMessageType.CLIENT, "04", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.DATA_OWNER),
+  LOG_SN_REQ_DO("log.request.sent.do", ELogMessageType.CLIENT, "05", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.DATA_OWNER),
+  LOG_REQ_DO("log.request.sent.do", ELogMessageType.CLIENT, "06", EExternalModuleError.CONNECTOR_DT, EExternalModuleError.DATA_OWNER),
+  
+  // Message sent to DE
+  LOG_IM_REQ_DE("log.request.sent.de", ELogMessageType.CLIENT, "07", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.DATA_EVALUATOR),
+  LOG_USI_REQ_DE("log.request.sent.de", ELogMessageType.CLIENT, "08", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.DATA_EVALUATOR),
+  LOG_LU_REQ_DE("log.request.sent.de", ELogMessageType.CLIENT, "09", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.DATA_EVALUATOR),
+  LOG_SN_REQ_DE("log.request.sent.de", ELogMessageType.CLIENT, "10", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.DATA_EVALUATOR),
+  LOG_REQ_DE("log.request.sent.de", ELogMessageType.CLIENT, "11", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.DATA_EVALUATOR),
+  
+  // AS4 Messsages
+  LOG_AS4_MSG_SENT("log.message.sent.as4", ELogMessageType.AS4, "01", EExternalModuleError.AS4, EExternalModuleError.AS4),
+  LOG_AS4_REQ_RECEIPT("log.message.received.as4", ELogMessageType.AS4, "02", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.CONNECTOR_DT),
+  
+  // Actually don't used by connector component
   LOG_IM_REQ_PROC("log.request.receipt.imusi", ELogMessageType.SERVICES, "01", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.CONNECTOR_DT),
   LOG_USI_REQ_PROC("log.request.receipt.imusi", ELogMessageType.SERVICES, "02", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.CONNECTOR_DT),
   LOG_SMP_REQ_SENT("log.request.sent.smp", ELogMessageType.CLIENT, "02", EExternalModuleError.CONNECTOR_DR, EExternalModuleError.SMP),

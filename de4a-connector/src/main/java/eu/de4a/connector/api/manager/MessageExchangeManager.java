@@ -89,6 +89,7 @@ public class MessageExchangeManager
     String sIteration1RememberID = null;
     RequestExtractMultiEvidenceIMType aNewRequest = null;
     final boolean bIsRequestForDO;
+    ELogMessage logMessage;
     switch (aProcessID.getValue ())
     {
       case DE4AConstants.PROCESS_ID_REQUEST:
@@ -101,6 +102,7 @@ public class MessageExchangeManager
           case IM:
           {
             LOGGER.info ("Converting IM request from DT to DO");
+            logMessage = ELogMessage.LOG_IM_REQ_DO;
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ().read (aRegRepElement);
 
             // check if is a 1st iteration message
@@ -136,6 +138,7 @@ public class MessageExchangeManager
           case USI:
           {
             LOGGER.info ("Converting USI request from DR to DO");
+            logMessage = ELogMessage.LOG_USI_REQ_DO;
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceUSIMarshaller ().getAsDocument (aDRRequest);
             if (aTargetDoc == null)
@@ -145,6 +148,7 @@ public class MessageExchangeManager
           case LU:
           {
             LOGGER.info ("Converting LU request from DR to DO");
+            logMessage = ELogMessage.LOG_LU_REQ_DO;
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceLUMarshaller ().getAsDocument (aDRRequest);
             if (aTargetDoc == null)
@@ -154,6 +158,7 @@ public class MessageExchangeManager
           case SN:
           {
             LOGGER.info ("Copying SN request from DR to DO");
+            logMessage = ELogMessage.LOG_SN_REQ_DO;
             final Document aNewDoc = XMLFactory.newDocument ();
             aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
             aTargetDoc = aNewDoc;
@@ -169,7 +174,7 @@ public class MessageExchangeManager
                                                          aTargetDoc,
                                                          senderID,
                                                          receiverID,
-                                                         ELogMessage.LOG_REQ_DO);
+                                                         logMessage);
         }
         else
         {
@@ -177,7 +182,7 @@ public class MessageExchangeManager
                                                       aTargetDoc,
                                                       senderID,
                                                       receiverID,
-                                                      ELogMessage.LOG_REQ_DO);
+                                                      logMessage);
         }
 
         if (HttpStatus.OK.equals (response.getStatusCode ()))
@@ -201,13 +206,27 @@ public class MessageExchangeManager
             final Document aNewDoc = XMLFactory.newDocument ();
             aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
             aTargetDoc = aNewDoc;
+            
+            switch(eMessageServiceType) {
+            	case IM: logMessage = ELogMessage.LOG_IM_REQ_DE;
+            		break;
+            	case USI: logMessage = ELogMessage.LOG_USI_REQ_DE;
+            		break;
+            	case LU: logMessage = ELogMessage.LOG_LU_REQ_DE;
+        			break;
+            	case SN: logMessage = ELogMessage.LOG_SN_REQ_DE;
+    				break;
+    			default: logMessage = ELogMessage.LOG_REQ_DE;
+            }
+            
           }
         }
         response = this.deliverService.pushMessage (eMessageServiceType,
                                                     aTargetDoc,
                                                     senderID,
                                                     receiverID,
-                                                    ELogMessage.LOG_REQ_DE);
+                                                    logMessage);
+        
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Evaluator");
         else
