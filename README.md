@@ -102,6 +102,23 @@ The Connector is deployed to Maven Central and is available via the following co
 
 The Docker images are not yet ready.
 
+#### Build the image
+
+Go inside the `de4a-connector` directory.
+Call
+
+```shell
+docker build --pull -t de4a/connector:latest .
+```
+
+and then to run it:
+
+```
+docker run -p 8080:8080 de4a/connector:latest
+``` 
+
+See also the file `Docker.md` file in the parent folder.
+
 ### Package
 
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server.
