@@ -14,12 +14,11 @@ import com.helger.commons.string.StringHelper;
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
 import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.EExternalModuleError;
-import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.connector.utils.KafkaClientWrapper;
 import eu.de4a.connector.utils.ServiceUtils;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Service
 public class DeliverService
@@ -49,9 +48,11 @@ public class DeliverService
    */
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
                                                @Nonnull final Document docMsg,
+                                               @Nonnull final String docType,
                                                @Nonnull final String senderID,
                                                @Nonnull final String receiverID,
-                                               @Nonnull final ELogMessage logMessage)
+                                               @Nonnull final ELogMessage logMessage,
+                                               final String... requestMetadata)
   {
     // Generic way for all request IDs
     final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, docMsg.getDocumentElement ());
@@ -63,18 +64,18 @@ public class DeliverService
                                                                 eMessageServiceType.getEndpointType (),
                                                                 eMessageServiceType.isRequest ());
     if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("URL for DO: "+url);
+      LOGGER.info ("URL for DO: " + url);
     if (url == null)
       throw new IllegalStateException ("Failed to determine DE/DO URL for receiver '" +
                                        receiverID +
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, senderID, receiverID, url);
+    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType(), sRequestID, docType, senderID, receiverID, requestMetadata[0]);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,
                                                     DOMUtils.documentToByte (docMsg),
-                                                    new ConnectorException ().withModule (EExternalModuleError.DATA_OWNER));
+                                                    new ConnectorException ().withModule (logMessage.getModule()));
   }
 }

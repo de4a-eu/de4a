@@ -36,8 +36,8 @@ import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.config.AddressesProperties;
 import eu.de4a.connector.config.MockConf;
-import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.DOMUtils;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @RunWith (SpringRunner.class)
 @TestPropertySource (locations = "classpath:application.yml")
@@ -74,9 +74,10 @@ public class ConnectorServicesTest
     // Calling the tested method
     final ResponseEntity <byte []> response = this.deliverService.pushMessage (EMessageServiceType.USI,
                                                                                dReq,
+                                                                               "urn:de4a-eu:CanonicalEvidenceType::MultiItem:1.0",
                                                                                "iso6523-actorid-upis::9999:lu000000025",
                                                                                "iso6523-actorid-upis::9999:test-sgad",
-                                                                               ELogMessage.LOG_REQ_DO);
+                                                                               ELogMessage.LOG_REQ_DE);
 
     assertEquals (HttpStatus.OK, response.getStatusCode ());
     mockServer.verify ();

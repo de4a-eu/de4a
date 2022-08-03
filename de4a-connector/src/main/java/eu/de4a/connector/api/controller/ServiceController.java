@@ -25,12 +25,13 @@ import com.helger.httpclient.HttpClientManager;
 import com.helger.httpclient.response.ResponseHandlerByteArray;
 
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
+import eu.de4a.connector.utils.KafkaClientWrapper;
 import eu.de4a.connector.utils.ServiceUtils;
 import eu.de4a.ial.api.IALMarshaller;
 import eu.de4a.ial.api.jaxb.ResponseLookupRoutingInformationType;
+import eu.de4a.kafkaclient.model.EExternalModule;
 
 @Controller
 @RequestMapping ("/service")
@@ -55,11 +56,14 @@ public class ServiceController
     final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL (StringHelper.getExplodedToOrderedSet (",", cot));
     if (aResponse == null)
     {
-      // Error case
-      throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
+    	String errorMsg = "Error querying IAL";
+    	KafkaClientWrapper.sendError(EFamilyErrorType.CONNECTION_ERROR, EExternalModule.CONNECTOR_DR, EExternalModule.IAL.getLabel(), errorMsg);
+    	
+    	// Error case
+    	throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
                                      .withLayer (ELayerError.INTERNAL_FAILURE)
-                                     .withModule (EExternalModuleError.IAL)
-                                     .withMessageArg ("Error querying IAL")
+                                     .withModule (EExternalModule.IAL)
+                                     .withMessageArg (errorMsg)
                                      .withHttpStatus (HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -79,11 +83,14 @@ public class ServiceController
     final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL (StringHelper.getExplodedToOrderedSet (",", cot), atu);
     if (aResponse == null)
     {
-      // Error case
-      throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
+    	String errorMsg = "Error querying IAL with ATU code";
+    	KafkaClientWrapper.sendError(EFamilyErrorType.CONNECTION_ERROR, EExternalModule.CONNECTOR_DR, EExternalModule.IAL.getLabel(), errorMsg);
+    	
+    	// Error case
+    	throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
                                      .withLayer (ELayerError.INTERNAL_FAILURE)
-                                     .withModule (EExternalModuleError.IAL)
-                                     .withMessageArg ("Error querying IAL with ATU code")
+                                     .withModule (EExternalModule.IAL)
+                                     .withMessageArg (errorMsg)
                                      .withHttpStatus (HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -115,10 +122,13 @@ public class ServiceController
     }
     catch (final Exception e)
     {
-      throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
+    	String errorMsg = "Error accessing/processing to remote MOR file from: " + this.morFileEndpoint;
+    	KafkaClientWrapper.sendError(EFamilyErrorType.CONNECTION_ERROR, EExternalModule.CONNECTOR_DR, EExternalModule.MOR.getLabel(), errorMsg);
+    	
+    	throw new ConnectorException ().withFamily (EFamilyErrorType.CONNECTION_ERROR)
                                      .withLayer (ELayerError.INTERNAL_FAILURE)
-                                     .withModule (EExternalModuleError.MOR)
-                                     .withMessageArg ("Error accessing/processing to remote MOR file from: " + this.morFileEndpoint)
+                                     .withModule (EExternalModule.MOR)
+                                     .withMessageArg (errorMsg)
                                      .withHttpStatus (HttpStatus.NOT_FOUND);
     }
   }

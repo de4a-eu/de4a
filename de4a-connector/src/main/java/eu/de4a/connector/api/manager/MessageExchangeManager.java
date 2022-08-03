@@ -1,5 +1,8 @@
 package eu.de4a.connector.api.manager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
@@ -25,7 +28,9 @@ import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
-import eu.de4a.connector.error.model.ELogMessage;
+import eu.de4a.connector.utils.DOMUtils;
+import eu.de4a.connector.utils.KafkaClientWrapper;
+import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.AdditionalParameterType;
 import eu.de4a.iem.core.jaxb.common.RequestEvidenceItemType;
@@ -36,12 +41,14 @@ import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Component
 public class MessageExchangeManager
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (MessageExchangeManager.class);
-
+  private static final String XPATH_REQUEST_ID = "//*[local-name()='RequestId']/text()";
+  
   @Autowired
   private DeliverService deliverService;
   @Autowired
@@ -62,7 +69,9 @@ public class MessageExchangeManager
 
     final String senderID = meMessage.getSenderID ().getURIEncoded ();
     final String receiverID = meMessage.getReceiverID ().getURIEncoded ();
+    final String documentTypeId = meMessage.getDocumentTypeID().getURIEncoded();
     final IProcessIdentifier aProcessID = meMessage.getProcessID ();
+    String metadata = "";
 
     if (meMessage.payloads ().size () != 1)
       throw new IllegalArgumentException ("Expecting the AS4 message to have exactly one payload only, but found " +
@@ -101,10 +110,11 @@ public class MessageExchangeManager
         {
           case IM:
           {
-            LOGGER.info ("Converting IM request from DT to DO");
-            logMessage = ELogMessage.LOG_IM_REQ_DO;
+            LOGGER.info ("Sending IM request from DT to DO");
+            logMessage = ELogMessage.LOG_REQ_IM_DR_DT;
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ().read (aRegRepElement);
-
+            metadata = MessageUtils.getRequestMetadata(aDRRequest.getRequestEvidenceIMItem());
+            
             // check if is a 1st iteration message
             final RequestEvidenceItemType itemRequest = aDRRequest.getRequestEvidenceIMItemAtIndex (0);
             if (itemRequest != null &&
@@ -114,12 +124,17 @@ public class MessageExchangeManager
               if (addParam != null && addParam.getLabel ().equals ("iteration") && addParam.getValue ().equals ("1"))
               {
                 LOGGER.info ("backwardsCompatibility enabled");
+            	logMessage = ELogMessage.LOG_REQ_IM_LEGACY_DR_DT;
                 backwardsCompatibility = true;
                 sIteration1RememberID = aDRRequest.getRequestId ();
                 aNewRequest = aDRRequest;
                 // convert new to old
                 final RequestExtractEvidenceIMType aOldRequest = LegacyAPIHelper.convertNewToOldRequest (aDRRequest);
                 aTargetDoc = DE4AMarshaller.doImRequestMarshaller ().getAsDocument (aOldRequest);
+                
+                List<RequestExtractEvidenceIMType> requestItems = new ArrayList<RequestExtractEvidenceIMType>();
+                requestItems.add(aOldRequest);
+                metadata = MessageUtils.getRequestMetadata(requestItems);
               }
             }
 
@@ -129,7 +144,7 @@ public class MessageExchangeManager
               aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceIMMarshaller ().getAsDocument (aDRRequest);
 
               if (aTargetDoc == null)
-                throw new IllegalStateException ("Failed to convert IM request from DR to DO");
+                throw new IllegalStateException ("Failed sending IM request from DT to DO");
             }
 
 
@@ -137,28 +152,32 @@ public class MessageExchangeManager
           }
           case USI:
           {
-            LOGGER.info ("Converting USI request from DR to DO");
-            logMessage = ELogMessage.LOG_USI_REQ_DO;
+            LOGGER.info ("Sending USI request from DT to DO");
+            logMessage = ELogMessage.LOG_REQ_USI_DR_DT;
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceUSIMarshaller ().getAsDocument (aDRRequest);
+            metadata = MessageUtils.getRequestMetadata(aDRRequest.getRequestEvidenceUSIItem());
+            
             if (aTargetDoc == null)
               throw new IllegalStateException ("Failed to convert USI request from DR to DO");
             break;
           }
           case LU:
           {
-            LOGGER.info ("Converting LU request from DR to DO");
-            logMessage = ELogMessage.LOG_LU_REQ_DO;
+            LOGGER.info ("Sending LU request from DT to DO");
+            logMessage = ELogMessage.LOG_REQ_LU_DR_DT;
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceLUMarshaller ().getAsDocument (aDRRequest);
+            metadata = MessageUtils.getRequestMetadata(aDRRequest.getRequestEvidenceLUItem());
+            
             if (aTargetDoc == null)
               throw new IllegalStateException ("Failed to convert LU request from DR to DO");
             break;
           }
           case SN:
           {
-            LOGGER.info ("Copying SN request from DR to DO");
-            logMessage = ELogMessage.LOG_SN_REQ_DO;
+            LOGGER.info ("Sending SN request from DT to DO");
+            logMessage = ELogMessage.LOG_REQ_SUBSC_DR_DT;
             final Document aNewDoc = XMLFactory.newDocument ();
             aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
             aTargetDoc = aNewDoc;
@@ -172,17 +191,21 @@ public class MessageExchangeManager
         {
           response = this.deliverServiceIT1.pushMessage (eMessageServiceType,
                                                          aTargetDoc,
+                                                         documentTypeId,
                                                          senderID,
                                                          receiverID,
-                                                         logMessage);
+                                                         logMessage,
+                                                         metadata);
         }
         else
         {
           response = this.deliverService.pushMessage (eMessageServiceType,
                                                       aTargetDoc,
+                                                      documentTypeId,
                                                       senderID,
                                                       receiverID,
-                                                      logMessage);
+                                                      logMessage,
+                                                      metadata);
         }
 
         if (HttpStatus.OK.equals (response.getStatusCode ()))
@@ -202,30 +225,47 @@ public class MessageExchangeManager
           default:
           {
             if (LOGGER.isInfoEnabled ())
-              LOGGER.info ("Copying " + eMessageServiceType + " request from DT to DE");
+              LOGGER.info ("Sending " + eMessageServiceType + "(" + eMessageServiceType.getType() + ") request from DR to DE");
             final Document aNewDoc = XMLFactory.newDocument ();
             aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
             aTargetDoc = aNewDoc;
-            
-            switch(eMessageServiceType) {
-            	case IM: logMessage = ELogMessage.LOG_IM_REQ_DE;
+            switch(eMessageServiceType.getType()) {
+            	case "ResponseTransferEvidence":
+            		var rte = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller(eu.de4a.iem.core.IDE4ACanonicalEvidenceType.NONE).read (aRegRepElement);
+            		metadata = MessageUtils.getEvidenceResponseMetadata(rte.getResponseExtractEvidenceItem());
+            		logMessage = ELogMessage.LOG_RES_EVIDENCE_DT_DR;
+            		if (StringHelper.hasText (sIteration1RememberID)) logMessage = ELogMessage.LOG_RES_IM_LEGACY_DT_DR;
             		break;
-            	case USI: logMessage = ELogMessage.LOG_USI_REQ_DE;
+            		
+            	case "USIRedirectUser": logMessage = ELogMessage.LOG_RES_REDIRECT_DT_DR;
+            		var uru = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller().read (aRegRepElement);
+            		metadata = MessageUtils.getRedirectResponseMetadata(uru);
             		break;
-            	case LU: logMessage = ELogMessage.LOG_LU_REQ_DE;
-        			break;
-            	case SN: logMessage = ELogMessage.LOG_SN_REQ_DE;
+            		
+            	case "ResponseEventSubscription": logMessage = ELogMessage.LOG_RES_SUBSC_DT_DR;
+            		//var res = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller().read (aRegRepElement);
+            		//metadata = MessageUtils.getEventSubscriptionResponseMetadata(res.getResponseEventSubscriptionItem()); //TODO method to be implemented
     				break;
+    				
+            	case "EventNotification": logMessage = ELogMessage.LOG_EVENT_NOTIF_DT_DR;
+            		var en = DE4ACoreMarshaller.dtEventNotificationMarshaller().read (aRegRepElement);
+            		metadata = MessageUtils.getEventNotificationMetadata(en.getEventNotificationItem());
+            		break;
+    				
     			default: logMessage = ELogMessage.LOG_REQ_DE;
             }
-            
           }
         }
+        
+        final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, aTargetDoc.getDocumentElement ());
+        KafkaClientWrapper.sendInfo (logMessage, sRequestID, eMessageServiceType.getType(), documentTypeId, senderID, receiverID, metadata);
+        
         response = this.deliverService.pushMessage (eMessageServiceType,
                                                     aTargetDoc,
+                                                    documentTypeId,
                                                     senderID,
                                                     receiverID,
-                                                    logMessage);
+                                                    ELogMessage.LOG_REQ_DE);
         
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Evaluator");
@@ -254,12 +294,14 @@ public class MessageExchangeManager
                                                                       .getCanonicalEvidenceTypeId (),
                                                           DE4AConstants.PROCESS_ID_RESPONSE);
       
-      this.apiManager.processIncomingMessage (ELogMessage.LOG_IM_LEGACY_RESPONSE,
+      metadata = MessageUtils.getEvidenceResponseMetadata(aNewResponse.getResponseExtractEvidenceItem());
+      
+      this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_IM_LEGACY_DT_DR,
     		  							      aNewResponse,
                                               messageDTO,
-                                              aNewResponse.getRequestId (),
-                                              "Legacy IM Response Evidence",
-                                              marshaller);
+                                              marshaller,
+                                              aNewResponse.getRequestId(),
+                                              metadata);
     }
     else
     {

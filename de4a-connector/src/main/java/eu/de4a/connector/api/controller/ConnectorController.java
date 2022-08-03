@@ -29,10 +29,10 @@ import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
-import eu.de4a.connector.error.model.ELogMessage;
+import eu.de4a.connector.utils.KafkaClientWrapper;
+import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
 import eu.de4a.iem.core.jaxb.common.AdditionalParameterType;
@@ -44,6 +44,8 @@ import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
+import eu.de4a.kafkaclient.model.EExternalModule;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Controller
 public class ConnectorController
@@ -71,6 +73,7 @@ public class ConnectorController
     marshaller.readExceptionCallbacks ().set (e -> {
       if (e.getLinkedException () != null)
         baseEx.withMessageArg (e.getLinkedException ().getMessage ());
+      KafkaClientWrapper.sendError(EFamilyErrorType.CONVERSION_ERROR, ex.getModule(), e.getLinkedException().getMessage());
     });
 
     final T returnObj;
@@ -101,7 +104,7 @@ public class ConnectorController
     // Unmarshalling and schema validation
     final RequestTransferEvidenceUSIIMDRType aOldRequest = _conversionBytesWithCatching (request,
                                                                                          aOldRequestMarshaller,
-                                                                                         new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+                                                                                         new ConnectorException ().withModule (EExternalModule.CONNECTOR_DR));
 
     // Convert to the new format
     LOGGER.info ("Converting old request to new request");
@@ -123,8 +126,9 @@ public class ConnectorController
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
     final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_IM_LEGACY_REQ_RECEIPT, 
-    		aNewRequest, messageDTO, sNewDocTypeID, "Legacy IM Request", aNewRequestMarshaller);
+    String requestMetadata = MessageUtils.getRequestMetadata(aNewRequest.getRequestEvidenceIMItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_IM_LEGACY_DE_DR, 
+    		aNewRequest, messageDTO, aNewRequestMarshaller, sNewDocTypeID, requestMetadata);
 
     // Remember request
     LegacyAPIHelper.rememberLegacyRequest_DR (aOldRequest);

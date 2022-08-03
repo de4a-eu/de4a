@@ -1,7 +1,9 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
+
 import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,22 +14,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import com.helger.dcng.api.DcngIdentifierFactory;
 import com.helger.peppolid.CIdentifier;
+
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
-import eu.de4a.connector.error.model.EExternalModuleError;
-import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.APIRestUtils;
+import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
 import eu.de4a.iem.core.jaxb.common.RedirectUserType;
 import eu.de4a.iem.core.jaxb.common.ResponseEventSubscriptionType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
+import eu.de4a.kafkaclient.model.EExternalModule;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Controller
 @RequestMapping ("/response")
@@ -48,15 +53,16 @@ public class ResponseController
 
     final RedirectUserType redirectUserMsg = APIRestUtils.conversionBytesWithCatching (request,
                                                                                        marshaller,
-                                                                                       new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+                                                                                       new ConnectorException ().withModule (EExternalModule.CONNECTOR_DT));
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (redirectUserMsg.getDataOwner ().getAgentUrn (),
                                                         redirectUserMsg.getDataEvaluator().getAgentUrn (),
                                                         redirectUserMsg.getCanonicalEvidenceTypeId (),
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_USI_REDIRECT_USER_RESPONSE, 
-    		redirectUserMsg, messageDTO, redirectUserMsg.getRequestId (), "Redirect User", marshaller);
+    String responseMetadata = MessageUtils.getRedirectResponseMetadata(redirectUserMsg);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_REDIRECT_DO_DT, 
+    		redirectUserMsg, messageDTO, marshaller, redirectUserMsg.getRequestId(), responseMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -70,7 +76,8 @@ public class ResponseController
 
     final ResponseExtractMultiEvidenceType responseObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                    marshaller,
-                                                                                                   new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+                                                                                                   new ConnectorException ().withModule (EExternalModule.CONNECTOR_DT));
+    
     if (responseObj.hasNoResponseExtractEvidenceItemEntries ())
       throw new IllegalStateException ("Provided payload has no ResponseExtractEvidenceItem entries");
 
@@ -90,8 +97,9 @@ public class ResponseController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_USI_EVIDENCE_RESPONSE, 
-    		responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
+    String responseMetadata = MessageUtils.getEvidenceResponseMetadata(responseObj.getResponseExtractEvidenceItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_EVIDENCE_DO_DT, 
+    		responseObj, messageDTO, marshaller, responseObj.getRequestId(), responseMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -105,7 +113,7 @@ public class ResponseController
 
     final ResponseEventSubscriptionType responseObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                 marshaller,
-                                                                                                new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+                                                                                                new ConnectorException ().withModule (EExternalModule.CONNECTOR_DT));
     if (responseObj.hasNoResponseEventSubscriptionItemEntries ())
       throw new IllegalStateException ("Provided payload has no ResponseEventSubscriptionItem entries");
 
@@ -124,9 +132,10 @@ public class ResponseController
                                                         responseObj.getDataOwner ().getAgentUrn (),
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
-
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_USI_SUBSC_RESPONSE, 
-    		responseObj, messageDTO, responseObj.getRequestId (), "Subscription Response", marshaller);
+    
+    //TODO Get Subscription response and extract evidences/errors, actually the ResponseEventSubscriptionItemType does not have ErrorType
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_SUBSC_DO_DT, 
+    		responseObj, messageDTO, marshaller, responseObj.getRequestId());
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

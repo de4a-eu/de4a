@@ -7,15 +7,16 @@ import javax.annotation.Nullable;
 
 import org.springframework.http.HttpStatus;
 
-import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.connector.error.model.ErrorHelper;
+import eu.de4a.kafkaclient.model.EExternalModule;
+import eu.de4a.kafkaclient.model.ELogMessageLevel;
 
 public class ConnectorException extends RuntimeException
 {
   private ELayerError layer;
-  private EExternalModuleError module;
+  private EExternalModule module;
   private EFamilyErrorType family;
   private HttpStatus status = HttpStatus.BAD_REQUEST;
   private List <Object> args;
@@ -27,12 +28,12 @@ public class ConnectorException extends RuntimeException
   }
 
   @Nullable
-  public EExternalModuleError getModule ()
+  public EExternalModule getModule ()
   {
     return module;
   }
 
-  public ConnectorException withModule (final EExternalModuleError module)
+  public ConnectorException withModule (final EExternalModule module)
   {
     this.module = module;
     return this;
@@ -80,7 +81,7 @@ public class ConnectorException extends RuntimeException
 
   public String buildCode ()
   {
-    return ErrorHelper.createCode (layer, module, family);
+    return ErrorHelper.createCode (module, ELogMessageLevel.ERROR, family);
   }
 
   @Override

@@ -23,12 +23,10 @@ import com.helger.peppolid.factory.IIdentifierFactory;
 
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
-import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.DOMUtils;
-import eu.de4a.connector.utils.KafkaClientWrapper;
+import eu.de4a.kafkaclient.model.EExternalModule;
 
 @Service
 public class AS4SendingService
@@ -65,11 +63,13 @@ public class AS4SendingService
     aPayload.setValue (DOMUtils.documentToByte (messageDTO.getMessage ()));
     aPayload.setMimeType (CMimeType.APPLICATION_XML.getAsString ());
 
+    /*
     KafkaClientWrapper.sendInfo (ELogMessage.LOG_AS4_MSG_SENT,
                                  aSendingPI.getURIEncoded (),
                                  aReceiverPI.getURIEncoded (),
                                  aDocumentTypeID.getURIEncoded (),
                                  aProcessID.getURIEncoded ());
+                                 */
 
     // Perform SMP client lookup and send the AS4 message in one call
     final LookupAndSendingResult aResult = ApiPostLookupAndSendIt2.perform (aSendingPI,
@@ -109,7 +109,7 @@ public class AS4SendingService
 
       // A problem occurs sending the AS4 message
       if (aResult.hasException ())
-        throw ex.withModule (EExternalModuleError.AS4).withMessageArg (aResult.getException ().getMessage ());
+        throw ex.withModule (EExternalModule.AS4).withMessageArg (aResult.getException ().getMessage ());
 
       if (!aResult.isLookupSuccess ())
       {
@@ -118,10 +118,13 @@ public class AS4SendingService
           smpErrMsg = "Found the SMP Participant and Document Type, but failed to select based on Process and Transport Profile.";
         else
           smpErrMsg = "Found no matching SMP Participant and/or Document Type";
-        throw ex.withModule (EExternalModuleError.SMP).withMessageArg (smpErrMsg);
+        
+        //KafkaClientWrapper.sendError(EFamilyErrorType.AS4_ERROR_COMMUNICATION, EExternalModule.SMP, smpErrMsg);
+        
+        throw ex.withModule (EExternalModule.SMP).withMessageArg (smpErrMsg);
       }
       if (!aResult.isSendingSuccess ())
-        throw ex.withModule (EExternalModuleError.AS4).withMessageArg ("Error with AS4 communications");
+        throw ex.withModule (EExternalModule.AS4).withMessageArg ("Error with AS4 communications");
     }
   }
 }

@@ -68,6 +68,9 @@ public final class APIRestUtils
       final ConnectorException exception = aBaseEx.withLayer (ELayerError.COMMUNICATIONS)
                                                   .withFamily (EFamilyErrorType.ERROR_RESPONSE)
                                                   .withMessageArg (ex.getMessage ());
+      
+      KafkaClientWrapper.sendError(EFamilyErrorType.ERROR_RESPONSE, exception.getModule(), url, exception.getMessage());
+      
       return new ResponseEntity <> (ConnectorExceptionHandler.getResponseErrorObjectBytes (exception),
                                     HttpStatus.resolve (ex.getStatusCode ()));
     }
@@ -78,6 +81,9 @@ public final class APIRestUtils
       final ConnectorException exception = aBaseEx.withLayer (ELayerError.COMMUNICATIONS)
                                                   .withFamily (EFamilyErrorType.CONNECTION_ERROR)
                                                   .withMessageArg (ex.getMessage ());
+      
+      KafkaClientWrapper.sendError(EFamilyErrorType.CONNECTION_ERROR, exception.getModule(), url, exception.getMessage());
+      
       return new ResponseEntity <> (ConnectorExceptionHandler.getResponseErrorObjectBytes (exception), HttpStatus.BAD_REQUEST);
     }
   }
@@ -89,8 +95,10 @@ public final class APIRestUtils
   {
     final ConnectorException baseEx = ex.withFamily (EFamilyErrorType.CONVERSION_ERROR).withLayer (ELayerError.INTERNAL_FAILURE);
     marshaller.readExceptionCallbacks ().set (e -> {
-      if (e.getLinkedException () != null)
-        baseEx.withMessageArg (e.getLinkedException ().getMessage ());
+      if (e.getLinkedException () != null) {
+    	  baseEx.withMessageArg (e.getLinkedException ().getMessage ());
+    	  KafkaClientWrapper.sendError(EFamilyErrorType.CONVERSION_ERROR, ex.getModule(), e.getLinkedException().getMessage());
+      }
     });
 
     final T returnObj;

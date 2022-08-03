@@ -22,12 +22,12 @@ import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
-import eu.de4a.connector.error.model.EExternalModuleError;
-import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.EventNotificationType;
+import eu.de4a.kafkaclient.model.EExternalModule;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Controller
 @RequestMapping ("/event")
@@ -47,7 +47,7 @@ public class EventController
 
     final EventNotificationType eventObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                      marshaller,
-                                                                                     new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+                                                                                     new ConnectorException ().withModule (EExternalModule.CONNECTOR_DT));
 
     if (eventObj.hasNoEventNotificationItemEntries ())
       throw new IllegalStateException ("Provided payload has no EventNotificationItem entries");
@@ -68,7 +68,7 @@ public class EventController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_NOTIFICATION);
 
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_NOTIF_REQ_RECEIPT, eventObj, messageDTO, eventObj.getNotificationId (), "Event Notification", marshaller);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_EVENT_NOTIF_DO_DT, eventObj, messageDTO, marshaller, eventObj.getNotificationId());
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

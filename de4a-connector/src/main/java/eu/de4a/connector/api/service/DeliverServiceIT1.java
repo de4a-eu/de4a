@@ -4,32 +4,25 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
+
 import com.helger.commons.string.StringHelper;
+
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
-import eu.de4a.connector.api.manager.MessageExchangeManager;
 import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.EExternalModuleError;
-import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.APIRestUtils;
 import eu.de4a.connector.utils.DOMUtils;
 import eu.de4a.connector.utils.KafkaClientWrapper;
-import eu.de4a.connector.utils.ServiceUtils;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Service
 public class DeliverServiceIT1
 {
   private static final String XPATH_REQUEST_ID = "//*[local-name()='RequestId']/text()";
-
   private static final Logger LOGGER = LoggerFactory.getLogger (DeliverServiceIT1.class);
-		  
-  @Autowired
-  private ServiceUtils serviceUtils;
-  
   private static String legacyDOURL = "";
   
   /**
@@ -50,9 +43,11 @@ public class DeliverServiceIT1
    */
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
                                                @Nonnull final Document docMsg,
+                                               @Nonnull final String docType,
                                                @Nonnull final String senderID,
                                                @Nonnull final String receiverID,
-                                               @Nonnull final ELogMessage logMessage)
+                                               @Nonnull final ELogMessage logMessage,
+                                               final String... requestMetadata)
   
   {
     // Generic way for all request IDs
@@ -70,12 +65,12 @@ public class DeliverServiceIT1
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, senderID, receiverID, url);
+    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, docType, senderID, receiverID, url, requestMetadata[0]);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,
                                                     DOMUtils.documentToByte (docMsg),
-                                                    new ConnectorException ().withModule (EExternalModuleError.DATA_OWNER));
+                                                    new ConnectorException ().withModule (logMessage.getModule()));
   }
 
 	public static String getLegacyDOURL() {
