@@ -10,4 +10,5 @@ phase4-dumps/
 .idea/
 *.iml
 *.log
+*.p12
 zz
