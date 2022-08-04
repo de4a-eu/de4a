@@ -15,71 +15,78 @@ import eu.de4a.iem.core.jaxb.common.RedirectUserType;
 import eu.de4a.iem.core.jaxb.common.RequestEvidenceItemType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractEvidenceItemType;
 
-public final class MessageUtils {
+public final class MessageUtils
+{
 
-    private MessageUtils (){}
+  private MessageUtils ()
+  {}
 
-    public static String format(final String key, final Object[] args) {
-        final MessageSource messageSource = StaticContextAccessor.getBean(MessageSource.class);
-        final Locale locale = LocaleContextHolder.getLocale();
-        if(args != null && args.length > 0) {
-            return messageSource.getMessage(key, args, locale);
-        }
-        return messageSource.getMessage(key, ArrayHelper.EMPTY_OBJECT_ARRAY, locale);
+  public static String format (final String key, final Object [] args)
+  {
+    final MessageSource messageSource = StaticContextAccessor.getBean (MessageSource.class);
+    final Locale locale = LocaleContextHolder.getLocale ();
+    if (args != null && args.length > 0)
+    {
+      return messageSource.getMessage (key, args, locale);
     }
-    
-    public static <T> String getRequestMetadata(List<T> items) {
+    return messageSource.getMessage (key, ArrayHelper.EMPTY_OBJECT_ARRAY, locale);
+  }
 
-	    List<String> requestItems = new ArrayList<String>();
-	    items.forEach(item -> {
-	    	RequestEvidenceItemType request = (RequestEvidenceItemType) item;
-	    	requestItems.add(request.getRequestItemId() + ":" + request.getCanonicalEvidenceTypeId());
-	    });
-	    
-	    return format(requestItems);
-    }
-    
-    public static String getEvidenceResponseMetadata(List<ResponseExtractEvidenceItemType> items) {
+  public static <T> String getRequestMetadata (final List <T> items)
+  {
+    final List <String> requestItems = new ArrayList <> ();
+    items.forEach (item -> {
+      final RequestEvidenceItemType request = (RequestEvidenceItemType) item;
+      requestItems.add (request.getRequestItemId () + ":" + request.getCanonicalEvidenceTypeId ());
+    });
 
-	    List<String> requestItems = new ArrayList<String>();
-	    items.forEach(item -> {
-	    	if(!item.getError().isEmpty()) requestItems.add(item.getRequestItemId() + ":" + item.getErrorAtIndex(0).getCode());
-	    	else requestItems.add(item.getRequestItemId() + ":" + item.getCanonicalEvidenceTypeId());
-	    });
-	    
-	    return format(requestItems);
-    }
-    
-    public static String getRedirectResponseMetadata(RedirectUserType redirectResponse) {
-    	return redirectResponse.getError().isEmpty() ?
-    			redirectResponse.getRequestId() + ":" + redirectResponse.getCanonicalEvidenceTypeId() :
-    				redirectResponse.getRequestId() + ":" + redirectResponse.getErrorAtIndex(0).getCode(); 
-    }
-    
-    public static String getEventNotificationMetadata(List<EventNotificationItemType> items) {
-    	List<String> requestItems = new ArrayList<String>();
-	    items.forEach(item -> {
-	    	requestItems.add(item.getNotificationItemId() + ":" + item.getCanonicalEventCatalogUri());
-	    });
-	    
-	    return format(requestItems);
-	    
-    }
-    
-    //TODO The ResponseEventSubscriptionItemType does not have ErrorType
-    /*
-    public static String getEventSubscriptionResponseMetadata(List<ResponseEventSubscriptionItemType> items) {
+    return format (requestItems);
+  }
 
-	    List<String> requestItems = new ArrayList<String>();
-	    items.forEach(item -> {
-	    	if(!item.getError().isEmpty()) requestItems.add(item.getRequestItemId() + ":" + item..getCode());
-	    	else requestItems.add(item.getRequestItemId() + ":" + item.getCanonicalEvidenceTypeId());
-	    });
-	    
-	    return format(requestItems);
-    }*/
-    
-    private static String format(List<String> items) {
-    	return "(" + String.join(", ",  items) + ")";
-    }
+  public static String getEvidenceResponseMetadata (final List <ResponseExtractEvidenceItemType> items)
+  {
+    final List <String> requestItems = new ArrayList <> ();
+    items.forEach (item -> {
+      if (!item.getError ().isEmpty ())
+        requestItems.add (item.getRequestItemId () + ":" + item.getErrorAtIndex (0).getCode ());
+      else
+        requestItems.add (item.getRequestItemId () + ":" + item.getCanonicalEvidenceTypeId ());
+    });
+
+    return format (requestItems);
+  }
+
+  public static String getRedirectResponseMetadata (final RedirectUserType redirectResponse)
+  {
+    return redirectResponse.getError ().isEmpty () ? redirectResponse.getRequestId () + ":" + redirectResponse.getCanonicalEvidenceTypeId ()
+                                                   : redirectResponse.getRequestId () +
+                                                     ":" +
+                                                     redirectResponse.getErrorAtIndex (0).getCode ();
+  }
+
+  public static String getEventNotificationMetadata (final List <EventNotificationItemType> items)
+  {
+    final List <String> requestItems = new ArrayList <> ();
+    items.forEach (item -> {
+      requestItems.add (item.getNotificationItemId () + ":" + item.getCanonicalEventCatalogUri ());
+    });
+
+    return format (requestItems);
+
+  }
+
+  // TODO The ResponseEventSubscriptionItemType does not have ErrorType
+  /*
+   * public static String getEventSubscriptionResponseMetadata(List<
+   * ResponseEventSubscriptionItemType> items) { List<String> requestItems = new
+   * ArrayList<String>(); items.forEach(item -> { if(!item.getError().isEmpty())
+   * requestItems.add(item.getRequestItemId() + ":" + item..getCode()); else
+   * requestItems.add(item.getRequestItemId() + ":" +
+   * item.getCanonicalEvidenceTypeId()); }); return format(requestItems); }
+   */
+
+  private static String format (final List <String> items)
+  {
+    return "(" + String.join (", ", items) + ")";
+  }
 }

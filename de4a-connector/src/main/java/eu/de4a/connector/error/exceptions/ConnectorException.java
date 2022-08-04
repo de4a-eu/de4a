@@ -21,6 +21,12 @@ public class ConnectorException extends RuntimeException
   private HttpStatus status = HttpStatus.BAD_REQUEST;
   private List <Object> args;
 
+  @Nullable
+  public ELayerError getLayer ()
+  {
+    return layer;
+  }
+
   public ConnectorException withLayer (final ELayerError layer)
   {
     this.layer = layer;
