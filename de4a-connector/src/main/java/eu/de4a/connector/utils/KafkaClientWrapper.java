@@ -1,6 +1,5 @@
 package eu.de4a.connector.utils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -8,6 +7,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.error.level.EErrorLevel;
 
 import eu.de4a.connector.error.model.EFamilyErrorType;
@@ -71,7 +71,8 @@ public class KafkaClientWrapper
 
   private static void _send (final ELogMessage logMessage, final EErrorLevel level, final Object... params)
   {
-    final List <Object> listParams = Arrays.asList (params);
+    // A mutable list is needed
+    final List <Object> listParams = new CommonsArrayList <> (params);
     listParams.add (0, "[" + logMessage.getLogCode () + "] [" + KafkaClientWrapper.CONNECTOR_ID + "]");
     final String msg = MessageUtils.format (logMessage.getKey (), listParams.toArray ());
 
@@ -92,8 +93,9 @@ public class KafkaClientWrapper
                                   final EErrorLevel level,
                                   final Object... params)
   {
-    final List <Object> listParams = Arrays.asList (params);
-    final var code = module.getID () + ELogMessageLevel.ERROR.getCode () + errorType.getID ();
+    // A mutable list is needed
+    final List <Object> listParams = new CommonsArrayList <> (params);
+    final String code = module.getID () + ELogMessageLevel.ERROR.getCode () + errorType.getID ();
     listParams.add (0, "[" + code + "] [" + KafkaClientWrapper.CONNECTOR_ID + "]");
     final String msg = MessageUtils.format (errorType.getLabel (), listParams.toArray ());
 
