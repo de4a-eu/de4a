@@ -33,7 +33,6 @@ public class APIManager
 		KafkaClientWrapper.sendInfo (eLogMessage,
 				requestObj.getClass().getSimpleName(),
                 requestId,
-                messageDTO.getDocTypeID (),
                 messageDTO.getSenderID (),
                 messageDTO.getReceiverID (),
                 metadata[0]);
@@ -44,7 +43,6 @@ public class APIManager
 		KafkaClientWrapper.sendInfo (eLogMessage,
 				requestObj.getClass().getSimpleName(),
                 requestId,
-                messageDTO.getDocTypeID (),
                 messageDTO.getSenderID (),
                 messageDTO.getReceiverID ()
                 );

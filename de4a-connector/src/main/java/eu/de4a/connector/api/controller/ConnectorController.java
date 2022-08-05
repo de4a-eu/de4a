@@ -126,7 +126,7 @@ public class ConnectorController
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
     final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
-    String requestMetadata = MessageUtils.getRequestMetadata(aNewRequest.getRequestEvidenceIMItem());
+    String requestMetadata = MessageUtils.getLegacyRequestMetadata(aOldRequest.getRequestId(), aOldRequest.getCanonicalEvidenceTypeId());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_IM_LEGACY_DE_DR, 
     		aNewRequest, messageDTO, aNewRequestMarshaller, sNewDocTypeID, requestMetadata);
 

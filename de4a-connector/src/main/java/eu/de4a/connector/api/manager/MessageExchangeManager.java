@@ -1,8 +1,5 @@
 package eu.de4a.connector.api.manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
@@ -28,8 +25,6 @@ import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.api.service.model.MessageExchangeWrapper;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
-import eu.de4a.connector.utils.DOMUtils;
-import eu.de4a.connector.utils.KafkaClientWrapper;
 import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.AdditionalParameterType;
@@ -69,7 +64,6 @@ public class MessageExchangeManager
 
     final String senderID = meMessage.getSenderID ().getURIEncoded ();
     final String receiverID = meMessage.getReceiverID ().getURIEncoded ();
-    final String documentTypeId = meMessage.getDocumentTypeID ().getURIEncoded ();
     final IProcessIdentifier aProcessID = meMessage.getProcessID ();
     String metadata = "";
 
@@ -128,10 +122,7 @@ public class MessageExchangeManager
                 // convert new to old
                 final RequestExtractEvidenceIMType aOldRequest = LegacyAPIHelper.convertNewToOldRequest (aDRRequest);
                 aTargetDoc = DE4AMarshaller.doImRequestMarshaller ().getAsDocument (aOldRequest);
-
-                final List <RequestExtractEvidenceIMType> requestItems = new ArrayList <> ();
-                requestItems.add (aOldRequest);
-                metadata = MessageUtils.getRequestMetadata (requestItems);
+                metadata = MessageUtils.getLegacyRequestMetadata (aOldRequest.getRequestId(), aOldRequest.getCanonicalEvidenceTypeId());
               }
             }
 
@@ -187,7 +178,6 @@ public class MessageExchangeManager
         {
           response = this.deliverServiceIT1.pushMessage (eMessageServiceType,
                                                          aTargetDoc,
-                                                         documentTypeId,
                                                          senderID,
                                                          receiverID,
                                                          logMessage,
@@ -197,7 +187,6 @@ public class MessageExchangeManager
         {
           response = this.deliverService.pushMessage (eMessageServiceType,
                                                       aTargetDoc,
-                                                      documentTypeId,
                                                       senderID,
                                                       receiverID,
                                                       logMessage,
@@ -264,21 +253,22 @@ public class MessageExchangeManager
           }
         }
 
-        final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, aTargetDoc.getDocumentElement ());
+        //final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, aTargetDoc.getDocumentElement ());
+        /*
         KafkaClientWrapper.sendInfo (logMessage,
+        							 eMessageServiceType.getType (),
                                      sRequestID,
-                                     eMessageServiceType.getType (),
-                                     documentTypeId,
                                      senderID,
                                      receiverID,
                                      metadata);
+                                     */
 
         response = this.deliverService.pushMessage (eMessageServiceType,
                                                     aTargetDoc,
-                                                    documentTypeId,
                                                     senderID,
                                                     receiverID,
-                                                    ELogMessage.LOG_REQ_DE);
+                                                    logMessage,
+                                                    metadata);
 
         if (HttpStatus.OK.equals (response.getStatusCode ()))
           LOGGER.info ("Message successfully sent to the Data Evaluator");

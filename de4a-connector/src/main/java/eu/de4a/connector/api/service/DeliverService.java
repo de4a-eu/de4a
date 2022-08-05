@@ -48,11 +48,10 @@ public class DeliverService
    */
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
                                                @Nonnull final Document docMsg,
-                                               @Nonnull final String docType,
                                                @Nonnull final String senderID,
                                                @Nonnull final String receiverID,
                                                @Nonnull final ELogMessage logMessage,
-                                               final String... requestMetadata)
+                                               final String... metadata)
   {
     // Generic way for all request IDs
     final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, docMsg.getDocumentElement ());
@@ -71,7 +70,7 @@ public class DeliverService
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType(), sRequestID, docType, senderID, receiverID, requestMetadata[0]);
+    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType(), sRequestID, senderID, receiverID, metadata[0]);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,

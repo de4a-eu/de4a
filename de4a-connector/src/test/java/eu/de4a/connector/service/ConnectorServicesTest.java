@@ -74,7 +74,6 @@ public class ConnectorServicesTest
     // Calling the tested method
     final ResponseEntity <byte []> response = this.deliverService.pushMessage (EMessageServiceType.USI,
                                                                                dReq,
-                                                                               "urn:de4a-eu:CanonicalEvidenceType::MultiItem:1.0",
                                                                                "iso6523-actorid-upis::9999:lu000000025",
                                                                                "iso6523-actorid-upis::9999:test-sgad",
                                                                                ELogMessage.LOG_REQ_DE);

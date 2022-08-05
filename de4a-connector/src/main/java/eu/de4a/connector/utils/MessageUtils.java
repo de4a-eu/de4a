@@ -42,7 +42,14 @@ public final class MessageUtils
 
     return format (requestItems);
   }
-
+  
+  public static <T> String getLegacyRequestMetadata (final String requestId, final String canonicalEvidenceTypeId)
+  {
+    final List <String> requestItems = new ArrayList <> ();
+    requestItems.add (requestId + ":" + canonicalEvidenceTypeId);
+    return format (requestItems);
+  }
+  
   public static String getEvidenceResponseMetadata (final List <ResponseExtractEvidenceItemType> items)
   {
     final List <String> requestItems = new ArrayList <> ();
@@ -58,10 +65,9 @@ public final class MessageUtils
 
   public static String getRedirectResponseMetadata (final RedirectUserType redirectResponse)
   {
-    return redirectResponse.getError ().isEmpty () ? redirectResponse.getRequestId () + ":" + redirectResponse.getCanonicalEvidenceTypeId ()
-                                                   : redirectResponse.getRequestId () +
-                                                     ":" +
-                                                     redirectResponse.getErrorAtIndex (0).getCode ();
+    var data = redirectResponse.getError ().isEmpty () ? redirectResponse.getRequestId () + ":" + redirectResponse.getCanonicalEvidenceTypeId () 
+    													: redirectResponse.getRequestId () + ":" + redirectResponse.getErrorAtIndex (0).getCode ();
+    return "(" + data + ")";
   }
 
   public static String getEventNotificationMetadata (final List <EventNotificationItemType> items)

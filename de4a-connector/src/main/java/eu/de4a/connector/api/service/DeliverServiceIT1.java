@@ -43,7 +43,6 @@ public class DeliverServiceIT1
    */
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
                                                @Nonnull final Document docMsg,
-                                               @Nonnull final String docType,
                                                @Nonnull final String senderID,
                                                @Nonnull final String receiverID,
                                                @Nonnull final ELogMessage logMessage,
@@ -65,7 +64,7 @@ public class DeliverServiceIT1
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, docType, senderID, receiverID, url, requestMetadata[0]);
+    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, senderID, receiverID, url, requestMetadata[0]);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,
