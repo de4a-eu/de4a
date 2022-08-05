@@ -155,7 +155,7 @@ public class MessageExchangeManager
             logMessage = ELogMessage.LOG_REQ_LU_DR_DT;
             final var aDRRequest = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller ().read (aRegRepElement);
             aTargetDoc = DE4ACoreMarshaller.doRequestExtractMultiEvidenceLUMarshaller ().getAsDocument (aDRRequest);
-            metadata = MessageUtils.getRequestMetadata (aDRRequest.getRequestEvidenceLUItem ());
+            metadata = MessageUtils.getLookupRequestMetadata (aDRRequest.getRequestEvidenceLUItem ());
 
             if (aTargetDoc == null)
               throw new IllegalStateException ("Failed to convert LU request from DR to DO");

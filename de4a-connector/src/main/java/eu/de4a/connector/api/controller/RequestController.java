@@ -146,7 +146,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    String requestMetadata = MessageUtils.getRequestMetadata(requestObj.getRequestEvidenceLUItem());
+    String requestMetadata = MessageUtils.getLookupRequestMetadata(requestObj.getRequestEvidenceLUItem());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_LU_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
@@ -182,7 +182,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    String requestMetadata = MessageUtils.getRequestMetadata(requestObj.getEventSubscripRequestItem());
+    String requestMetadata = MessageUtils.getSubscriptionRequestMetadata(requestObj.getEventSubscripRequestItem());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_SUBSC_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());

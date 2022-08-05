@@ -11,8 +11,10 @@ import com.helger.commons.collection.ArrayHelper;
 
 import eu.de4a.connector.StaticContextAccessor;
 import eu.de4a.iem.core.jaxb.common.EventNotificationItemType;
+import eu.de4a.iem.core.jaxb.common.EventSubscripRequestItemType;
 import eu.de4a.iem.core.jaxb.common.RedirectUserType;
 import eu.de4a.iem.core.jaxb.common.RequestEvidenceItemType;
+import eu.de4a.iem.core.jaxb.common.RequestEvidenceLUItemType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractEvidenceItemType;
 
 public final class MessageUtils
@@ -43,12 +45,34 @@ public final class MessageUtils
     return format (requestItems);
   }
   
-  public static <T> String getLegacyRequestMetadata (final String requestId, final String canonicalEvidenceTypeId)
+  public static String getLegacyRequestMetadata (final String requestId, final String canonicalEvidenceTypeId)
   {
     final List <String> requestItems = new ArrayList <> ();
     requestItems.add (requestId + ":" + canonicalEvidenceTypeId);
     return format (requestItems);
   }
+  
+  public static String getSubscriptionRequestMetadata (final List <EventSubscripRequestItemType> items)
+  {
+    final List <String> requestItems = new ArrayList <> ();
+    items.forEach (item -> {
+      requestItems.add (item.getRequestItemId () + ":" + item.getCanonicalEventCatalogUri());
+    });
+
+    return format (requestItems);
+  }
+  
+  public static String getLookupRequestMetadata (final List<RequestEvidenceLUItemType> items)
+  {
+    final List <String> requestItems = new ArrayList <> ();
+    items.forEach (item -> {
+      requestItems.add (item.getRequestItemId () + ":" + item.getCanonicalEvidenceTypeId());
+    });
+
+    return format (requestItems);
+  }
+  
+  
   
   public static String getEvidenceResponseMetadata (final List <ResponseExtractEvidenceItemType> items)
   {
