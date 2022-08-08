@@ -4,6 +4,7 @@
 target/
 
 #Ignore out of scope project modules
+config/
 de4a-evaluator/
 de4a-pid-owner/
 phase4-dumps/
@@ -11,4 +12,5 @@ phase4-dumps/
 *.iml
 *.log
 *.p12
+*.jks
 zz

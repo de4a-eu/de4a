@@ -1,5 +1,11 @@
 FROM tomcat:9-jdk11
 
+# Install unzip
+RUN apt-get update \
+  && apt-get upgrade -y \
+  && apt-get install -y unzip \
+  && rm -rf /var/lib/apt/lists/*
+
 ARG WAR_NAME=de4a-connector.war
 
 #create tc webapp folder
