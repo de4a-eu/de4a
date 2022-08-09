@@ -33,3 +33,14 @@ With docker-compose run the following to update to a newer image
 
 Please be advised this only works for the specified `<tag>` in your docker-compose.yml. If you run `latest` you will always get the latest built image.
 If you are upgrading between version i.e. 0.1.0 -> 0.2.0 you need to first change the `docker-compose.yml` file to reflect the new version and then run the above command
+
+## Building
+
+Internal instructions to manually build and push Docker images
+
+### Connector
+
+1. Run `mvn clean install` on the main project
+2. Goto `de4a-connector` submodule
+3. Run `docker build --pull -t de4a/connector:iteration1 .`
+4. Run `docker run -d -p 8080:8080 de4a/connector:iteration1`
