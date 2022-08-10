@@ -32,7 +32,7 @@ Checkout the technical documentation on [the Wiki page](https://wiki.de4a.eu/ind
 
 * **`/service/ial/{cot}`** - Query the IAL for provided Canonical Object Types (COTs). Multiple COTs can be separated by `,`. No ATU restrictions are applied.
 * **`/service/ial/{cot}/{atu}`** - Query the IAL for provided Canonical Object Types (COTs) but only for the ones in the specified ATU. Multiple COTs can be separated by `,`.
-* **`/service/mor/{lang}`** - Query MOR. This API is NOT YET FINALIZED. DON'T USE IT.
+* **`/service/reload-addresses`** - Reload the internal address list for forwarding to DE and DO from the backend file.
 
 ### Configuration
 
