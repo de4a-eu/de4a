@@ -16,7 +16,8 @@ pipeline {
                 }
             }
             steps {
-                sh 'mvn clean test sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_TOKEN'
+                // sh 'mvn clean test sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_TOKEN'
+                sh 'mvn clean test'
             }
         }
 
