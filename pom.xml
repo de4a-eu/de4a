@@ -179,7 +179,7 @@
       <dependency>
         <groupId>com.helger.dcng</groupId>
         <artifactId>dcng-parent-pom</artifactId>
-        <version>0.2.6</version>
+        <version>0.2.7</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
