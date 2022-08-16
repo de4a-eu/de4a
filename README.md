@@ -101,23 +101,7 @@ The Connector is deployed to Maven Central and is available via the following co
 ### Docker
 
 The Docker images are not yet ready.
-
-#### Build the image
-
-Go inside the `de4a-connector` directory.
-Call
-
-```shell
-docker build --pull -t de4a/connector:latest .
-```
-
-and then to run it:
-
-```
-docker run -p 8080:8080 de4a/connector:latest
-``` 
-
-See also the file `Docker.md` file in the parent folder.
+See DOCKER.md for details
 
 ### Package
 
@@ -174,7 +158,7 @@ To enable HTTP kafka log producer, you only need to set the property to true `de
 
 It is important to mention the property `de4a.kafka.logging.enabled`, used to enable the file log printing for each kafka message sent, that property could be enabled even when the `de4a.kafka.enabled=false`, just for write the log at the different appenders configured in the log4j2 configuration file.
 
-### SMP/SML properties `refeence.properties`
+### SMP/SML properties `reference.properties`
 
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
 
@@ -279,9 +263,10 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
-* v0.2.2 - work in progress
-    * Updated to de4a-commons 0.2.10
-    * Updated to de4a-connector-ng 0.2.6 with improved configurability
+* v0.2.2 - 2022-08-16
+    * Updated to de4a-commons 0.2.12
+    * Updated to de4a-connector-ng 0.2.7 with improved configurability
+    * Using a consistent logging towards Kafka Tracker
 * v0.2.1 - 2022-07-06
     * Updated to de4a-commons 0.2.8
     * Improved the Iteration 1 backwards compatibility interface for the DO side as well
