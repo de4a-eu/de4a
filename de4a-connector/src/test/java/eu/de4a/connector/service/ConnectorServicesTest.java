@@ -76,7 +76,8 @@ public class ConnectorServicesTest
                                                                                dReq,
                                                                                "iso6523-actorid-upis::9999:lu000000025",
                                                                                "iso6523-actorid-upis::9999:test-sgad",
-                                                                               ELogMessage.LOG_REQ_DE);
+                                                                               ELogMessage.LOG_REQ_DE,
+                                                                               null);
 
     assertEquals (HttpStatus.OK, response.getStatusCode ());
     mockServer.verify ();

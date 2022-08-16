@@ -1,6 +1,7 @@
 package eu.de4a.connector.api.service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +24,9 @@ public class DeliverServiceIT1
 {
   private static final String XPATH_REQUEST_ID = "//*[local-name()='RequestId']/text()";
   private static final Logger LOGGER = LoggerFactory.getLogger (DeliverServiceIT1.class);
+
   private static String legacyDOURL = "";
-  
+
   /**
    * Deliver a message to the corresponding participant based on the receiver
    * internal configuration resolved by
@@ -39,6 +41,8 @@ public class DeliverServiceIT1
    *         Receiver participant identifier
    * @param logMessage
    *         Log tag for i18n
+   * @param requestMetadata
+   *         Optional logging metadata
    * @return ResponseEntity with the response of the external service
    */
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
@@ -46,8 +50,8 @@ public class DeliverServiceIT1
                                                @Nonnull final String senderID,
                                                @Nonnull final String receiverID,
                                                @Nonnull final ELogMessage logMessage,
-                                               final String... requestMetadata)
-  
+                                               @Nullable final String requestMetadata)
+
   {
     // Generic way for all request IDs
     final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, docMsg.getDocumentElement ());
@@ -56,15 +60,16 @@ public class DeliverServiceIT1
 
     // Get where has to be sent depending of the content
     final String url = legacyDOURL;
-    LOGGER.info ("Legacy URL for DO: "+url);
-                                                               
-    if (url == null)
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Legacy URL for DO: " + url);
+
+    if (StringHelper.hasNoText (url))
       throw new IllegalStateException ("Failed to determine DE/DO URL for receiver '" +
                                        receiverID +
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, senderID, receiverID, url, requestMetadata[0]);
+    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, senderID, receiverID, url, requestMetadata);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,
@@ -72,11 +77,12 @@ public class DeliverServiceIT1
                                                     new ConnectorException ().withModule (logMessage.getModule()));
   }
 
+  @Nullable
 	public static String getLegacyDOURL() {
 		return legacyDOURL;
 	}
-	
-	public static void setLegacyDOURL(String legacyDOURL) {
+
+	public static void setLegacyDOURL(@Nullable final String legacyDOURL) {
 		DeliverServiceIT1.legacyDOURL = legacyDOURL;
 	}
 }

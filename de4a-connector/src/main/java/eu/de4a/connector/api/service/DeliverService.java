@@ -1,6 +1,7 @@
 package eu.de4a.connector.api.service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +45,17 @@ public class DeliverService
    *         Receiver participant identifier
    * @param logMessage
    *         Log tag for i18n
+   * @param metadata
+   *         Optional logging metadata
    * @return ResponseEntity with the response of the external service
    */
+  @Nonnull
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
                                                @Nonnull final Document docMsg,
                                                @Nonnull final String senderID,
                                                @Nonnull final String receiverID,
                                                @Nonnull final ELogMessage logMessage,
-                                               final String... metadata)
+                                               @Nullable final String metadata)
   {
     // Generic way for all request IDs
     final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, docMsg.getDocumentElement ());
@@ -70,7 +74,7 @@ public class DeliverService
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType(), sRequestID, senderID, receiverID, metadata[0]);
+    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType(), sRequestID, senderID, receiverID, metadata);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,
