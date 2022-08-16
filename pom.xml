@@ -165,14 +165,14 @@
       <dependency>
         <groupId>eu.de4a.ial</groupId>
         <artifactId>ial-parent-pom</artifactId>
-        <version>0.1.5</version>
+        <version>0.1.6</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>eu.de4a</groupId>
         <artifactId>de4a-commons-parent-pom</artifactId>
-        <version>0.2.11</version>
+        <version>0.2.12</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

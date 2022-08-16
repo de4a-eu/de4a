@@ -60,7 +60,7 @@ public class ServiceController
 
     // Success case
     return ResponseEntity.status (HttpStatus.OK)
-                         .body (IALMarshaller.idkResponseLookupRoutingInformationMarshaller ().getAsBytes (aResponse));
+                         .body (IALMarshaller.responseLookupRoutingInformationMarshaller ().getAsBytes (aResponse));
   }
 
   @GetMapping (value = "/ial/{cot}/{atu}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
@@ -87,7 +87,7 @@ public class ServiceController
 
     // Success case
     return ResponseEntity.status (HttpStatus.OK)
-                         .body (IALMarshaller.idkResponseLookupRoutingInformationMarshaller ().getAsBytes (aResponse));
+                         .body (IALMarshaller.responseLookupRoutingInformationMarshaller ().getAsBytes (aResponse));
   }
 
   @GetMapping (value = "/reload-addresses", produces = MediaType.TEXT_PLAIN_VALUE)
