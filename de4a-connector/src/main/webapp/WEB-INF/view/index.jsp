@@ -13,7 +13,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="https://www.thymeleaf.org" lang="en">
 <head>
-    <title>DE4A-Connector - Info</title>
+    <title>DE4A-Connector (Iteration 2) - Info</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style type="text/css">
         body {
