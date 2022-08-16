@@ -3,8 +3,10 @@ package eu.de4a.connector.api.controller;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.xml.bind.UnmarshalException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -21,16 +23,17 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
 import eu.de4a.connector.error.model.CMessageKeys;
-import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
-import eu.de4a.connector.error.model.ELayerError;
 import eu.de4a.connector.error.model.ErrorHelper;
 import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4AResponseDocumentHelper;
 import eu.de4a.iem.core.jaxb.common.ResponseErrorType;
+import eu.de4a.kafkaclient.model.EExternalModule;
+import eu.de4a.kafkaclient.model.ELogMessageLevel;
 
 /**
  * Controller for handling type errors for more concise messages
@@ -48,10 +51,11 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler
     final HttpHeaders headers = new HttpHeaders ();
     headers.setContentType (new MediaType (MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
     final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError (false);
-    final String code = ErrorHelper.createCode (ELayerError.COMMUNICATIONS,
-                                                EExternalModuleError.NONE,
+    final String code = ErrorHelper.createCode (EExternalModule.NONE,
+                                                ELogMessageLevel.ERROR,
                                                 EFamilyErrorType.MISSING_REQUIRED_ARGUMENTS);
     responseError.addError (DE4AResponseDocumentHelper.createError (code, err));
+    
     return new ResponseEntity <> (responseError, headers, HttpStatus.BAD_REQUEST);
   }
 
@@ -132,8 +136,9 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler
     final String err = MessageUtils.format (CMessageKeys.ERROR_SERVICE_NOT_FOUND,
                                             new Object [] { ((ServletWebRequest) request).getRequest ().getRequestURI () });
     final ResponseErrorType responseError = DE4AResponseDocumentHelper.createResponseError (false);
-    final String code = ErrorHelper.createCode (ELayerError.COMMUNICATIONS, EExternalModuleError.NONE, EFamilyErrorType.SERVICE_NOT_FOUND);
+    final String code = ErrorHelper.createCode (EExternalModule.NONE, ELogMessageLevel.ERROR, EFamilyErrorType.SERVICE_NOT_FOUND);
     responseError.addError (DE4AResponseDocumentHelper.createError (code, err));
+    
     return new ResponseEntity <> (responseError, new HttpHeaders (), HttpStatus.NOT_FOUND);
 
   }

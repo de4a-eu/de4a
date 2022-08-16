@@ -122,10 +122,10 @@
   },
   "dataEvaluators": {
     "iso6523-actorid-upis::9999:demoui-localhost-it2": {
-      "response":          "http://localhost:8080/api/de-inbound/",
-      "subscription_resp": "http://localhost:8080/api/de-inbound/",
-      "redirect":          "http://localhost:8080/api/de-inbound/",
-      "notification":      "http://localhost:8080/api/de-inbound/"
+      "response":          "http://localhost:8090/api/de-inbound/",
+      "subscription_resp": "http://localhost:8090/api/de-inbound/",
+      "redirect":          "http://localhost:8090/api/de-redirect/",
+      "notification":      "http://localhost:8090/api/de-notification/"
     },
     "iso6523-actorid-upis::9999:ess2833002e-it2": {
       "response": "https://data-evaluator.com/response/",

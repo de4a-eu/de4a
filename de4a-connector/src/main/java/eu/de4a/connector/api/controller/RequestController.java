@@ -23,14 +23,16 @@ import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
-import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.utils.APIRestUtils;
+import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.jaxb.common.RequestEventSubscriptionType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceIMType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceLUType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceUSIType;
+import eu.de4a.kafkaclient.model.EExternalModule;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Controller
 @RequestMapping ("/request")
@@ -47,12 +49,13 @@ public class RequestController
   {
     LOGGER.info ("[DE-DR] Request to API /request/im/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceIMType requestObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                    marshaller,
-                                                                                                   new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+                                                                                                   new ConnectorException ().withModule (EExternalModule.CONNECTOR_DR));
+    
     if (requestObj.hasNoRequestEvidenceIMItemEntries ())
       throw new IllegalStateException ("Provided payload has no RequestEvidenceIMItem entries");
 
@@ -72,7 +75,8 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "IM Request", marshaller);
+    String requestMetadata = MessageUtils.getRequestMetadata(requestObj.getRequestEvidenceIMItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_IM_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -82,12 +86,12 @@ public class RequestController
   {
     LOGGER.info ("[DE-DR] Request to API /request/usi/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceUSIMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceUSIMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceUSIType requestObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                     marshaller,
-                                                                                                    new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+                                                                                                    new ConnectorException ().withModule (EExternalModule.CONNECTOR_DR));
     if (requestObj.hasNoRequestEvidenceUSIItemEntries ())
       throw new IllegalStateException ("Provided payload has no RequestEvidenceUSIItem entries");
 
@@ -107,8 +111,8 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "USI Request", marshaller);
-
+    String requestMetadata = MessageUtils.getRequestMetadata(requestObj.getRequestEvidenceUSIItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_USI_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
 
@@ -117,12 +121,12 @@ public class RequestController
   {
     LOGGER.info ("[DE-DR] Request to API /request/lu/ received");
 
-    final var marshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceLUMarshaller ();
+    final var marshaller = DE4ACoreMarshaller.drRequestTransferEvidenceLUMarshaller ();
 
     // Unmarshalling and schema validation
     final RequestExtractMultiEvidenceLUType requestObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                    marshaller,
-                                                                                                   new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+                                                                                                   new ConnectorException ().withModule (EExternalModule.CONNECTOR_DR));
     if (requestObj.hasNoRequestEvidenceLUItemEntries ())
       throw new IllegalStateException ("Provided payload has no RequestEvidenceLUItem entries");
 
@@ -142,7 +146,8 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "LU Request", marshaller);
+    String requestMetadata = MessageUtils.getLookupRequestMetadata(requestObj.getRequestEvidenceLUItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_LU_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -157,7 +162,7 @@ public class RequestController
     // Unmarshalling and schema validation
     final RequestEventSubscriptionType requestObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                               marshaller,
-                                                                                              new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+                                                                                              new ConnectorException ().withModule (EExternalModule.CONNECTOR_DR));
     if (requestObj.hasNoEventSubscripRequestItemEntries ())
       throw new IllegalStateException ("Provided payload has no EventSubscripRequestItem entries");
 
@@ -177,7 +182,8 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    this.apiManager.processIncomingMessage (requestObj, messageDTO, docTypeID, "Subscription Request", marshaller);
+    String requestMetadata = MessageUtils.getSubscriptionRequestMetadata(requestObj.getEventSubscripRequestItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_SUBSC_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

@@ -32,7 +32,7 @@ Checkout the technical documentation on [the Wiki page](https://wiki.de4a.eu/ind
 
 * **`/service/ial/{cot}`** - Query the IAL for provided Canonical Object Types (COTs). Multiple COTs can be separated by `,`. No ATU restrictions are applied.
 * **`/service/ial/{cot}/{atu}`** - Query the IAL for provided Canonical Object Types (COTs) but only for the ones in the specified ATU. Multiple COTs can be separated by `,`.
-* **`/service/mor/{lang}`** - Query MOR. This API is NOT YET FINALIZED. DON'T USE IT.
+* **`/service/reload-addresses`** - Reload the internal address list for forwarding to DE and DO from the backend file.
 
 ### Configuration
 
@@ -85,7 +85,25 @@ mvn clean install
 It is also possible to compile each package separately by browsing to the folder and running the command above.
 It requires Java 11 and Maven 3.x (latest).
 
-#### Package
+### Maven packages
+
+The Connector is deployed to Maven Central and is available via the following coordinates, replacing `x.y.z` with the real version:
+
+```xml
+<dependency>
+  <groupId>eu.de4a</groupId>
+  <artifactId>de4a-connector</artifactId>
+  <version>x.y.z</version>
+  <type>war</type>
+</dependency>
+```
+
+### Docker
+
+The Docker images are not yet ready.
+See DOCKER.md for details
+
+### Package
 
 The compilation process will packaging the project into a `.war` file located on `/target/` path, which should be deployable on any applications server.
 
@@ -140,7 +158,7 @@ To enable HTTP kafka log producer, you only need to set the property to true `de
 
 It is important to mention the property `de4a.kafka.logging.enabled`, used to enable the file log printing for each kafka message sent, that property could be enabled even when the `de4a.kafka.enabled=false`, just for write the log at the different appenders configured in the log4j2 configuration file.
 
-### SMP/SML properties `refeence.properties`
+### SMP/SML properties `reference.properties`
 
 To establish which SMP server will provide the Connector with metadata services, the following properties must be used:
 
@@ -148,6 +166,7 @@ To establish which SMP server will provide the Connector with metadata services,
 # SMP stuff is always the same for the pilots
 de4a.smp.http.useglobalsettings = true
 de4a.smp.usedns = true
+de4a.smp.tls.trustall = true
 de4a.smp.sml.name = SMK DE4A
 de4a.smp.sml.dnszone = de4a.acc.edelivery.tech.ec.europa.eu.
 de4a.smp.sml.serviceurl = https://acc.edelivery.tech.ec.europa.eu/edelivery-sml
@@ -241,3 +260,15 @@ Once you have all configuration parameters well configured (if not, check the lo
 Once you have deployed the `war` file, there are several **checks to ensure that the deployment was successful**:
 - Connector index page will be at root path: `http://host:port/`
 	- Eg.: [UM Connector](https://de4a-connector.informatika.uni-mb.si/)
+
+# News and Noteworthy
+
+* v0.2.2 - 2022-08-16
+    * Updated to de4a-commons 0.2.12
+    * Updated to de4a-connector-ng 0.2.7 with improved configurability
+    * Using a consistent logging towards Kafka Tracker
+* v0.2.1 - 2022-07-06
+    * Updated to de4a-commons 0.2.8
+    * Improved the Iteration 1 backwards compatibility interface for the DO side as well
+* v0.2.0 - 2022-05-20
+    * This is the first version of the Iteration 2 Connector. It's not the final version, but a good starting point

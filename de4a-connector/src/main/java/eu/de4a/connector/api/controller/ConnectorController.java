@@ -1,6 +1,8 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.validation.Valid;
@@ -27,11 +29,14 @@ import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
-import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.error.model.EFamilyErrorType;
 import eu.de4a.connector.error.model.ELayerError;
+import eu.de4a.connector.utils.KafkaClientWrapper;
+import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
+import eu.de4a.iem.core.jaxb.common.AdditionalParameterType;
+import eu.de4a.iem.core.jaxb.common.AdditionalParameterTypeType;
 import eu.de4a.iem.core.jaxb.common.RequestExtractMultiEvidenceIMType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
 import eu.de4a.iem.jaxb.common.types.ErrorListType;
@@ -39,6 +44,8 @@ import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseTransferEvidenceType;
 import eu.de4a.iem.xml.de4a.DE4AMarshaller;
 import eu.de4a.iem.xml.de4a.DE4AResponseDocumentHelper;
+import eu.de4a.kafkaclient.model.EExternalModule;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Controller
 public class ConnectorController
@@ -66,6 +73,7 @@ public class ConnectorController
     marshaller.readExceptionCallbacks ().set (e -> {
       if (e.getLinkedException () != null)
         baseEx.withMessageArg (e.getLinkedException ().getMessage ());
+      KafkaClientWrapper.sendError(EFamilyErrorType.CONVERSION_ERROR, ex.getModule(), e.getLinkedException().getMessage());
     });
 
     final T returnObj;
@@ -96,11 +104,20 @@ public class ConnectorController
     // Unmarshalling and schema validation
     final RequestTransferEvidenceUSIIMDRType aOldRequest = _conversionBytesWithCatching (request,
                                                                                          aOldRequestMarshaller,
-                                                                                         new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DR));
+                                                                                         new ConnectorException ().withModule (EExternalModule.CONNECTOR_DR));
 
     // Convert to the new format
     LOGGER.info ("Converting old request to new request");
-    final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest (aOldRequest);
+    final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest_DR (aOldRequest);
+
+    //additional parameter for it1 message identification
+    final List<AdditionalParameterType> aList = new ArrayList<>();
+    final AdditionalParameterType addParam = new AdditionalParameterType();
+    addParam.setLabel("iteration");
+    addParam.setValue("1");
+    addParam.setType(AdditionalParameterTypeType.YES_NO);
+    aList.add(addParam);
+    aNewRequest.getRequestEvidenceIMItemAtIndex(0).setAdditionalParameter(aList);
 
     final String sNewDocTypeID = aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
     final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewRequest.getDataEvaluator ().getAgentUrn (),
@@ -108,21 +125,23 @@ public class ConnectorController
                                                         sNewDocTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestExtractMultiEvidenceIMMarshaller ();
-    this.apiManager.processIncomingMessage (aNewRequest, messageDTO, sNewDocTypeID, "Legacy IM Request", aNewRequestMarshaller);
+    final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
+    String requestMetadata = MessageUtils.getLegacyRequestMetadata(aOldRequest.getRequestId(), aOldRequest.getCanonicalEvidenceTypeId());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_IM_LEGACY_DE_DR, 
+    		aNewRequest, messageDTO, aNewRequestMarshaller, sNewDocTypeID, requestMetadata);
 
     // Remember request
-    LegacyAPIHelper.rememberLegacyRequest (aOldRequest);
+    LegacyAPIHelper.rememberLegacyRequest_DR (aOldRequest);
 
     // Synchronously wait for response
     final long timeout = 60_000;
     final long init = PDTFactory.getCurrentMillis ();
-    Document aResponseDoc = LegacyAPIHelper.isFinalized (aOldRequest);
+    Document aResponseDoc = LegacyAPIHelper.isFinalized_DR (aOldRequest);
     while (aResponseDoc == null)
     {
       LOGGER.info ("Waiting for synchronous response on legacy IM request");
       ThreadHelper.sleep (500);
-      aResponseDoc = LegacyAPIHelper.isFinalized (aOldRequest);
+      aResponseDoc = LegacyAPIHelper.isFinalized_DR (aOldRequest);
       if (PDTFactory.getCurrentMillis () - init >= timeout)
         break;
     }
@@ -142,7 +161,7 @@ public class ConnectorController
     else
     {
       // Try to interpret response
-      final var aNewResponseMarshaller = DE4ACoreMarshaller.dtResponseExtractMultiEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
+      final var aNewResponseMarshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
       final ResponseExtractMultiEvidenceType aNewResponse = aNewResponseMarshaller.read (aResponseDoc);
       if (aNewResponse == null)
       {
@@ -153,12 +172,12 @@ public class ConnectorController
 
       // Convert new Response to old response
       LOGGER.info ("Converting new response to old format");
-      aOldResponse = LegacyAPIHelper.convertNewToOldResponse (aOldRequest, aNewResponse);
+      aOldResponse = LegacyAPIHelper.convertNewToOldResponse_DR (aOldRequest, aNewResponse);
     }
 
     // Serialize result
     final byte [] aOldResponseBytes = DE4AMarshaller.drImResponseMarshaller (eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType.NONE)
-                                                    .getAsBytes (aOldResponse);
+    												 .getAsBytes (aOldResponse);
     LOGGER.info ("Returning old response");
     return ResponseEntity.status (HttpStatus.OK).body (aOldResponseBytes);
   }

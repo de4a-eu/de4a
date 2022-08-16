@@ -23,14 +23,16 @@ import eu.de4a.connector.config.DE4AConstants;
 import eu.de4a.connector.dto.AS4MessageDTO;
 import eu.de4a.connector.error.exceptions.ConnectorException;
 import eu.de4a.connector.error.handler.ConnectorExceptionHandler;
-import eu.de4a.connector.error.model.EExternalModuleError;
 import eu.de4a.connector.utils.APIRestUtils;
+import eu.de4a.connector.utils.MessageUtils;
 import eu.de4a.iem.core.CIEM;
 import eu.de4a.iem.core.DE4ACoreMarshaller;
 import eu.de4a.iem.core.IDE4ACanonicalEvidenceType;
 import eu.de4a.iem.core.jaxb.common.RedirectUserType;
 import eu.de4a.iem.core.jaxb.common.ResponseEventSubscriptionType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
+import eu.de4a.kafkaclient.model.EExternalModule;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Controller
 @RequestMapping ("/response")
@@ -51,14 +53,16 @@ public class ResponseController
 
     final RedirectUserType redirectUserMsg = APIRestUtils.conversionBytesWithCatching (request,
                                                                                        marshaller,
-                                                                                       new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+                                                                                       new ConnectorException ().withModule (EExternalModule.CONNECTOR_DT));
 
-    final AS4MessageDTO messageDTO = new AS4MessageDTO (redirectUserMsg.getDataEvaluator ().getAgentUrn (),
-                                                        redirectUserMsg.getDataOwner ().getAgentUrn (),
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (redirectUserMsg.getDataOwner ().getAgentUrn (),
+                                                        redirectUserMsg.getDataEvaluator().getAgentUrn (),
                                                         redirectUserMsg.getCanonicalEvidenceTypeId (),
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage (redirectUserMsg, messageDTO, redirectUserMsg.getRequestId (), "Redirect User", marshaller);
+    String responseMetadata = MessageUtils.getRedirectResponseMetadata(redirectUserMsg);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_REDIRECT_DO_DT, 
+    		redirectUserMsg, messageDTO, marshaller, redirectUserMsg.getRequestId(), responseMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -68,11 +72,12 @@ public class ResponseController
   {
     LOGGER.info ("[DO-DT] Request to API /response/evidence/ received");
 
-    final var marshaller = DE4ACoreMarshaller.dtResponseExtractMultiEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
+    final var marshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller (IDE4ACanonicalEvidenceType.NONE);
 
     final ResponseExtractMultiEvidenceType responseObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                    marshaller,
-                                                                                                   new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+                                                                                                   new ConnectorException ().withModule (EExternalModule.CONNECTOR_DT));
+    
     if (responseObj.hasNoResponseExtractEvidenceItemEntries ())
       throw new IllegalStateException ("Provided payload has no ResponseExtractEvidenceItem entries");
 
@@ -92,7 +97,9 @@ public class ResponseController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    this.apiManager.processIncomingMessage (responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
+    String responseMetadata = MessageUtils.getEvidenceResponseMetadata(responseObj.getResponseExtractEvidenceItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_EVIDENCE_DO_DT, 
+    		responseObj, messageDTO, marshaller, responseObj.getRequestId(), responseMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -106,7 +113,7 @@ public class ResponseController
 
     final ResponseEventSubscriptionType responseObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                 marshaller,
-                                                                                                new ConnectorException ().withModule (EExternalModuleError.CONNECTOR_DT));
+                                                                                                new ConnectorException ().withModule (EExternalModule.CONNECTOR_DT));
     if (responseObj.hasNoResponseEventSubscriptionItemEntries ())
       throw new IllegalStateException ("Provided payload has no ResponseEventSubscriptionItem entries");
 
@@ -125,8 +132,10 @@ public class ResponseController
                                                         responseObj.getDataOwner ().getAgentUrn (),
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
-
-    this.apiManager.processIncomingMessage (responseObj, messageDTO, responseObj.getRequestId (), "Response Evidence", marshaller);
+    
+    //TODO Get Subscription response and extract evidences/errors, actually the ResponseEventSubscriptionItemType does not have ErrorType
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_SUBSC_DO_DT, 
+    		responseObj, messageDTO, marshaller, responseObj.getRequestId());
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

@@ -36,8 +36,8 @@ import eu.de4a.connector.api.service.DeliverService;
 import eu.de4a.connector.api.service.model.EMessageServiceType;
 import eu.de4a.connector.config.AddressesProperties;
 import eu.de4a.connector.config.MockConf;
-import eu.de4a.connector.error.model.ELogMessage;
 import eu.de4a.connector.utils.DOMUtils;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @RunWith (SpringRunner.class)
 @TestPropertySource (locations = "classpath:application.yml")
@@ -76,7 +76,8 @@ public class ConnectorServicesTest
                                                                                dReq,
                                                                                "iso6523-actorid-upis::9999:lu000000025",
                                                                                "iso6523-actorid-upis::9999:test-sgad",
-                                                                               ELogMessage.LOG_REQ_DO);
+                                                                               ELogMessage.LOG_REQ_DE,
+                                                                               null);
 
     assertEquals (HttpStatus.OK, response.getStatusCode ());
     mockServer.verify ();

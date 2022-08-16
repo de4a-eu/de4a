@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import eu.de4a.connector.config.AddressesProperties;
-import eu.de4a.connector.error.model.ELogMessage;
+import eu.de4a.kafkaclient.model.ELogMessage;
 
 @Component
 public class ServiceUtils
@@ -17,6 +17,11 @@ public class ServiceUtils
 
   private ServiceUtils ()
   {}
+
+  public void reloadParticipantAddresses ()
+  {
+    addressesProperties.init ();
+  }
 
   /**
    * Get the participant's endpoint
@@ -31,7 +36,11 @@ public class ServiceUtils
    */
   public String getParticipantAddress (final String participantId, final String endpointType, final boolean isRequest)
   {
-    KafkaClientWrapper.sendInfo (ELogMessage.LOG_PARTICIPANT_LOOKUP, participantId, endpointType);
+	 ELogMessage eLogMessage;
+	 if(isRequest) eLogMessage = ELogMessage.LOG_DT_PARTICIPANT_LOOKUP;
+	 else eLogMessage = ELogMessage.LOG_DR_PARTICIPANT_LOOKUP;
+	 
+    KafkaClientWrapper.sendInfo (eLogMessage, participantId, endpointType);
 
     final Map <String, Map <String, String>> participants = isRequest ? addressesProperties.getDataOwners ()
                                                                       : addressesProperties.getDataEvaluators ();
@@ -43,7 +52,9 @@ public class ServiceUtils
     final Map <String, String> participantAddress = participants.get (participantId);
     if (participantAddress == null || participantAddress.get (endpointType) == null)
     {
-      KafkaClientWrapper.sendError (ELogMessage.LOG_ERROR_PARTICIPANT_LOOKUP, participantId, endpointType);
+    	if(isRequest) eLogMessage = ELogMessage.LOG_ERROR_DT_PARTICIPANT_LOOKUP;
+   	 	else eLogMessage = ELogMessage.LOG_ERROR_DR_PARTICIPANT_LOOKUP;
+      KafkaClientWrapper.sendError (eLogMessage, participantId, endpointType);
       return null;
     }
     return participantAddress.get (endpointType);
