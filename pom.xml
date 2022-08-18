@@ -183,6 +183,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      
+      <!-- For the DBA legacy layer only -->
+      <dependency>
+        <groupId>eu.de4a</groupId>
+        <artifactId>de4a-iem</artifactId>
+        <version>0.1.13-SNAPSHOT</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
