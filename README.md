@@ -263,6 +263,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.2.3 - work in progress
+    * The `/service/ial` queries no longer require the `application/xml` Content Type
 * v0.2.2 - 2022-08-16
     * Updated to de4a-commons 0.2.12
     * Updated to de4a-connector-ng 0.2.7 with improved configurability

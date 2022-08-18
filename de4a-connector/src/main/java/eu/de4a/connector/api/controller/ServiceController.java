@@ -37,7 +37,7 @@ public class ServiceController
   @Autowired
   private ServiceUtils serviceUtils;
 
-  @GetMapping (value = "/ial/{cot}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @GetMapping (value = "/ial/{cot}", produces = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot)
   {
     if (LOGGER.isInfoEnabled ())
@@ -63,7 +63,7 @@ public class ServiceController
                          .body (IALMarshaller.responseLookupRoutingInformationMarshaller ().getAsBytes (aResponse));
   }
 
-  @GetMapping (value = "/ial/{cot}/{atu}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  @GetMapping (value = "/ial/{cot}/{atu}", produces = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot,
                                                             @Valid @PathVariable @NotNull final String atu)
   {
