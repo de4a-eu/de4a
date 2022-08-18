@@ -6,6 +6,7 @@
       <!-- DE4A Metrics pattern [prefix][timestamp][Level][Error/Log Code][UC#][Origin][Destiny][Message] -->
       <PatternLayout pattern="[DE4A-CONNECTOR][%date{ISO8601}][%-5level] %msg -- %location [%thread]%n" />
     </Console>
+    
     <RollingFile name="rollingFile" 
                  fileName="${sys:catalina.base}/logs/connector.log"
                  filePattern="${sys:catalina.base}/logs/history/connector.%d{dd-MMM}.log.gz"
@@ -19,6 +20,7 @@
       </Policies>
       <DefaultRolloverStrategy max="5" />
     </RollingFile>
+    
     <RollingFile name="metricsFile" 
                  fileName="${sys:catalina.base}/logs/metrics-connector.log"
                  filePattern="${sys:catalina.base}/logs/history/metrics-connector.%d{dd-MMM}.log.gz" 
@@ -59,5 +61,10 @@
       <AppenderRef ref="rollingFile" />
       <AppenderRef ref="RouterMetrics" />
     </Root>
+<!-- 
+     <Root level="debug">
+      <AppenderRef ref="STDOUT" />
+    </Root>
+ -->
   </Loggers>
 </Configuration>
