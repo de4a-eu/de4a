@@ -6,16 +6,15 @@ import java.io.InputStream;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.helger.commons.collection.ArrayHelper;
-import com.helger.commons.http.CHttpHeader;
-import com.helger.commons.mime.CMimeType;
 import com.helger.dcng.core.http.DcngHttpClientSettings;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.httpclient.response.ExtendedHttpResponseException;
@@ -47,8 +46,7 @@ public final class APIRestUtils
     try (final HttpClientManager aHCM = HttpClientManager.create (new DcngHttpClientSettings ()))
     {
       final HttpPost aPost = new HttpPost (url);
-      aPost.addHeader (CHttpHeader.CONTENT_TYPE, CMimeType.APPLICATION_XML.getAsString ());
-      aPost.setEntity (new ByteArrayEntity (request));
+      aPost.setEntity (new ByteArrayEntity (request, ContentType.APPLICATION_XML));
       final byte [] aResult = aHCM.execute (aPost, new ResponseHandlerByteArray ());
       if (aResult == null || aResult.length == 0)
       {
@@ -68,9 +66,9 @@ public final class APIRestUtils
       final ConnectorException exception = aBaseEx.withLayer (ELayerError.COMMUNICATIONS)
                                                   .withFamily (EFamilyErrorType.ERROR_RESPONSE)
                                                   .withMessageArg (ex.getMessage ());
-      
+
       KafkaClientWrapper.sendError(EFamilyErrorType.ERROR_RESPONSE, exception.getModule(), url, exception.getMessage());
-      
+
       return new ResponseEntity <> (ConnectorExceptionHandler.getResponseErrorObjectBytes (exception),
                                     HttpStatus.resolve (ex.getStatusCode ()));
     }
@@ -81,9 +79,9 @@ public final class APIRestUtils
       final ConnectorException exception = aBaseEx.withLayer (ELayerError.COMMUNICATIONS)
                                                   .withFamily (EFamilyErrorType.CONNECTION_ERROR)
                                                   .withMessageArg (ex.getMessage ());
-      
+
       KafkaClientWrapper.sendError(EFamilyErrorType.CONNECTION_ERROR, exception.getModule(), url, exception.getMessage());
-      
+
       return new ResponseEntity <> (ConnectorExceptionHandler.getResponseErrorObjectBytes (exception), HttpStatus.BAD_REQUEST);
     }
   }
