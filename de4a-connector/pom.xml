@@ -34,7 +34,6 @@
         <dependency>
             <groupId>eu.de4a</groupId>
             <artifactId>de4a-iem</artifactId>
-            <version>0.1.12</version>
         </dependency>
         
         <!-- DE4A IAL -->
@@ -147,29 +146,32 @@
                 </exclusion>
             </exclusions>
         </dependency>
-      <!-- JUnit 4 for testing -->
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <scope>test</scope>
-      </dependency>
+        
+        <!-- JUnit 4 for testing -->
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
     
     <build>
-      <resources>
-        <resource>
-          <directory>${basedir}/src/main/resources</directory>
-          <targetPath>${project.build.directory}/classes</targetPath>
-        </resource>
-        <resource>
-          <directory>${basedir}/src/main/webapp</directory>
-          <targetPath>${project.build.directory}/webapp-classes</targetPath>
-        </resource>
-        <resource>
-          <directory>${basedir}/src/test/resources</directory>
-          <targetPath>${project.build.directory}/test-classes</targetPath>
-        </resource>
-      </resources>
+        <finalName>de4a-connector</finalName>
+
+        <resources>
+          <resource>
+            <directory>${basedir}/src/main/resources</directory>
+            <targetPath>${project.build.directory}/classes</targetPath>
+          </resource>
+          <resource>
+            <directory>${basedir}/src/main/webapp</directory>
+            <targetPath>${project.build.directory}/webapp-classes</targetPath>
+          </resource>
+          <resource>
+            <directory>${basedir}/src/test/resources</directory>
+            <targetPath>${project.build.directory}/test-classes</targetPath>
+          </resource>
+        </resources>
 
         <plugins>
             <plugin>
@@ -187,6 +189,5 @@
                 </executions>
             </plugin>    
         </plugins>
-        <finalName>de4a-connector</finalName>
     </build>
 </project>

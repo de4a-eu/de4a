@@ -1,17 +1,5 @@
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-<spring:eval expression="@environment.getProperty('de4a.smp.sml.dnszone')" var="smlDnsZone" />
-<spring:eval expression="@environment.getProperty('de4a.smp.sml.serviceurl')" var="smlServiceUrl" />
-<spring:eval expression="@environment.getProperty('de4a.kafka.enabled') == 'true'" var="kafkaEnabled" />
-<spring:eval expression="@environment.getProperty('de4a.kafka.http.enabled') == 'true'" var="kafkaHttpEnabled" />
-<spring:eval expression="@environment.getProperty('de4a.kafka.topic')" var="kafkaTopic" />
-<spring:eval expression="@environment.getProperty('de4a.kafka.url')" var="kafkaUrl" />
-<spring:eval expression="@environment.getProperty('idk.endpoint')" var="idkEndpoint" />
-<spring:eval expression="@environment.getProperty('phase4.send.fromparty.id')" var="as4FromPartyId" />
-<spring:eval expression="@environment.getProperty('de4a.me.implementation')" var="as4GatewayBean" />
-
-
 <!DOCTYPE HTML>
-<html xmlns:th="https://www.thymeleaf.org" lang="en">
+<html lang="en">
 <head>
     <title>DE4A-Connector (Iteration 2) - Info</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -71,20 +59,23 @@
     </style>
 </head>
 <body>
-    <h1 class="h1-title"><span class="de4a">DE4A</span> Connector</h1>
+    <h1 class="h1-title"><span class="de4a">DE4A</span> Connector (Iteration 2)</h1>
     <h3>Status: <span class="param-value value-true">Running</span></h3>
     <br>
     <h3 style="margin-bottom: 5px;">System Parameters</h3>
     <hr style="width:40%;min-width:600px;margin-left:0;">
-    <h4 class="param-name">de4a.smp.sml.dnszone: <span class="param-value">${empty smlDnsZone ? 'not-set' : smlDnsZone}</span></h4>
-    <h4 class="param-name">de4a.smp.sml.serviceurl: <span class="param-value">${empty smlServiceUrl ? 'not-set' : smlServiceUrl}</span></h4><br>
-    <h4 class="param-name">de4a.kafka.enabled: <span class="param-value ${kafkaEnabled ? ' value-true' : ' value-false'}">${kafkaEnabled}</span></h4>
-    <h4 class="param-name">de4a.kafka.http.enabled: <span class="param-value ${kafkaHttpEnabled ? ' value-true' : ' value-false'}">${kafkaHttpEnabled}</span></h4>
-    <h4 class="param-name">de4a.kafka.url: <span class="param-value value">${empty kafkaUrl ? 'not-set' : kafkaUrl}</span></h4>
-    <h4 class="param-name">de4a.kafka.topic: <span class="param-value value">${empty kafkaTopic ? 'not-set' : kafkaTopic}</span></h4><br>
-    <h4 class="param-name">idk.endpoint: <span class="param-value value">${empty idkEndpoint ? 'not-set' : idkEndpoint}</span></h4><br>
-    <h4 class="param-name">phase4.send.fromparty.id: <span class="param-value value">${empty as4FromPartyId ? 'not-set' : as4FromPartyId}</span></h4>
-    <h4 class="param-name">de4a.me.implementation: <span class="param-value value">${empty as4GatewayBean ? 'not-set' : as4GatewayBean}</span></h4>
+    <h4 class="param-name">de4a.smp.sml.dnszone: <%= eu.de4a.connector.JSPHelper.formattedProp("de4a.smp.sml.dnszone") %></h4>
+    <h4 class="param-name">de4a.smp.sml.serviceurl: <%= eu.de4a.connector.JSPHelper.formattedProp("de4a.smp.sml.serviceurl") %></h4>
+    <br>
+    <h4 class="param-name">de4a.kafka.enabled: <%= eu.de4a.connector.JSPHelper.formattedProp("de4a.kafka.enabled") %></h4>
+    <h4 class="param-name">de4a.kafka.http.enabled: <%= eu.de4a.connector.JSPHelper.formattedProp("de4a.kafka.http.enabled") %></h4>
+    <h4 class="param-name">de4a.kafka.url: <%= eu.de4a.connector.JSPHelper.formattedProp("de4a.kafka.url") %></h4>
+    <h4 class="param-name">de4a.kafka.topic: <%= eu.de4a.connector.JSPHelper.formattedProp("de4a.kafka.topic") %></h4>
+    <br>
+    <h4 class="param-name">idk.endpoint: <%= eu.de4a.connector.JSPHelper.formattedProp("idk.endpoint") %></h4></h4>
+    <br>
+    <h4 class="param-name">phase4.send.fromparty.id: <%= eu.de4a.connector.JSPHelper.formattedProp("phase4.send.fromparty.id") %></h4></h4>
+    <h4 class="param-name">de4a.me.implementation: <%= eu.de4a.connector.JSPHelper.formattedProp("de4a.me.implementation") %></h4></h4>
     <hr style="width: 40%;min-width:600px;margin-left:0; margin-top:25px;">
 </body>
 </html>

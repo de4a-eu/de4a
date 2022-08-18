@@ -7,5 +7,7 @@ services:
             - "8080:8080"
         volumes:
             - ./config/application.properties:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
-            - ./config/application.yml:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.yml
+            - ./config/de-do.json:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/de-do.json
+# TODO add keystore
+#            - ./config/keystore.p12:/de4a/keystore.p12
             - /tmp/connector:/tmp

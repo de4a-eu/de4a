@@ -1,8 +1,6 @@
 package eu.de4a.connector.api.controller;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.validation.Valid;
@@ -111,13 +109,13 @@ public class ConnectorController
     final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest_DR (aOldRequest);
 
     //additional parameter for it1 message identification
-    final List<AdditionalParameterType> aList = new ArrayList<>();
-    final AdditionalParameterType addParam = new AdditionalParameterType();
-    addParam.setLabel("iteration");
-    addParam.setValue("1");
-    addParam.setType(AdditionalParameterTypeType.YES_NO);
-    aList.add(addParam);
-    aNewRequest.getRequestEvidenceIMItemAtIndex(0).setAdditionalParameter(aList);
+    {
+      final AdditionalParameterType addParam = new AdditionalParameterType();
+      addParam.setLabel("iteration");
+      addParam.setValue("1");
+      addParam.setType(AdditionalParameterTypeType.YES_NO);
+      aNewRequest.getRequestEvidenceIMItemAtIndex(0).addAdditionalParameter (addParam);
+    }
 
     final String sNewDocTypeID = aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
     final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewRequest.getDataEvaluator ().getAgentUrn (),
@@ -126,8 +124,8 @@ public class ConnectorController
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
     final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
-    String requestMetadata = MessageUtils.getLegacyRequestMetadata(aOldRequest.getRequestId(), aOldRequest.getCanonicalEvidenceTypeId());
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_IM_LEGACY_DE_DR, 
+    final String requestMetadata = MessageUtils.getLegacyRequestMetadata(aOldRequest.getRequestId(), aOldRequest.getCanonicalEvidenceTypeId());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_IM_LEGACY_DE_DR,
     		aNewRequest, messageDTO, aNewRequestMarshaller, sNewDocTypeID, requestMetadata);
 
     // Remember request
