@@ -263,8 +263,11 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
-* v0.2.3 - work in progress
+* v0.2.3 - 2022-08-18
     * The `/service/ial` queries no longer require the `application/xml` Content Type
+    * Updated the Iteration 1 code bindings to avoid conflicting paths (de4a-iem 0.1.13)
+    * Fixed bugs in the default page of the Connector - now all properties are shown
+    * Made the IAL remote query more resilient
 * v0.2.2 - 2022-08-16
     * Updated to de4a-commons 0.2.12
     * Updated to de4a-connector-ng 0.2.7 with improved configurability
