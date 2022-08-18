@@ -8,6 +8,7 @@ cd de4a-connector
 docker build --pull -t de4a/connector:iteration2 .
 if errorlevel 1 goto error
 
+docker stop de4a_conncector_it2 && docker rm de4a_conncector_it2
 docker run -d -p 8080:8080 --name de4a_conncector_it2 de4a/connector:iteration2
 if errorlevel 1 goto error
 
