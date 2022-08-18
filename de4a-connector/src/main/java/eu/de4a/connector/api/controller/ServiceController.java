@@ -41,13 +41,13 @@ public class ServiceController
   public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot)
   {
     if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Request to API /service/ial/" + cot + " received");
+      LOGGER.info ("Request to API '/service/ial/" + cot + "' received");
 
     // Main query
     final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL (StringHelper.getExplodedToOrderedSet (",", cot));
     if (aResponse == null)
     {
-    	final String errorMsg = "Error querying IAL";
+    	final String errorMsg = "Error querying IAL without ATU code";
     	KafkaClientWrapper.sendError(EFamilyErrorType.CONNECTION_ERROR, EExternalModule.CONNECTOR_DR, EExternalModule.IAL.getLabel(), errorMsg);
 
     	// Error case
@@ -68,7 +68,7 @@ public class ServiceController
                                                             @Valid @PathVariable @NotNull final String atu)
   {
     if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Request to API /service/ial/" + cot + "/" + atu + " received");
+      LOGGER.info ("Request to API '/service/ial/" + cot + "/" + atu + "' received");
 
     // Main query
     final ResponseLookupRoutingInformationType aResponse = DcngApiHelper.queryIAL (StringHelper.getExplodedToOrderedSet (",", cot), atu);
@@ -94,7 +94,7 @@ public class ServiceController
   public ResponseEntity <String> reloadAddresses ()
   {
     if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Request to API /service/reload-addresses received");
+      LOGGER.info ("Request to API '/service/reload-addresses' received");
 
     serviceUtils.reloadParticipantAddresses ();
 
