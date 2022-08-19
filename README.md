@@ -263,6 +263,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.2.4 - 2022-08-19
+    * Fixed a Spring problem with the `/service/ial` APIs when run in a Docker container (same name of resolved method)
 * v0.2.3 - 2022-08-18
     * The `/service/ial` queries no longer require the `application/xml` Content Type
     * Updated the Iteration 1 code bindings to avoid conflicting paths (de4a-iem 0.1.13)

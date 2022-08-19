@@ -38,7 +38,7 @@ public class ServiceController
   private ServiceUtils serviceUtils;
 
   @GetMapping (value = "/ial/{cot}", produces = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot)
+  public ResponseEntity <byte []> callIalCot (@Valid @PathVariable @NotNull final String cot)
   {
     if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/ial/" + cot + "' received");
@@ -64,8 +64,8 @@ public class ServiceController
   }
 
   @GetMapping (value = "/ial/{cot}/{atu}", produces = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity <byte []> lookupRoutingInformation (@Valid @PathVariable @NotNull final String cot,
-                                                            @Valid @PathVariable @NotNull final String atu)
+  public ResponseEntity <byte []> callIalCotAtu (@Valid @PathVariable @NotNull final String cot,
+                                                 @Valid @PathVariable @NotNull final String atu)
   {
     if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/ial/" + cot + "/" + atu + "' received");

@@ -3,6 +3,7 @@
 .settings/
 target/
 phase4-dumps/
+ph/
 
 #Ignore out of scope project modules
 .idea/
