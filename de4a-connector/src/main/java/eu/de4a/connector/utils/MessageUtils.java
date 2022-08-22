@@ -15,6 +15,7 @@ import eu.de4a.iem.core.jaxb.common.EventSubscripRequestItemType;
 import eu.de4a.iem.core.jaxb.common.RedirectUserType;
 import eu.de4a.iem.core.jaxb.common.RequestEvidenceItemType;
 import eu.de4a.iem.core.jaxb.common.RequestEvidenceLUItemType;
+import eu.de4a.iem.core.jaxb.common.ResponseEventSubscriptionItemType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractEvidenceItemType;
 
 public final class MessageUtils
@@ -105,15 +106,18 @@ public final class MessageUtils
 
   }
 
-  // TODO The ResponseEventSubscriptionItemType does not have ErrorType
-  /*
-   * public static String getEventSubscriptionResponseMetadata(List<
-   * ResponseEventSubscriptionItemType> items) { List<String> requestItems = new
-   * ArrayList<String>(); items.forEach(item -> { if(!item.getError().isEmpty())
-   * requestItems.add(item.getRequestItemId() + ":" + item..getCode()); else
-   * requestItems.add(item.getRequestItemId() + ":" +
-   * item.getCanonicalEvidenceTypeId()); }); return format(requestItems); }
-   */
+   public static String getEventSubscriptionResponseMetadata(List<ResponseEventSubscriptionItemType> items) 
+   { 
+	   final List <String> requestItems = new ArrayList <> ();
+	   items.forEach (item -> {
+	      if (!item.getError ().isEmpty ())
+	        requestItems.add (item.getRequestItemId () + ":" + item.getErrorAtIndex (0).getCode ());
+	      else
+	        requestItems.add (item.getRequestItemId () + ":" + item.getCanonicalEventCatalogUri());
+	    });
+
+	    return format (requestItems);
+   }
 
   private static String format (final List <String> items)
   {
