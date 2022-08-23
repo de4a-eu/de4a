@@ -62,6 +62,7 @@ pipeline {
                     }
                 }
                 sh 'docker system prune -f'
+				sh 'docker network create docker-ci_default'
             }
         }
 
