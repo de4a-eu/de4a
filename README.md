@@ -31,7 +31,12 @@ Checkout the technical documentation on [the Wiki page](https://wiki.de4a.eu/ind
 #### Service APIs
 
 * **`/service/ial/{cot}`** - Query the IAL for provided Canonical Object Types (COTs). Multiple COTs can be separated by `,`. No ATU restrictions are applied.
+    * Optional query parameter **`environment`** - The runtime environment for which the Connector will filter the result entries from IAL. The following environments are allowed.
+        * The `playground` environment only allows `9999:.+mock-it2` identifier values
+        * The `test` environment only allows `99\d\d:.+test-it2` identifier values
+        * The `pilot` environment allows for all other identifiers (so the ones that are neither `playground` nor `test`)
 * **`/service/ial/{cot}/{atu}`** - Query the IAL for provided Canonical Object Types (COTs) but only for the ones in the specified ATU. Multiple COTs can be separated by `,`.
+    * Optional query parameter **`environment`** - The runtime environment for which the Connector will filter the result entries from IAL. See above for details.
 * **`/service/reload-addresses`** - Reload the internal address list for forwarding to DE and DO from the backend file.
 
 ### Configuration
