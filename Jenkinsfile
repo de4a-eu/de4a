@@ -6,6 +6,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'develop*';
+					branch 'iteration2-dev';
                     branch pattern: 'PR-\\d+', comparator: 'REGEXP'
                 }
             }
