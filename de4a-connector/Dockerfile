@@ -11,7 +11,7 @@ RUN apt-get update \
 COPY target/de4a-connector.war ./connector.war
 
 RUN unzip connector.war -d /smp && \
-    rm /smp/WEB-INF/classes/*.p12
+    rm -f /smp/WEB-INF/classes/*.p12
 
 # Part 2:
     
