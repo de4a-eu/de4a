@@ -133,9 +133,10 @@ public class ResponseController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
     
-    //TODO Get Subscription response and extract evidences/errors, actually the ResponseEventSubscriptionItemType does not have ErrorType
+    responseObj.getResponseEventSubscriptionItemAtIndex(0).getError();
+    String responseMetadata = MessageUtils.getEventSubscriptionResponseMetadata(responseObj.getResponseEventSubscriptionItem());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_SUBSC_DO_DT, 
-    		responseObj, messageDTO, marshaller, responseObj.getRequestId());
+    		responseObj, messageDTO, marshaller, responseObj.getRequestId(), responseMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }

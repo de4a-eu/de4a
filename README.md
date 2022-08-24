@@ -31,7 +31,12 @@ Checkout the technical documentation on [the Wiki page](https://wiki.de4a.eu/ind
 #### Service APIs
 
 * **`/service/ial/{cot}`** - Query the IAL for provided Canonical Object Types (COTs). Multiple COTs can be separated by `,`. No ATU restrictions are applied.
+    * Optional query parameter **`environment`** - The runtime environment for which the Connector will filter the result entries from IAL. The following environments are allowed.
+        * The `playground` environment only allows `9999:.+mock-it2` identifier values
+        * The `test` environment only allows `99\d\d:.+test-it2` identifier values
+        * The `pilot` environment allows for all other identifiers (so the ones that are neither `playground` nor `test`)
 * **`/service/ial/{cot}/{atu}`** - Query the IAL for provided Canonical Object Types (COTs) but only for the ones in the specified ATU. Multiple COTs can be separated by `,`.
+    * Optional query parameter **`environment`** - The runtime environment for which the Connector will filter the result entries from IAL. See above for details.
 * **`/service/reload-addresses`** - Reload the internal address list for forwarding to DE and DO from the backend file.
 
 ### Configuration
@@ -263,6 +268,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.2.5 - 2022-08-24
+    * Extended the `/service/ial` queries with an optional `environment` request parameter that can limit the result DOs
 * v0.2.4 - 2022-08-19
     * Fixed a Spring problem with the `/service/ial` APIs when run in a Docker container (same name of resolved method)
 * v0.2.3 - 2022-08-18

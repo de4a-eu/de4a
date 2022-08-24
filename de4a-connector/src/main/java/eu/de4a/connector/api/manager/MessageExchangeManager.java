@@ -233,12 +233,8 @@ public class MessageExchangeManager
 
               case "ResponseEventSubscription":
                 logMessage = ELogMessage.LOG_RES_SUBSC_DT_DR;
-                // var res =
-                // DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller().read
-                // (aRegRepElement);
-                // metadata =
-                // MessageUtils.getEventSubscriptionResponseMetadata(res.getResponseEventSubscriptionItem());
-                // //TODO method to be implemented
+                var res = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller().read(aRegRepElement);
+                metadata = MessageUtils.getEventSubscriptionResponseMetadata(res.getResponseEventSubscriptionItem());
                 break;
 
               case "EventNotification":
@@ -252,16 +248,6 @@ public class MessageExchangeManager
             }
           }
         }
-
-        //final String sRequestID = DOMUtils.getValueFromXpath (XPATH_REQUEST_ID, aTargetDoc.getDocumentElement ());
-        /*
-        KafkaClientWrapper.sendInfo (logMessage,
-        							 eMessageServiceType.getType (),
-                                     sRequestID,
-                                     senderID,
-                                     receiverID,
-                                     metadata);
-                                     */
 
         response = this.deliverService.pushMessage (eMessageServiceType,
                                                     aTargetDoc,
