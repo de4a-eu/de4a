@@ -13,5 +13,6 @@ WORKDIR $CATALINA_HOME/webapps
 COPY target/de4a-connector.war ./connector.war
 
 RUN rm -rf manager host-manager docs examples ROOT && \
-    unzip connector.war -d ROOT  && \
+    unzip connector.war -d ROOT && \
+    rm ROOT/WEB-INF/classes/*.p12 \
     rm -f connector.war
