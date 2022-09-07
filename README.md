@@ -268,6 +268,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.2.6 - 2022-09-07
+    * Really fixed the Spring problem with the `/service/ial` APIs - thx to @zigc
 * v0.2.5 - 2022-08-24
     * Extended the `/service/ial` queries with an optional `environment` request parameter that can limit the result DOs
 * v0.2.4 - 2022-08-19
