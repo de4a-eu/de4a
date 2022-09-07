@@ -8,7 +8,7 @@
   </parent>
   <groupId>eu.de4a</groupId>
   <artifactId>de4a-parent-pom</artifactId>
-  <version>0.2.6-SNAPSHOT</version>
+  <version>0.2.6</version>
   <packaging>pom</packaging>
   <name>de4a-parent-pom</name>
   <description>Base POM to build the DE4A projects</description>
@@ -26,7 +26,7 @@
     <connection>scm:git:git@github.com:de4a-wp5/de4a.git</connection>
     <developerConnection>scm:git:git@github.com:de4a-wp5/de4a.git</developerConnection>
     <url>http://github.com/de4a-wp5/de4a</url>
-    <tag>HEAD</tag>
+    <tag>de4a-parent-pom-0.2.6</tag>
   </scm>
 
   <organization>
