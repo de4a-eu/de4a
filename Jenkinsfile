@@ -6,6 +6,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'develop*';
+					branch 'iteration2-dev';
                     branch pattern: 'PR-\\d+', comparator: 'REGEXP'
                 }
             }
@@ -16,8 +17,7 @@ pipeline {
                 }
             }
             steps {
-                // sh 'mvn clean test sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_TOKEN'
-                sh 'mvn clean test'
+                sh 'mvn clean test sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_TOKEN'
             }
         }
 

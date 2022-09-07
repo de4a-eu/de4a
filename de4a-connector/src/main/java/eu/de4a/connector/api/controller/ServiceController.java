@@ -113,8 +113,8 @@ public class ServiceController
   }
 
   @GetMapping (value = "/ial/{cot}", produces = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity <byte []> callIalCot (@Valid @PathVariable @NotNull final String cot,
-                                              @RequestParam (required = false) final String environment)
+  public ResponseEntity <byte []> callIalCot (@Valid @PathVariable("cot") @NotNull final String cot,
+                                              @RequestParam (name = "environment", required = false) final String environment)
   {
     if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/ial/" +
@@ -150,9 +150,9 @@ public class ServiceController
   }
 
   @GetMapping (value = "/ial/{cot}/{atu}", produces = MediaType.APPLICATION_XML_VALUE)
-  public ResponseEntity <byte []> callIalCotAtu (@Valid @PathVariable @NotNull final String cot,
-                                                 @Valid @PathVariable @NotNull final String atu,
-                                                 @RequestParam (required = false) final String environment)
+  public ResponseEntity <byte []> callIalCotAtu (@Valid @PathVariable("cot") @NotNull final String cot,
+                                                 @Valid @PathVariable("atu") @NotNull final String atu,
+                                                 @RequestParam (name = "environment", required = false) final String environment)
   {
     if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/ial/" +
