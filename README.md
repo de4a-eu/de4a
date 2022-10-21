@@ -268,6 +268,9 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.3.0 - 2022-10-21
+    * Added support for the new V4 truststore for CommisSign2 PKI
+    * Using the new CommisSign2 PKI as the default
 * v0.2.6 - 2022-09-07
     * Really fixed the Spring problem with the `/service/ial` APIs - thx to @zigc
 * v0.2.5 - 2022-08-24
