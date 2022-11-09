@@ -36,10 +36,12 @@ public class ServiceUtils
    */
   public String getParticipantAddress (final String participantId, final String endpointType, final boolean isRequest)
   {
-	 ELogMessage eLogMessage;
-	 if(isRequest) eLogMessage = ELogMessage.LOG_DT_PARTICIPANT_LOOKUP;
-	 else eLogMessage = ELogMessage.LOG_DR_PARTICIPANT_LOOKUP;
-	 
+    ELogMessage eLogMessage;
+    if (isRequest)
+      eLogMessage = ELogMessage.LOG_DT_PARTICIPANT_LOOKUP;
+    else
+      eLogMessage = ELogMessage.LOG_DR_PARTICIPANT_LOOKUP;
+
     KafkaClientWrapper.sendInfo (eLogMessage, participantId, endpointType);
 
     final Map <String, Map <String, String>> participants = isRequest ? addressesProperties.getDataOwners ()
@@ -52,12 +54,13 @@ public class ServiceUtils
     final Map <String, String> participantAddress = participants.get (participantId);
     if (participantAddress == null || participantAddress.get (endpointType) == null)
     {
-    	if(isRequest) eLogMessage = ELogMessage.LOG_ERROR_DT_PARTICIPANT_LOOKUP;
-   	 	else eLogMessage = ELogMessage.LOG_ERROR_DR_PARTICIPANT_LOOKUP;
+      if (isRequest)
+        eLogMessage = ELogMessage.LOG_ERROR_DT_PARTICIPANT_LOOKUP;
+      else
+        eLogMessage = ELogMessage.LOG_ERROR_DR_PARTICIPANT_LOOKUP;
       KafkaClientWrapper.sendError (eLogMessage, participantId, endpointType);
       return null;
     }
     return participantAddress.get (endpointType);
   }
-
 }
