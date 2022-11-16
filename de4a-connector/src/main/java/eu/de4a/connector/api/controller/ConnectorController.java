@@ -71,7 +71,7 @@ public class ConnectorController
     marshaller.readExceptionCallbacks ().set (e -> {
       if (e.getLinkedException () != null)
         baseEx.withMessageArg (e.getLinkedException ().getMessage ());
-      KafkaClientWrapper.sendError(EFamilyErrorType.CONVERSION_ERROR, ex.getModule(), e.getLinkedException().getMessage());
+      KafkaClientWrapper.sendError (EFamilyErrorType.CONVERSION_ERROR, ex.getModule (), e.getLinkedException ().getMessage ());
     });
 
     final T returnObj;
@@ -108,13 +108,13 @@ public class ConnectorController
     LOGGER.info ("Converting old request to new request");
     final RequestExtractMultiEvidenceIMType aNewRequest = LegacyAPIHelper.convertOldToNewRequest_DR (aOldRequest);
 
-    //additional parameter for it1 message identification
+    // additional parameter for it1 message identification
     {
-      final AdditionalParameterType addParam = new AdditionalParameterType();
-      addParam.setLabel("iteration");
-      addParam.setValue("1");
-      addParam.setType(AdditionalParameterTypeType.YES_NO);
-      aNewRequest.getRequestEvidenceIMItemAtIndex(0).addAdditionalParameter (addParam);
+      final AdditionalParameterType addParam = new AdditionalParameterType ();
+      addParam.setLabel ("iteration");
+      addParam.setValue ("1");
+      addParam.setType (AdditionalParameterTypeType.YES_NO);
+      aNewRequest.getRequestEvidenceIMItemAtIndex (0).addAdditionalParameter (addParam);
     }
 
     final String sNewDocTypeID = aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
@@ -124,9 +124,14 @@ public class ConnectorController
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
     final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
-    final String requestMetadata = MessageUtils.getLegacyRequestMetadata(aOldRequest.getRequestId(), aOldRequest.getCanonicalEvidenceTypeId());
+    final String requestMetadata = MessageUtils.getLegacyRequestMetadata (aOldRequest.getRequestId (),
+                                                                          aOldRequest.getCanonicalEvidenceTypeId ());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_IM_LEGACY_DE_DR,
-    		aNewRequest, messageDTO, aNewRequestMarshaller, sNewDocTypeID, requestMetadata);
+                                            aNewRequest,
+                                            messageDTO,
+                                            aNewRequestMarshaller,
+                                            sNewDocTypeID,
+                                            requestMetadata);
 
     // Remember request
     LegacyAPIHelper.rememberLegacyRequest_DR (aOldRequest);
@@ -134,14 +139,17 @@ public class ConnectorController
     // Synchronously wait for response
     final long timeout = 60_000;
     final long init = PDTFactory.getCurrentMillis ();
+    LOGGER.info ("Waiting for synchronous response on legacy IM request (" + timeout + " milliseconds)");
     Document aResponseDoc = LegacyAPIHelper.isFinalized_DR (aOldRequest);
     while (aResponseDoc == null)
     {
-      LOGGER.info ("Waiting for synchronous response on legacy IM request");
       ThreadHelper.sleep (500);
       aResponseDoc = LegacyAPIHelper.isFinalized_DR (aOldRequest);
       if (PDTFactory.getCurrentMillis () - init >= timeout)
+      {
+        LOGGER.warn ("Timeout waiting for synchronous response on legacy IM request");
         break;
+      }
     }
 
     final ResponseTransferEvidenceType aOldResponse;
@@ -175,7 +183,7 @@ public class ConnectorController
 
     // Serialize result
     final byte [] aOldResponseBytes = DE4AMarshaller.drImResponseMarshaller (eu.de4a.iem.xml.de4a.IDE4ACanonicalEvidenceType.NONE)
-    												 .getAsBytes (aOldResponse);
+                                                    .getAsBytes (aOldResponse);
     LOGGER.info ("Returning old response");
     return ResponseEntity.status (HttpStatus.OK).body (aOldResponseBytes);
   }

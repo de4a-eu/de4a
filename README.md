@@ -268,6 +268,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.3.1 - 2022-11-16
+    * Updated default application.properties for easier Tracker usage
 * v0.3.0 - 2022-10-21
     * Added support for the new V4 truststore for CommisSign2 PKI
     * Using the new CommisSign2 PKI as the default
