@@ -60,12 +60,18 @@ public class MessageExchangeManager
    */
   public void processMessageExchange (@Nonnull final MessageExchangeWrapper messageWrapper)
   {
+    LOGGER.info ("Now processing AS4 message with MessageExchangeManager");
+
     final MEMessage meMessage = messageWrapper.getMeMessage ();
 
     final String senderID = meMessage.getSenderID ().getURIEncoded ();
     final String receiverID = meMessage.getReceiverID ().getURIEncoded ();
     final IProcessIdentifier aProcessID = meMessage.getProcessID ();
     String metadata = "";
+
+    LOGGER.info ("  Sender=" + senderID);
+    LOGGER.info ("  Receiver=" + receiverID);
+    LOGGER.info ("  ProcessID=" + (aProcessID == null ? null : aProcessID.getURIEncoded ()));
 
     if (meMessage.payloads ().size () != 1)
       throw new IllegalArgumentException ("Expecting the AS4 message to have exactly one payload only, but found " +
@@ -74,15 +80,22 @@ public class MessageExchangeManager
 
     // This is the RegRep
     final MEPayload aPayload = messageWrapper.getMeMessage ().payloads ().get (0);
+
+    LOGGER.info ("  Now trying to extract Payload from RegRep");
+
     // Extract payload from RegRep
     final Element aRegRepElement = DcngRegRepHelperIt2.extractPayload (aPayload.getData ());
     if (aRegRepElement == null)
       throw new IllegalStateException ("Failed to extract the payload from the anticipated RegRep message - see the log for details");
 
     final String elemType = aRegRepElement.getNodeName ();
+    LOGGER.info ("  Now trying to find the Message Service for element '" + elemType + "'");
+
     final EMessageServiceType eMessageServiceType = EMessageServiceType.getByTypeOrNull (elemType);
     if (eMessageServiceType == null)
-      throw new IllegalStateException ("Failed to resolve message type from XML document element local name '" + elemType + "'");
+      throw new IllegalStateException ("Failed to resolve message type from XML document element local name '" +
+                                       elemType +
+                                       "'");
 
     // Create a new document with the payload only
 
@@ -122,7 +135,8 @@ public class MessageExchangeManager
                 // convert new to old
                 final RequestExtractEvidenceIMType aOldRequest = LegacyAPIHelper.convertNewToOldRequest (aDRRequest);
                 aTargetDoc = DE4AMarshaller.doImRequestMarshaller ().getAsDocument (aOldRequest);
-                metadata = MessageUtils.getLegacyRequestMetadata (aOldRequest.getRequestId(), aOldRequest.getCanonicalEvidenceTypeId());
+                metadata = MessageUtils.getLegacyRequestMetadata (aOldRequest.getRequestId (),
+                                                                  aOldRequest.getCanonicalEvidenceTypeId ());
               }
             }
 
@@ -171,6 +185,7 @@ public class MessageExchangeManager
             break;
           }
           default:
+            LOGGER.error ("Unsupported message type " + eMessageServiceType);
             throw new IllegalStateException ("Unsupported message type " + eMessageServiceType);
         }
 
@@ -209,14 +224,17 @@ public class MessageExchangeManager
           // Dunno if we need translations
           default:
           {
-            if (LOGGER.isInfoEnabled ())
-              LOGGER.info ("Sending " + eMessageServiceType + "(" + eMessageServiceType.getType () + ") request from DR to DE");
+            LOGGER.info ("Sending " +
+                         eMessageServiceType +
+                         "(" +
+                         eMessageServiceType.getType () +
+                         ") request from DR to DE");
             final Document aNewDoc = XMLFactory.newDocument ();
             aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
             aTargetDoc = aNewDoc;
-            switch (eMessageServiceType.getType ())
+            switch (eMessageServiceType)
             {
-              case "ResponseTransferEvidence":
+              case RESPONSE:
                 final var rte = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller (eu.de4a.iem.core.IDE4ACanonicalEvidenceType.NONE)
                                                   .read (aRegRepElement);
                 metadata = MessageUtils.getEvidenceResponseMetadata (rte.getResponseExtractEvidenceItem ());
@@ -225,25 +243,26 @@ public class MessageExchangeManager
                   logMessage = ELogMessage.LOG_RES_IM_LEGACY_DT_DR;
                 break;
 
-              case "USIRedirectUser":
+              case REDIRECT:
                 logMessage = ELogMessage.LOG_RES_REDIRECT_DT_DR;
                 final var uru = DE4ACoreMarshaller.dtUSIRedirectUserMarshaller ().read (aRegRepElement);
                 metadata = MessageUtils.getRedirectResponseMetadata (uru);
                 break;
 
-              case "ResponseEventSubscription":
+              case SUBSCRIPTION_RESP:
                 logMessage = ELogMessage.LOG_RES_SUBSC_DT_DR;
-                var res = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller().read(aRegRepElement);
-                metadata = MessageUtils.getEventSubscriptionResponseMetadata(res.getResponseEventSubscriptionItem());
+                final var res = DE4ACoreMarshaller.dtResponseEventSubscriptionMarshaller ().read (aRegRepElement);
+                metadata = MessageUtils.getEventSubscriptionResponseMetadata (res.getResponseEventSubscriptionItem ());
                 break;
 
-              case "EventNotification":
+              case NOTIFICATION:
                 logMessage = ELogMessage.LOG_EVENT_NOTIF_DT_DR;
                 final var en = DE4ACoreMarshaller.dtEventNotificationMarshaller ().read (aRegRepElement);
                 metadata = MessageUtils.getEventNotificationMetadata (en.getEventNotificationItem ());
                 break;
 
               default:
+                LOGGER.warn ("Unsupported message type " + eMessageServiceType);
                 logMessage = ELogMessage.LOG_REQ_DE;
             }
           }
@@ -273,7 +292,8 @@ public class MessageExchangeManager
       // This only affects the backwards compatibility layer
       final var aOldResponseMarshaller = DE4AMarshaller.doImResponseMarshaller (IDE4ACanonicalEvidenceType.NONE);
       final ResponseExtractEvidenceType aOldResponse = aOldResponseMarshaller.read (response.getBody ());
-      final ResponseExtractMultiEvidenceType aNewResponse = LegacyAPIHelper.convertOldToNewResponse (aOldResponse, aNewRequest);
+      final ResponseExtractMultiEvidenceType aNewResponse = LegacyAPIHelper.convertOldToNewResponse (aOldResponse,
+                                                                                                     aNewRequest);
       final var marshaller = DE4ACoreMarshaller.dtResponseTransferEvidenceMarshaller (eu.de4a.iem.core.IDE4ACanonicalEvidenceType.NONE);
 
       final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewResponse.getDataOwner ().getAgentUrn (),
