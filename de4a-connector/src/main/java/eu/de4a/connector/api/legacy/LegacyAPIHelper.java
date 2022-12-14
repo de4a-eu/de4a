@@ -140,7 +140,7 @@ public final class LegacyAPIHelper
     // Only canonical evidence and domestic evidence is missing
     final ResponseExtractEvidenceItemType aNewItem = aNewResponse.getResponseExtractEvidenceItemAtIndex (0);
     // Canonical Evidences
-    if (aNewItem.getCanonicalEvidence ().getAny () != null)
+    if (aNewItem.getCanonicalEvidence () != null && aNewItem.getCanonicalEvidence ().getAny () != null)
     {
       final CanonicalEvidenceType aOldCE = new CanonicalEvidenceType ();
       // TODO Do we need to clone???
