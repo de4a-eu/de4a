@@ -1,7 +1,5 @@
 package eu.de4a.connector.api.legacy;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -26,6 +24,8 @@ import eu.de4a.iem.core.jaxb.common.ResponseExtractEvidenceItemType;
 import eu.de4a.iem.core.jaxb.common.ResponseExtractMultiEvidenceType;
 import eu.de4a.iem.jaxb.common.types.CanonicalEvidenceType;
 import eu.de4a.iem.jaxb.common.types.DomesticsEvidencesType;
+import eu.de4a.iem.jaxb.common.types.ErrorListType;
+import eu.de4a.iem.jaxb.common.types.ErrorType;
 import eu.de4a.iem.jaxb.common.types.RequestExtractEvidenceIMType;
 import eu.de4a.iem.jaxb.common.types.RequestTransferEvidenceUSIIMDRType;
 import eu.de4a.iem.jaxb.common.types.ResponseExtractEvidenceType;
@@ -139,11 +139,12 @@ public final class LegacyAPIHelper
     final ResponseTransferEvidenceType aOldResponse = DE4AResponseDocumentHelper.createResponseTransferEvidence (aOldRequest);
     // Only canonical evidence and domestic evidence is missing
     final ResponseExtractEvidenceItemType aNewItem = aNewResponse.getResponseExtractEvidenceItemAtIndex (0);
+
     // Canonical Evidences
-    if (aNewItem.getCanonicalEvidence ().getAny () != null)
+    if (aNewItem.getCanonicalEvidence () != null && aNewItem.getCanonicalEvidence ().getAny () != null)
     {
       final CanonicalEvidenceType aOldCE = new CanonicalEvidenceType ();
-      // TODO Do we need to clone???
+      // No need to clone here
       aOldCE.setAny (aNewItem.getCanonicalEvidence ().getAny ());
       aOldResponse.setCanonicalEvidence (aOldCE);
     }
@@ -178,6 +179,32 @@ public final class LegacyAPIHelper
         aOldDEs.addDomesticEvidence (aDEConverter.apply (aNewDE));
       aOldResponse.setDomesticEvidenceList (aOldDEs);
     }
+
+    // Error messages
+    if (aNewItem.hasErrorEntries ())
+    {
+      final ErrorListType aOldErrorList = new ErrorListType ();
+      for (final eu.de4a.iem.core.jaxb.common.ErrorType aNewError : aNewItem.getError ())
+      {
+        final ErrorType aOldError = new ErrorType ();
+        aOldError.setCode (aNewError.getCode ());
+        aOldError.setText (aNewError.getText ());
+        aOldErrorList.addError (aOldError);
+      }
+      aOldResponse.setErrorList (aOldErrorList);
+    }
+
+    if (aOldResponse.getCanonicalEvidence () == null && aOldResponse.getErrorList () == null)
+    {
+      // Fallback to avoid illegal content
+      final ErrorListType aOldErrorList = new ErrorListType ();
+      final ErrorType aOldError = new ErrorType ();
+      aOldError.setCode ("FALLBACK");
+      aOldError.setText ("Error converting new response to old response");
+      aOldErrorList.addError (aOldError);
+      aOldResponse.setErrorList (aOldErrorList);
+    }
+
     return aOldResponse;
   }
 
@@ -337,22 +364,45 @@ public final class LegacyAPIHelper
     aNewResponse.setDataEvaluator (aNewRequest.getDataEvaluator ());
     aNewResponse.setDataOwner (aNewRequest.getDataOwner ());
 
-    final ResponseExtractEvidenceItemType item = new ResponseExtractEvidenceItemType ();
-    item.setRequestItemId (aNewRequest.getRequestId ());
-    item.setDataRequestSubject (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getDataRequestSubject ());
-    item.setCanonicalEvidenceTypeId (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ());
+    final ResponseExtractEvidenceItemType aNewItem = new ResponseExtractEvidenceItemType ();
+    aNewItem.setRequestItemId (aNewRequest.getRequestId ());
+    aNewItem.setDataRequestSubject (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getDataRequestSubject ());
+    aNewItem.setCanonicalEvidenceTypeId (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ());
 
-    if (aOldResponse.getCanonicalEvidence ().getAny () != null)
+    if (aOldResponse.getCanonicalEvidence () != null && aOldResponse.getCanonicalEvidence ().getAny () != null)
     {
       final eu.de4a.iem.core.jaxb.common.CanonicalEvidenceType aNewCE = new eu.de4a.iem.core.jaxb.common.CanonicalEvidenceType ();
-
       aNewCE.setAny (aOldResponse.getCanonicalEvidence ().getAny ());
-      item.setCanonicalEvidence (aNewCE);
+      aNewItem.setCanonicalEvidence (aNewCE);
     }
 
-    final List <ResponseExtractEvidenceItemType> aList = new ArrayList <> ();
-    aList.add (item);
-    aNewResponse.setResponseExtractEvidenceItem (aList);
+    // Error messages
+    if (aOldResponse.getErrorList () != null && aOldResponse.getErrorList ().hasErrorEntries ())
+    {
+      final ErrorListType aOldErrorList = new ErrorListType ();
+      for (final eu.de4a.iem.core.jaxb.common.ErrorType aNewError : aNewItem.getError ())
+      {
+        final ErrorType aOldError = new ErrorType ();
+        aOldError.setCode (aNewError.getCode ());
+        aOldError.setText (aNewError.getText ());
+        aOldErrorList.addError (aOldError);
+      }
+      aOldResponse.setErrorList (aOldErrorList);
+    }
+
+    if (aNewItem.getCanonicalEvidence () == null && aNewItem.hasNoErrorEntries ())
+    {
+      // Fallback to avoid illegal content
+      final ErrorListType aOldErrorList = new ErrorListType ();
+      final ErrorType aOldError = new ErrorType ();
+      aOldError.setCode ("FALLBACK");
+      aOldError.setText ("Error converting new response to old response");
+      aOldErrorList.addError (aOldError);
+      aOldResponse.setErrorList (aOldErrorList);
+    }
+
+
+    aNewResponse.addResponseExtractEvidenceItem (aNewItem);
 
     return aNewResponse;
   }
@@ -372,21 +422,44 @@ public final class LegacyAPIHelper
     aNewResponse.setDataEvaluator (aNewRequest.getDataEvaluator ());
     aNewResponse.setDataOwner (aNewRequest.getDataOwner ());
 
-    final ResponseExtractEvidenceItemType item = new ResponseExtractEvidenceItemType ();
-    item.setRequestItemId (aNewRequest.getRequestId ());
-    item.setDataRequestSubject (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getDataRequestSubject ());
-    item.setCanonicalEvidenceTypeId (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ());
+    final ResponseExtractEvidenceItemType aNewItem = new ResponseExtractEvidenceItemType ();
+    aNewItem.setRequestItemId (aNewRequest.getRequestId ());
+    aNewItem.setDataRequestSubject (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getDataRequestSubject ());
+    aNewItem.setCanonicalEvidenceTypeId (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ());
 
-    if (aOldResponse.getCanonicalEvidence ().getAny () != null)
+    if (aOldResponse.getCanonicalEvidence () != null && aOldResponse.getCanonicalEvidence ().getAny () != null)
     {
       final eu.de4a.iem.core.jaxb.common.CanonicalEvidenceType aNewCE = new eu.de4a.iem.core.jaxb.common.CanonicalEvidenceType ();
       aNewCE.setAny (aOldResponse.getCanonicalEvidence ().getAny ());
-      item.setCanonicalEvidence (aNewCE);
+      aNewItem.setCanonicalEvidence (aNewCE);
     }
 
-    final List <ResponseExtractEvidenceItemType> aList = new ArrayList <> ();
-    aList.add (item);
-    aNewResponse.setResponseExtractEvidenceItem (aList);
+    // Error messages
+    if (aOldResponse.getErrorList () != null && aOldResponse.getErrorList ().hasErrorEntries ())
+    {
+      final ErrorListType aOldErrorList = new ErrorListType ();
+      for (final eu.de4a.iem.core.jaxb.common.ErrorType aNewError : aNewItem.getError ())
+      {
+        final ErrorType aOldError = new ErrorType ();
+        aOldError.setCode (aNewError.getCode ());
+        aOldError.setText (aNewError.getText ());
+        aOldErrorList.addError (aOldError);
+      }
+      aOldResponse.setErrorList (aOldErrorList);
+    }
+
+    if (aNewItem.getCanonicalEvidence () == null && aNewItem.hasNoErrorEntries ())
+    {
+      // Fallback to avoid illegal content
+      final ErrorListType aOldErrorList = new ErrorListType ();
+      final ErrorType aOldError = new ErrorType ();
+      aOldError.setCode ("FALLBACK");
+      aOldError.setText ("Error converting new response to old response");
+      aOldErrorList.addError (aOldError);
+      aOldResponse.setErrorList (aOldErrorList);
+    }
+
+    aNewResponse.addResponseExtractEvidenceItem (aNewItem);
 
     return aNewResponse;
   }

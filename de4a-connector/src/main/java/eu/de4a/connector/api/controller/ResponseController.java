@@ -60,8 +60,8 @@ public class ResponseController
                                                         redirectUserMsg.getCanonicalEvidenceTypeId (),
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    String responseMetadata = MessageUtils.getRedirectResponseMetadata(redirectUserMsg);
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_REDIRECT_DO_DT, 
+    final String responseMetadata = MessageUtils.getRedirectResponseMetadata(redirectUserMsg);
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_REDIRECT_DO_DT,
     		redirectUserMsg, messageDTO, marshaller, redirectUserMsg.getRequestId(), responseMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
@@ -77,7 +77,7 @@ public class ResponseController
     final ResponseExtractMultiEvidenceType responseObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                    marshaller,
                                                                                                    new ConnectorException ().withModule (EExternalModule.CONNECTOR_DT));
-    
+
     if (responseObj.hasNoResponseExtractEvidenceItemEntries ())
       throw new IllegalStateException ("Provided payload has no ResponseExtractEvidenceItem entries");
 
@@ -97,8 +97,8 @@ public class ResponseController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
-    String responseMetadata = MessageUtils.getEvidenceResponseMetadata(responseObj.getResponseExtractEvidenceItem());
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_EVIDENCE_DO_DT, 
+    final String responseMetadata = MessageUtils.getEvidenceResponseMetadata(responseObj.getResponseExtractEvidenceItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_EVIDENCE_DO_DT,
     		responseObj, messageDTO, marshaller, responseObj.getRequestId(), responseMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
@@ -128,14 +128,14 @@ public class ResponseController
       docTypeID = responseObj.getResponseEventSubscriptionItemAtIndex (0).getCanonicalEventCatalogUri ();
     }
 
-    final AS4MessageDTO messageDTO = new AS4MessageDTO (responseObj.getDataEvaluator ().getAgentUrn (),
-                                                        responseObj.getDataOwner ().getAgentUrn (),
+    final AS4MessageDTO messageDTO = new AS4MessageDTO (responseObj.getDataOwner ().getAgentUrn (),
+                                                        responseObj.getDataEvaluator ().getAgentUrn (),
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
-    
+
     responseObj.getResponseEventSubscriptionItemAtIndex(0).getError();
-    String responseMetadata = MessageUtils.getEventSubscriptionResponseMetadata(responseObj.getResponseEventSubscriptionItem());
-    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_SUBSC_DO_DT, 
+    final String responseMetadata = MessageUtils.getEventSubscriptionResponseMetadata(responseObj.getResponseEventSubscriptionItem());
+    this.apiManager.processIncomingMessage (ELogMessage.LOG_RES_SUBSC_DO_DT,
     		responseObj, messageDTO, marshaller, responseObj.getRequestId(), responseMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());

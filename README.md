@@ -39,6 +39,8 @@ Checkout the technical documentation on [the Wiki page](https://wiki.de4a.eu/ind
     * Optional query parameter **`environment`** - The runtime environment for which the Connector will filter the result entries from IAL. See above for details.
 * **`/service/reload-addresses`** - Reload the internal address list for forwarding to DE and DO from the backend file.
 
+*Note*: the MOR data cannot be queried via the Connector. Please query the [IAL](https://github.com/de4a-wp5/ial-service) directly. Example URL: `https://de4a.simplegob.com/ial/mor/en.json`
+
 ### Configuration
 
 #### Application properties
@@ -268,6 +270,10 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.3.2 - 2022-12-15
+    * Fixed an error in `/response/subscription` that Data Evaluator and Data Owner were not swapped correctly
+    * Fixed `NullPointerException` in the DBA legacy layer, if error messages are returned
+    * Fixed the missing "Error handling" part in the DBA legacy layer for all kind of responses
 * v0.3.1 - 2022-11-16
     * Updated default application.properties for easier Tracker usage
 * v0.3.0 - 2022-10-21
