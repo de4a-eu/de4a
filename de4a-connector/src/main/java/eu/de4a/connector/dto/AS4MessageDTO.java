@@ -3,7 +3,9 @@ package eu.de4a.connector.dto;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+
 import org.w3c.dom.Document;
+
 import com.helger.commons.annotation.Nonempty;
 
 /**
@@ -55,6 +57,7 @@ public final class AS4MessageDTO {
     return message;
   }
 
+  @Nonnull
   public AS4MessageDTO withMessage(@Nullable final Document message) {
     this.message = message;
     return this;
