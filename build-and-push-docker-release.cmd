@@ -1,7 +1,7 @@
 @echo off
 
 :: The version to release
-set VER=0.3.1
+set VER=0.3.2
 
 cd de4a-connector
 docker build --pull -t de4a/connector:%VER% .
