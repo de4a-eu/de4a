@@ -270,6 +270,10 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.3.2 - 2022-12-15
+    * Fixed an error in `/response/subscription` that Data Evaluator and Data Owner were not swapped correctly
+    * Fixed `NullPointerException` in the DBA legacy layer, if error messages are returned
+    * Fixed the missing "Error handling" part in the DBA legacy layer for all kind of responses
 * v0.3.1 - 2022-11-16
     * Updated default application.properties for easier Tracker usage
 * v0.3.0 - 2022-10-21
