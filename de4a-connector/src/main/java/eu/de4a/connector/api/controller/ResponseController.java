@@ -15,8 +15,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.helger.dcng.api.DcngConfig;
 import com.helger.dcng.api.DcngIdentifierFactory;
-import com.helger.peppolid.CIdentifier;
+import com.helger.peppolid.IDocumentTypeIdentifier;
 
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
@@ -57,7 +58,7 @@ public class ResponseController
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (redirectUserMsg.getDataOwner ().getAgentUrn (),
                                                         redirectUserMsg.getDataEvaluator().getAgentUrn (),
-                                                        redirectUserMsg.getCanonicalEvidenceTypeId (),
+                                                        DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (redirectUserMsg.getCanonicalEvidenceTypeId ()),
                                                         DE4AConstants.PROCESS_ID_RESPONSE);
 
     final String responseMetadata = MessageUtils.getRedirectResponseMetadata(redirectUserMsg);
@@ -82,14 +83,14 @@ public class ResponseController
       throw new IllegalStateException ("Provided payload has no ResponseExtractEvidenceItem entries");
 
     // Check if there are multiple evidence responses
-    final String docTypeID;
+    final IDocumentTypeIdentifier docTypeID;
     if (responseObj.getResponseExtractEvidenceItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+      docTypeID = DcngConfig.getIdentifierFactory ().createDocumentTypeIdentifier (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
-      docTypeID = responseObj.getResponseExtractEvidenceItemAtIndex (0).getCanonicalEvidenceTypeId ();
+      docTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (responseObj.getResponseExtractEvidenceItemAtIndex (0).getCanonicalEvidenceTypeId ());
     }
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (responseObj.getDataOwner ().getAgentUrn (),
@@ -118,14 +119,14 @@ public class ResponseController
       throw new IllegalStateException ("Provided payload has no ResponseEventSubscriptionItem entries");
 
     // Check if there are multiple evidence responses
-    final String docTypeID;
+    final IDocumentTypeIdentifier docTypeID;
     if (responseObj.getResponseEventSubscriptionItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
+      docTypeID = DcngConfig.getIdentifierFactory ().createDocumentTypeIdentifier (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
-      docTypeID = responseObj.getResponseEventSubscriptionItemAtIndex (0).getCanonicalEventCatalogUri ();
+      docTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (responseObj.getResponseEventSubscriptionItemAtIndex (0).getCanonicalEventCatalogUri ());
     }
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (responseObj.getDataOwner ().getAgentUrn (),

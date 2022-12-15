@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.helger.commons.string.StringHelper;
+import com.helger.dcng.api.DcngConfig;
 import com.helger.dcng.api.me.model.MEMessage;
 import com.helger.dcng.api.me.model.MEPayload;
 import com.helger.dcng.core.regrep.DcngRegRepHelperIt2;
@@ -298,8 +299,9 @@ public class MessageExchangeManager
 
       final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewResponse.getDataOwner ().getAgentUrn (),
                                                           aNewResponse.getDataEvaluator ().getAgentUrn (),
-                                                          aNewResponse.getResponseExtractEvidenceItemAtIndex (0)
-                                                                      .getCanonicalEvidenceTypeId (),
+                                                          DcngConfig.getIdentifierFactory ()
+                                                                    .parseDocumentTypeIdentifier (aNewResponse.getResponseExtractEvidenceItemAtIndex (0)
+                                                                                                              .getCanonicalEvidenceTypeId ()),
                                                           DE4AConstants.PROCESS_ID_RESPONSE);
 
       metadata = MessageUtils.getEvidenceResponseMetadata (aNewResponse.getResponseExtractEvidenceItem ());

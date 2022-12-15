@@ -14,8 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.helger.dcng.api.DcngConfig;
 import com.helger.dcng.api.DcngIdentifierFactory;
-import com.helger.peppolid.CIdentifier;
+import com.helger.peppolid.IDocumentTypeIdentifier;
 
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
@@ -53,14 +54,14 @@ public class EventController
       throw new IllegalStateException ("Provided payload has no EventNotificationItem entries");
 
     // Check if there are multiple evidence responses
-    final String docTypeID;
+    final IDocumentTypeIdentifier docTypeID;
     if (eventObj.getEventNotificationItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
+      docTypeID = DcngConfig.getIdentifierFactory ().createDocumentTypeIdentifier (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
-      docTypeID = eventObj.getEventNotificationItemAtIndex (0).getCanonicalEventCatalogUri ();
+      docTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (eventObj.getEventNotificationItemAtIndex (0).getCanonicalEventCatalogUri ());
     }
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (eventObj.getDataOwner ().getAgentUrn (),
