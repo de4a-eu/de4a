@@ -18,6 +18,7 @@ import com.helger.dcng.api.me.model.MEPayload;
 import com.helger.dcng.core.regrep.DcngRegRepHelperIt2;
 import com.helger.peppolid.IProcessIdentifier;
 import com.helger.xml.XMLFactory;
+import com.helger.xml.XMLHelper;
 
 import eu.de4a.connector.api.legacy.LegacyAPIHelper;
 import eu.de4a.connector.api.service.DeliverService;
@@ -89,13 +90,13 @@ public class MessageExchangeManager
     if (aRegRepElement == null)
       throw new IllegalStateException ("Failed to extract the payload from the anticipated RegRep message - see the log for details");
 
-    final String elemType = aRegRepElement.getNodeName ();
-    LOGGER.info ("  Now trying to find the Message Service for element '" + elemType + "'");
+    final String elementLocalName = XMLHelper.getLocalNameOrTagName (aRegRepElement);
+    LOGGER.info ("  Now trying to find the Message Service for element '" + elementLocalName + "'");
 
-    final EMessageServiceType eMessageServiceType = EMessageServiceType.getByTypeOrNull (elemType);
+    final EMessageServiceType eMessageServiceType = EMessageServiceType.getByElementLocalNameOrNull (elementLocalName);
     if (eMessageServiceType == null)
       throw new IllegalStateException ("Failed to resolve message type from XML document element local name '" +
-                                       elemType +
+                                       elementLocalName +
                                        "'");
 
     // Create a new document with the payload only
@@ -228,7 +229,7 @@ public class MessageExchangeManager
             LOGGER.info ("Sending " +
                          eMessageServiceType +
                          "(" +
-                         eMessageServiceType.getType () +
+                         eMessageServiceType.getElementLocalName () +
                          ") request from DR to DE");
             final Document aNewDoc = XMLFactory.newDocument ();
             aNewDoc.appendChild (aNewDoc.adoptNode (aRegRepElement.cloneNode (true)));
