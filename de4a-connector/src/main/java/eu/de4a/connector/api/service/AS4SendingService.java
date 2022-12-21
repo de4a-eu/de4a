@@ -51,7 +51,7 @@ public class AS4SendingService
     if (aReceiverPI == null)
       throw new IllegalStateException ("Failed to parse receiving Participant ID '" + messageDTO.getReceiverID () + "'");
 
-    final IDocumentTypeIdentifier aDocumentTypeID = aIF.parseDocumentTypeIdentifier (messageDTO.getDocTypeID ());
+    final IDocumentTypeIdentifier aDocumentTypeID = messageDTO.getDocTypeID ();
     if (aDocumentTypeID == null)
       throw new IllegalStateException ("Failed to parse Document Type ID '" + messageDTO.getDocTypeID () + "'");
 
@@ -118,9 +118,9 @@ public class AS4SendingService
           smpErrMsg = "Found the SMP Participant and Document Type, but failed to select based on Process and Transport Profile.";
         else
           smpErrMsg = "Found no matching SMP Participant and/or Document Type";
-        
+
         //KafkaClientWrapper.sendError(EFamilyErrorType.AS4_ERROR_COMMUNICATION, EExternalModule.SMP, smpErrMsg);
-        
+
         throw ex.withModule (EExternalModule.SMP).withMessageArg (smpErrMsg);
       }
       if (!aResult.isSendingSuccess ())

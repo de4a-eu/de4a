@@ -18,6 +18,8 @@ import org.w3c.dom.Document;
 
 import com.helger.commons.concurrent.ThreadHelper;
 import com.helger.commons.datetime.PDTFactory;
+import com.helger.dcng.api.DcngConfig;
+import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.xml.serialize.write.EXMLSerializeIndent;
 import com.helger.xml.serialize.write.XMLWriter;
 import com.helger.xml.serialize.write.XMLWriterSettings;
@@ -117,10 +119,10 @@ public class ConnectorController
       aNewRequest.getRequestEvidenceIMItemAtIndex (0).addAdditionalParameter (addParam);
     }
 
-    final String sNewDocTypeID = aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
+    final IDocumentTypeIdentifier aNewDocTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ());
     final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewRequest.getDataEvaluator ().getAgentUrn (),
                                                         aNewRequest.getDataOwner ().getAgentUrn (),
-                                                        sNewDocTypeID,
+                                                        aNewDocTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
     final var aNewRequestMarshaller = DE4ACoreMarshaller.drRequestTransferEvidenceIMMarshaller ();
@@ -130,7 +132,7 @@ public class ConnectorController
                                             aNewRequest,
                                             messageDTO,
                                             aNewRequestMarshaller,
-                                            sNewDocTypeID,
+                                            aNewDocTypeID.getURIEncoded (),
                                             requestMetadata);
 
     // Remember request

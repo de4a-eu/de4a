@@ -1,13 +1,11 @@
 package eu.de4a.connector.api.service.model;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.lang.EnumHelper;
+import com.helger.commons.string.StringHelper;
 
 /**
  * Enum for controlling correspondences between message types (root XML element
@@ -17,36 +15,38 @@ import com.helger.commons.annotation.Nonempty;
  */
 public enum EMessageServiceType
 {
-  IM (eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestTransferEvidenceIM_QNAME.getLocalPart (), true),
-  USI (eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestTransferEvidenceUSI_QNAME.getLocalPart (), true),
-  LU (eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestTransferEvidenceLU_QNAME.getLocalPart (), true),
-  SN (eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestEventSubscription_QNAME.getLocalPart (), true),
-  RESPONSE (eu.de4a.iem.core.jaxb.dt.ObjectFactory._ResponseTransferEvidence_QNAME.getLocalPart (), false),
-  SUBSCRIPTION_RESP (eu.de4a.iem.core.jaxb.dt.ObjectFactory._ResponseEventSubscription_QNAME.getLocalPart (), false),
-  REDIRECT (eu.de4a.iem.core.jaxb.dt.ObjectFactory._USIRedirectUser_QNAME.getLocalPart (), false),
-  NOTIFICATION (eu.de4a.iem.core.jaxb.dt.ObjectFactory._EventNotification_QNAME.getLocalPart (), false);
+  IM ("im", eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestTransferEvidenceIM_QNAME.getLocalPart (), true),
+  USI ("usi", eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestTransferEvidenceUSI_QNAME.getLocalPart (), true),
+  LU ("lu", eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestTransferEvidenceLU_QNAME.getLocalPart (), true),
+  SN ("sn", eu.de4a.iem.core.jaxb.dr.ObjectFactory._RequestEventSubscription_QNAME.getLocalPart (), true),
+  RESPONSE ("response", eu.de4a.iem.core.jaxb.dt.ObjectFactory._ResponseTransferEvidence_QNAME.getLocalPart (), false),
+  SUBSCRIPTION_RESP ("subscription_resp", eu.de4a.iem.core.jaxb.dt.ObjectFactory._ResponseEventSubscription_QNAME.getLocalPart (), false),
+  REDIRECT ("redirect", eu.de4a.iem.core.jaxb.dt.ObjectFactory._USIRedirectUser_QNAME.getLocalPart (), false),
+  NOTIFICATION ("notification", eu.de4a.iem.core.jaxb.dt.ObjectFactory._EventNotification_QNAME.getLocalPart (), false);
 
-  private static final Map <String, EMessageServiceType> LOOKUP = new HashMap <> ();
-  static
-  {
-    for (final EMessageServiceType item : values ())
-      LOOKUP.put (item.getType (), item);
-  }
-
-  private final String type;
+  private final String endpointType;
+  private final String elementLocalName;
   private final boolean isRequest;
 
-  EMessageServiceType (@Nonnull @Nonempty final String type, final boolean isRequest)
+  EMessageServiceType (@Nonnull @Nonempty final String endpointType, @Nonnull @Nonempty final String elementLocalName, final boolean isRequest)
   {
-    this.type = type;
+    this.endpointType = endpointType;
+    this.elementLocalName = elementLocalName;
     this.isRequest = isRequest;
   }
 
   @Nonnull
   @Nonempty
-  public String getType ()
+  public String getEndpointType ()
   {
-    return type;
+    return endpointType;
+  }
+
+  @Nonnull
+  @Nonempty
+  public String getElementLocalName ()
+  {
+    return elementLocalName;
   }
 
   public boolean isRequest ()
@@ -54,16 +54,11 @@ public enum EMessageServiceType
     return isRequest;
   }
 
-  @Nonnull
-  @Nonempty
-  public String getEndpointType ()
-  {
-    return name ().toLowerCase (Locale.ROOT);
-  }
-
   @Nullable
-  public static EMessageServiceType getByTypeOrNull (@Nullable final String type)
+  public static EMessageServiceType getByElementLocalNameOrNull (@Nullable final String elementLocalName)
   {
-    return LOOKUP.get (type);
+    if (StringHelper.hasNoText (elementLocalName))
+      return null;
+    return EnumHelper.findFirst (EMessageServiceType.class, x-> x.getElementLocalName ().equals (elementLocalName));
   }
 }

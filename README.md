@@ -270,6 +270,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.3.3 - 2022-12-21
+    * Fixed an error in determining the `EMessageServiceType` if the source element used an explicit namespace prefix
 * v0.3.2 - 2022-12-15
     * Fixed an error in `/response/subscription` that Data Evaluator and Data Owner were not swapped correctly
     * Fixed `NullPointerException` in the DBA legacy layer, if error messages are returned

@@ -15,8 +15,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.helger.dcng.api.DcngConfig;
 import com.helger.dcng.api.DcngIdentifierFactory;
-import com.helger.peppolid.CIdentifier;
+import com.helger.peppolid.IDocumentTypeIdentifier;
 
 import eu.de4a.connector.api.manager.APIManager;
 import eu.de4a.connector.config.DE4AConstants;
@@ -55,19 +56,19 @@ public class RequestController
     final RequestExtractMultiEvidenceIMType requestObj = APIRestUtils.conversionBytesWithCatching (request,
                                                                                                    marshaller,
                                                                                                    new ConnectorException ().withModule (EExternalModule.CONNECTOR_DR));
-    
+
     if (requestObj.hasNoRequestEvidenceIMItemEntries ())
       throw new IllegalStateException ("Provided payload has no RequestEvidenceIMItem entries");
 
     // Check if there are multiple evidence request
-    final String docTypeID;
+    final IDocumentTypeIdentifier docTypeID;
     if (requestObj.getRequestEvidenceIMItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+      docTypeID = DcngConfig.getIdentifierFactory ().createDocumentTypeIdentifier (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
-      docTypeID = requestObj.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ();
+      docTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (requestObj.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ());
     }
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
@@ -75,7 +76,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    String requestMetadata = MessageUtils.getRequestMetadata(requestObj.getRequestEvidenceIMItem());
+    final String requestMetadata = MessageUtils.getRequestMetadata(requestObj.getRequestEvidenceIMItem());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_IM_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
@@ -96,14 +97,14 @@ public class RequestController
       throw new IllegalStateException ("Provided payload has no RequestEvidenceUSIItem entries");
 
     // Check if there are multiple evidence request
-    final String docTypeID;
+    final IDocumentTypeIdentifier docTypeID;
     if (requestObj.getRequestEvidenceUSIItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+      docTypeID = DcngConfig.getIdentifierFactory ().createDocumentTypeIdentifier (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
-      docTypeID = requestObj.getRequestEvidenceUSIItemAtIndex (0).getCanonicalEvidenceTypeId ();
+      docTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (requestObj.getRequestEvidenceUSIItemAtIndex (0).getCanonicalEvidenceTypeId ());
     }
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
@@ -111,7 +112,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    String requestMetadata = MessageUtils.getRequestMetadata(requestObj.getRequestEvidenceUSIItem());
+    final String requestMetadata = MessageUtils.getRequestMetadata(requestObj.getRequestEvidenceUSIItem());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_USI_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
   }
@@ -131,14 +132,14 @@ public class RequestController
       throw new IllegalStateException ("Provided payload has no RequestEvidenceLUItem entries");
 
     // Check if there are multiple evidence request
-    final String docTypeID;
+    final IDocumentTypeIdentifier docTypeID;
     if (requestObj.getRequestEvidenceLUItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
+      docTypeID = DcngConfig.getIdentifierFactory ().createDocumentTypeIdentifier (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVIDENCE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
-      docTypeID = requestObj.getRequestEvidenceLUItemAtIndex (0).getCanonicalEvidenceTypeId ();
+      docTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (requestObj.getRequestEvidenceLUItemAtIndex (0).getCanonicalEvidenceTypeId ());
     }
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
@@ -146,7 +147,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    String requestMetadata = MessageUtils.getLookupRequestMetadata(requestObj.getRequestEvidenceLUItem());
+    final String requestMetadata = MessageUtils.getLookupRequestMetadata(requestObj.getRequestEvidenceLUItem());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_LU_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());
@@ -167,14 +168,14 @@ public class RequestController
       throw new IllegalStateException ("Provided payload has no EventSubscripRequestItem entries");
 
     // Check if there are multiple evidence request
-    final String docTypeID;
+    final IDocumentTypeIdentifier docTypeID;
     if (requestObj.getEventSubscripRequestItemCount () > 1)
     {
-      docTypeID = CIdentifier.getURIEncoded (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
+      docTypeID = DcngConfig.getIdentifierFactory ().createDocumentTypeIdentifier (DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE, CIEM.MULTI_ITEM_TYPE);
     }
     else
     {
-      docTypeID = requestObj.getEventSubscripRequestItemAtIndex (0).getCanonicalEventCatalogUri ();
+      docTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (requestObj.getEventSubscripRequestItemAtIndex (0).getCanonicalEventCatalogUri ());
     }
 
     final AS4MessageDTO messageDTO = new AS4MessageDTO (requestObj.getDataEvaluator ().getAgentUrn (),
@@ -182,7 +183,7 @@ public class RequestController
                                                         docTypeID,
                                                         DE4AConstants.PROCESS_ID_REQUEST);
 
-    String requestMetadata = MessageUtils.getSubscriptionRequestMetadata(requestObj.getEventSubscripRequestItem());
+    final String requestMetadata = MessageUtils.getSubscriptionRequestMetadata(requestObj.getEventSubscripRequestItem());
     this.apiManager.processIncomingMessage (ELogMessage.LOG_REQ_SUBSC_DE_DR, requestObj, messageDTO, marshaller, requestObj.getRequestId(), requestMetadata);
 
     return ResponseEntity.status (HttpStatus.OK).body (ConnectorExceptionHandler.getSuccessResponseBytes ());

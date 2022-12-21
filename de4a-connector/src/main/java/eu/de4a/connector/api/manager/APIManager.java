@@ -22,32 +22,31 @@ public class APIManager
    * sent
    */
   public <T> void processIncomingMessage (final ELogMessage eLogMessage,
-		  								  final T requestObj,
+                                          final T requestObj,
                                           final AS4MessageDTO messageDTO,
                                           final DE4ACoreMarshaller <T> marshaller,
                                           final String requestId,
                                           final String... metadata)
   {
-	  
-	if(metadata.length > 0) {
-		KafkaClientWrapper.sendInfo (eLogMessage,
-				requestObj.getClass().getSimpleName(),
-                requestId,
-                messageDTO.getSenderID (),
-                messageDTO.getReceiverID (),
-                metadata[0]);
+    if (metadata.length > 0)
+    {
+      KafkaClientWrapper.sendInfo (eLogMessage,
+                                   requestObj.getClass ().getSimpleName (),
+                                   requestId,
+                                   messageDTO.getSenderID (),
+                                   messageDTO.getReceiverID (),
+                                   metadata[0]);
 
-	}
-	else 
-	{
-		KafkaClientWrapper.sendInfo (eLogMessage,
-				requestObj.getClass().getSimpleName(),
-                requestId,
-                messageDTO.getSenderID (),
-                messageDTO.getReceiverID ()
-                );
-	}
-    
+    }
+    else
+    {
+      KafkaClientWrapper.sendInfo (eLogMessage,
+                                   requestObj.getClass ().getSimpleName (),
+                                   requestId,
+                                   messageDTO.getSenderID (),
+                                   messageDTO.getReceiverID ());
+    }
+
     final Document doc = marshaller.getAsDocument (requestObj);
 
     // Sends AS4 message - it can trigger an error response via exceptions

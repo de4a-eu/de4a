@@ -3,8 +3,11 @@ package eu.de4a.connector.dto;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+
 import org.w3c.dom.Document;
+
 import com.helger.commons.annotation.Nonempty;
+import com.helger.peppolid.IDocumentTypeIdentifier;
 
 /**
  * AS4 message data representation for DE4AConnector
@@ -14,12 +17,12 @@ import com.helger.commons.annotation.Nonempty;
 public final class AS4MessageDTO {
   private final String senderID;
   private final String receiverID;
-  private final String docTypeID;
+  private final IDocumentTypeIdentifier docTypeID;
   private final String processID;
   private Document message;
 
   public AS4MessageDTO(@Nonnull @Nonempty final String sSenderID, @Nonnull @Nonempty final String sReceiverID,
-      @Nonnull @Nonempty final String sDocTypeID, @Nonnull @Nonempty final String sProcessID) {
+      @Nonnull  final IDocumentTypeIdentifier sDocTypeID, @Nonnull @Nonempty final String sProcessID) {
     senderID = sSenderID;
     receiverID = sReceiverID;
     this.docTypeID = sDocTypeID;
@@ -39,8 +42,7 @@ public final class AS4MessageDTO {
   }
 
   @Nonnull
-  @Nonempty
-  public String getDocTypeID() {
+  public IDocumentTypeIdentifier getDocTypeID() {
     return docTypeID;
   }
 
@@ -55,6 +57,7 @@ public final class AS4MessageDTO {
     return message;
   }
 
+  @Nonnull
   public AS4MessageDTO withMessage(@Nullable final Document message) {
     this.message = message;
     return this;

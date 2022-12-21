@@ -69,7 +69,7 @@ public class DeliverServiceIT1
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getType (), sRequestID, senderID, receiverID, url, requestMetadata);
+    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getElementLocalName (), sRequestID, senderID, receiverID, url, requestMetadata);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,

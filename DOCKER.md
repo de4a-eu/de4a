@@ -31,7 +31,7 @@ With docker-compose run the following to update to a newer image
 `docker-compose pull de4aconnector && docker-compose up -d`
 
 Please be advised this only works for the specified `<tag>` in your docker-compose.yml. If you run `latest` you will always get the latest built image.
-If you are upgrading beteween version ie 0.1.0 -> 0.2.0 you need to first change the docker-compose.yml file to reflect the new version and then run the above command
+If you are upgrading between version ie 0.1.0 -> 0.2.0 you need to first change the docker-compose.yml file to reflect the new version and then run the above command
 
 ## Building
 
