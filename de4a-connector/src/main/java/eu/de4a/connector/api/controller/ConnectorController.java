@@ -69,10 +69,10 @@ public class ConnectorController
                                                      final DE4AMarshaller <T> marshaller,
                                                      final ConnectorException ex)
   {
-    final ConnectorException baseEx = ex.withFamily (EFamilyErrorType.CONVERSION_ERROR).withLayer (ELayerError.INTERNAL_FAILURE);
+    ex.withFamily (EFamilyErrorType.CONVERSION_ERROR).withLayer (ELayerError.INTERNAL_FAILURE);
     marshaller.readExceptionCallbacks ().set (e -> {
       if (e.getLinkedException () != null)
-        baseEx.withMessageArg (e.getLinkedException ().getMessage ());
+        ex.withMessageArg (e.getLinkedException ().getMessage ());
       KafkaClientWrapper.sendError (EFamilyErrorType.CONVERSION_ERROR, ex.getModule (), e.getLinkedException ().getMessage ());
     });
 
@@ -85,10 +85,10 @@ public class ConnectorController
     {
       if (LOGGER.isDebugEnabled ())
         LOGGER.debug ("Object received is not valid, check the structure", e);
-      throw baseEx.withMessageArg (e.getMessage ());
+      throw ex.withMessageArg (e.getMessage ());
     }
     if (returnObj == null)
-      throw baseEx.withMessageArg (ex.getArgs ());
+      throw ex.withMessageArg (ex.getArgs ());
 
     return returnObj;
   }
