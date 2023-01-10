@@ -69,11 +69,13 @@ public class ConnectorController
                                                      final DE4AMarshaller <T> marshaller,
                                                      final ConnectorException ex)
   {
-    final ConnectorException baseEx = ex.withFamily (EFamilyErrorType.CONVERSION_ERROR).withLayer (ELayerError.INTERNAL_FAILURE);
+    ex.withFamily (EFamilyErrorType.CONVERSION_ERROR).withLayer (ELayerError.INTERNAL_FAILURE);
     marshaller.readExceptionCallbacks ().set (e -> {
       if (e.getLinkedException () != null)
-        baseEx.withMessageArg (e.getLinkedException ().getMessage ());
-      KafkaClientWrapper.sendError (EFamilyErrorType.CONVERSION_ERROR, ex.getModule (), e.getLinkedException ().getMessage ());
+        ex.withMessageArg (e.getLinkedException ().getMessage ());
+      KafkaClientWrapper.sendError (EFamilyErrorType.CONVERSION_ERROR,
+                                    ex.getModule (),
+                                    e.getLinkedException ().getMessage ());
     });
 
     final T returnObj;
@@ -83,19 +85,19 @@ public class ConnectorController
     }
     catch (final Exception e)
     {
-      if (LOGGER.isDebugEnabled ())
-        LOGGER.debug ("Object received is not valid, check the structure", e);
-      throw baseEx.withMessageArg (e.getMessage ());
+      LOGGER.error ("Object received is not valid, check the structure", e);
+      throw ex.withMessageArg (e.getMessage ());
     }
     if (returnObj == null)
-      throw baseEx.withMessageArg (ex.getArgs ());
+    {
+      LOGGER.error ("Object received is not valid but no Exception was thrown");
+      throw ex.withMessageArg (ex.getArgs ());
+    }
 
     return returnObj;
   }
 
-  @PostMapping (value = "/requestTransferEvidenceIM",
-                produces = MediaType.APPLICATION_XML_VALUE,
-                consumes = MediaType.APPLICATION_XML_VALUE)
+  @PostMapping (value = "/requestTransferEvidenceIM", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   public ResponseEntity <byte []> iteration1LegacyIM (@Valid final InputStream request)
   {
     // Read the old format
@@ -119,7 +121,9 @@ public class ConnectorController
       aNewRequest.getRequestEvidenceIMItemAtIndex (0).addAdditionalParameter (addParam);
     }
 
-    final IDocumentTypeIdentifier aNewDocTypeID = DcngConfig.getIdentifierFactory ().parseDocumentTypeIdentifier (aNewRequest.getRequestEvidenceIMItemAtIndex (0).getCanonicalEvidenceTypeId ());
+    final IDocumentTypeIdentifier aNewDocTypeID = DcngConfig.getIdentifierFactory ()
+                                                            .parseDocumentTypeIdentifier (aNewRequest.getRequestEvidenceIMItemAtIndex (0)
+                                                                                                     .getCanonicalEvidenceTypeId ());
     final AS4MessageDTO messageDTO = new AS4MessageDTO (aNewRequest.getDataEvaluator ().getAgentUrn (),
                                                         aNewRequest.getDataOwner ().getAgentUrn (),
                                                         aNewDocTypeID,
@@ -158,7 +162,9 @@ public class ConnectorController
     if (aResponseDoc == null)
     {
       // Failed to wait - send error message back
-      final String sErrorMsg = "Failed to wait for synchronous response on legacy IM request. Timeout after " + timeout + " milliseconds.";
+      final String sErrorMsg = "Failed to wait for synchronous response on legacy IM request. Timeout after " +
+                               timeout +
+                               " milliseconds.";
       LOGGER.error (sErrorMsg);
       // Copy as much as possible from the old request
       aOldResponse = DE4AResponseDocumentHelper.createResponseTransferEvidence (aOldRequest);
@@ -174,7 +180,8 @@ public class ConnectorController
       if (aNewResponse == null)
       {
         LOGGER.warn ("Response received:\n" +
-                     XMLWriter.getNodeAsString (aResponseDoc, new XMLWriterSettings ().setIndent (EXMLSerializeIndent.INDENT_AND_ALIGN)));
+                     XMLWriter.getNodeAsString (aResponseDoc,
+                                                new XMLWriterSettings ().setIndent (EXMLSerializeIndent.INDENT_AND_ALIGN)));
         throw new IllegalStateException ("Failed to interprete Response as ResponseExtractMultiEvidenceType - see log for details");
       }
 

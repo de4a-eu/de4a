@@ -292,6 +292,7 @@ public class MessageExchangeManager
     if (StringHelper.hasText (sIteration1RememberID))
     {
       // This only affects the backwards compatibility layer
+      // It deals with the synchronous response of sending the legacy IM request
       final var aOldResponseMarshaller = DE4AMarshaller.doImResponseMarshaller (IDE4ACanonicalEvidenceType.NONE);
       final ResponseExtractEvidenceType aOldResponse = aOldResponseMarshaller.read (response.getBody ());
       final ResponseExtractMultiEvidenceType aNewResponse = LegacyAPIHelper.convertOldToNewResponse (aOldResponse,
