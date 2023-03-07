@@ -24,7 +24,7 @@ import eu.de4a.kafkaclient.model.ELogMessage;
 @Service
 public class DeliverService
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger (DeliverService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (DeliverService.class);
 
   private static final String XPATH_REQUEST_ID = "//*[local-name()='RequestId']/text()";
 
@@ -36,17 +36,18 @@ public class DeliverService
    * internal configuration resolved by
    * {@link eu.de4a.connector.config.AddressesProperties}
    *
-   * @param eMessageServiceType Message service type
+   * @param eMessageServiceType
+   *        Message service type
    * @param docMsg
-   *         DOM Document with the message
+   *        DOM Document with the message
    * @param senderID
-   *         Sender participant identifier
+   *        Sender participant identifier
    * @param receiverID
-   *         Receiver participant identifier
+   *        Receiver participant identifier
    * @param logMessage
-   *         Log tag for i18n
+   *        Log tag for i18n
    * @param metadata
-   *         Optional logging metadata
+   *        Optional logging metadata
    * @return ResponseEntity with the response of the external service
    */
   @Nonnull
@@ -63,22 +64,29 @@ public class DeliverService
       LegacyAPIHelper.rememberFinalized_DR (sRequestID, docMsg);
 
     // Get where has to be sent depending of the content
+    final boolean bIsRequest = eMessageServiceType.isRequest ();
+    // TODO if this is DomicileDeregistration this is bogus - it leads to an
+    // "dataEvaluator" entry in the "de-do.json" being required
     final String url = this.serviceUtils.getParticipantAddress (receiverID,
                                                                 eMessageServiceType.getEndpointType (),
-                                                                eMessageServiceType.isRequest ());
-    if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("URL for DO: " + url);
+                                                                bIsRequest);
+    LOGGER.info ("URL for DO: " + url);
     if (url == null)
       throw new IllegalStateException ("Failed to determine DE/DO URL for receiver '" +
                                        receiverID +
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getElementLocalName (), sRequestID, senderID, receiverID, metadata);
+    KafkaClientWrapper.sendInfo (logMessage,
+                                 eMessageServiceType.getElementLocalName (),
+                                 sRequestID,
+                                 senderID,
+                                 receiverID,
+                                 metadata);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,
                                                     DOMUtils.documentToByte (docMsg),
-                                                    new ConnectorException ().withModule (logMessage.getModule()));
+                                                    new ConnectorException ().withModule (logMessage.getModule ()));
   }
 }

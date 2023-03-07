@@ -32,17 +32,18 @@ public class DeliverServiceIT1
    * internal configuration resolved by
    * {@link eu.de4a.connector.config.AddressesProperties}
    *
-   * @param eMessageServiceType Message service type
+   * @param eMessageServiceType
+   *        Message service type
    * @param docMsg
-   *         DOM Document with the message
+   *        DOM Document with the message
    * @param senderID
-   *         Sender participant identifier
+   *        Sender participant identifier
    * @param receiverID
-   *         Receiver participant identifier
+   *        Receiver participant identifier
    * @param logMessage
-   *         Log tag for i18n
+   *        Log tag for i18n
    * @param requestMetadata
-   *         Optional logging metadata
+   *        Optional logging metadata
    * @return ResponseEntity with the response of the external service
    */
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
@@ -60,8 +61,7 @@ public class DeliverServiceIT1
 
     // Get where has to be sent depending of the content
     final String url = legacyDOURL;
-    if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Legacy URL for DO: " + url);
+    LOGGER.info ("Legacy URL for DO: '" + url + "'");
 
     if (StringHelper.hasNoText (url))
       throw new IllegalStateException ("Failed to determine DE/DO URL for receiver '" +
@@ -69,20 +69,28 @@ public class DeliverServiceIT1
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getElementLocalName (), sRequestID, senderID, receiverID, url, requestMetadata);
+    KafkaClientWrapper.sendInfo (logMessage,
+                                 eMessageServiceType.getElementLocalName (),
+                                 sRequestID,
+                                 senderID,
+                                 receiverID,
+                                 url,
+                                 requestMetadata);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,
                                                     DOMUtils.documentToByte (docMsg),
-                                                    new ConnectorException ().withModule (logMessage.getModule()));
+                                                    new ConnectorException ().withModule (logMessage.getModule ()));
   }
 
   @Nullable
-	public static String getLegacyDOURL() {
-		return legacyDOURL;
-	}
+  public static String getLegacyDOURL ()
+  {
+    return legacyDOURL;
+  }
 
-	public static void setLegacyDOURL(@Nullable final String legacyDOURL) {
-		DeliverServiceIT1.legacyDOURL = legacyDOURL;
-	}
+  public static void setLegacyDOURL (@Nullable final String legacyDOURL)
+  {
+    DeliverServiceIT1.legacyDOURL = legacyDOURL;
+  }
 }

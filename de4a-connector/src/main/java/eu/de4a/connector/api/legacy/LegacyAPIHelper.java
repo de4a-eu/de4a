@@ -213,8 +213,7 @@ public final class LegacyAPIHelper
     ValueEnforcer.notNull (aOldRequest, "OldRequest");
 
     final String sID = aOldRequest.getRequestId ();
-    if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Remembering Legacy Request with ID '" + sID + "'");
+    LOGGER.info ("Remembering Legacy Request with ID '" + sID + "'");
 
     RW_LOCK.writeLocked ( () -> {
       if (LEGACY_REQUESTS.containsKey (sID))
@@ -229,8 +228,7 @@ public final class LegacyAPIHelper
     ValueEnforcer.notEmpty (sRequestID, "RequestID");
     ValueEnforcer.notNull (aResponseDoc, "ResponseDoc");
 
-    if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Remembering Request with ID '" + sRequestID + "' was finalized");
+    LOGGER.info ("Remembering Request with ID '" + sRequestID + "' was finalized");
 
     RW_LOCK.writeLocked ( () -> {
       // Only add, if it is a legacy ID
@@ -400,7 +398,6 @@ public final class LegacyAPIHelper
       aOldErrorList.addError (aOldError);
       aOldResponse.setErrorList (aOldErrorList);
     }
-
 
     aNewResponse.addResponseExtractEvidenceItem (aNewItem);
 

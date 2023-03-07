@@ -68,7 +68,6 @@ public class ServiceController
       final EDE4ARuntimeEnvironment rtEnv = EDE4ARuntimeEnvironment.getFromIDOrNull (environment);
       if (rtEnv != null)
       {
-        if (LOGGER.isInfoEnabled ())
           LOGGER.info ("Filtering allowed DOs returned by /service/ial/* query to " + rtEnv);
 
         for (final ResponseItemType aRI : new CommonsArrayList <> (aResponse.getResponseItem ()))
@@ -80,7 +79,6 @@ public class ServiceController
                                                            .parseParticipantIdentifier (aProv.getDataOwnerId ());
               if (rtEnv.isAllowedParticipantID (aPI))
                 return false;
-              if (LOGGER.isInfoEnabled ())
                 LOGGER.info ("Ignoring non-" + rtEnv + " DataOwner ID " + aProv.getDataOwnerId ());
               return true;
             });
@@ -106,7 +104,6 @@ public class ServiceController
       else
       {
         if (StringHelper.hasText (environment))
-          if (LOGGER.isWarnEnabled ())
             LOGGER.warn ("Unsupported environment '" + environment + "' provided to /service/ial/* query");
       }
     }
@@ -116,7 +113,6 @@ public class ServiceController
   public ResponseEntity <byte []> callIalCot (@Valid @PathVariable("cot") @NotNull final String cot,
                                               @RequestParam (name = "environment", required = false) final String environment)
   {
-    if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/ial/" +
                    cot +
                    "' " +
@@ -154,7 +150,6 @@ public class ServiceController
                                                  @Valid @PathVariable("atu") @NotNull final String atu,
                                                  @RequestParam (name = "environment", required = false) final String environment)
   {
-    if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/ial/" +
                    cot +
                    "/" +
@@ -193,12 +188,10 @@ public class ServiceController
   @GetMapping (value = "/reload-addresses", produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity <String> reloadAddresses ()
   {
-    if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/reload-addresses' received");
 
     serviceUtils.reloadParticipantAddresses ();
 
-    if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Finished reloading addresses");
 
     return ResponseEntity.ok ("done");

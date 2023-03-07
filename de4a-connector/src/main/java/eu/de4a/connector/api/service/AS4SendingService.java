@@ -100,7 +100,6 @@ public class AS4SendingService
     }
     else
     {
-      if (LOGGER.isWarnEnabled ())
         LOGGER.warn ("AS4 Sending result:\n " + aResult.getAsJson ().getAsJsonString (JsonWriterSettings.DEFAULT_SETTINGS_FORMATTED));
 
       // Base exception to be thrown

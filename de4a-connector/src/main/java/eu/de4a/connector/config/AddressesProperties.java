@@ -56,8 +56,7 @@ public class AddressesProperties
           aMap1.put (aEntry2.getKey (), aEntry2.getValue ().getAsValue ().getAsString ());
       }
 
-    if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Successfully read the '" + sChildName + "' address map with " + aTarget.size () + " entries");
+    LOGGER.info ("Successfully read the '" + sChildName + "' address map with " + aTarget.size () + " entries");
   }
 
   @PostConstruct
@@ -65,9 +64,11 @@ public class AddressesProperties
   {
     ValueEnforcer.notNull (m_sFilePrefix, "FilePrefix");
     final ClassPathResource aRes = new ClassPathResource (m_sFilePrefix + ".json");
-    if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Reading DE/DO address JSON from " + aRes);
-    final IJsonObject aJson = JsonReader.builder ().source (aRes).customizeCallback (p -> p.setTrackPosition (true)).readAsObject ();
+    LOGGER.info ("Reading DE/DO address JSON from " + aRes);
+    final IJsonObject aJson = JsonReader.builder ()
+                                        .source (aRes)
+                                        .customizeCallback (p -> p.setTrackPosition (true))
+                                        .readAsObject ();
     if (aJson == null)
       throw new IllegalStateException ("Failed to read DE/DO JSON from " + aRes);
 
