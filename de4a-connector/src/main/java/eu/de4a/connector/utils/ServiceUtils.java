@@ -2,6 +2,8 @@ package eu.de4a.connector.utils;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +36,7 @@ public class ServiceUtils
    *        - if true Data Owners are selected, if not Data Evaluators
    * @return String - URL with the participant endpoint
    */
+  @Nullable
   public String getParticipantAddress (final String participantId, final String endpointType, final boolean isRequest)
   {
     KafkaClientWrapper.sendInfo (isRequest ? ELogMessage.LOG_DT_PARTICIPANT_LOOKUP
