@@ -318,23 +318,25 @@ public class MessageExchangeManager
     else
     {
       // The response forwarded to the DO does not need to return this API
-      if (bIsRequestForDO && response != null)
+      if (response != null)
       {
+        final String sRole = bIsRequestForDO ? "DO" : "DE";
         final ResponseErrorType aResponse = DE4ACoreMarshaller.defResponseMarshaller ().read (response.getBody ());
         if (aResponse != null)
         {
           if (aResponse.isAck ())
           {
-            LOGGER.info ("DO accepted our request");
+            LOGGER.info (sRole + " accepted our request");
           }
           else
           {
-            LOGGER.error ("DO rejected our request");
-            aResponse.getError ().forEach (x -> LOGGER.error ("  DO Error [" + x.getCode () + "] " + x.getText ()));
+            LOGGER.error (sRole + " rejected our request");
+            aResponse.getError ()
+                     .forEach (x -> LOGGER.error ("  " + sRole + " Error [" + x.getCode () + "] " + x.getText ()));
           }
         }
         else
-          LOGGER.warn ("Failed to interprete the DO response as a ResponseErrorType");
+          LOGGER.warn ("Failed to interprete the " + sRole + " response as a ResponseErrorType");
       }
     }
   }
