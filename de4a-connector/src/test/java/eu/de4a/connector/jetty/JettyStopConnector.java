@@ -1,6 +1,10 @@
 /*
- * Copyright (C) 2021 Philip Helger (www.helger.com)
- * philip[at]helger[dot]com
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author:
+ *   Austrian Federal Computing Center (BRZ)
+ *   Spanish Ministry of Economic Affairs and Digital Transformation -
+ *     General Secretariat for Digital Administration (MAETD - SGAD)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
