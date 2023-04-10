@@ -26,7 +26,7 @@
     <parent>
         <groupId>eu.de4a</groupId>
         <artifactId>de4a-parent-pom</artifactId>
-        <version>0.3.5-SNAPSHOT</version>
+        <version>0.3.5</version>
     </parent>
     <artifactId>de4a-connector</artifactId>
     <packaging>war</packaging>
