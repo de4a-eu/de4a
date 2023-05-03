@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author:
+ *   Austrian Federal Computing Center (BRZ)
+ *   Spanish Ministry of Economic Affairs and Digital Transformation -
+ *     General Secretariat for Digital Administration (MAETD - SGAD)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package eu.de4a.connector.api.service;
 
 import javax.annotation.Nonnull;
@@ -32,17 +52,18 @@ public class DeliverServiceIT1
    * internal configuration resolved by
    * {@link eu.de4a.connector.config.AddressesProperties}
    *
-   * @param eMessageServiceType Message service type
+   * @param eMessageServiceType
+   *        Message service type
    * @param docMsg
-   *         DOM Document with the message
+   *        DOM Document with the message
    * @param senderID
-   *         Sender participant identifier
+   *        Sender participant identifier
    * @param receiverID
-   *         Receiver participant identifier
+   *        Receiver participant identifier
    * @param logMessage
-   *         Log tag for i18n
+   *        Log tag for i18n
    * @param requestMetadata
-   *         Optional logging metadata
+   *        Optional logging metadata
    * @return ResponseEntity with the response of the external service
    */
   public ResponseEntity <byte []> pushMessage (@Nonnull final EMessageServiceType eMessageServiceType,
@@ -60,8 +81,7 @@ public class DeliverServiceIT1
 
     // Get where has to be sent depending of the content
     final String url = legacyDOURL;
-    if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("Legacy URL for DO: " + url);
+    LOGGER.info ("Legacy URL for DO: '" + url + "'");
 
     if (StringHelper.hasNoText (url))
       throw new IllegalStateException ("Failed to determine DE/DO URL for receiver '" +
@@ -69,20 +89,28 @@ public class DeliverServiceIT1
                                        "' and message type " +
                                        eMessageServiceType);
 
-    KafkaClientWrapper.sendInfo (logMessage, eMessageServiceType.getElementLocalName (), sRequestID, senderID, receiverID, url, requestMetadata);
+    KafkaClientWrapper.sendInfo (logMessage,
+                                 eMessageServiceType.getElementLocalName (),
+                                 sRequestID,
+                                 senderID,
+                                 receiverID,
+                                 url,
+                                 requestMetadata);
 
     // Send message
     return APIRestUtils.postRestObjectWithCatching (url,
                                                     DOMUtils.documentToByte (docMsg),
-                                                    new ConnectorException ().withModule (logMessage.getModule()));
+                                                    new ConnectorException ().withModule (logMessage.getModule ()));
   }
 
   @Nullable
-	public static String getLegacyDOURL() {
-		return legacyDOURL;
-	}
+  public static String getLegacyDOURL ()
+  {
+    return legacyDOURL;
+  }
 
-	public static void setLegacyDOURL(@Nullable final String legacyDOURL) {
-		DeliverServiceIT1.legacyDOURL = legacyDOURL;
-	}
+  public static void setLegacyDOURL (@Nullable final String legacyDOURL)
+  {
+    DeliverServiceIT1.legacyDOURL = legacyDOURL;
+  }
 }

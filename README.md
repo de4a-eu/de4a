@@ -270,6 +270,8 @@ Once you have deployed the `war` file, there are several **checks to ensure that
 
 # News and Noteworthy
 
+* v0.3.5 - 2023-04-10
+    * Updated the license information to the final version
 * v0.3.4 - 2023-01-10
     * Updated to DCNG 0.2.12 fixing the value of `DcngIdentifierFactory.DOCTYPE_SCHEME_CANONICAL_EVENT_CATALOGUE` (`Type` was missing)
 * v0.3.3 - 2022-12-21

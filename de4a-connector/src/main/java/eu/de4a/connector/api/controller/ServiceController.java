@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author:
+ *   Austrian Federal Computing Center (BRZ)
+ *   Spanish Ministry of Economic Affairs and Digital Transformation -
+ *     General Secretariat for Digital Administration (MAETD - SGAD)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package eu.de4a.connector.api.controller;
 
 import javax.annotation.Nonnull;
@@ -68,7 +88,6 @@ public class ServiceController
       final EDE4ARuntimeEnvironment rtEnv = EDE4ARuntimeEnvironment.getFromIDOrNull (environment);
       if (rtEnv != null)
       {
-        if (LOGGER.isInfoEnabled ())
           LOGGER.info ("Filtering allowed DOs returned by /service/ial/* query to " + rtEnv);
 
         for (final ResponseItemType aRI : new CommonsArrayList <> (aResponse.getResponseItem ()))
@@ -80,7 +99,6 @@ public class ServiceController
                                                            .parseParticipantIdentifier (aProv.getDataOwnerId ());
               if (rtEnv.isAllowedParticipantID (aPI))
                 return false;
-              if (LOGGER.isInfoEnabled ())
                 LOGGER.info ("Ignoring non-" + rtEnv + " DataOwner ID " + aProv.getDataOwnerId ());
               return true;
             });
@@ -106,7 +124,6 @@ public class ServiceController
       else
       {
         if (StringHelper.hasText (environment))
-          if (LOGGER.isWarnEnabled ())
             LOGGER.warn ("Unsupported environment '" + environment + "' provided to /service/ial/* query");
       }
     }
@@ -116,7 +133,6 @@ public class ServiceController
   public ResponseEntity <byte []> callIalCot (@Valid @PathVariable("cot") @NotNull final String cot,
                                               @RequestParam (name = "environment", required = false) final String environment)
   {
-    if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/ial/" +
                    cot +
                    "' " +
@@ -154,7 +170,6 @@ public class ServiceController
                                                  @Valid @PathVariable("atu") @NotNull final String atu,
                                                  @RequestParam (name = "environment", required = false) final String environment)
   {
-    if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/ial/" +
                    cot +
                    "/" +
@@ -193,12 +208,10 @@ public class ServiceController
   @GetMapping (value = "/reload-addresses", produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity <String> reloadAddresses ()
   {
-    if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Request to API '/service/reload-addresses' received");
 
     serviceUtils.reloadParticipantAddresses ();
 
-    if (LOGGER.isInfoEnabled ())
       LOGGER.info ("Finished reloading addresses");
 
     return ResponseEntity.ok ("done");
